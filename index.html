@@ -6,37 +6,34 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juanito">
-<meta name="theme-color" content="#0f0f23">
+<meta name="theme-color" content="#0a0a1a">
 <title>Juanito Garcia</title>
 <style>
 :root {
-  --bg: #0f0f23;
-  --bg2: #1a1a35;
-  --bg3: #24243e;
-  --card: #1e1e38;
-  --card2: #252540;
+  --bg:     #0a0a1a;
+  --bg2:    #12122a;
+  --bg3:    #1c1c38;
+  --card:   #181830;
+  --card2:  #202040;
   --border: rgba(255,255,255,0.08);
-  --text: #f0f0f8;
-  --text2: rgba(255,255,255,0.6);
-  --text3: rgba(255,255,255,0.35);
-  --red: #e24b4a;
-  --red-bg: rgba(226,75,74,0.12);
-  --yellow: #ef9f27;
-  --yellow-bg: rgba(239,159,39,0.12);
-  --green: #4caf7d;
-  --green-bg: rgba(76,175,125,0.12);
-  --accent: #6c8efb;
+  --text:   #f0f0f8;
+  --text2:  rgba(255,255,255,0.55);
+  --text3:  rgba(255,255,255,0.3);
+  --red:    #e53935;
+  --red-bg: rgba(229,57,53,0.12);
+  --red-border: rgba(229,57,53,0.3);
+  --yellow: #f9a825;
+  --yellow-bg: rgba(249,168,37,0.1);
+  --yellow-border: rgba(249,168,37,0.3);
+  --green:  #43a047;
+  --green-bg: rgba(67,160,71,0.1);
+  --green-border: rgba(67,160,71,0.3);
+  --accent: #5c6bc0;
+  --accent2: #7986cb;
   --nav-h: 64px;
   --top-h: 56px;
-  --radius: 12px;
-}
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f4f4f8; --bg2: #ffffff; --bg3: #eaeaf0;
-    --card: #ffffff; --card2: #f8f8fc;
-    --border: rgba(0,0,0,0.08);
-    --text: #1a1a2e; --text2: rgba(0,0,0,0.55); --text3: rgba(0,0,0,0.3);
-  }
+  --radius: 14px;
+  --radius-sm: 8px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; }
@@ -44,33 +41,34 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* LAYOUT */
 #app { display: flex; flex-direction: column; height: 100%; }
 #top-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 12px; min-height: var(--top-h); flex-shrink: 0; }
-#top-bar .back-btn { background: none; border: none; color: var(--accent); font-size: 22px; cursor: pointer; padding: 4px; display: none; align-items: center; }
+#top-bar .back-btn { background: none; border: none; color: var(--accent2); font-size: 24px; cursor: pointer; padding: 4px; display: none; align-items: center; line-height: 1; }
 #top-bar .back-btn.visible { display: flex; }
-#top-title { font-size: 16px; font-weight: 600; flex: 1; }
+#top-title { font-size: 16px; font-weight: 700; flex: 1; letter-spacing: -0.2px; }
 #top-sub { font-size: 11px; color: var(--text3); }
-#top-badge { font-size: 10px; background: var(--bg3); color: var(--text2); padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+#top-badge { font-size: 10px; font-weight: 600; background: var(--bg3); color: var(--text2); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
 
 #main { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 #nav-bar { background: var(--bg2); border-top: 1px solid var(--border); display: flex; min-height: var(--nav-h); flex-shrink: 0; }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; padding: 8px 4px; transition: opacity 0.15s; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 8px 4px; transition: opacity 0.15s; }
 .nav-item svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
-.nav-item span { font-size: 10px; color: var(--text3); transition: color 0.15s; }
-.nav-item.active svg { stroke: var(--accent); }
-.nav-item.active span { color: var(--accent); }
+.nav-item span { font-size: 10px; font-weight: 500; color: var(--text3); transition: color 0.15s; }
+.nav-item.active svg { stroke: var(--accent2); }
+.nav-item.active span { color: var(--accent2); }
+.nav-badge { background: var(--red); color: #fff; font-size: 9px; font-weight: 700; border-radius: 20px; padding: 1px 5px; min-width: 16px; text-align: center; }
 
 /* iPad layout */
 @media (min-width: 768px) {
   #app { flex-direction: row; }
   #nav-bar { flex-direction: column; width: 80px; min-height: unset; border-top: none; border-right: 1px solid var(--border); }
-  .nav-item { padding: 16px 8px; }
+  .nav-item { padding: 18px 8px; }
   #top-bar { display: none; }
-  #ipad-sidebar-header { display: flex; flex-direction: column; align-items: center; padding: 20px 8px 12px; border-bottom: 1px solid var(--border); }
-  #ipad-sidebar-header h2 { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); margin-bottom: 8px; }
+  #ipad-sidebar-header { display: flex; flex-direction: column; align-items: center; padding: 24px 8px 16px; border-bottom: 1px solid var(--border); }
+  #ipad-sidebar-header .logo-text { font-size: 11px; font-weight: 800; color: var(--accent2); letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); margin-bottom: 8px; }
   #left-panel { display: flex; flex-direction: column; }
   #right-panel { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   #main { display: flex; flex: 1; overflow: hidden; }
   .mobile-header { display: none !important; }
-  .ipad-top { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+  .ipad-top { display: flex; align-items: center; justify-content: space-between; padding: 24px 24px 0; }
 }
 @media (max-width: 767px) {
   #ipad-sidebar-header { display: none; }
@@ -79,180 +77,459 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 
 /* SCREENS */
-.screen { display: none; padding: 16px; }
+.screen { display: none; padding: 16px 14px; }
 .screen.active { display: block; }
 @media (min-width: 768px) {
-  .screen { padding: 24px; }
+  .screen { padding: 24px 24px; }
   #screen-home { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
   #screen-home.active { display: grid; }
   .home-col-right { display: flex; flex-direction: column; gap: 16px; }
 }
 
-/* SEMAFOROS */
-.semaforos { display: flex; gap: 10px; margin-bottom: 18px; }
-.sem-card { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 8px; text-align: center; cursor: pointer; transition: background 0.15s; }
-.sem-card:active { background: var(--card2); }
-.sem-emoji { font-size: 22px; }
-.sem-name { font-size: 11px; font-weight: 600; color: var(--text2); margin-top: 3px; letter-spacing: 0.5px; }
-.sem-kpi { font-size: 10px; color: var(--text3); margin-top: 2px; }
+/* ============================
+   SEMÁFOROS — REDISEÑADOS
+   ============================ */
+.semaforos { display: flex; gap: 10px; margin-bottom: 14px; }
+.sem-card {
+  flex: 1;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 10px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.sem-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.sem-card.red { border-color: var(--red-border); }
+.sem-card.red::before { background: var(--red); }
+.sem-card.yellow { border-color: var(--yellow-border); }
+.sem-card.yellow::before { background: var(--yellow); }
+.sem-card.green { border-color: var(--green-border); }
+.sem-card.green::before { background: var(--green); }
+.sem-card:active { transform: scale(0.97); }
 
-/* AGENDA CEO */
-.agenda-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
-.agenda-header { padding: 12px 14px 8px; border-bottom: 1px solid var(--border); }
-.agenda-header h3 { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
-.agenda-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
-.agenda-item:last-child { border-bottom: none; }
-.agenda-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-.dot-red { background: var(--red); }
-.dot-yellow { background: var(--yellow); }
-.dot-blue { background: var(--accent); }
-.agenda-content { flex: 1; }
-.agenda-text { font-size: 13px; color: var(--text); line-height: 1.4; }
-.agenda-meta { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.sem-dot {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  position: relative;
+}
+.sem-dot.red { background: var(--red-bg); box-shadow: 0 0 12px rgba(229,57,53,0.35); }
+.sem-dot.yellow { background: var(--yellow-bg); box-shadow: 0 0 12px rgba(249,168,37,0.3); }
+.sem-dot.green { background: var(--green-bg); box-shadow: 0 0 12px rgba(67,160,71,0.3); }
+.sem-pulse { animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 8px rgba(229,57,53,0.3); }
+  50% { box-shadow: 0 0 20px rgba(229,57,53,0.6); }
+}
+.sem-name { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.5px; margin-bottom: 4px; }
+.sem-kpi { font-size: 10px; color: var(--text3); line-height: 1.3; }
+.sem-estado { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 3px; text-transform: uppercase; }
+.sem-estado.red { color: var(--red); }
+.sem-estado.yellow { color: var(--yellow); }
+.sem-estado.green { color: var(--green); }
 
-/* SECTION TITLE */
-.section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; margin-top: 20px; }
+/* ============================
+   HOLDING STRIP
+   ============================ */
+.holding-strip {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.holding-stat {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.holding-icon { font-size: 18px; }
+.holding-info { flex: 1; }
+.holding-val { font-size: 18px; font-weight: 700; color: var(--text); line-height: 1; }
+.holding-label { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* ============================
+   AGENDA CEO — REDISEÑADA
+   ============================ */
+.agenda-section { margin-bottom: 18px; }
+.agenda-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.agenda-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.agenda-count {
+  background: var(--red);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 1px 6px;
+  min-width: 16px;
+  text-align: center;
+}
+.agenda-count.yellow { background: var(--yellow); color: #000; }
+.agenda-count.blue { background: var(--accent); }
+
+.agenda-items { display: flex; flex-direction: column; gap: 6px; }
+
+.agenda-item-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+.agenda-item-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+}
+.agenda-item-card.red { border-color: rgba(229,57,53,0.2); }
+.agenda-item-card.red::before { background: var(--red); }
+.agenda-item-card.yellow { border-color: rgba(249,168,37,0.15); }
+.agenda-item-card.yellow::before { background: var(--yellow); }
+.agenda-item-card.blue { border-color: rgba(92,107,192,0.2); }
+.agenda-item-card.blue::before { background: var(--accent2); }
+
+.agenda-item-content { flex: 1; padding-left: 2px; }
+.agenda-item-text { font-size: 13px; line-height: 1.45; color: var(--text); }
+.agenda-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+.agenda-tag {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.agenda-tag.emp { background: var(--bg3); color: var(--text2); }
+.agenda-tag.resp { background: rgba(121,134,203,0.12); color: var(--accent2); }
+
+/* ============================
+   SECTION TITLE
+   ============================ */
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .section-title:first-child { margin-top: 0; }
+.section-divider { flex: 1; height: 1px; background: var(--border); }
 
-/* KPI GRID */
+/* ============================
+   KPI GRID — MEJORADA
+   ============================ */
 .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
-.kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
-.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.kpi-val { font-size: 20px; font-weight: 600; line-height: 1; }
+.kpi-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 14px 12px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card.red { border-color: var(--red-border); }
+.kpi-card.yellow { border-color: var(--yellow-border); }
+.kpi-card.green { border-color: var(--green-border); }
+
+.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; line-height: 1.3; }
+.kpi-val { font-size: 24px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
 .kpi-val.red { color: var(--red); }
 .kpi-val.yellow { color: var(--yellow); }
 .kpi-val.green { color: var(--green); }
 .kpi-val.neutral { color: var(--text); }
-.kpi-meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
-.kpi-tend { font-size: 11px; margin-top: 2px; }
 
-/* REPORTES LIST */
+.kpi-meta { font-size: 10px; color: var(--text3); margin-top: 6px; line-height: 1.3; }
+.kpi-trend { display: flex; align-items: center; gap: 4px; margin-top: 5px; }
+.kpi-trend-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.kpi-trend-badge.up { background: var(--red-bg); color: var(--red); }
+.kpi-trend-badge.down { background: var(--green-bg); color: var(--green); }
+.kpi-trend-badge.stable { background: var(--bg3); color: var(--text2); }
+
+/* Progress bar */
+.kpi-progress { margin-top: 8px; }
+.kpi-progress-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.kpi-progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.kpi-progress-fill.red { background: var(--red); }
+.kpi-progress-fill.yellow { background: var(--yellow); }
+.kpi-progress-fill.green { background: var(--green); }
+.kpi-progress-labels { display: flex; justify-content: space-between; margin-top: 3px; }
+.kpi-progress-label { font-size: 9px; color: var(--text3); }
+
+/* ============================
+   EMPRESA HEADER
+   ============================ */
+.empresa-header-card {
+  border-radius: var(--radius);
+  padding: 16px 16px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.empresa-header-card.red { background: var(--red-bg); border: 1.5px solid var(--red-border); }
+.empresa-header-card.yellow { background: var(--yellow-bg); border: 1.5px solid var(--yellow-border); }
+.empresa-header-card.green { background: var(--green-bg); border: 1.5px solid var(--green-border); }
+
+.empresa-header-icon { font-size: 32px; }
+.empresa-header-info { flex: 1; }
+.empresa-header-name { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.empresa-header-name.red { color: var(--red); }
+.empresa-header-name.yellow { color: var(--yellow); }
+.empresa-header-name.green { color: var(--green); }
+.empresa-header-status { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.empresa-header-status.red { color: rgba(229,57,53,0.8); }
+.empresa-header-status.yellow { color: rgba(249,168,37,0.8); }
+.empresa-header-status.green { color: rgba(67,160,71,0.8); }
+.empresa-header-razon { font-size: 12px; color: var(--text2); margin-top: 4px; line-height: 1.4; }
+
+/* ============================
+   REPORTES LIST
+   ============================ */
 .reportes-list { display: flex; flex-direction: column; gap: 8px; }
-.reporte-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; }
+.reporte-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  position: relative;
+  overflow: hidden;
+}
+.reporte-item::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.reporte-item.red::after { background: var(--red); opacity: 1; }
+.reporte-item.yellow::after { background: var(--yellow); opacity: 1; }
+.reporte-item.green::after { background: var(--green); opacity: 0.7; }
 .reporte-item:active { background: var(--card2); }
-.reporte-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+.reporte-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .reporte-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .icon-red { background: var(--red-bg); color: var(--red); }
 .icon-yellow { background: var(--yellow-bg); color: var(--yellow); }
 .icon-green { background: var(--green-bg); color: var(--green); }
 .icon-neutral { background: var(--bg3); color: var(--text2); }
+
 .reporte-info { flex: 1; }
-.reporte-name { font-size: 13px; font-weight: 500; color: var(--text); }
-.reporte-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.reporte-arrow { color: var(--text3); font-size: 16px; }
+.reporte-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.reporte-sub { font-size: 11px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
+.reporte-arrow { color: var(--text3); font-size: 18px; font-weight: 300; }
 
-/* DETAIL SCREEN */
-.alert-banner { border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; }
-.alert-banner.red { background: var(--red-bg); border: 1px solid rgba(226,75,74,0.2); }
-.alert-banner.yellow { background: var(--yellow-bg); border: 1px solid rgba(239,159,39,0.2); }
-.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-.alert-text { font-size: 12px; line-height: 1.5; }
-.alert-banner.red .alert-text { color: #f8c1c1; }
-.alert-banner.yellow .alert-text { color: #fac775; }
+/* Estado chip en lista */
+.estado-chip {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.estado-chip.red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.estado-chip.yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+.estado-chip.green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.estado-chip.neutral { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
 
+/* ============================
+   DETAIL SCREEN
+   ============================ */
+.alert-banner { border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; }
+.alert-banner.red { background: var(--red-bg); border: 1px solid var(--red-border); }
+.alert-banner.yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+.alert-icon { font-size: 18px; flex-shrink: 0; }
+.alert-text { font-size: 13px; line-height: 1.5; font-weight: 500; }
+.alert-banner.red .alert-text { color: #ffcdd2; }
+.alert-banner.yellow .alert-text { color: #fff9c4; }
+
+/* Tramos */
 .tramos { display: flex; gap: 8px; margin-bottom: 16px; }
-.tramo { flex: 1; border-radius: 10px; padding: 10px 8px; text-align: center; }
-.tramo.green { background: var(--green-bg); border: 1px solid rgba(76,175,125,0.2); }
-.tramo.yellow { background: var(--yellow-bg); border: 1px solid rgba(239,159,39,0.2); }
-.tramo.red { background: var(--red-bg); border: 1px solid rgba(226,75,74,0.2); }
-.tramo-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.tramo { flex: 1; border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; }
+.tramo.green { background: var(--green-bg); border: 1px solid var(--green-border); }
+.tramo.yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+.tramo.red { background: var(--red-bg); border: 1px solid var(--red-border); }
+.tramo-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
 .tramo.green .tramo-label { color: var(--green); }
 .tramo.yellow .tramo-label { color: var(--yellow); }
 .tramo.red .tramo-label { color: var(--red); }
-.tramo-val { font-size: 14px; font-weight: 600; margin-top: 4px; }
+.tramo-val { font-size: 16px; font-weight: 700; margin-top: 5px; }
 .tramo.green .tramo-val { color: var(--green); }
 .tramo.yellow .tramo-val { color: var(--yellow); }
 .tramo.red .tramo-val { color: var(--red); }
-.tramo-sub { font-size: 9px; margin-top: 2px; opacity: 0.7; }
+.tramo-sub { font-size: 9px; margin-top: 3px; opacity: 0.75; }
 .tramo.green .tramo-sub { color: var(--green); }
 .tramo.yellow .tramo-sub { color: var(--yellow); }
 .tramo.red .tramo-sub { color: var(--red); }
 
+/* Riesgos */
 .riesgo-list { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
-.riesgo-row { display: flex; align-items: center; padding: 11px 14px; border-bottom: 1px solid var(--border); gap: 10px; }
+.riesgo-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); gap: 10px; }
 .riesgo-row:last-child { border-bottom: none; }
 .riesgo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .riesgo-info { flex: 1; min-width: 0; }
-.riesgo-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.riesgo-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .riesgo-canal { font-size: 10px; color: var(--text3); margin-top: 1px; }
-.riesgo-monto-val { font-size: 13px; font-weight: 600; color: var(--red); text-align: right; }
+.riesgo-monto-val { font-size: 14px; font-weight: 700; color: var(--red); text-align: right; }
 .riesgo-monto-sub { font-size: 10px; color: var(--text3); text-align: right; }
 
-.tend-chart { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; }
-.tend-bars { display: flex; align-items: flex-end; gap: 6px; height: 50px; }
-.tend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.tend-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height 0.3s; }
+/* Tendencia — gráfico mejorado */
+.tend-chart { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px 12px; margin-bottom: 16px; }
+.tend-title-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.tend-chart-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.tend-bars { display: flex; align-items: flex-end; gap: 6px; height: 64px; }
+.tend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.4s ease; }
 .tend-bar.green { background: var(--green); }
 .tend-bar.yellow { background: var(--yellow); }
 .tend-bar.red { background: var(--red); }
-.tend-pct { font-size: 9px; color: var(--text); font-weight: 500; }
-.tend-mes { font-size: 8px; color: var(--text3); }
+.tend-pct { font-size: 10px; color: var(--text); font-weight: 600; }
+.tend-mes { font-size: 9px; color: var(--text3); }
+.tend-current-marker { font-size: 9px; color: var(--accent2); font-weight: 700; }
 
-.decision-box { background: rgba(108,142,251,0.08); border: 1px solid rgba(108,142,251,0.2); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; }
-.decision-title { font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-.decision-item { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 4px; padding-left: 12px; position: relative; }
-.decision-item::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+/* Decisiones */
+.decision-box { background: rgba(92,107,192,0.08); border: 1px solid rgba(121,134,203,0.25); border-radius: var(--radius); padding: 14px 14px; margin-bottom: 16px; }
+.decision-title { font-size: 10px; font-weight: 700; color: var(--accent2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px; }
+.decision-item { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 6px; padding-left: 16px; position: relative; }
+.decision-item:last-child { margin-bottom: 0; }
+.decision-item::before { content: '→'; position: absolute; left: 0; color: var(--accent2); font-weight: 700; }
 
-.png-btn { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; color: var(--text2); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; transition: background 0.15s; }
+/* Botones */
+.png-btn { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; color: var(--text2); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; transition: background 0.12s; text-align: left; }
 .png-btn:active { background: var(--card2); }
-.ask-btn { width: 100%; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s; }
+.ask-btn { width: 100%; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s; letter-spacing: -0.1px; }
 .ask-btn:active { opacity: 0.85; }
 
 /* PNG VIEWER */
-#png-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; flex-direction: column; }
+#png-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; display: none; flex-direction: column; }
 #png-viewer.open { display: flex; }
-#png-viewer-bar { background: var(--bg2); padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
-#png-viewer-bar button { background: none; border: none; color: var(--accent); font-size: 15px; cursor: pointer; padding: 4px 8px; }
-#png-viewer-title { flex: 1; font-size: 14px; font-weight: 500; }
+#png-viewer-bar { background: var(--bg2); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+#png-viewer-bar button { background: none; border: none; color: var(--accent2); font-size: 15px; cursor: pointer; padding: 4px 8px; }
+#png-viewer-title { flex: 1; font-size: 14px; font-weight: 600; }
 #png-viewer-img { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 16px; }
 #png-viewer-img img { max-width: 100%; height: auto; border-radius: 8px; }
 
-/* CHAT */
-#chat-fab { position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50; box-shadow: 0 4px 16px rgba(108,142,251,0.4); transition: transform 0.15s; }
+/* CHAT FAB */
+#chat-fab { position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50; box-shadow: 0 4px 20px rgba(92,107,192,0.45); transition: transform 0.15s; border: none; }
 #chat-fab:active { transform: scale(0.93); }
 #chat-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 @media (min-width: 768px) { #chat-fab { bottom: 20px; right: 20px; } }
 
+/* CHAT MODAL */
 #chat-modal { position: fixed; inset: 0; z-index: 80; display: none; flex-direction: column; background: var(--bg); }
 #chat-modal.open { display: flex; }
 @media (min-width: 768px) {
-  #chat-modal { left: auto; right: 0; width: 400px; border-left: 1px solid var(--border); box-shadow: -4px 0 20px rgba(0,0,0,0.3); }
+  #chat-modal { left: auto; right: 0; width: 420px; border-left: 1px solid var(--border); box-shadow: -6px 0 30px rgba(0,0,0,0.5); }
 }
 #chat-header { background: var(--bg2); padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-#chat-header h2 { flex: 1; font-size: 16px; font-weight: 600; }
+#chat-header h2 { flex: 1; font-size: 16px; font-weight: 700; }
 #chat-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
 #chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.msg { max-width: 85%; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.5; }
+.msg { max-width: 85%; padding: 11px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
 .msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
 .msg.assistant { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
 .msg.loading { opacity: 0.6; }
 #chat-input-area { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; gap: 10px; align-items: flex-end; }
 #chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 10px 16px; color: var(--text); font-size: 14px; resize: none; max-height: 100px; outline: none; font-family: inherit; }
-#chat-send { background: var(--accent); border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; }
+#chat-send { background: var(--accent); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; }
 #chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
 #chat-send svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
 #api-setup { padding: 20px; background: var(--card); margin: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
 #api-setup p { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
 #api-key-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; margin-bottom: 10px; font-family: monospace; outline: none; }
-#api-save-btn { background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+#api-save-btn { background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
 
 /* LOADING */
 #loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 200; }
-#loading-overlay h1 { font-size: 24px; font-weight: 700; }
+#loading-overlay h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
 #loading-overlay p { font-size: 14px; color: var(--text2); }
-.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* MISC */
-.holding-bar { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; display: flex; gap: 20px; }
-.holding-stat { flex: 1; text-align: center; }
-.holding-stat-val { font-size: 16px; font-weight: 600; color: var(--text); }
-.holding-stat-label { font-size: 10px; color: var(--text3); margin-top: 2px; }
-.empresa-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
-.empresa-sem { font-size: 24px; }
-.empresa-name { font-size: 16px; font-weight: 700; }
-.empresa-kpi { font-size: 12px; color: var(--text3); margin-top: 2px; }
+/* Desglose grid */
+.breakdown-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+.breakdown-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 13px;
+}
+.breakdown-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
+.breakdown-val { font-size: 18px; font-weight: 700; }
+.breakdown-val.red { color: var(--red); }
+.breakdown-val.yellow { color: var(--yellow); }
+.breakdown-val.green { color: var(--green); }
+.breakdown-val.neutral { color: var(--text); }
+.breakdown-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+/* Cumplimiento por gerente */
+.gerente-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.gerente-row:last-child { border-bottom: none; }
+.gerente-info { flex: 1; }
+.gerente-name { font-size: 13px; font-weight: 500; }
+.gerente-pct-track { height: 6px; background: var(--border); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+.gerente-pct-fill { height: 100%; border-radius: 3px; }
+.gerente-val { font-size: 14px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -263,22 +540,22 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <p id="loading-msg">Cargando datos...</p>
 </div>
 
-<!-- TOP BAR (mobile) -->
 <div id="app" style="display:none">
+  <!-- TOP BAR (mobile) -->
   <div id="top-bar">
     <button class="back-btn" id="back-btn" onclick="goBack()">‹</button>
     <div style="flex:1">
       <div id="top-title">Juanito Garcia</div>
-      <div id="top-sub" style="font-size:11px;color:var(--text3)"></div>
+      <div id="top-sub"></div>
     </div>
     <span id="top-badge"></span>
   </div>
 
   <div id="main">
-    <!-- NAV SIDEBAR (iPad) / BOTTOM NAV (mobile) -->
+    <!-- NAV -->
     <div id="nav-bar">
       <div id="ipad-sidebar-header">
-        <h2>JG</h2>
+        <span class="logo-text">JG</span>
       </div>
       <div class="nav-item active" data-tab="home" onclick="showTab('home')">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -305,18 +582,27 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div id="screen-home" class="screen active">
         <div id="home-left">
           <div class="semaforos" id="semaforos-row"></div>
-          <div class="holding-bar" id="holding-bar">
-            <div class="holding-stat"><div class="holding-stat-val" id="h-ventas">—</div><div class="holding-stat-label">Ventas holding</div></div>
-            <div class="holding-stat"><div class="holding-stat-val" id="h-mora">—</div><div class="holding-stat-label">Mora consolidada</div></div>
+          <div class="holding-strip" id="holding-strip">
+            <div class="holding-stat">
+              <div class="holding-icon">💰</div>
+              <div class="holding-info">
+                <div class="holding-val" id="h-ventas">—</div>
+                <div class="holding-label">Ventas holding</div>
+              </div>
+            </div>
+            <div class="holding-stat">
+              <div class="holding-icon">⚠️</div>
+              <div class="holding-info">
+                <div class="holding-val" id="h-mora" style="color:var(--red)">—</div>
+                <div class="holding-label">Mora consolidada</div>
+              </div>
+            </div>
           </div>
-          <div class="section-title">Agenda CEO — decidir hoy</div>
-          <div class="agenda-card" id="agenda-hoy"></div>
-          <div class="section-title">Escalar esta semana</div>
-          <div class="agenda-card" id="agenda-semana"></div>
+          <div id="agenda-decidir-section"></div>
+          <div id="agenda-semana-section"></div>
         </div>
         <div class="home-col-right" id="home-right" style="display:none">
-          <div class="section-title">Monitorear</div>
-          <div class="agenda-card" id="agenda-monitorear"></div>
+          <div id="agenda-monitorear-section"></div>
         </div>
       </div>
 
@@ -339,7 +625,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div id="screen-detail" class="screen">
         <div id="detail-content"></div>
       </div>
-
     </div>
   </div>
 </div>
@@ -361,7 +646,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <!-- CHAT MODAL -->
 <div id="chat-modal">
   <div id="chat-header">
-    <div style="width:34px;height:34px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px">🤖</div>
+    <div style="width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">🤖</div>
     <h2>Juanito Garcia</h2>
     <button id="chat-close" onclick="closeChat()">✕</button>
   </div>
@@ -381,13 +666,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </div>
 
 <script>
-const BASE = '';
 let DATA = null;
 let currentTab = 'home';
 let navHistory = [];
 let apiKey = localStorage.getItem('jg_api_key') || '';
-
-const EMPRESA_LABELS = { PAUNO: 'PAUNO', AMAUTA: 'AMAUTA', NEOPACK: 'NEOPACK' };
 
 const REPORTES_CONFIG = {
   PAUNO: [
@@ -427,21 +709,22 @@ const ICON_SVG = {
   target:   '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
 };
 
-function semColor(s) { return s === 'red' ? '🔴' : s === 'yellow' ? '🟡' : '🟢'; }
+function semEmoji(s) { return s === 'red' ? '🔴' : s === 'yellow' ? '🟡' : '🟢'; }
+function semLabel(s) { return s === 'red' ? 'CRÍTICO' : s === 'yellow' ? 'ATENCIÓN' : 'OK'; }
 function stateClass(s) { return s === 'red' ? 'red' : s === 'yellow' ? 'yellow' : s === 'green' ? 'green' : 'neutral'; }
-function dotClass(s) { return s === 'red' ? 'dot-red' : s === 'yellow' ? 'dot-yellow' : 'dot-blue'; }
+function dotBg(s) { return s === 'red' ? 'var(--red)' : s === 'yellow' ? 'var(--yellow)' : 'var(--accent2)'; }
 
 async function loadData() {
   try {
     document.getElementById('loading-msg').textContent = 'Cargando análisis...';
     const r = await fetch('data/latest/summaries.json?t=' + Date.now());
-    if (!r.ok) throw new Error('No hay datos');
+    if (!r.ok) throw new Error('Sin datos');
     DATA = await r.json();
     renderAll();
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
   } catch(e) {
-    document.getElementById('loading-msg').textContent = 'Sin datos disponibles. El scraper corre a las 7am.';
+    document.getElementById('loading-msg').textContent = 'Sin datos. El scraper corre a las 7am (días hábiles).';
   }
 }
 
@@ -451,44 +734,82 @@ function renderAll() {
   renderEmpresa('AMAUTA', 'amauta-content');
   renderEmpresa('NEOPACK', 'neopack-content');
   document.getElementById('top-sub').textContent = DATA.fecha + ' · ' + DATA.hora;
+  // Update nav badges
+  const sems = DATA.semaforos || {};
+  const redCount = Object.values(sems).filter(v => v === 'red').length;
+  if (redCount > 0) {
+    document.querySelectorAll('.nav-item[data-tab="home"] span')[0].insertAdjacentHTML('afterend',
+      `<span class="nav-badge">${redCount}</span>`);
+  }
 }
 
 function renderHome() {
   const sems = DATA.semaforos || {};
   const razones = DATA.semaforo_razon || {};
+
+  // Semáforos
   document.getElementById('semaforos-row').innerHTML = Object.entries(sems).map(([emp, s]) =>
-    `<div class="sem-card" onclick="showTab('${emp.toLowerCase()}')">
-      <div class="sem-emoji">${semColor(s)}</div>
+    `<div class="sem-card ${s}" onclick="showTab('${emp.toLowerCase()}')">
+      <div class="sem-dot ${s}${s === 'red' ? ' sem-pulse' : ''}">
+        ${semEmoji(s)}
+      </div>
+      <div class="sem-estado ${s}">${semLabel(s)}</div>
       <div class="sem-name">${emp}</div>
-      <div class="sem-kpi">${razones[emp] || ''}</div>
+      <div class="sem-kpi">${(razones[emp] || '').split(' con ')[0]}</div>
     </div>`
   ).join('');
 
+  // Holding
   document.getElementById('h-ventas').textContent = DATA.holding_ventas || '—';
   document.getElementById('h-mora').textContent = DATA.holding_mora || '—';
 
+  // Agenda
   const agenda = DATA.agenda_ceo || {};
-  renderAgendaSection('agenda-hoy', agenda.decidir_hoy || []);
-  renderAgendaSection('agenda-semana', agenda.escalar_semana || []);
-  renderAgendaSection('agenda-monitorear', agenda.monitorear || []);
+  renderAgendaSection('agenda-decidir-section', 'Decidir hoy', 'red', agenda.decidir_hoy || []);
+  renderAgendaSection('agenda-semana-section', 'Escalar esta semana', 'yellow', agenda.escalar_semana || []);
+  renderAgendaSection('agenda-monitorear-section', 'Monitorear', 'blue', agenda.monitorear || []);
 
-  // Show monitor on iPad
   if (window.innerWidth >= 768) {
     document.getElementById('home-right').style.display = 'flex';
   }
 }
 
-function renderAgendaSection(id, items) {
+function renderAgendaSection(id, title, color, items) {
   const el = document.getElementById(id);
-  if (!items.length) { el.innerHTML = '<div class="agenda-item"><div class="agenda-content"><div class="agenda-text" style="color:var(--text3)">Sin alertas</div></div></div>'; return; }
-  el.innerHTML = items.map(item => `
-    <div class="agenda-item">
-      <div class="agenda-dot ${dotClass(item.estado || (id === 'agenda-hoy' ? 'red' : id === 'agenda-semana' ? 'yellow' : 'blue'))}"></div>
-      <div class="agenda-content">
-        <div class="agenda-text">${item.texto || item.text || ''}</div>
-        <div class="agenda-meta">${[item.empresa, item.responsable].filter(Boolean).join(' · ')}</div>
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = `<div class="agenda-section">
+      <div class="agenda-section-header">
+        <div class="agenda-section-title">${title}</div>
       </div>
-    </div>`).join('');
+      <div class="agenda-items">
+        <div class="agenda-item-card blue" style="opacity:0.5">
+          <div class="agenda-item-content"><div class="agenda-item-text" style="color:var(--text3)">Sin elementos</div></div>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+  const countClass = color === 'red' ? '' : color === 'yellow' ? 'yellow' : 'blue';
+  el.innerHTML = `<div class="agenda-section">
+    <div class="agenda-section-header">
+      <div class="agenda-section-title">${title}</div>
+      <span class="agenda-count ${countClass}">${items.length}</span>
+      <div class="section-divider"></div>
+    </div>
+    <div class="agenda-items">
+      ${items.map(item => `
+        <div class="agenda-item-card ${color}">
+          <div class="agenda-item-content">
+            <div class="agenda-item-text">${item.texto || item.text || ''}</div>
+            <div class="agenda-item-meta">
+              ${item.empresa ? `<span class="agenda-tag emp">${item.empresa}</span>` : ''}
+              ${item.responsable ? `<span class="agenda-tag resp">${item.responsable}</span>` : ''}
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
 }
 
 function renderEmpresa(empresa, containerId) {
@@ -497,48 +818,91 @@ function renderEmpresa(empresa, containerId) {
   const semaforo = (DATA.semaforos || {})[empresa] || 'green';
   const razon = (DATA.semaforo_razon || {})[empresa] || '';
   const reportes = REPORTES_CONFIG[empresa] || [];
-
-  // Collect KPIs from all reports
-  const allKpis = [];
   const reportesData = empData.reportes || {};
+
+  // Collect top KPIs
+  const allKpis = [];
   reportes.forEach(r => {
     const rd = reportesData[r.tipo] || {};
     (rd.kpis || []).slice(0, 1).forEach(k => allKpis.push(k));
   });
 
+  const statusLabel = semaforo === 'red' ? 'CRÍTICO — ACCIÓN INMEDIATA' : semaforo === 'yellow' ? 'ATENCIÓN — REVISAR' : 'OPERANDO BIEN';
+
   el.innerHTML = `
-    <div class="empresa-header">
-      <div class="empresa-sem">${semColor(semaforo)}</div>
-      <div>
-        <div class="empresa-name">${empresa}</div>
-        <div class="empresa-kpi">${razon}</div>
+    <div class="empresa-header-card ${semaforo}">
+      <div class="empresa-header-icon">${semEmoji(semaforo)}</div>
+      <div class="empresa-header-info">
+        <div class="empresa-header-name ${semaforo}">${empresa}</div>
+        <div class="empresa-header-status ${semaforo}">${statusLabel}</div>
+        <div class="empresa-header-razon">${razon}</div>
       </div>
     </div>
+
     ${allKpis.length ? `
-    <div class="section-title">KPIs principales</div>
-    <div class="kpi-grid">${allKpis.slice(0,6).map(k => `
-      <div class="kpi-card">
-        <div class="kpi-label">${k.label}</div>
-        <div class="kpi-val ${stateClass(k.estado)}">${k.valor || '—'}</div>
-        <div class="kpi-meta">${[k.meta ? 'meta ' + k.meta : '', k.tendencia || ''].filter(Boolean).join(' · ')}</div>
-      </div>`).join('')}
+    <div class="section-title">KPIs Clave
+      <div class="section-divider"></div>
+    </div>
+    <div class="kpi-grid">
+      ${allKpis.slice(0,6).map(k => renderKpiCard(k)).join('')}
     </div>` : ''}
-    <div class="section-title">Reportes — toca para ver análisis</div>
-    <div class="reportes-list">${reportes.map(r => {
-      const rd = reportesData[r.tipo] || {};
-      const estado = rd.estado || 'neutral';
-      return `<div class="reporte-item" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}')">
-        <div class="reporte-icon icon-${estado === 'neutral' ? 'neutral' : estado}">
-          <svg viewBox="0 0 24 24">${ICON_SVG[r.icon] || ICON_SVG.check}</svg>
-        </div>
-        <div class="reporte-info">
-          <div class="reporte-name">${r.label}</div>
-          <div class="reporte-sub">${rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].valor + ' ' + (rd.kpis[0].meta ? '(meta ' + rd.kpis[0].meta + ')' : '') : 'Toca para ver')}</div>
-        </div>
-        <div class="reporte-arrow">›</div>
-      </div>`;
-    }).join('')}
+
+    <div class="section-title">Reportes
+      <div class="section-divider"></div>
+    </div>
+    <div class="reportes-list">
+      ${reportes.map(r => {
+        const rd = reportesData[r.tipo] || {};
+        const estado = rd.estado || 'neutral';
+        const subtext = rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].valor + (rd.kpis[0].meta ? ' (meta ' + rd.kpis[0].meta + ')' : '') : 'Ver análisis');
+        return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}')">
+          <div class="reporte-icon icon-${estado === 'neutral' ? 'neutral' : estado}">
+            <svg viewBox="0 0 24 24">${ICON_SVG[r.icon] || ICON_SVG.check}</svg>
+          </div>
+          <div class="reporte-info">
+            <div class="reporte-name">${r.label}</div>
+            <div class="reporte-sub">${subtext}</div>
+          </div>
+          <span class="estado-chip ${estado}">${estado === 'neutral' ? 'Ver' : estado === 'red' ? 'Crítico' : estado === 'yellow' ? 'Alerta' : 'OK'}</span>
+        </div>`;
+      }).join('')}
     </div>`;
+}
+
+function renderKpiCard(k) {
+  const cls = stateClass(k.estado);
+  let progressHtml = '';
+  // Try to build a progress bar if we have a numeric value and meta
+  if (k.valor && k.meta) {
+    const valNum = parseFloat(k.valor.replace(/[^0-9.]/g, ''));
+    const metaNum = parseFloat(k.meta.replace(/[^0-9.]/g, ''));
+    if (!isNaN(valNum) && !isNaN(metaNum) && metaNum > 0) {
+      const pct = Math.min(100, Math.round((valNum / metaNum) * 100));
+      progressHtml = `<div class="kpi-progress">
+        <div class="kpi-progress-track">
+          <div class="kpi-progress-fill ${cls}" style="width:${pct}%"></div>
+        </div>
+        <div class="kpi-progress-labels">
+          <span class="kpi-progress-label">0</span>
+          <span class="kpi-progress-label" style="color:var(--text2)">${pct}% de meta</span>
+          <span class="kpi-progress-label">Meta: ${k.meta}</span>
+        </div>
+      </div>`;
+    }
+  }
+  const trendArrow = k.tendencia ? (k.tendencia.includes('sube') || k.tendencia.includes('crecien') ? '↑' :
+    k.tendencia.includes('baja') || k.tendencia.includes('descend') || k.tendencia.includes('mejor') ? '↓' : '→') : '';
+  const trendBadgeClass = trendArrow === '↑' ? 'up' : trendArrow === '↓' ? 'down' : 'stable';
+
+  return `<div class="kpi-card ${cls}">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+    ${k.tendencia ? `<div class="kpi-trend">
+      <span class="kpi-trend-badge ${trendBadgeClass}">${trendArrow} ${k.tendencia}</span>
+    </div>` : ''}
+    ${k.meta ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
+    ${progressHtml}
+  </div>`;
 }
 
 function showDetail(empresa, tipo, label, archivo) {
@@ -552,22 +916,23 @@ function showDetail(empresa, tipo, label, archivo) {
   // Alert banner
   if (rd.alerta) {
     const ac = rd.estado === 'red' ? 'red' : 'yellow';
-    html += `<div class="alert-banner ${ac}"><div class="alert-icon">${ac === 'red' ? '⚠️' : '⚡'}</div><div class="alert-text">${rd.alerta}</div></div>`;
+    const icon = ac === 'red' ? '🚨' : '⚡';
+    html += `<div class="alert-banner ${ac}">
+      <div class="alert-icon">${icon}</div>
+      <div class="alert-text">${rd.alerta}</div>
+    </div>`;
   }
 
   // KPIs
   if (rd.kpis?.length) {
-    html += `<div class="section-title">Indicadores clave</div><div class="kpi-grid">${rd.kpis.map(k => `
-      <div class="kpi-card">
-        <div class="kpi-label">${k.label}</div>
-        <div class="kpi-val ${stateClass(k.estado)}">${k.valor || '—'}</div>
-        <div class="kpi-meta">${[k.meta ? 'meta ' + k.meta : '', k.tendencia || ''].filter(Boolean).join(' · ')}</div>
-      </div>`).join('')}</div>`;
+    html += `<div class="section-title">Indicadores clave<div class="section-divider"></div></div>
+    <div class="kpi-grid">${rd.kpis.map(k => renderKpiCard(k)).join('')}</div>`;
   }
 
-  // Tramos
+  // Tramos de cartera
   if (rd.tramos?.length) {
-    html += `<div class="section-title">Distribución de cartera</div><div class="tramos">${rd.tramos.map(t => `
+    html += `<div class="section-title">Distribución de cartera<div class="section-divider"></div></div>
+    <div class="tramos">${rd.tramos.map(t => `
       <div class="tramo ${t.estado}">
         <div class="tramo-label">${t.label}</div>
         <div class="tramo-val">${t.valor}</div>
@@ -576,16 +941,15 @@ function showDetail(empresa, tipo, label, archivo) {
   }
 
   // Riesgos / ranking
-  const risks = rd.riesgos || rd.proveedores_criticos || rd.por_gerente || [];
+  const risks = rd.riesgos || rd.proveedores_criticos || [];
   if (risks.length) {
-    const isGerentes = !!rd.por_gerente;
-    html += `<div class="section-title">${isGerentes ? 'Cumplimiento por gerente' : 'Mayor riesgo'}</div>
-    <div class="riesgo-list">${risks.slice(0,4).map(r => `
+    html += `<div class="section-title">Mayor riesgo<div class="section-divider"></div></div>
+    <div class="riesgo-list">${risks.slice(0,5).map(r => `
       <div class="riesgo-row">
-        <div class="riesgo-dot ${dotClass(r.estado)}"></div>
+        <div class="riesgo-dot" style="background:${dotBg(r.estado)}"></div>
         <div class="riesgo-info">
           <div class="riesgo-name">${r.nombre || r.name || ''}</div>
-          <div class="riesgo-canal">${r.canal || r.categoria || r.categoria || ''}</div>
+          <div class="riesgo-canal">${r.canal || r.categoria || ''}</div>
         </div>
         <div>
           <div class="riesgo-monto-val">${r.vencido30 || r.monto || r.pct || ''}</div>
@@ -594,52 +958,88 @@ function showDetail(empresa, tipo, label, archivo) {
       </div>`).join('')}</div>`;
   }
 
-  // Por UEN / canal / marca
-  const breakdown = rd.por_uen || rd.por_canal || rd.por_marca || rd.por_categoria || rd.clasificacion || [];
-  if (breakdown.length) {
-    const bKey = Object.keys(breakdown[0]).find(k => !['estado','monto','pct','avance','real','ratio','interpretacion'].includes(k));
-    html += `<div class="section-title">Desglose</div><div class="kpi-grid">${breakdown.map(b => {
-      const val = b.margen || b.avance || b.ratio || b.pct || '';
-      const label2 = b[bKey] || '';
-      const sub = b.monto || b.real || b.interpretacion || '';
-      return `<div class="kpi-card">
-        <div class="kpi-label">${label2}</div>
-        <div class="kpi-val ${stateClass(b.estado)}">${val}</div>
-        <div class="kpi-meta">${sub}</div>
+  // Cumplimiento por gerente
+  const gerentes = rd.por_gerente || [];
+  if (gerentes.length) {
+    html += `<div class="section-title">Por gerente<div class="section-divider"></div></div>
+    <div class="riesgo-list">${gerentes.map(g => {
+      const pctNum = parseFloat((g.pct || '0').replace('%',''));
+      const color = pctNum >= 80 ? 'var(--green)' : pctNum >= 60 ? 'var(--yellow)' : 'var(--red)';
+      return `<div class="gerente-row">
+        <div class="gerente-info">
+          <div class="gerente-name">${g.nombre || ''}</div>
+          <div class="gerente-pct-track">
+            <div class="gerente-pct-fill" style="width:${Math.min(100,pctNum)}%;background:${color}"></div>
+          </div>
+        </div>
+        <div class="gerente-val" style="color:${color}">${g.pct || ''}</div>
       </div>`;
     }).join('')}</div>`;
   }
 
-  // Tendencia
+  // Desglose (por UEN, canal, marca, etc.)
+  const breakdown = rd.por_uen || rd.por_canal || rd.por_marca || rd.por_categoria || rd.clasificacion || [];
+  if (breakdown.length) {
+    const bKey = Object.keys(breakdown[0]).find(k => !['estado','monto','pct','avance','real','ratio','interpretacion','margen'].includes(k));
+    html += `<div class="section-title">Desglose<div class="section-divider"></div></div>
+    <div class="breakdown-grid">${breakdown.map(b => {
+      const val = b.margen || b.avance || b.ratio || b.pct || '';
+      const labelB = b[bKey] || '';
+      const sub = b.monto || b.real || b.interpretacion || '';
+      return `<div class="breakdown-item">
+        <div class="breakdown-label">${labelB}</div>
+        <div class="breakdown-val ${stateClass(b.estado)}">${val}</div>
+        <div class="breakdown-sub">${sub}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  // Tendencia — gráfico mejorado
   const tendData = rd.tendencia_mora || rd.tendencia || rd.tendencia_ate || rd.tendencia_dias || rd.tendencia_margen || rd.tendencia_ratio || [];
   if (tendData.length > 1) {
-    const vals = tendData.map(t => t.pct || t.val || t.dias || t.ratio || 0);
+    const vals = tendData.map(t => parseFloat(t.pct || t.val || t.dias || t.ratio || 0));
     const maxV = Math.max(...vals) || 1;
-    html += `<div class="section-title">Tendencia</div>
-    <div class="tend-chart"><div class="tend-bars">${tendData.map((t,i) => {
-      const v = vals[i];
-      const h = Math.max(4, Math.round((v / maxV) * 46));
-      const cls = v > (maxV * 0.8) ? 'red' : v > (maxV * 0.5) ? 'yellow' : 'green';
-      return `<div class="tend-col">
-        <div class="tend-pct">${typeof v === 'number' ? v.toFixed(v < 10 ? 1 : 0) : v}${t.pct !== undefined ? '%' : ''}</div>
-        <div class="tend-bar ${cls}" style="height:${h}px"></div>
-        <div class="tend-mes">${t.mes || ''}</div>
-      </div>`;
-    }).join('')}</div></div>`;
+    const minV = Math.min(...vals);
+    const lastV = vals[vals.length - 1];
+    const prevV = vals[vals.length - 2];
+    const trend = lastV > prevV ? '↑ Empeorando' : lastV < prevV ? '↓ Mejorando' : '→ Estable';
+    const trendColor = lastV > prevV ? 'var(--red)' : lastV < prevV ? 'var(--green)' : 'var(--text2)';
+
+    html += `<div class="section-title">Tendencia<div class="section-divider"></div></div>
+    <div class="tend-chart">
+      <div class="tend-title-row">
+        <div class="tend-chart-label">Últimos ${tendData.length} meses</div>
+        <div style="font-size:12px;font-weight:700;color:${trendColor}">${trend}</div>
+      </div>
+      <div class="tend-bars">${tendData.map((t,i) => {
+        const v = vals[i];
+        const h = Math.max(6, Math.round(((v - minV * 0.5) / (maxV - minV * 0.5 || 1)) * 58));
+        const isLast = i === tendData.length - 1;
+        const cls = isLast ? (v > maxV * 0.75 ? 'red' : v > maxV * 0.5 ? 'yellow' : 'green') :
+          (v > maxV * 0.75 ? 'red' : v > maxV * 0.5 ? 'yellow' : 'green');
+        return `<div class="tend-col">
+          <div class="tend-pct ${isLast ? 'tend-current-marker' : ''}">${typeof v === 'number' ? (v % 1 ? v.toFixed(1) : v) : v}${t.pct !== undefined ? '%' : ''}</div>
+          <div class="tend-bar ${cls}" style="height:${h}px${isLast ? ';opacity:1;box-shadow:0 0 6px rgba(255,255,255,0.2)' : ';opacity:0.75'}"></div>
+          <div class="tend-mes">${t.mes || ''}</div>
+        </div>`;
+      }).join('')}</div>
+    </div>`;
   }
 
-  // Acciones
+  // Acciones recomendadas
   if (rd.acciones?.length) {
-    html += `<div class="decision-box"><div class="decision-title">Qué hacer con esto</div>${rd.acciones.map(a => `<div class="decision-item">${a}</div>`).join('')}</div>`;
+    html += `<div class="decision-box">
+      <div class="decision-title">💡 Qué hacer con esto</div>
+      ${rd.acciones.map(a => `<div class="decision-item">${a}</div>`).join('')}
+    </div>`;
   }
 
-  // Ver PNG original
+  // Ver PNG
   html += `<button class="png-btn" onclick="openPng('data/latest/${empresa}/${archivo}','${label}')">
     <svg viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--text2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
     Ver reporte Power BI original
-  </button>`;
-
-  html += `<button class="ask-btn" onclick="openChatWith('${empresa}','${tipo}','${label}')">
+  </button>
+  <button class="ask-btn" onclick="openChatWith('${empresa}','${tipo}','${label}')">
     💬 Preguntarle a Juanito sobre esto
   </button>`;
 
@@ -647,8 +1047,6 @@ function showDetail(empresa, tipo, label, archivo) {
   document.getElementById('top-title').textContent = label;
   document.getElementById('top-badge').textContent = empresa;
   document.getElementById('back-btn').classList.add('visible');
-
-  // Show detail screen
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-detail').classList.add('active');
 }
@@ -668,12 +1066,12 @@ function showTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + tab).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    n.classList.toggle('active', n.dataset.tab === tab);
-  });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
   document.getElementById('top-title').textContent = tab === 'home' ? 'Juanito Garcia' : tab.toUpperCase();
   document.getElementById('top-badge').textContent = DATA?.fecha || '';
   document.getElementById('back-btn').classList.remove('visible');
+  // scroll to top
+  document.getElementById('screens-container').scrollTop = 0;
 }
 
 function openPng(src, title) {
@@ -683,7 +1081,6 @@ function openPng(src, title) {
 }
 function closePng() { document.getElementById('png-viewer').classList.remove('open'); }
 
-// CHAT
 function openChat() { document.getElementById('chat-modal').classList.add('open'); checkApiKey(); }
 function closeChat() { document.getElementById('chat-modal').classList.remove('open'); }
 
@@ -696,8 +1093,7 @@ function openChatWith(empresa, tipo, label) {
 }
 
 function checkApiKey() {
-  const setup = document.getElementById('api-setup');
-  setup.style.display = apiKey ? 'none' : 'block';
+  document.getElementById('api-setup').style.display = apiKey ? 'none' : 'block';
   if (apiKey && document.getElementById('chat-messages').children.length <= 1) {
     addMsg('assistant', `Hola. Soy Juanito Garcia. Tengo los datos del ${DATA?.fecha || 'día de hoy'}. ¿Sobre qué empresa o KPI quieres profundizar?`);
   }
@@ -746,13 +1142,11 @@ async function sendChat() {
   loadingEl.classList.add('loading');
 
   try {
-    // Build context from summaries
     const ctx = JSON.stringify(DATA, null, 2).slice(0, 8000);
     const systemPrompt = `Eres Juanito Garcia, analista de Control Interno de un holding con 3 empresas: PAUNO, AMAUTA y NEOPACK.
 Fecha de los datos: ${DATA?.fecha} ${DATA?.hora}.
-Responde en español, de forma directa y con números exactos del contexto.
-Si el usuario pregunta sobre algo no disponible en los datos, dilo claramente.
-Nunca inventes números. Sé conciso pero preciso.
+Responde en español, directo y con números exactos del contexto.
+Si algo no está en los datos, dilo claramente. Nunca inventes cifras. Sé conciso pero preciso.
 
 DATOS DEL DÍA:
 ${ctx}`;
@@ -760,12 +1154,7 @@ ${ctx}`;
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-calls': 'true' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: text }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1024, system: systemPrompt, messages: [{ role: 'user', content: text }] })
     });
 
     const data = await resp.json();
