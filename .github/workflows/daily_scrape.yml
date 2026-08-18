@@ -1,0 +1,56 @@
+name: Juanito Garcia — Scraper Diario
+
+on:
+  schedule:
+    # 12:00 UTC = 07:00 Lima (America/Lima UTC-5)
+    - cron: '0 12 * * 1-5'
+  workflow_dispatch:  # permite ejecutar manualmente desde GitHub
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          pip install playwright anthropic requests
+          python -m playwright install chromium
+          python -m playwright install-deps chromium
+
+      - name: Ejecutar scraper Power BI
+        run: |
+          python scripts/scrape_powerbi.py --output data/latest
+        env:
+          PYTHONUNBUFFERED: "1"
+
+      - name: Generar summaries con Claude
+        run: |
+          python scripts/generate_summaries.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Verificar archivos generados
+        run: |
+          echo "PNGs capturados:"
+          find data/latest -name "*.png" | wc -l
+          echo "Summaries generados:"
+          cat data/latest/summaries.json | python -c "import sys,json; d=json.load(sys.stdin); print(f'Semáforos: {d.get(\"semaforos\")}')"
+
+      - name: Commit y push datos
+        run: |
+          git config user.name "Juanito Garcia Bot"
+          git config user.email "juanito@juanito-garcia.local"
+          git add data/latest/
+          git diff --staged --quiet || git commit -m "datos $(date +'%Y-%m-%d %H:%M') Lima"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
