@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Juanito">
+<meta name="theme-color" content="#0f0f23">
+<title>Juanito Garcia</title>
+<style>
+:root {
+  --bg: #0f0f23;
+  --bg2: #1a1a35;
+  --bg3: #24243e;
+  --card: #1e1e38;
+  --card2: #252540;
+  --border: rgba(255,255,255,0.08);
+  --text: #f0f0f8;
+  --text2: rgba(255,255,255,0.6);
+  --text3: rgba(255,255,255,0.35);
+  --red: #e24b4a;
+  --red-bg: rgba(226,75,74,0.12);
+  --yellow: #ef9f27;
+  --yellow-bg: rgba(239,159,39,0.12);
+  --green: #4caf7d;
+  --green-bg: rgba(76,175,125,0.12);
+  --accent: #6c8efb;
+  --nav-h: 64px;
+  --top-h: 56px;
+  --radius: 12px;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f4f8; --bg2: #ffffff; --bg3: #eaeaf0;
+    --card: #ffffff; --card2: #f8f8fc;
+    --border: rgba(0,0,0,0.08);
+    --text: #1a1a2e; --text2: rgba(0,0,0,0.55); --text3: rgba(0,0,0,0.3);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; }
+
+/* LAYOUT */
+#app { display: flex; flex-direction: column; height: 100%; }
+#top-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 12px; min-height: var(--top-h); flex-shrink: 0; }
+#top-bar .back-btn { background: none; border: none; color: var(--accent); font-size: 22px; cursor: pointer; padding: 4px; display: none; align-items: center; }
+#top-bar .back-btn.visible { display: flex; }
+#top-title { font-size: 16px; font-weight: 600; flex: 1; }
+#top-sub { font-size: 11px; color: var(--text3); }
+#top-badge { font-size: 10px; background: var(--bg3); color: var(--text2); padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+
+#main { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+#nav-bar { background: var(--bg2); border-top: 1px solid var(--border); display: flex; min-height: var(--nav-h); flex-shrink: 0; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; padding: 8px 4px; transition: opacity 0.15s; }
+.nav-item svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+.nav-item span { font-size: 10px; color: var(--text3); transition: color 0.15s; }
+.nav-item.active svg { stroke: var(--accent); }
+.nav-item.active span { color: var(--accent); }
+
+/* iPad layout */
+@media (min-width: 768px) {
+  #app { flex-direction: row; }
+  #nav-bar { flex-direction: column; width: 80px; min-height: unset; border-top: none; border-right: 1px solid var(--border); }
+  .nav-item { padding: 16px 8px; }
+  #top-bar { display: none; }
+  #ipad-sidebar-header { display: flex; flex-direction: column; align-items: center; padding: 20px 8px 12px; border-bottom: 1px solid var(--border); }
+  #ipad-sidebar-header h2 { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); margin-bottom: 8px; }
+  #left-panel { display: flex; flex-direction: column; }
+  #right-panel { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #main { display: flex; flex: 1; overflow: hidden; }
+  .mobile-header { display: none !important; }
+  .ipad-top { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+}
+@media (max-width: 767px) {
+  #ipad-sidebar-header { display: none; }
+  #left-panel, #right-panel { display: none !important; }
+  #right-panel.mobile-active { display: block !important; }
+}
+
+/* SCREENS */
+.screen { display: none; padding: 16px; }
+.screen.active { display: block; }
+@media (min-width: 768px) {
+  .screen { padding: 24px; }
+  #screen-home { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  #screen-home.active { display: grid; }
+  .home-col-right { display: flex; flex-direction: column; gap: 16px; }
+}
+
+/* SEMAFOROS */
+.semaforos { display: flex; gap: 10px; margin-bottom: 18px; }
+.sem-card { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 8px; text-align: center; cursor: pointer; transition: background 0.15s; }
+.sem-card:active { background: var(--card2); }
+.sem-emoji { font-size: 22px; }
+.sem-name { font-size: 11px; font-weight: 600; color: var(--text2); margin-top: 3px; letter-spacing: 0.5px; }
+.sem-kpi { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* AGENDA CEO */
+.agenda-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+.agenda-header { padding: 12px 14px 8px; border-bottom: 1px solid var(--border); }
+.agenda-header h3 { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
+.agenda-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.agenda-item:last-child { border-bottom: none; }
+.agenda-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.dot-blue { background: var(--accent); }
+.agenda-content { flex: 1; }
+.agenda-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+.agenda-meta { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* SECTION TITLE */
+.section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; margin-top: 20px; }
+.section-title:first-child { margin-top: 0; }
+
+/* KPI GRID */
+.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.kpi-val { font-size: 20px; font-weight: 600; line-height: 1; }
+.kpi-val.red { color: var(--red); }
+.kpi-val.yellow { color: var(--yellow); }
+.kpi-val.green { color: var(--green); }
+.kpi-val.neutral { color: var(--text); }
+.kpi-meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.kpi-tend { font-size: 11px; margin-top: 2px; }
+
+/* REPORTES LIST */
+.reportes-list { display: flex; flex-direction: column; gap: 8px; }
+.reporte-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; }
+.reporte-item:active { background: var(--card2); }
+.reporte-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.reporte-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.icon-red { background: var(--red-bg); color: var(--red); }
+.icon-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.icon-green { background: var(--green-bg); color: var(--green); }
+.icon-neutral { background: var(--bg3); color: var(--text2); }
+.reporte-info { flex: 1; }
+.reporte-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.reporte-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.reporte-arrow { color: var(--text3); font-size: 16px; }
+
+/* DETAIL SCREEN */
+.alert-banner { border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; }
+.alert-banner.red { background: var(--red-bg); border: 1px solid rgba(226,75,74,0.2); }
+.alert-banner.yellow { background: var(--yellow-bg); border: 1px solid rgba(239,159,39,0.2); }
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-text { font-size: 12px; line-height: 1.5; }
+.alert-banner.red .alert-text { color: #f8c1c1; }
+.alert-banner.yellow .alert-text { color: #fac775; }
+
+.tramos { display: flex; gap: 8px; margin-bottom: 16px; }
+.tramo { flex: 1; border-radius: 10px; padding: 10px 8px; text-align: center; }
+.tramo.green { background: var(--green-bg); border: 1px solid rgba(76,175,125,0.2); }
+.tramo.yellow { background: var(--yellow-bg); border: 1px solid rgba(239,159,39,0.2); }
+.tramo.red { background: var(--red-bg); border: 1px solid rgba(226,75,74,0.2); }
+.tramo-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.tramo.green .tramo-label { color: var(--green); }
+.tramo.yellow .tramo-label { color: var(--yellow); }
+.tramo.red .tramo-label { color: var(--red); }
+.tramo-val { font-size: 14px; font-weight: 600; margin-top: 4px; }
+.tramo.green .tramo-val { color: var(--green); }
+.tramo.yellow .tramo-val { color: var(--yellow); }
+.tramo.red .tramo-val { color: var(--red); }
+.tramo-sub { font-size: 9px; margin-top: 2px; opacity: 0.7; }
+.tramo.green .tramo-sub { color: var(--green); }
+.tramo.yellow .tramo-sub { color: var(--yellow); }
+.tramo.red .tramo-sub { color: var(--red); }
+
+.riesgo-list { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+.riesgo-row { display: flex; align-items: center; padding: 11px 14px; border-bottom: 1px solid var(--border); gap: 10px; }
+.riesgo-row:last-child { border-bottom: none; }
+.riesgo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.riesgo-info { flex: 1; min-width: 0; }
+.riesgo-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.riesgo-canal { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.riesgo-monto-val { font-size: 13px; font-weight: 600; color: var(--red); text-align: right; }
+.riesgo-monto-sub { font-size: 10px; color: var(--text3); text-align: right; }
+
+.tend-chart { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; }
+.tend-bars { display: flex; align-items: flex-end; gap: 6px; height: 50px; }
+.tend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.tend-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height 0.3s; }
+.tend-bar.green { background: var(--green); }
+.tend-bar.yellow { background: var(--yellow); }
+.tend-bar.red { background: var(--red); }
+.tend-pct { font-size: 9px; color: var(--text); font-weight: 500; }
+.tend-mes { font-size: 8px; color: var(--text3); }
+
+.decision-box { background: rgba(108,142,251,0.08); border: 1px solid rgba(108,142,251,0.2); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; }
+.decision-title { font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.decision-item { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 4px; padding-left: 12px; position: relative; }
+.decision-item::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+
+.png-btn { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; color: var(--text2); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; transition: background 0.15s; }
+.png-btn:active { background: var(--card2); }
+.ask-btn { width: 100%; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s; }
+.ask-btn:active { opacity: 0.85; }
+
+/* PNG VIEWER */
+#png-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; flex-direction: column; }
+#png-viewer.open { display: flex; }
+#png-viewer-bar { background: var(--bg2); padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+#png-viewer-bar button { background: none; border: none; color: var(--accent); font-size: 15px; cursor: pointer; padding: 4px 8px; }
+#png-viewer-title { flex: 1; font-size: 14px; font-weight: 500; }
+#png-viewer-img { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 16px; }
+#png-viewer-img img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* CHAT */
+#chat-fab { position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50; box-shadow: 0 4px 16px rgba(108,142,251,0.4); transition: transform 0.15s; }
+#chat-fab:active { transform: scale(0.93); }
+#chat-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@media (min-width: 768px) { #chat-fab { bottom: 20px; right: 20px; } }
+
+#chat-modal { position: fixed; inset: 0; z-index: 80; display: none; flex-direction: column; background: var(--bg); }
+#chat-modal.open { display: flex; }
+@media (min-width: 768px) {
+  #chat-modal { left: auto; right: 0; width: 400px; border-left: 1px solid var(--border); box-shadow: -4px 0 20px rgba(0,0,0,0.3); }
+}
+#chat-header { background: var(--bg2); padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+#chat-header h2 { flex: 1; font-size: 16px; font-weight: 600; }
+#chat-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
+#chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 85%; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.5; }
+.msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.msg.assistant { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+.msg.loading { opacity: 0.6; }
+#chat-input-area { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; gap: 10px; align-items: flex-end; }
+#chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 10px 16px; color: var(--text); font-size: 14px; resize: none; max-height: 100px; outline: none; font-family: inherit; }
+#chat-send { background: var(--accent); border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; }
+#chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+#chat-send svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+#api-setup { padding: 20px; background: var(--card); margin: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+#api-setup p { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
+#api-key-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; margin-bottom: 10px; font-family: monospace; outline: none; }
+#api-save-btn { background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+
+/* LOADING */
+#loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 200; }
+#loading-overlay h1 { font-size: 24px; font-weight: 700; }
+#loading-overlay p { font-size: 14px; color: var(--text2); }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* MISC */
+.holding-bar { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; display: flex; gap: 20px; }
+.holding-stat { flex: 1; text-align: center; }
+.holding-stat-val { font-size: 16px; font-weight: 600; color: var(--text); }
+.holding-stat-label { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.empresa-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+.empresa-sem { font-size: 24px; }
+.empresa-name { font-size: 16px; font-weight: 700; }
+.empresa-kpi { font-size: 12px; color: var(--text3); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <h1>Juanito Garcia</h1>
+  <p id="loading-msg">Cargando datos...</p>
+</div>
+
+<!-- TOP BAR (mobile) -->
+<div id="app" style="display:none">
+  <div id="top-bar">
+    <button class="back-btn" id="back-btn" onclick="goBack()">‹</button>
+    <div style="flex:1">
+      <div id="top-title">Juanito Garcia</div>
+      <div id="top-sub" style="font-size:11px;color:var(--text3)"></div>
+    </div>
+    <span id="top-badge"></span>
+  </div>
+
+  <div id="main">
+    <!-- NAV SIDEBAR (iPad) / BOTTOM NAV (mobile) -->
+    <div id="nav-bar">
+      <div id="ipad-sidebar-header">
+        <h2>JG</h2>
+      </div>
+      <div class="nav-item active" data-tab="home" onclick="showTab('home')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Inicio</span>
+      </div>
+      <div class="nav-item" data-tab="pauno" onclick="showTab('pauno')">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>PAUNO</span>
+      </div>
+      <div class="nav-item" data-tab="amauta" onclick="showTab('amauta')">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>AMAUTA</span>
+      </div>
+      <div class="nav-item" data-tab="neopack" onclick="showTab('neopack')">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        <span>NEOPACK</span>
+      </div>
+    </div>
+
+    <!-- SCREENS -->
+    <div id="screens-container" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch">
+
+      <!-- HOME -->
+      <div id="screen-home" class="screen active">
+        <div id="home-left">
+          <div class="semaforos" id="semaforos-row"></div>
+          <div class="holding-bar" id="holding-bar">
+            <div class="holding-stat"><div class="holding-stat-val" id="h-ventas">—</div><div class="holding-stat-label">Ventas holding</div></div>
+            <div class="holding-stat"><div class="holding-stat-val" id="h-mora">—</div><div class="holding-stat-label">Mora consolidada</div></div>
+          </div>
+          <div class="section-title">Agenda CEO — decidir hoy</div>
+          <div class="agenda-card" id="agenda-hoy"></div>
+          <div class="section-title">Escalar esta semana</div>
+          <div class="agenda-card" id="agenda-semana"></div>
+        </div>
+        <div class="home-col-right" id="home-right" style="display:none">
+          <div class="section-title">Monitorear</div>
+          <div class="agenda-card" id="agenda-monitorear"></div>
+        </div>
+      </div>
+
+      <!-- PAUNO -->
+      <div id="screen-pauno" class="screen">
+        <div id="pauno-content"></div>
+      </div>
+
+      <!-- AMAUTA -->
+      <div id="screen-amauta" class="screen">
+        <div id="amauta-content"></div>
+      </div>
+
+      <!-- NEOPACK -->
+      <div id="screen-neopack" class="screen">
+        <div id="neopack-content"></div>
+      </div>
+
+      <!-- DETAIL -->
+      <div id="screen-detail" class="screen">
+        <div id="detail-content"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PNG VIEWER -->
+<div id="png-viewer">
+  <div id="png-viewer-bar">
+    <button onclick="closePng()">✕ Cerrar</button>
+    <div id="png-viewer-title"></div>
+  </div>
+  <div id="png-viewer-img"><img id="png-img" src="" alt="Reporte"></div>
+</div>
+
+<!-- CHAT FAB -->
+<button id="chat-fab" onclick="openChat()">
+  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+
+<!-- CHAT MODAL -->
+<div id="chat-modal">
+  <div id="chat-header">
+    <div style="width:34px;height:34px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px">🤖</div>
+    <h2>Juanito Garcia</h2>
+    <button id="chat-close" onclick="closeChat()">✕</button>
+  </div>
+  <div id="chat-messages">
+    <div id="api-setup" style="display:none">
+      <p>Para usar el chat, ingresa tu Anthropic API Key. Se guarda solo en tu dispositivo.</p>
+      <input type="password" id="api-key-input" placeholder="sk-ant-...">
+      <button id="api-save-btn" onclick="saveApiKey()">Guardar y continuar</button>
+    </div>
+  </div>
+  <div id="chat-input-area">
+    <textarea id="chat-input" placeholder="Pregúntale a Juanito..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="chat-send" onclick="sendChat()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const BASE = '';
+let DATA = null;
+let currentTab = 'home';
+let navHistory = [];
+let apiKey = localStorage.getItem('jg_api_key') || '';
+
+const EMPRESA_LABELS = { PAUNO: 'PAUNO', AMAUTA: 'AMAUTA', NEOPACK: 'NEOPACK' };
+
+const REPORTES_CONFIG = {
+  PAUNO: [
+    { tipo: 'cuentas_por_cobrar',   label: 'CxC — Cuentas por cobrar',  archivo: '01_cuentas_por_cobrar.png',   icon: 'cxc' },
+    { tipo: 'cuentas_por_pagar',    label: 'CxP — Cuentas por pagar',   archivo: '02_cuentas_por_pagar.png',    icon: 'cxp' },
+    { tipo: 'margen_variable',      label: 'Margen variable',            archivo: '03_margen_variable.png',      icon: 'trend' },
+    { tipo: 'mermas',               label: 'Mermas por planta',          archivo: '04_mermas.png',               icon: 'activity' },
+    { tipo: 'compras',              label: 'Compras — ratio consumo',    archivo: '05_compras.png',              icon: 'shopping' },
+    { tipo: 'control_interno',      label: 'Control interno',            archivo: '07_control_interno.png',      icon: 'check' },
+    { tipo: 'sop_inventario',       label: 'S&OP — Inventario',          archivo: '10_sop_inventario.png',       icon: 'box' },
+    { tipo: 'fill_rate',            label: 'Fill Rate',                  archivo: '11_fill_rate.png',            icon: 'fill' },
+    { tipo: 'productividad',        label: 'Productividad',              archivo: '12_productividad.png',        icon: 'prod' },
+    { tipo: 'margen_variable_pag2', label: 'Avance ventas vs ppto',      archivo: '13_margen_variable_pag2.png', icon: 'target' },
+  ],
+  AMAUTA: [
+    { tipo: 'cuentas_por_cobrar', label: 'CxC — Cuentas por cobrar', archivo: '01_reporte_01.png', icon: 'cxc' },
+    { tipo: 'cuentas_por_pagar',  label: 'CxP — Cuentas por pagar',  archivo: '02_reporte_02.png', icon: 'cxp' },
+    { tipo: 'inventario',         label: 'Inventario',                archivo: '03_reporte_03.png', icon: 'box' },
+  ],
+  NEOPACK: [
+    { tipo: 'cuentas_por_cobrar', label: 'CxC — Cuentas por cobrar', archivo: '01_reporte_01.png', icon: 'cxc' },
+    { tipo: 'cuentas_por_pagar',  label: 'CxP — Cuentas por pagar',  archivo: '02_reporte_02.png', icon: 'cxp' },
+    { tipo: 'ventas',             label: 'Ventas vs presupuesto',     archivo: '03_reporte_03.png', icon: 'target' },
+  ],
+};
+
+const ICON_SVG = {
+  cxc:      '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+  cxp:      '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+  trend:    '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+  shopping: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>',
+  check:    '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  box:      '<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>',
+  fill:     '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+  prod:     '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  target:   '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+};
+
+function semColor(s) { return s === 'red' ? '🔴' : s === 'yellow' ? '🟡' : '🟢'; }
+function stateClass(s) { return s === 'red' ? 'red' : s === 'yellow' ? 'yellow' : s === 'green' ? 'green' : 'neutral'; }
+function dotClass(s) { return s === 'red' ? 'dot-red' : s === 'yellow' ? 'dot-yellow' : 'dot-blue'; }
+
+async function loadData() {
+  try {
+    document.getElementById('loading-msg').textContent = 'Cargando análisis...';
+    const r = await fetch('data/latest/summaries.json?t=' + Date.now());
+    if (!r.ok) throw new Error('No hay datos');
+    DATA = await r.json();
+    renderAll();
+    document.getElementById('loading-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  } catch(e) {
+    document.getElementById('loading-msg').textContent = 'Sin datos disponibles. El scraper corre a las 7am.';
+  }
+}
+
+function renderAll() {
+  renderHome();
+  renderEmpresa('PAUNO', 'pauno-content');
+  renderEmpresa('AMAUTA', 'amauta-content');
+  renderEmpresa('NEOPACK', 'neopack-content');
+  document.getElementById('top-sub').textContent = DATA.fecha + ' · ' + DATA.hora;
+}
+
+function renderHome() {
+  const sems = DATA.semaforos || {};
+  const razones = DATA.semaforo_razon || {};
+  document.getElementById('semaforos-row').innerHTML = Object.entries(sems).map(([emp, s]) =>
+    `<div class="sem-card" onclick="showTab('${emp.toLowerCase()}')">
+      <div class="sem-emoji">${semColor(s)}</div>
+      <div class="sem-name">${emp}</div>
+      <div class="sem-kpi">${razones[emp] || ''}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById('h-ventas').textContent = DATA.holding_ventas || '—';
+  document.getElementById('h-mora').textContent = DATA.holding_mora || '—';
+
+  const agenda = DATA.agenda_ceo || {};
+  renderAgendaSection('agenda-hoy', agenda.decidir_hoy || []);
+  renderAgendaSection('agenda-semana', agenda.escalar_semana || []);
+  renderAgendaSection('agenda-monitorear', agenda.monitorear || []);
+
+  // Show monitor on iPad
+  if (window.innerWidth >= 768) {
+    document.getElementById('home-right').style.display = 'flex';
+  }
+}
+
+function renderAgendaSection(id, items) {
+  const el = document.getElementById(id);
+  if (!items.length) { el.innerHTML = '<div class="agenda-item"><div class="agenda-content"><div class="agenda-text" style="color:var(--text3)">Sin alertas</div></div></div>'; return; }
+  el.innerHTML = items.map(item => `
+    <div class="agenda-item">
+      <div class="agenda-dot ${dotClass(item.estado || (id === 'agenda-hoy' ? 'red' : id === 'agenda-semana' ? 'yellow' : 'blue'))}"></div>
+      <div class="agenda-content">
+        <div class="agenda-text">${item.texto || item.text || ''}</div>
+        <div class="agenda-meta">${[item.empresa, item.responsable].filter(Boolean).join(' · ')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderEmpresa(empresa, containerId) {
+  const el = document.getElementById(containerId);
+  const empData = (DATA.empresas || {})[empresa] || {};
+  const semaforo = (DATA.semaforos || {})[empresa] || 'green';
+  const razon = (DATA.semaforo_razon || {})[empresa] || '';
+  const reportes = REPORTES_CONFIG[empresa] || [];
+
+  // Collect KPIs from all reports
+  const allKpis = [];
+  const reportesData = empData.reportes || {};
+  reportes.forEach(r => {
+    const rd = reportesData[r.tipo] || {};
+    (rd.kpis || []).slice(0, 1).forEach(k => allKpis.push(k));
+  });
+
+  el.innerHTML = `
+    <div class="empresa-header">
+      <div class="empresa-sem">${semColor(semaforo)}</div>
+      <div>
+        <div class="empresa-name">${empresa}</div>
+        <div class="empresa-kpi">${razon}</div>
+      </div>
+    </div>
+    ${allKpis.length ? `
+    <div class="section-title">KPIs principales</div>
+    <div class="kpi-grid">${allKpis.slice(0,6).map(k => `
+      <div class="kpi-card">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-val ${stateClass(k.estado)}">${k.valor || '—'}</div>
+        <div class="kpi-meta">${[k.meta ? 'meta ' + k.meta : '', k.tendencia || ''].filter(Boolean).join(' · ')}</div>
+      </div>`).join('')}
+    </div>` : ''}
+    <div class="section-title">Reportes — toca para ver análisis</div>
+    <div class="reportes-list">${reportes.map(r => {
+      const rd = reportesData[r.tipo] || {};
+      const estado = rd.estado || 'neutral';
+      return `<div class="reporte-item" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}')">
+        <div class="reporte-icon icon-${estado === 'neutral' ? 'neutral' : estado}">
+          <svg viewBox="0 0 24 24">${ICON_SVG[r.icon] || ICON_SVG.check}</svg>
+        </div>
+        <div class="reporte-info">
+          <div class="reporte-name">${r.label}</div>
+          <div class="reporte-sub">${rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].valor + ' ' + (rd.kpis[0].meta ? '(meta ' + rd.kpis[0].meta + ')' : '') : 'Toca para ver')}</div>
+        </div>
+        <div class="reporte-arrow">›</div>
+      </div>`;
+    }).join('')}
+    </div>`;
+}
+
+function showDetail(empresa, tipo, label, archivo) {
+  navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab });
+
+  const empData = (DATA.empresas || {})[empresa] || {};
+  const rd = (empData.reportes || {})[tipo] || {};
+
+  let html = '';
+
+  // Alert banner
+  if (rd.alerta) {
+    const ac = rd.estado === 'red' ? 'red' : 'yellow';
+    html += `<div class="alert-banner ${ac}"><div class="alert-icon">${ac === 'red' ? '⚠️' : '⚡'}</div><div class="alert-text">${rd.alerta}</div></div>`;
+  }
+
+  // KPIs
+  if (rd.kpis?.length) {
+    html += `<div class="section-title">Indicadores clave</div><div class="kpi-grid">${rd.kpis.map(k => `
+      <div class="kpi-card">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-val ${stateClass(k.estado)}">${k.valor || '—'}</div>
+        <div class="kpi-meta">${[k.meta ? 'meta ' + k.meta : '', k.tendencia || ''].filter(Boolean).join(' · ')}</div>
+      </div>`).join('')}</div>`;
+  }
+
+  // Tramos
+  if (rd.tramos?.length) {
+    html += `<div class="section-title">Distribución de cartera</div><div class="tramos">${rd.tramos.map(t => `
+      <div class="tramo ${t.estado}">
+        <div class="tramo-label">${t.label}</div>
+        <div class="tramo-val">${t.valor}</div>
+        <div class="tramo-sub">${t.pct || ''}</div>
+      </div>`).join('')}</div>`;
+  }
+
+  // Riesgos / ranking
+  const risks = rd.riesgos || rd.proveedores_criticos || rd.por_gerente || [];
+  if (risks.length) {
+    const isGerentes = !!rd.por_gerente;
+    html += `<div class="section-title">${isGerentes ? 'Cumplimiento por gerente' : 'Mayor riesgo'}</div>
+    <div class="riesgo-list">${risks.slice(0,4).map(r => `
+      <div class="riesgo-row">
+        <div class="riesgo-dot ${dotClass(r.estado)}"></div>
+        <div class="riesgo-info">
+          <div class="riesgo-name">${r.nombre || r.name || ''}</div>
+          <div class="riesgo-canal">${r.canal || r.categoria || r.categoria || ''}</div>
+        </div>
+        <div>
+          <div class="riesgo-monto-val">${r.vencido30 || r.monto || r.pct || ''}</div>
+          <div class="riesgo-monto-sub">${r.total || ''}</div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+
+  // Por UEN / canal / marca
+  const breakdown = rd.por_uen || rd.por_canal || rd.por_marca || rd.por_categoria || rd.clasificacion || [];
+  if (breakdown.length) {
+    const bKey = Object.keys(breakdown[0]).find(k => !['estado','monto','pct','avance','real','ratio','interpretacion'].includes(k));
+    html += `<div class="section-title">Desglose</div><div class="kpi-grid">${breakdown.map(b => {
+      const val = b.margen || b.avance || b.ratio || b.pct || '';
+      const label2 = b[bKey] || '';
+      const sub = b.monto || b.real || b.interpretacion || '';
+      return `<div class="kpi-card">
+        <div class="kpi-label">${label2}</div>
+        <div class="kpi-val ${stateClass(b.estado)}">${val}</div>
+        <div class="kpi-meta">${sub}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  // Tendencia
+  const tendData = rd.tendencia_mora || rd.tendencia || rd.tendencia_ate || rd.tendencia_dias || rd.tendencia_margen || rd.tendencia_ratio || [];
+  if (tendData.length > 1) {
+    const vals = tendData.map(t => t.pct || t.val || t.dias || t.ratio || 0);
+    const maxV = Math.max(...vals) || 1;
+    html += `<div class="section-title">Tendencia</div>
+    <div class="tend-chart"><div class="tend-bars">${tendData.map((t,i) => {
+      const v = vals[i];
+      const h = Math.max(4, Math.round((v / maxV) * 46));
+      const cls = v > (maxV * 0.8) ? 'red' : v > (maxV * 0.5) ? 'yellow' : 'green';
+      return `<div class="tend-col">
+        <div class="tend-pct">${typeof v === 'number' ? v.toFixed(v < 10 ? 1 : 0) : v}${t.pct !== undefined ? '%' : ''}</div>
+        <div class="tend-bar ${cls}" style="height:${h}px"></div>
+        <div class="tend-mes">${t.mes || ''}</div>
+      </div>`;
+    }).join('')}</div></div>`;
+  }
+
+  // Acciones
+  if (rd.acciones?.length) {
+    html += `<div class="decision-box"><div class="decision-title">Qué hacer con esto</div>${rd.acciones.map(a => `<div class="decision-item">${a}</div>`).join('')}</div>`;
+  }
+
+  // Ver PNG original
+  html += `<button class="png-btn" onclick="openPng('data/latest/${empresa}/${archivo}','${label}')">
+    <svg viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--text2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    Ver reporte Power BI original
+  </button>`;
+
+  html += `<button class="ask-btn" onclick="openChatWith('${empresa}','${tipo}','${label}')">
+    💬 Preguntarle a Juanito sobre esto
+  </button>`;
+
+  document.getElementById('detail-content').innerHTML = html;
+  document.getElementById('top-title').textContent = label;
+  document.getElementById('top-badge').textContent = empresa;
+  document.getElementById('back-btn').classList.add('visible');
+
+  // Show detail screen
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-detail').classList.add('active');
+}
+
+function goBack() {
+  if (!navHistory.length) { showTab(currentTab); return; }
+  const prev = navHistory.pop();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(prev.screen).classList.add('active');
+  document.getElementById('top-title').textContent = prev.tab === 'home' ? 'Juanito Garcia' : prev.tab.toUpperCase();
+  document.getElementById('top-badge').textContent = DATA.fecha || '';
+  if (!navHistory.length) document.getElementById('back-btn').classList.remove('visible');
+}
+
+function showTab(tab) {
+  navHistory = [];
+  currentTab = tab;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.tab === tab);
+  });
+  document.getElementById('top-title').textContent = tab === 'home' ? 'Juanito Garcia' : tab.toUpperCase();
+  document.getElementById('top-badge').textContent = DATA?.fecha || '';
+  document.getElementById('back-btn').classList.remove('visible');
+}
+
+function openPng(src, title) {
+  document.getElementById('png-viewer-title').textContent = title;
+  document.getElementById('png-img').src = src;
+  document.getElementById('png-viewer').classList.add('open');
+}
+function closePng() { document.getElementById('png-viewer').classList.remove('open'); }
+
+// CHAT
+function openChat() { document.getElementById('chat-modal').classList.add('open'); checkApiKey(); }
+function closeChat() { document.getElementById('chat-modal').classList.remove('open'); }
+
+function openChatWith(empresa, tipo, label) {
+  openChat();
+  setTimeout(() => {
+    document.getElementById('chat-input').value = `Juanito, dame más detalle sobre ${label} de ${empresa}.`;
+    document.getElementById('chat-input').focus();
+  }, 300);
+}
+
+function checkApiKey() {
+  const setup = document.getElementById('api-setup');
+  setup.style.display = apiKey ? 'none' : 'block';
+  if (apiKey && document.getElementById('chat-messages').children.length <= 1) {
+    addMsg('assistant', `Hola. Soy Juanito Garcia. Tengo los datos del ${DATA?.fecha || 'día de hoy'}. ¿Sobre qué empresa o KPI quieres profundizar?`);
+  }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-')) { alert('API key inválida — debe comenzar con sk-'); return; }
+  apiKey = val;
+  localStorage.setItem('jg_api_key', val);
+  document.getElementById('api-setup').style.display = 'none';
+  addMsg('assistant', `Hola. Soy Juanito Garcia. Tengo los datos del ${DATA?.fecha || 'día de hoy'}. ¿Sobre qué empresa o KPI quieres profundizar?`);
+}
+
+function addMsg(role, text) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.textContent = text;
+  const msgs = document.getElementById('chat-messages');
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+  return el;
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+async function sendChat() {
+  if (!apiKey) { openChat(); return; }
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  addMsg('user', text);
+  const send = document.getElementById('chat-send');
+  send.disabled = true;
+  const loadingEl = addMsg('assistant', '...');
+  loadingEl.classList.add('loading');
+
+  try {
+    // Build context from summaries
+    const ctx = JSON.stringify(DATA, null, 2).slice(0, 8000);
+    const systemPrompt = `Eres Juanito Garcia, analista de Control Interno de un holding con 3 empresas: PAUNO, AMAUTA y NEOPACK.
+Fecha de los datos: ${DATA?.fecha} ${DATA?.hora}.
+Responde en español, de forma directa y con números exactos del contexto.
+Si el usuario pregunta sobre algo no disponible en los datos, dilo claramente.
+Nunca inventes números. Sé conciso pero preciso.
+
+DATOS DEL DÍA:
+${ctx}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-calls': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    loadingEl.textContent = data.content[0].text;
+    loadingEl.classList.remove('loading');
+  } catch(e) {
+    loadingEl.textContent = 'Error: ' + e.message;
+    loadingEl.classList.remove('loading');
+  }
+  send.disabled = false;
+}
+
+loadData();
+</script>
+</body>
+</html>
