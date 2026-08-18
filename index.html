@@ -420,16 +420,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .tend-trend-text.bad  { color: var(--red); }
 .tend-trend-text.good { color: var(--green); }
 .tend-trend-text.flat { color: var(--text2); }
-.tend-bars { display: flex; align-items: flex-end; gap: 5px; height: 72px; }
-.tend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+/* Scroll horizontal cuando hay muchas barras */
+.tend-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+.tend-scroll::-webkit-scrollbar { height: 3px; }
+.tend-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.tend-bars { display: flex; align-items: flex-end; gap: 6px; height: 72px; }
+/* Cada columna tiene ancho mínimo para que las etiquetas sean legibles */
+.tend-col { flex-shrink: 0; width: 36px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .tend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; }
 .tend-bar.red    { background: var(--red-light); }
 .tend-bar.yellow { background: var(--yellow-light); }
 .tend-bar.green  { background: var(--green-light); }
-.tend-bar.current { box-shadow: 0 0 0 2px rgba(0,0,0,0.15); }
-.tend-val { font-size: 10px; font-weight: 600; color: var(--text); }
-.tend-val.current { font-size: 11px; font-weight: 800; }
-.tend-mes { font-size: 8px; color: var(--text3); }
+.tend-bar.current { box-shadow: 0 0 0 2px rgba(0,0,0,0.18); }
+.tend-val { font-size: 9px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.tend-val.current { font-size: 10px; font-weight: 800; }
+.tend-mes { font-size: 8px; color: var(--text3); white-space: nowrap; }
 .tend-meta-line { margin-top: 10px; display: flex; align-items: center; gap: 6px; }
 .tend-meta-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg3); border: 2px dashed var(--text3); flex-shrink: 0; }
 .tend-meta-text { font-size: 10px; color: var(--text3); }
@@ -1009,7 +1014,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
         <div class="tend-chart-label">${tendData.length} periodos</div>
         <div class="tend-trend-text ${going}">${goingText}</div>
       </div>
-      <div class="tend-bars">${tendData.map((t,i) => {
+      <div class="tend-scroll"><div class="tend-bars">${tendData.map((t,i) => {
         const v = vals[i];
         const h = Math.max(6, Math.round(((v - minV) / (maxV - minV || 1)) * 66));
         const isLast = i === tendData.length - 1;
@@ -1023,7 +1028,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
           <div class="tend-bar ${barCls}${isLast ? ' current' : ''}" style="height:${h}px"></div>
           <div class="tend-mes">${t.mes || ''}</div>
         </div>`;
-      }).join('')}</div>
+      }).join('')}</div></div>
       ${rd.kpis?.[0]?.meta ? `<div class="tend-meta-line"><div class="tend-meta-dot"></div><div class="tend-meta-text">Meta: ${rd.kpis[0].meta}</div></div>` : ''}
     </div>`;
   }
