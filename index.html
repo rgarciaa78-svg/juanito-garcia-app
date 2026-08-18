@@ -861,6 +861,38 @@ function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
   </div>`;
 }
 
+// KPI card en vista de detalle — clickeable para abrir chat con análisis profundo
+function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
+  const cls = sc(k.estado);
+  const { arrow, cls: tCls } = trendArrow(k.tendencia, k.label);
+  const pregunta = `En el reporte "${reporteLabel}" de ${empresa}, explícame el indicador "${k.label}" que está en ${k.valor}${k.meta ? ` (meta ${k.meta})` : ''}. ¿Qué significa este valor, por qué está en ese nivel y qué debería hacer?`;
+
+  let progressHtml = '';
+  if (k.valor && k.meta) {
+    const valN  = parseFloat((k.valor||'').replace(/[^0-9.]/g,''));
+    const metaN = parseFloat((k.meta ||'').replace(/[^0-9.]/g,''));
+    if (!isNaN(valN) && !isNaN(metaN) && metaN > 0) {
+      const pct = Math.min(100, Math.round((valN / metaN) * 100));
+      progressHtml = `<div class="kpi-progress">
+        <div class="kpi-progress-track"><div class="kpi-progress-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="kpi-progress-meta">Meta: ${k.meta} · ${pct}% alcanzado</div>
+      </div>`;
+    }
+  }
+
+  // Escapar la pregunta para uso en onclick
+  const pregEsc = pregunta.replace(/'/g, "\\'").replace(/\n/g, ' ');
+
+  return `<div class="kpi-card ${cls} kpi-card-link" onclick="openChatWithMsg('${pregEsc}')">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+    ${k.tendencia ? `<div class="kpi-trend-row"><span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span></div>` : ''}
+    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
+    ${progressHtml}
+    <div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600">💬 Preguntarle a Juanito →</div>
+  </div>`;
+}
+
 function showDetail(empresa, tipo, label, archivo, desc) {
   navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab });
   const empData = (DATA.empresas || {})[empresa] || {};
@@ -884,10 +916,10 @@ function showDetail(empresa, tipo, label, archivo, desc) {
     </div>`;
   }
 
-  // KPIs — con contexto del reporte para que "Ratio Agosto 2026" tenga sentido
+  // KPIs — clickeables para abrir chat con análisis de ese KPI
   if (rd.kpis?.length) {
-    html += `<div class="section-header"><div class="section-header-title">Indicadores clave</div><div class="section-header-line"></div></div>
-    <div class="kpi-grid">${rd.kpis.map(k => renderKpiCard(k, null)).join('')}</div>`;
+    html += `<div class="section-header"><div class="section-header-title">Indicadores clave <span style="font-weight:400;opacity:.6;font-size:9px;text-transform:none;letter-spacing:0">— toca para profundizar</span></div><div class="section-header-line"></div></div>
+    <div class="kpi-grid">${rd.kpis.map(k => renderKpiCardDetail(k, empresa, label, desc)).join('')}</div>`;
   }
 
   // Tramos de cartera
@@ -1059,6 +1091,21 @@ function openChatWith(empresa, tipo, label) {
   setTimeout(() => {
     document.getElementById('chat-input').value = `Juanito, dame más detalle sobre ${label} de ${empresa}.`;
     document.getElementById('chat-input').focus();
+  }, 300);
+}
+
+// Abre el chat con un mensaje ya listo — desde KPI cards de detalle
+function openChatWithMsg(pregunta) {
+  openChat();
+  setTimeout(() => {
+    const input = document.getElementById('chat-input');
+    input.value = pregunta;
+    autoResize(input);
+    input.focus();
+    // Auto-enviar si ya hay API key
+    if (apiKey) {
+      setTimeout(() => sendChat(), 200);
+    }
   }, 300);
 }
 
