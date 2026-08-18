@@ -353,6 +353,110 @@ def generar_reporte(empresa: str, archivo: str, tipo: str, data_dir: Path) -> di
     return llamar_api(content, max_tokens=1200)
 
 
+PREGUNTAS_CEO = [
+    "¿Cuál es la situación general del holding hoy? ¿Hay algo crítico que deba atender?",
+    "¿Cómo están las ventas de PAUNO este mes versus el presupuesto?",
+    "¿Cuál es el estado de la mora en PAUNO y AMAUTA?",
+    "¿Cómo está el margen variable de PAUNO? ¿Está por encima o por debajo de la meta del 52%?",
+    "¿Cuál es la situación de cuentas por pagar? ¿Tenemos proveedores críticos que presionen el flujo?",
+    "¿Cómo están las mermas en planta? ¿Alguna planta está fuera de meta?",
+    "¿Cuál es el ratio de compras de PAUNO? ¿Estamos jalando inventario o sobre-comprando?",
+    "¿Cómo está el fill rate? ¿Estamos cumpliendo con los pedidos de los clientes?",
+    "¿Cuál es la situación del inventario? ¿Tenemos dead stock elevado?",
+    "¿Cómo está el control interno? ¿Hay gerentes con cumplimiento bajo?",
+    "¿Qué debo decidir hoy como CEO? Dame las 3 acciones más urgentes.",
+    "¿Cómo está AMAUTA en general? ¿Hay alertas?",
+    "¿Cómo está NEOPACK? ¿Cómo van sus ventas?",
+    "¿Cuál empresa del holding tiene la situación más crítica hoy?",
+    "¿Cómo está la productividad de PAUNO comparada con el año pasado?",
+]
+
+
+def llamar_api_texto(mensaje_sistema: str, mensaje_usuario: str, max_tokens: int = 400) -> str:
+    body = json.dumps(
+        {
+            "model": "claude-haiku-4-5-20251001",
+            "max_tokens": max_tokens,
+            "system": mensaje_sistema,
+            "messages": [{"role": "user", "content": mensaje_usuario}],
+        },
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+    api_key = ANTHROPIC_API_KEY.encode("ascii", errors="ignore").decode("ascii")
+
+    for intento in range(2):
+        try:
+            conn = http.client.HTTPSConnection("api.anthropic.com", timeout=60)
+            conn.request(
+                "POST",
+                "/v1/messages",
+                body=body,
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                    "content-length": str(len(body)),
+                },
+            )
+            resp = conn.getresponse()
+            raw = resp.read().decode("utf-8")
+            conn.close()
+            if resp.status != 200:
+                raise Exception(f"HTTP {resp.status}: {raw[:200]}")
+            data = json.loads(raw)
+            return data["content"][0]["text"].strip()
+        except Exception as e:
+            print(f"  Error chat intento {intento + 1}: {e}")
+    return ""
+
+
+def generar_chat_qa(resultado: dict) -> list:
+    print("\nGenerando respuestas pre-cargadas para el chat...")
+
+    ctx_parts = []
+    ctx_parts.append(f"Fecha: {resultado.get('fecha', '')}")
+    ctx_parts.append(f"Holding ventas: {resultado.get('holding_ventas', '')}")
+    ctx_parts.append(f"Holding mora: {resultado.get('holding_mora', '')}")
+
+    sem = resultado.get("semaforos", {})
+    razones = resultado.get("semaforo_razon", {})
+    for emp in ["PAUNO", "AMAUTA", "NEOPACK"]:
+        ctx_parts.append(f"{emp}: semaforo={sem.get(emp, '?')}, razon={razones.get(emp, '')}")
+
+    agenda = resultado.get("agenda_ceo", {})
+    for bloque, items in agenda.items():
+        for it in items:
+            ctx_parts.append(f"Agenda/{bloque}: {it.get('texto', '')} ({it.get('empresa', '')})")
+
+    for empresa, emp_data in resultado.get("empresas", {}).items():
+        for tipo, rd in emp_data.get("reportes", {}).items():
+            if not rd:
+                continue
+            for kpi in rd.get("kpis", [])[:3]:
+                ctx_parts.append(f"{empresa}/{tipo}: {kpi.get('label')}={kpi.get('valor')} meta={kpi.get('meta')} estado={kpi.get('estado')}")
+            if rd.get("alerta"):
+                ctx_parts.append(f"{empresa}/{tipo} ALERTA: {rd['alerta']}")
+
+    contexto = "\n".join(ctx_parts)
+    sistema = (
+        "Eres Juanito Garcia, analista de Control de Gestion del holding PAUNO/AMAUTA/NEOPACK. "
+        "Responde en espanol, directo y claro, con cifras exactas del contexto. "
+        "Maximo 150 palabras. Usa puntos para listas. "
+        "DATOS ACTUALES:\n" + contexto
+    )
+
+    qa_list = []
+    for pregunta in PREGUNTAS_CEO:
+        print(f"  Respondiendo: {pregunta[:60]}...")
+        respuesta = llamar_api_texto(sistema, pregunta, max_tokens=350)
+        if respuesta:
+            qa_list.append({"pregunta": pregunta, "respuesta": respuesta})
+
+    print(f"  {len(qa_list)} respuestas generadas.")
+    return qa_list
+
+
 def main():
     if not ANTHROPIC_API_KEY:
         print("ERROR: ANTHROPIC_API_KEY no configurada")
@@ -373,6 +477,8 @@ def main():
         "generado_en": datetime.now().isoformat(),
         "empresas": empresas_data,
     }
+
+    resultado["chat_qa"] = generar_chat_qa(resultado)
 
     out = DATA_DIR / "summaries.json"
     out.write_bytes(json.dumps(resultado, ensure_ascii=False, indent=2).encode("utf-8"))
