@@ -1142,47 +1142,81 @@ async function sendChat() {
   loadEl.classList.add('loading');
 
   try {
-    const ctx = JSON.stringify(DATA, null, 2).slice(0, 12000);
-    const sistema = `Eres Juanito Garcia, el analista de Control de Gestión del holding. Tienes acceso a los datos reales del día extraídos de Power BI.
+    // Contexto compacto para no sobrecargar el request en mobile
+    const ctx = construirContexto();
 
-HOLDING: 3 empresas — PAUNO (alimentos), AMAUTA (distribución), NEOPACK (empaques).
-FECHA DE LOS DATOS: ${DATA.fecha} ${DATA.hora}.
+    const sistema = `Eres Juanito Garcia, analista de Control de Gestión. El usuario es el CEO/GG del holding.
+HOLDING: PAUNO (alimentos), AMAUTA (distribución), NEOPACK (empaques). Fecha: ${DATA.fecha}.
+Responde en español, directo, con cifras exactas. Nunca inventes números. Máximo 180 palabras. Usa • para listas.
+DATOS: ${ctx}`;
 
-INSTRUCCIONES:
-- Responde en español, directo y ejecutivo. El usuario es el CEO/GG.
-- Usa los datos del JSON para dar cifras exactas. Nunca inventes números.
-- Sé conciso pero completo. Si hay un problema, dilo claro con el número y la consecuencia.
-- Si hay acciones recomendadas en los datos, menciona las más importantes.
-- Usa viñetas (•) para listas. Máximo 200 palabras salvo que pidan más detalle.
-
-DATOS DEL DÍA:
-${ctx}`;
+    const body = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 600,
+      system: sistema,
+      messages: [{ role: 'user', content: text }]
+    });
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
       headers: {
         'x-api-key': _K,
         'anthropic-version': '2023-06-01',
         'content-type': 'application/json',
         'anthropic-dangerous-direct-browser-calls': 'true'
       },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 800,
-        system: sistema,
-        messages: [{ role: 'user', content: text }]
-      })
+      body: body
     });
 
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
+    }
     const data = await resp.json();
-    if (data.error) throw new Error(data.error.message);
     loadEl.innerHTML = data.content[0].text.replace(/\n/g, '<br>');
     loadEl.classList.remove('loading');
   } catch(e) {
-    loadEl.textContent = 'Error al conectar: ' + e.message;
+    loadEl.textContent = 'Error: ' + e.message;
     loadEl.classList.remove('loading');
   }
   send.disabled = false;
+}
+
+// Contexto compacto — solo datos clave, sin tendencias históricas largas
+function construirContexto() {
+  const d = DATA;
+  const obj = {
+    fecha: d.fecha,
+    semaforos: d.semaforos,
+    semaforo_razon: d.semaforo_razon,
+    holding_ventas: d.holding_ventas,
+    holding_mora: d.holding_mora,
+    agenda_ceo: d.agenda_ceo,
+    empresas: {}
+  };
+  // Por cada empresa: solo alertas + KPIs (sin tendencia histórica)
+  Object.entries(d.empresas || {}).forEach(([emp, ed]) => {
+    obj.empresas[emp] = { reportes: {} };
+    Object.entries(ed.reportes || {}).forEach(([tipo, rd]) => {
+      obj.empresas[emp].reportes[tipo] = {
+        estado: rd.estado,
+        alerta: rd.alerta,
+        kpis: rd.kpis,
+        acciones: (rd.acciones || []).slice(0, 3),
+        riesgos: (rd.riesgos || []).slice(0, 3),
+        proveedores_criticos: (rd.proveedores_criticos || []).slice(0, 3),
+        tramos: rd.tramos,
+        por_gerente: rd.por_gerente,
+        por_uen: rd.por_uen,
+        por_canal: rd.por_canal,
+        por_categoria: rd.por_categoria
+        // excluimos tendencia_* para reducir tamaño
+      };
+    });
+  });
+  return JSON.stringify(obj);
 }
 
 loadData();
