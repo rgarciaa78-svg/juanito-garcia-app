@@ -8,13 +8,12 @@ import os
 import sys
 import json
 import base64
-import requests
+import http.client
 from pathlib import Path
 from datetime import datetime
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 DATA_DIR = Path("data/latest")
-API_URL = "https://api.anthropic.com/v1/messages"
 
 REPORTES = {
     "PAUNO": [
@@ -285,22 +284,35 @@ def img_b64(path: Path) -> str:
 
 
 def llamar_api(content: list, max_tokens: int = 1500) -> dict:
-    headers = {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-    }
     body = json.dumps(
         {"model": "claude-sonnet-4-5", "max_tokens": max_tokens,
          "messages": [{"role": "user", "content": content}]},
         ensure_ascii=True,
     ).encode("ascii")
 
+    api_key = ANTHROPIC_API_KEY.encode("ascii", errors="ignore").decode("ascii")
+
     for intento in range(3):
         try:
-            resp = requests.post(API_URL, headers=headers, data=body, timeout=120)
-            resp.raise_for_status()
-            texto = resp.json()["content"][0]["text"].strip()
+            conn = http.client.HTTPSConnection("api.anthropic.com", timeout=120)
+            conn.request(
+                "POST",
+                "/v1/messages",
+                body=body,
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                    "content-length": str(len(body)),
+                },
+            )
+            resp = conn.getresponse()
+            raw = resp.read().decode("utf-8")
+            conn.close()
+            if resp.status != 200:
+                raise Exception(f"HTTP {resp.status}: {raw[:200]}")
+            data = json.loads(raw)
+            texto = data["content"][0]["text"].strip()
             if texto.startswith("```"):
                 texto = texto.split("```")[1]
                 if texto.startswith("json"):
