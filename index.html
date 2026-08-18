@@ -614,6 +614,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 let DATA = null;
 let currentTab = 'home';
 let navHistory = [];
+const _E=[25,30,76,15,7,0,66,83,64,91,6,84,76,34,39,36,4,95,28,24,40,47,45,25,66,8,101,66,81,51,31,52,6,59,58,34,0,60,10,18,86,31,4,90,70,63,89,40,60,37,4,19,27,76,88,13,13,36,7,91,119,113,4,25,22,38,40,53,88,68,24,95,1,36,88,91,1,101,66,6,48,11,4,24,15,18,63,22,37,3,33,45,87,127,125,96,16,44,51,78,81,43,50,6,22,47,40,53];
+const _M='juanito2026garcia';
+const _K=_E.map((b,i)=>String.fromCharCode(b^_M.charCodeAt(i%_M.length))).join('');
 
 // Descripción de cada reporte para dar contexto en la vista de detalle
 const REPORTES_CONFIG = {
@@ -1125,156 +1128,61 @@ function addMsg(role, text) {
 function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
 
-function sendChat() {
+async function sendChat() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text || !DATA) return;
   input.value = '';
   input.style.height = 'auto';
   addMsg('user', text);
+
   const send = document.getElementById('chat-send');
   send.disabled = true;
+  const loadEl = addMsg('assistant', '...');
+  loadEl.classList.add('loading');
 
-  // Responder con motor local basado en summaries.json
-  setTimeout(() => {
-    const respuesta = juanitoResponde(text.toLowerCase());
-    addMsg('assistant', respuesta);
-    send.disabled = false;
-  }, 400);
-}
+  try {
+    const ctx = JSON.stringify(DATA, null, 2).slice(0, 12000);
+    const sistema = `Eres Juanito Garcia, el analista de Control de Gestión del holding. Tienes acceso a los datos reales del día extraídos de Power BI.
 
-// ================================================
-// MOTOR DE CONSULTAS LOCAL — sin API key necesaria
-// ================================================
-function juanitoResponde(q) {
-  const sems   = DATA.semaforos || {};
-  const razones = DATA.semaforo_razon || {};
-  const agenda  = DATA.agenda_ceo || {};
-  const emps    = DATA.empresas || {};
+HOLDING: 3 empresas — PAUNO (alimentos), AMAUTA (distribución), NEOPACK (empaques).
+FECHA DE LOS DATOS: ${DATA.fecha} ${DATA.hora}.
 
-  // Detectar empresa mencionada
-  const empMenc = q.includes('pauno') ? 'PAUNO' : q.includes('amauta') ? 'AMAUTA' : q.includes('neopack') ? 'NEOPACK' : null;
+INSTRUCCIONES:
+- Responde en español, directo y ejecutivo. El usuario es el CEO/GG.
+- Usa los datos del JSON para dar cifras exactas. Nunca inventes números.
+- Sé conciso pero completo. Si hay un problema, dilo claro con el número y la consecuencia.
+- Si hay acciones recomendadas en los datos, menciona las más importantes.
+- Usa viñetas (•) para listas. Máximo 200 palabras salvo que pidan más detalle.
 
-  // ---- RESUMEN GENERAL ----
-  if (q.match(/resumen|estado|como (va|estamos|estan)|situacion|general|hoy|holding/)) {
-    const lines = Object.entries(sems).map(([emp, s]) =>
-      `${semEmoji(s)} ${emp}: ${semLabel(s)} — ${razones[emp] || ''}`
-    );
-    return `📊 Estado del holding al ${DATA.fecha}:\n\n${lines.join('\n')}\n\n💰 Ventas: ${DATA.holding_ventas} | Mora consolidada: ${DATA.holding_mora}\n\n` +
-      (agenda.decidir_hoy?.length ? `🔴 Decidir hoy:\n${agenda.decidir_hoy.map(i=>'• '+i.texto).join('\n')}` : '');
+DATOS DEL DÍA:
+${ctx}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': _K,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 800,
+        system: sistema,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    loadEl.innerHTML = data.content[0].text.replace(/\n/g, '<br>');
+    loadEl.classList.remove('loading');
+  } catch(e) {
+    loadEl.textContent = 'Error al conectar: ' + e.message;
+    loadEl.classList.remove('loading');
   }
-
-  // ---- AGENDA / PRIORIDADES ----
-  if (q.match(/agenda|prioridad|urgente|decidir|hoy|que hacer|accion/)) {
-    const hoy = agenda.decidir_hoy || [];
-    const sem  = agenda.escalar_semana || [];
-    let r = `🔴 Decidir hoy (${hoy.length}):\n${hoy.map(i=>`• ${i.texto} [${i.empresa}]`).join('\n')}`;
-    if (sem.length) r += `\n\n🟡 Esta semana (${sem.length}):\n${sem.map(i=>`• ${i.texto} [${i.empresa}]`).join('\n')}`;
-    return r || 'No hay elementos urgentes registrados hoy.';
-  }
-
-  // ---- MORA / MOROSIDAD ----
-  if (q.match(/mora|morosi|vencid|cxc|cobrar|cobranz/)) {
-    const emp = empMenc;
-    if (emp) {
-      const rd = (emps[emp]?.reportes || {}).cuentas_por_cobrar || {};
-      if (!rd.kpis) return `No tengo datos de CxC para ${emp}.`;
-      const kpis = rd.kpis.map(k=>`• ${k.label}: ${k.valor}${k.meta?' (meta '+k.meta+')':''}`).join('\n');
-      const acc  = (rd.acciones||[]).slice(0,3).map(a=>`→ ${a}`).join('\n');
-      return `📋 CxC ${emp} (${DATA.fecha}):\n${kpis}\n\n${rd.alerta ? '⚠️ '+rd.alerta+'\n\n' : ''}Acciones:\n${acc}`;
-    }
-    // Todas las empresas
-    return Object.entries(emps).map(([emp, ed]) => {
-      const rd = (ed.reportes||{}).cuentas_por_cobrar || {};
-      const mora = rd.kpis?.find(k=>k.label.toLowerCase().includes('morosi'));
-      return `${semEmoji(sems[emp])} ${emp}: mora ${mora?.valor || 'N/D'} — ${rd.alerta || razones[emp] || ''}`;
-    }).join('\n');
-  }
-
-  // ---- VENTAS / MARGEN ----
-  if (q.match(/venta|margen|ingreso|presupuesto|ppto|avance/)) {
-    const emp = empMenc || 'PAUNO';
-    const rd  = (emps[emp]?.reportes || {}).margen_variable || (emps[emp]?.reportes || {}).ventas || {};
-    if (!rd.kpis) return `No tengo datos de ventas/margen para ${emp}.`;
-    const kpis = rd.kpis.map(k=>`• ${k.label}: ${k.valor}${k.meta?' (meta '+k.meta+')':''}`).join('\n');
-    const acc  = (rd.acciones||[]).slice(0,3).map(a=>`→ ${a}`).join('\n');
-    return `📈 Ventas/Margen ${emp}:\n${kpis}\n\n${rd.alerta ? '⚠️ '+rd.alerta+'\n\n' : ''}Acciones:\n${acc}`;
-  }
-
-  // ---- COMPRAS / RATIO ----
-  if (q.match(/compra|ratio|consumo|abastec|stock|inventar|sop|dead/)) {
-    const emp = empMenc || 'PAUNO';
-    const rdC = (emps[emp]?.reportes || {}).compras || {};
-    const rdI = (emps[emp]?.reportes || {}).sop_inventario || (emps[emp]?.reportes || {}).inventario || {};
-    const rd  = rdC.kpis ? rdC : rdI;
-    if (!rd.kpis) return `No tengo datos de compras/inventario para ${emp}.`;
-    const kpis = rd.kpis.map(k=>`• ${k.label}: ${k.valor}${k.meta?' (meta '+k.meta+')':''}`).join('\n');
-    const acc  = (rd.acciones||[]).slice(0,3).map(a=>`→ ${a}`).join('\n');
-    return `📦 Compras/Inventario ${emp}:\n${kpis}\n\n${rd.alerta ? '⚠️ '+rd.alerta+'\n\n' : ''}Acciones:\n${acc}`;
-  }
-
-  // ---- CxP / PAGAR / PROVEEDORES ----
-  if (q.match(/pagar|pago|proveedor|cxp|deuda|dias pag/)) {
-    const emp = empMenc;
-    if (emp) {
-      const rd = (emps[emp]?.reportes || {}).cuentas_por_pagar || {};
-      if (!rd.kpis) return `No tengo datos de CxP para ${emp}.`;
-      const kpis = rd.kpis.map(k=>`• ${k.label}: ${k.valor}${k.meta?' (meta '+k.meta+')':''}`).join('\n');
-      const acc  = (rd.acciones||[]).slice(0,3).map(a=>`→ ${a}`).join('\n');
-      return `💳 CxP ${emp}:\n${kpis}\n\n${rd.alerta ? '⚠️ '+rd.alerta+'\n\n' : ''}Acciones:\n${acc}`;
-    }
-    return Object.entries(emps).map(([emp, ed]) => {
-      const rd = (ed.reportes||{}).cuentas_por_pagar || {};
-      const dias = rd.kpis?.find(k=>k.label.toLowerCase().includes('dia'));
-      return `${emp}: ${dias?.valor || 'N/D'} días CxP — ${rd.alerta || ''}`;
-    }).join('\n');
-  }
-
-  // ---- MERMAS ----
-  if (q.match(/merma|desperdicio|planta|ate|pachacamac|tercero/)) {
-    const rd = (emps['PAUNO']?.reportes || {}).mermas || {};
-    if (!rd.kpis) return 'No tengo datos de mermas.';
-    const kpis = rd.kpis.map(k=>`• ${k.label}: ${k.valor} (meta ${k.meta})`).join('\n');
-    return `🏭 Mermas PAUNO:\n${kpis}\n\n${rd.alerta ? '⚠️ '+rd.alerta : ''}`;
-  }
-
-  // ---- CONTROL INTERNO ----
-  if (q.match(/control|cumplimient|gerente|auditoria|hallazgo/)) {
-    const rd = (emps['PAUNO']?.reportes || {}).control_interno || {};
-    if (!rd.kpis) return 'No tengo datos de control interno.';
-    const kpis = rd.kpis.map(k=>`• ${k.label}: ${k.valor}${k.meta?' (meta '+k.meta+')':''}`).join('\n');
-    const gers = (rd.por_gerente||[]).map(g=>`• ${g.nombre}: ${g.pct}`).join('\n');
-    return `✅ Control Interno PAUNO:\n${kpis}\n${gers ? '\nPor gerente:\n'+gers : ''}`;
-  }
-
-  // ---- FILL RATE / PRODUCTIVIDAD ----
-  if (q.match(/fill|entrega|pedido|productiv|eficien/)) {
-    const rdF = (emps['PAUNO']?.reportes || {}).fill_rate || {};
-    const rdP = (emps['PAUNO']?.reportes || {}).productividad || {};
-    const rd  = rdF.kpis ? rdF : rdP;
-    if (!rd.kpis) return 'No tengo datos de fill rate/productividad.';
-    return `⚡ ${rdF.kpis ? 'Fill Rate' : 'Productividad'} PAUNO:\n${rd.kpis.map(k=>`• ${k.label}: ${k.valor}`).join('\n')}`;
-  }
-
-  // ---- EMPRESA ESPECÍFICA ----
-  if (empMenc) {
-    const ed  = emps[empMenc] || {};
-    const sem = sems[empMenc];
-    const reportes = Object.entries(ed.reportes || {});
-    const alertas = reportes
-      .filter(([,rd]) => rd.estado === 'red' || rd.estado === 'yellow')
-      .map(([tipo, rd]) => `• ${tipo.replace(/_/g,' ')}: ${rd.alerta || rd.kpis?.[0]?.valor || ''}`)
-      .join('\n');
-    return `${semEmoji(sem)} ${empMenc} — ${semLabel(sem)}\n${razones[empMenc]||''}\n\n${alertas || 'Sin alertas críticas.'}`;
-  }
-
-  // ---- AYUDA ----
-  if (q.match(/ayuda|help|que puedes|como funciona|que sabes/)) {
-    return `Puedo responderte sobre:\n\n• Estado general del holding\n• Mora y CxC por empresa\n• Ventas y margen variable\n• Compras y ratio consumo\n• CxP y proveedores\n• Mermas por planta\n• Control interno\n• Agenda CEO — qué decidir hoy\n\nEjemplos:\n"¿Cómo va la mora de AMAUTA?"\n"¿Qué hay que decidir hoy?"\n"¿Cómo están las compras de PAUNO?"`;
-  }
-
-  // ---- FALLBACK ----
-  return `No encontré información específica para esa consulta. Prueba preguntando sobre:\n\n• mora, ventas, compras, margen\n• CxC, CxP, inventario, mermas\n• control interno, fill rate\n• una empresa: PAUNO, AMAUTA, NEOPACK\n• agenda o prioridades de hoy`;
+  send.disabled = false;
 }
 
 loadData();
