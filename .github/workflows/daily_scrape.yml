@@ -1,4 +1,4 @@
-name: Juanito Garcia — Scraper Diario
+name: Juanito Garcia -- Scraper Diario
 
 on:
   schedule:
@@ -34,8 +34,7 @@ jobs:
       - name: Generar summaries con Claude
         run: |
           python scripts/generate_summaries.py
-        env: 
-          PYTHONUTF8: "1"
+        env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Commit y push datos
@@ -44,6 +43,7 @@ jobs:
           git config user.email "juanito@juanito-garcia.local"
           git add data/latest/
           git diff --staged --quiet || git commit -m "datos $(date +'%Y-%m-%d %H:%M') Lima"
+          git pull --rebase origin main
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
