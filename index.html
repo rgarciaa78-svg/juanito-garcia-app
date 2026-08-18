@@ -4,71 +4,75 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Juanito">
-<meta name="theme-color" content="#0a0a1a">
+<meta name="theme-color" content="#f5f5f7">
 <title>Juanito Garcia</title>
 <style>
 :root {
-  --bg:     #0a0a1a;
-  --bg2:    #12122a;
-  --bg3:    #1c1c38;
-  --card:   #181830;
-  --card2:  #202040;
-  --border: rgba(255,255,255,0.08);
-  --text:   #f0f0f8;
-  --text2:  rgba(255,255,255,0.55);
-  --text3:  rgba(255,255,255,0.3);
-  --red:    #e53935;
-  --red-bg: rgba(229,57,53,0.12);
-  --red-border: rgba(229,57,53,0.3);
-  --yellow: #f9a825;
-  --yellow-bg: rgba(249,168,37,0.1);
-  --yellow-border: rgba(249,168,37,0.3);
-  --green:  #43a047;
-  --green-bg: rgba(67,160,71,0.1);
-  --green-border: rgba(67,160,71,0.3);
-  --accent: #5c6bc0;
-  --accent2: #7986cb;
+  --bg:     #f2f2f7;
+  --bg2:    #ffffff;
+  --bg3:    #e8e8ed;
+  --card:   #ffffff;
+  --card2:  #f5f5f7;
+  --border: rgba(0,0,0,0.09);
+  --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 1px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  --text:   #1c1c1e;
+  --text2:  rgba(0,0,0,0.5);
+  --text3:  rgba(0,0,0,0.3);
+  --red:    #d32f2f;
+  --red-light: #ef5350;
+  --red-bg: #ffebee;
+  --red-border: rgba(211,47,47,0.25);
+  --yellow: #e65100;
+  --yellow-light: #f57c00;
+  --yellow-bg: #fff3e0;
+  --yellow-border: rgba(230,81,0,0.25);
+  --green:  #2e7d32;
+  --green-light: #388e3c;
+  --green-bg: #e8f5e9;
+  --green-border: rgba(46,125,50,0.25);
+  --accent: #1565c0;
+  --accent-bg: #e3f2fd;
   --nav-h: 64px;
   --top-h: 56px;
   --radius: 14px;
-  --radius-sm: 8px;
+  --radius-sm: 10px;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; -webkit-font-smoothing: antialiased; }
 
 /* LAYOUT */
 #app { display: flex; flex-direction: column; height: 100%; }
 #top-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 12px; min-height: var(--top-h); flex-shrink: 0; }
-#top-bar .back-btn { background: none; border: none; color: var(--accent2); font-size: 24px; cursor: pointer; padding: 4px; display: none; align-items: center; line-height: 1; }
+#top-bar .back-btn { background: none; border: none; color: var(--accent); font-size: 26px; cursor: pointer; padding: 4px 2px; display: none; align-items: center; line-height: 1; }
 #top-bar .back-btn.visible { display: flex; }
-#top-title { font-size: 16px; font-weight: 700; flex: 1; letter-spacing: -0.2px; }
+#top-title { font-size: 17px; font-weight: 700; flex: 1; letter-spacing: -0.3px; color: var(--text); }
 #top-sub { font-size: 11px; color: var(--text3); }
 #top-badge { font-size: 10px; font-weight: 600; background: var(--bg3); color: var(--text2); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
 
 #main { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 #nav-bar { background: var(--bg2); border-top: 1px solid var(--border); display: flex; min-height: var(--nav-h); flex-shrink: 0; }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 8px 4px; transition: opacity 0.15s; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; padding: 8px 4px; transition: opacity 0.15s; }
 .nav-item svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
 .nav-item span { font-size: 10px; font-weight: 500; color: var(--text3); transition: color 0.15s; }
-.nav-item.active svg { stroke: var(--accent2); }
-.nav-item.active span { color: var(--accent2); }
-.nav-badge { background: var(--red); color: #fff; font-size: 9px; font-weight: 700; border-radius: 20px; padding: 1px 5px; min-width: 16px; text-align: center; }
+.nav-item.active svg { stroke: var(--accent); }
+.nav-item.active span { color: var(--accent); }
 
-/* iPad layout */
+/* iPad */
 @media (min-width: 768px) {
   #app { flex-direction: row; }
   #nav-bar { flex-direction: column; width: 80px; min-height: unset; border-top: none; border-right: 1px solid var(--border); }
   .nav-item { padding: 18px 8px; }
   #top-bar { display: none; }
   #ipad-sidebar-header { display: flex; flex-direction: column; align-items: center; padding: 24px 8px 16px; border-bottom: 1px solid var(--border); }
-  #ipad-sidebar-header .logo-text { font-size: 11px; font-weight: 800; color: var(--accent2); letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); margin-bottom: 8px; }
+  #ipad-sidebar-header .logo-text { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); margin-bottom: 8px; }
   #left-panel { display: flex; flex-direction: column; }
   #right-panel { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   #main { display: flex; flex: 1; overflow: hidden; }
   .mobile-header { display: none !important; }
-  .ipad-top { display: flex; align-items: center; justify-content: space-between; padding: 24px 24px 0; }
 }
 @media (max-width: 767px) {
   #ipad-sidebar-header { display: none; }
@@ -77,133 +81,104 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 
 /* SCREENS */
-.screen { display: none; padding: 16px 14px; }
+.screen { display: none; padding: 16px 14px 24px; }
 .screen.active { display: block; }
 @media (min-width: 768px) {
-  .screen { padding: 24px 24px; }
+  .screen { padding: 24px 24px 32px; }
   #screen-home { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
   #screen-home.active { display: grid; }
   .home-col-right { display: flex; flex-direction: column; gap: 16px; }
 }
 
 /* ============================
-   SEMÁFOROS — REDISEÑADOS
+   SEMÁFOROS
    ============================ */
-.semaforos { display: flex; gap: 10px; margin-bottom: 14px; }
+.semaforos { display: flex; gap: 10px; margin-bottom: 12px; }
 .sem-card {
   flex: 1;
   background: var(--card);
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 10px 12px;
+  padding: 14px 8px 12px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.12s, border-color 0.15s;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s, box-shadow 0.12s;
   position: relative;
   overflow: hidden;
 }
-.sem-card::before {
+.sem-card::after {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: var(--radius) var(--radius) 0 0;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
 }
-.sem-card.red { border-color: var(--red-border); }
-.sem-card.red::before { background: var(--red); }
-.sem-card.yellow { border-color: var(--yellow-border); }
-.sem-card.yellow::before { background: var(--yellow); }
-.sem-card.green { border-color: var(--green-border); }
-.sem-card.green::before { background: var(--green); }
-.sem-card:active { transform: scale(0.97); }
+.sem-card.red::after { background: var(--red-light); }
+.sem-card.yellow::after { background: var(--yellow-light); }
+.sem-card.green::after { background: var(--green-light); }
+.sem-card:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
 
-.sem-dot {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  margin: 0 auto 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  position: relative;
+.sem-badge {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
 }
-.sem-dot.red { background: var(--red-bg); box-shadow: 0 0 12px rgba(229,57,53,0.35); }
-.sem-dot.yellow { background: var(--yellow-bg); box-shadow: 0 0 12px rgba(249,168,37,0.3); }
-.sem-dot.green { background: var(--green-bg); box-shadow: 0 0 12px rgba(67,160,71,0.3); }
-.sem-pulse { animation: pulse-dot 2s ease-in-out infinite; }
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 8px rgba(229,57,53,0.3); }
-  50% { box-shadow: 0 0 20px rgba(229,57,53,0.6); }
-}
-.sem-name { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.5px; margin-bottom: 4px; }
+.sem-badge.red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.sem-badge.yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+.sem-badge.green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+.sem-emoji-big { font-size: 28px; display: block; margin-bottom: 6px; }
+.sem-name { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.4px; margin-bottom: 4px; }
 .sem-kpi { font-size: 10px; color: var(--text3); line-height: 1.3; }
-.sem-estado { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 3px; text-transform: uppercase; }
-.sem-estado.red { color: var(--red); }
-.sem-estado.yellow { color: var(--yellow); }
-.sem-estado.green { color: var(--green); }
 
 /* ============================
    HOLDING STRIP
    ============================ */
-.holding-strip {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
+.holding-strip { display: flex; gap: 10px; margin-bottom: 16px; }
 .holding-stat {
   flex: 1;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
 }
-.holding-icon { font-size: 18px; }
-.holding-info { flex: 1; }
-.holding-val { font-size: 18px; font-weight: 700; color: var(--text); line-height: 1; }
-.holding-label { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.holding-val { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+.holding-val.danger { color: var(--red); }
+.holding-label { font-size: 10px; color: var(--text3); margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
 
 /* ============================
-   AGENDA CEO — REDISEÑADA
+   AGENDA CEO
    ============================ */
-.agenda-section { margin-bottom: 18px; }
+.agenda-section { margin-bottom: 16px; }
 .agenda-section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
 }
 .agenda-section-title {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.6px;
 }
 .agenda-count {
-  background: var(--red);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 700;
-  border-radius: 20px;
-  padding: 1px 6px;
-  min-width: 16px;
-  text-align: center;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center;
 }
-.agenda-count.yellow { background: var(--yellow); color: #000; }
-.agenda-count.blue { background: var(--accent); }
+.agenda-count.red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.agenda-count.yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+.agenda-count.blue { background: var(--accent-bg); color: var(--accent); }
+.agenda-divider { flex: 1; height: 1px; background: var(--border); }
 
 .agenda-items { display: flex; flex-direction: column; gap: 6px; }
-
 .agenda-item-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 11px 13px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  cursor: default;
+  padding: 12px 14px 12px 17px;
+  box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
 }
@@ -211,127 +186,111 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 3px;
-  border-radius: 3px 0 0 3px;
+  width: 4px;
 }
-.agenda-item-card.red { border-color: rgba(229,57,53,0.2); }
-.agenda-item-card.red::before { background: var(--red); }
-.agenda-item-card.yellow { border-color: rgba(249,168,37,0.15); }
-.agenda-item-card.yellow::before { background: var(--yellow); }
-.agenda-item-card.blue { border-color: rgba(92,107,192,0.2); }
-.agenda-item-card.blue::before { background: var(--accent2); }
+.agenda-item-card.red::before { background: var(--red-light); }
+.agenda-item-card.yellow::before { background: var(--yellow-light); }
+.agenda-item-card.blue::before { background: var(--accent); }
 
-.agenda-item-content { flex: 1; padding-left: 2px; }
-.agenda-item-text { font-size: 13px; line-height: 1.45; color: var(--text); }
-.agenda-item-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 5px;
-  flex-wrap: wrap;
-}
+.agenda-item-text { font-size: 13px; line-height: 1.5; color: var(--text); }
+.agenda-item-meta { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .agenda-tag {
-  font-size: 9px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
 }
 .agenda-tag.emp { background: var(--bg3); color: var(--text2); }
-.agenda-tag.resp { background: rgba(121,134,203,0.12); color: var(--accent2); }
+.agenda-tag.resp { background: var(--accent-bg); color: var(--accent); }
 
 /* ============================
-   SECTION TITLE
+   SECTION HEADER
    ============================ */
-.section-title {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 10px;
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.section-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; margin-top: 20px;
 }
-.section-title:first-child { margin-top: 0; }
-.section-divider { flex: 1; height: 1px; background: var(--border); }
+.section-header:first-child { margin-top: 0; }
+.section-header-title {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text2); white-space: nowrap;
+}
+.section-header-line { flex: 1; height: 1px; background: var(--border); }
 
 /* ============================
-   KPI GRID — MEJORADA
+   KPI GRID
    ============================ */
 .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
 .kpi-card {
   background: var(--card);
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 14px 12px;
+  box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
 }
-.kpi-card.red { border-color: var(--red-border); }
-.kpi-card.yellow { border-color: var(--yellow-border); }
-.kpi-card.green { border-color: var(--green-border); }
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-card.red::before { background: var(--red-light); }
+.kpi-card.yellow::before { background: var(--yellow-light); }
+.kpi-card.green::before { background: var(--green-light); }
 
-.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; line-height: 1.3; }
-.kpi-val { font-size: 24px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
+.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; line-height: 1.4; }
+.kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
 .kpi-val.red { color: var(--red); }
 .kpi-val.yellow { color: var(--yellow); }
 .kpi-val.green { color: var(--green); }
 .kpi-val.neutral { color: var(--text); }
 
-.kpi-meta { font-size: 10px; color: var(--text3); margin-top: 6px; line-height: 1.3; }
-.kpi-trend { display: flex; align-items: center; gap: 4px; margin-top: 5px; }
-.kpi-trend-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 10px;
+.kpi-meta { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.kpi-trend-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+.kpi-trend-pill {
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
 }
-.kpi-trend-badge.up { background: var(--red-bg); color: var(--red); }
-.kpi-trend-badge.down { background: var(--green-bg); color: var(--green); }
-.kpi-trend-badge.stable { background: var(--bg3); color: var(--text2); }
+.kpi-trend-pill.bad  { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-border); }
+.kpi-trend-pill.good { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-border); }
+.kpi-trend-pill.flat { background: var(--bg3);       color: var(--text2); }
 
 /* Progress bar */
 .kpi-progress { margin-top: 8px; }
-.kpi-progress-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.kpi-progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-.kpi-progress-fill.red { background: var(--red); }
-.kpi-progress-fill.yellow { background: var(--yellow); }
-.kpi-progress-fill.green { background: var(--green); }
-.kpi-progress-labels { display: flex; justify-content: space-between; margin-top: 3px; }
-.kpi-progress-label { font-size: 9px; color: var(--text3); }
+.kpi-progress-track { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.kpi-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.kpi-progress-fill.red    { background: var(--red-light); }
+.kpi-progress-fill.yellow { background: var(--yellow-light); }
+.kpi-progress-fill.green  { background: var(--green-light); }
+.kpi-progress-meta { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+.kpi-card-link { transition: transform 0.1s, box-shadow 0.1s; }
+.kpi-card-link:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
 
 /* ============================
    EMPRESA HEADER
    ============================ */
 .empresa-header-card {
   border-radius: var(--radius);
-  padding: 16px 16px 14px;
+  padding: 18px 16px;
   margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  position: relative;
-  overflow: hidden;
+  display: flex; align-items: flex-start; gap: 14px;
+  box-shadow: var(--shadow);
 }
-.empresa-header-card.red { background: var(--red-bg); border: 1.5px solid var(--red-border); }
+.empresa-header-card.red    { background: var(--red-bg);    border: 1.5px solid var(--red-border); }
 .empresa-header-card.yellow { background: var(--yellow-bg); border: 1.5px solid var(--yellow-border); }
-.empresa-header-card.green { background: var(--green-bg); border: 1.5px solid var(--green-border); }
+.empresa-header-card.green  { background: var(--green-bg);  border: 1.5px solid var(--green-border); }
 
-.empresa-header-icon { font-size: 32px; }
+.empresa-emoji { font-size: 36px; flex-shrink: 0; }
 .empresa-header-info { flex: 1; }
-.empresa-header-name { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-.empresa-header-name.red { color: var(--red); }
-.empresa-header-name.yellow { color: var(--yellow); }
-.empresa-header-name.green { color: var(--green); }
-.empresa-header-status { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-.empresa-header-status.red { color: rgba(229,57,53,0.8); }
-.empresa-header-status.yellow { color: rgba(249,168,37,0.8); }
-.empresa-header-status.green { color: rgba(67,160,71,0.8); }
-.empresa-header-razon { font-size: 12px; color: var(--text2); margin-top: 4px; line-height: 1.4; }
+.empresa-nombre { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.empresa-nombre.red    { color: var(--red); }
+.empresa-nombre.yellow { color: var(--yellow); }
+.empresa-nombre.green  { color: var(--green); }
+.empresa-status { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.empresa-status.red    { color: var(--red); }
+.empresa-status.yellow { color: var(--yellow); }
+.empresa-status.green  { color: var(--green); }
+.empresa-razon { font-size: 12px; color: var(--text2); margin-top: 5px; line-height: 1.4; }
 
 /* ============================
    REPORTES LIST
@@ -341,135 +300,164 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 13px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  padding: 13px 14px 13px 18px;
+  display: flex; align-items: center; gap: 12px;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-  position: relative;
-  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.1s, box-shadow 0.1s;
+  position: relative; overflow: hidden;
 }
-.reporte-item::after {
-  content: '';
-  position: absolute;
+.reporte-item::before {
+  content: ''; position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 3px;
-  opacity: 0;
-  transition: opacity 0.12s;
+  width: 4px;
 }
-.reporte-item.red::after { background: var(--red); opacity: 1; }
-.reporte-item.yellow::after { background: var(--yellow); opacity: 1; }
-.reporte-item.green::after { background: var(--green); opacity: 0.7; }
-.reporte-item:active { background: var(--card2); }
+.reporte-item.red::before    { background: var(--red-light); }
+.reporte-item.yellow::before { background: var(--yellow-light); }
+.reporte-item.green::before  { background: var(--green-light); }
+.reporte-item.neutral::before { background: var(--bg3); }
+.reporte-item:active { transform: scale(0.99); box-shadow: var(--shadow-md); }
 
 .reporte-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .reporte-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.icon-red { background: var(--red-bg); color: var(--red); }
+.icon-red    { background: var(--red-bg);    color: var(--red); }
 .icon-yellow { background: var(--yellow-bg); color: var(--yellow); }
-.icon-green { background: var(--green-bg); color: var(--green); }
-.icon-neutral { background: var(--bg3); color: var(--text2); }
+.icon-green  { background: var(--green-bg);  color: var(--green); }
+.icon-neutral{ background: var(--bg3);       color: var(--text2); }
 
 .reporte-info { flex: 1; }
 .reporte-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.reporte-sub { font-size: 11px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
-.reporte-arrow { color: var(--text3); font-size: 18px; font-weight: 300; }
+.reporte-sub  { font-size: 11px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
 
-/* Estado chip en lista */
 .estado-chip {
-  font-size: 9px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0;
 }
-.estado-chip.red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.estado-chip.red    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-border); }
 .estado-chip.yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
-.estado-chip.green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
-.estado-chip.neutral { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.estado-chip.green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-border); }
+.estado-chip.neutral{ background: var(--bg3);       color: var(--text2); }
 
 /* ============================
-   DETAIL SCREEN
+   DETAIL — REPORTE
    ============================ */
-.alert-banner { border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; }
-.alert-banner.red { background: var(--red-bg); border: 1px solid var(--red-border); }
-.alert-banner.yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+.detail-reporte-context {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-left: 4px solid var(--accent);
+}
+.detail-reporte-empresa { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.detail-reporte-titulo  { font-size: 14px; font-weight: 700; color: var(--text); }
+.detail-reporte-desc    { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
+
+.alert-banner { border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; }
+.alert-banner.red    { background: var(--red-bg);    border: 1.5px solid var(--red-border); }
+.alert-banner.yellow { background: var(--yellow-bg); border: 1.5px solid var(--yellow-border); }
 .alert-icon { font-size: 18px; flex-shrink: 0; }
-.alert-text { font-size: 13px; line-height: 1.5; font-weight: 500; }
-.alert-banner.red .alert-text { color: #ffcdd2; }
-.alert-banner.yellow .alert-text { color: #fff9c4; }
+.alert-text { font-size: 13px; font-weight: 600; line-height: 1.5; }
+.alert-banner.red    .alert-text { color: var(--red); }
+.alert-banner.yellow .alert-text { color: var(--yellow); }
 
 /* Tramos */
-.tramos { display: flex; gap: 8px; margin-bottom: 16px; }
-.tramo { flex: 1; border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; }
-.tramo.green { background: var(--green-bg); border: 1px solid var(--green-border); }
-.tramo.yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
-.tramo.red { background: var(--red-bg); border: 1px solid var(--red-border); }
-.tramo-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
-.tramo.green .tramo-label { color: var(--green); }
+.tramos { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.tramo { flex: 1; min-width: 80px; border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; box-shadow: var(--shadow); }
+.tramo.green  { background: var(--green-bg);  border: 1.5px solid var(--green-border); }
+.tramo.yellow { background: var(--yellow-bg); border: 1.5px solid var(--yellow-border); }
+.tramo.red    { background: var(--red-bg);    border: 1.5px solid var(--red-border); }
+.tramo-label  { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.tramo.green  .tramo-label { color: var(--green); }
 .tramo.yellow .tramo-label { color: var(--yellow); }
-.tramo.red .tramo-label { color: var(--red); }
+.tramo.red    .tramo-label { color: var(--red); }
 .tramo-val { font-size: 16px; font-weight: 700; margin-top: 5px; }
-.tramo.green .tramo-val { color: var(--green); }
+.tramo.green  .tramo-val { color: var(--green); }
 .tramo.yellow .tramo-val { color: var(--yellow); }
-.tramo.red .tramo-val { color: var(--red); }
-.tramo-sub { font-size: 9px; margin-top: 3px; opacity: 0.75; }
-.tramo.green .tramo-sub { color: var(--green); }
+.tramo.red    .tramo-val { color: var(--red); }
+.tramo-sub { font-size: 10px; margin-top: 3px; opacity: 0.75; }
+.tramo.green  .tramo-sub { color: var(--green); }
 .tramo.yellow .tramo-sub { color: var(--yellow); }
-.tramo.red .tramo-sub { color: var(--red); }
+.tramo.red    .tramo-sub { color: var(--red); }
 
 /* Riesgos */
-.riesgo-list { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+.riesgo-list { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; box-shadow: var(--shadow); }
 .riesgo-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); gap: 10px; }
 .riesgo-row:last-child { border-bottom: none; }
-.riesgo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.riesgo-rank { font-size: 12px; font-weight: 700; color: var(--text3); width: 20px; text-align: center; flex-shrink: 0; }
 .riesgo-info { flex: 1; min-width: 0; }
 .riesgo-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.riesgo-canal { font-size: 10px; color: var(--text3); margin-top: 1px; }
-.riesgo-monto-val { font-size: 14px; font-weight: 700; color: var(--red); text-align: right; }
-.riesgo-monto-sub { font-size: 10px; color: var(--text3); text-align: right; }
+.riesgo-sub  { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.riesgo-val  { font-size: 14px; font-weight: 700; text-align: right; }
+.riesgo-val.red    { color: var(--red); }
+.riesgo-val.yellow { color: var(--yellow); }
+.riesgo-sub-right { font-size: 10px; color: var(--text3); text-align: right; }
 
-/* Tendencia — gráfico mejorado */
-.tend-chart { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px 12px; margin-bottom: 16px; }
-.tend-title-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
-.tend-chart-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
-.tend-bars { display: flex; align-items: flex-end; gap: 6px; height: 64px; }
+/* Gerentes */
+.gerente-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.gerente-row:last-child { border-bottom: none; }
+.gerente-info { flex: 1; }
+.gerente-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.gerente-bar-track { height: 6px; background: var(--bg3); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+.gerente-bar-fill  { height: 100%; border-radius: 3px; }
+.gerente-pct { font-size: 14px; font-weight: 700; width: 52px; text-align: right; flex-shrink: 0; }
+
+/* Desglose */
+.breakdown-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+.breakdown-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 13px; box-shadow: var(--shadow); }
+.breakdown-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+.breakdown-val { font-size: 20px; font-weight: 700; }
+.breakdown-val.red    { color: var(--red); }
+.breakdown-val.yellow { color: var(--yellow); }
+.breakdown-val.green  { color: var(--green); }
+.breakdown-val.neutral{ color: var(--text); }
+.breakdown-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+/* Tendencia */
+.tend-chart { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px 12px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.tend-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.tend-chart-label { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; }
+.tend-trend-text { font-size: 12px; font-weight: 700; }
+.tend-trend-text.bad  { color: var(--red); }
+.tend-trend-text.good { color: var(--green); }
+.tend-trend-text.flat { color: var(--text2); }
+.tend-bars { display: flex; align-items: flex-end; gap: 5px; height: 72px; }
 .tend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.tend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.4s ease; }
-.tend-bar.green { background: var(--green); }
-.tend-bar.yellow { background: var(--yellow); }
-.tend-bar.red { background: var(--red); }
-.tend-pct { font-size: 10px; color: var(--text); font-weight: 600; }
-.tend-mes { font-size: 9px; color: var(--text3); }
-.tend-current-marker { font-size: 9px; color: var(--accent2); font-weight: 700; }
+.tend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; }
+.tend-bar.red    { background: var(--red-light); }
+.tend-bar.yellow { background: var(--yellow-light); }
+.tend-bar.green  { background: var(--green-light); }
+.tend-bar.current { box-shadow: 0 0 0 2px rgba(0,0,0,0.15); }
+.tend-val { font-size: 10px; font-weight: 600; color: var(--text); }
+.tend-val.current { font-size: 11px; font-weight: 800; }
+.tend-mes { font-size: 8px; color: var(--text3); }
+.tend-meta-line { margin-top: 10px; display: flex; align-items: center; gap: 6px; }
+.tend-meta-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg3); border: 2px dashed var(--text3); flex-shrink: 0; }
+.tend-meta-text { font-size: 10px; color: var(--text3); }
 
-/* Decisiones */
-.decision-box { background: rgba(92,107,192,0.08); border: 1px solid rgba(121,134,203,0.25); border-radius: var(--radius); padding: 14px 14px; margin-bottom: 16px; }
-.decision-title { font-size: 10px; font-weight: 700; color: var(--accent2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px; }
-.decision-item { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 6px; padding-left: 16px; position: relative; }
+/* Acciones */
+.decision-box { background: var(--accent-bg); border: 1.5px solid rgba(21,101,192,0.2); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+.decision-title { font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.decision-item { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 6px; padding-left: 18px; position: relative; }
 .decision-item:last-child { margin-bottom: 0; }
-.decision-item::before { content: '→'; position: absolute; left: 0; color: var(--accent2); font-weight: 700; }
+.decision-item::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
 
 /* Botones */
-.png-btn { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; color: var(--text2); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; transition: background 0.12s; text-align: left; }
-.png-btn:active { background: var(--card2); }
-.ask-btn { width: 100%; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s; letter-spacing: -0.1px; }
+.png-btn { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; color: var(--text2); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; transition: background 0.12s; text-align: left; box-shadow: var(--shadow); }
+.png-btn:active { background: var(--bg3); }
+.ask-btn { width: 100%; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s; box-shadow: 0 2px 8px rgba(21,101,192,0.3); }
 .ask-btn:active { opacity: 0.85; }
 
 /* PNG VIEWER */
-#png-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; display: none; flex-direction: column; }
+#png-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 100; display: none; flex-direction: column; }
 #png-viewer.open { display: flex; }
-#png-viewer-bar { background: var(--bg2); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-#png-viewer-bar button { background: none; border: none; color: var(--accent2); font-size: 15px; cursor: pointer; padding: 4px 8px; }
-#png-viewer-title { flex: 1; font-size: 14px; font-weight: 600; }
+#png-viewer-bar { background: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+#png-viewer-bar button { background: none; border: none; color: var(--accent); font-size: 15px; font-weight: 600; cursor: pointer; padding: 4px 8px; }
+#png-viewer-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
 #png-viewer-img { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 16px; }
 #png-viewer-img img { max-width: 100%; height: auto; border-radius: 8px; }
 
 /* CHAT FAB */
-#chat-fab { position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50; box-shadow: 0 4px 20px rgba(92,107,192,0.45); transition: transform 0.15s; border: none; }
+#chat-fab { position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50; box-shadow: 0 4px 16px rgba(21,101,192,0.35); transition: transform 0.15s; border: none; }
 #chat-fab:active { transform: scale(0.93); }
 #chat-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 @media (min-width: 768px) { #chat-fab { bottom: 20px; right: 20px; } }
@@ -478,58 +466,33 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #chat-modal { position: fixed; inset: 0; z-index: 80; display: none; flex-direction: column; background: var(--bg); }
 #chat-modal.open { display: flex; }
 @media (min-width: 768px) {
-  #chat-modal { left: auto; right: 0; width: 420px; border-left: 1px solid var(--border); box-shadow: -6px 0 30px rgba(0,0,0,0.5); }
+  #chat-modal { left: auto; right: 0; width: 420px; border-left: 1px solid var(--border); box-shadow: -6px 0 30px rgba(0,0,0,0.12); }
 }
 #chat-header { background: var(--bg2); padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
 #chat-header h2 { flex: 1; font-size: 16px; font-weight: 700; }
 #chat-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
 #chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .msg { max-width: 85%; padding: 11px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
-.msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
-.msg.assistant { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
-.msg.loading { opacity: 0.6; }
+.msg.user      { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.msg.assistant { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.msg.loading   { opacity: 0.6; }
 #chat-input-area { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; gap: 10px; align-items: flex-end; }
 #chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 10px 16px; color: var(--text); font-size: 14px; resize: none; max-height: 100px; outline: none; font-family: inherit; }
-#chat-send { background: var(--accent); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; }
+#chat-send { background: var(--accent); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; box-shadow: 0 2px 8px rgba(21,101,192,0.25); }
 #chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
 #chat-send svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-#api-setup { padding: 20px; background: var(--card); margin: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+#api-setup { padding: 20px; background: var(--card); margin: 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
 #api-setup p { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
 #api-key-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; margin-bottom: 10px; font-family: monospace; outline: none; }
 #api-save-btn { background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
 
 /* LOADING */
 #loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 200; }
-#loading-overlay h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-#loading-overlay p { font-size: 14px; color: var(--text2); }
-.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; }
+#loading-overlay h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+#loading-overlay p  { font-size: 14px; color: var(--text2); }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* Desglose grid */
-.breakdown-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
-.breakdown-item {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 13px;
-}
-.breakdown-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
-.breakdown-val { font-size: 18px; font-weight: 700; }
-.breakdown-val.red { color: var(--red); }
-.breakdown-val.yellow { color: var(--yellow); }
-.breakdown-val.green { color: var(--green); }
-.breakdown-val.neutral { color: var(--text); }
-.breakdown-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
-
-/* Cumplimiento por gerente */
-.gerente-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
-.gerente-row:last-child { border-bottom: none; }
-.gerente-info { flex: 1; }
-.gerente-name { font-size: 13px; font-weight: 500; }
-.gerente-pct-track { height: 6px; background: var(--border); border-radius: 3px; margin-top: 5px; overflow: hidden; }
-.gerente-pct-fill { height: 100%; border-radius: 3px; }
-.gerente-val { font-size: 14px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -541,7 +504,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </div>
 
 <div id="app" style="display:none">
-  <!-- TOP BAR (mobile) -->
   <div id="top-bar">
     <button class="back-btn" id="back-btn" onclick="goBack()">‹</button>
     <div style="flex:1">
@@ -552,7 +514,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   </div>
 
   <div id="main">
-    <!-- NAV -->
     <div id="nav-bar">
       <div id="ipad-sidebar-header">
         <span class="logo-text">JG</span>
@@ -575,7 +536,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
     </div>
 
-    <!-- SCREENS -->
     <div id="screens-container" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch">
 
       <!-- HOME -->
@@ -584,18 +544,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           <div class="semaforos" id="semaforos-row"></div>
           <div class="holding-strip" id="holding-strip">
             <div class="holding-stat">
-              <div class="holding-icon">💰</div>
-              <div class="holding-info">
-                <div class="holding-val" id="h-ventas">—</div>
-                <div class="holding-label">Ventas holding</div>
-              </div>
+              <div class="holding-val" id="h-ventas">—</div>
+              <div class="holding-label">Ventas holding</div>
             </div>
             <div class="holding-stat">
-              <div class="holding-icon">⚠️</div>
-              <div class="holding-info">
-                <div class="holding-val" id="h-mora" style="color:var(--red)">—</div>
-                <div class="holding-label">Mora consolidada</div>
-              </div>
+              <div class="holding-val danger" id="h-mora">—</div>
+              <div class="holding-label">Mora consolidada</div>
             </div>
           </div>
           <div id="agenda-decidir-section"></div>
@@ -607,24 +561,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
 
       <!-- PAUNO -->
-      <div id="screen-pauno" class="screen">
-        <div id="pauno-content"></div>
-      </div>
+      <div id="screen-pauno" class="screen"><div id="pauno-content"></div></div>
 
       <!-- AMAUTA -->
-      <div id="screen-amauta" class="screen">
-        <div id="amauta-content"></div>
-      </div>
+      <div id="screen-amauta" class="screen"><div id="amauta-content"></div></div>
 
       <!-- NEOPACK -->
-      <div id="screen-neopack" class="screen">
-        <div id="neopack-content"></div>
-      </div>
+      <div id="screen-neopack" class="screen"><div id="neopack-content"></div></div>
 
       <!-- DETAIL -->
-      <div id="screen-detail" class="screen">
-        <div id="detail-content"></div>
-      </div>
+      <div id="screen-detail" class="screen"><div id="detail-content"></div></div>
     </div>
   </div>
 </div>
@@ -671,28 +617,29 @@ let currentTab = 'home';
 let navHistory = [];
 let apiKey = localStorage.getItem('jg_api_key') || '';
 
+// Descripción de cada reporte para dar contexto en la vista de detalle
 const REPORTES_CONFIG = {
   PAUNO: [
-    { tipo: 'cuentas_por_cobrar',   label: 'CxC — Cuentas por cobrar',  archivo: '01_cuentas_por_cobrar.png',   icon: 'cxc' },
-    { tipo: 'cuentas_por_pagar',    label: 'CxP — Cuentas por pagar',   archivo: '02_cuentas_por_pagar.png',    icon: 'cxp' },
-    { tipo: 'margen_variable',      label: 'Margen variable',            archivo: '03_margen_variable.png',      icon: 'trend' },
-    { tipo: 'mermas',               label: 'Mermas por planta',          archivo: '04_mermas.png',               icon: 'activity' },
-    { tipo: 'compras',              label: 'Compras — ratio consumo',    archivo: '05_compras.png',              icon: 'shopping' },
-    { tipo: 'control_interno',      label: 'Control interno',            archivo: '07_control_interno.png',      icon: 'check' },
-    { tipo: 'sop_inventario',       label: 'S&OP — Inventario',          archivo: '10_sop_inventario.png',       icon: 'box' },
-    { tipo: 'fill_rate',            label: 'Fill Rate',                  archivo: '11_fill_rate.png',            icon: 'fill' },
-    { tipo: 'productividad',        label: 'Productividad',              archivo: '12_productividad.png',        icon: 'prod' },
-    { tipo: 'margen_variable_pag2', label: 'Avance ventas vs ppto',      archivo: '13_margen_variable_pag2.png', icon: 'target' },
+    { tipo: 'cuentas_por_cobrar',   label: 'Cuentas por cobrar (CxC)',      archivo: '01_cuentas_por_cobrar.png',   icon: 'cxc',      desc: 'Morosidad, cartera vencida y rotación de cobros' },
+    { tipo: 'cuentas_por_pagar',    label: 'Cuentas por pagar (CxP)',        archivo: '02_cuentas_por_pagar.png',    icon: 'cxp',      desc: 'Días de pago a proveedores y deuda vigente' },
+    { tipo: 'margen_variable',      label: 'Margen variable',                archivo: '03_margen_variable.png',      icon: 'trend',    desc: 'Margen de contribución por UEN (B&D, MAQUILA, TIGO)' },
+    { tipo: 'mermas',               label: 'Mermas por planta',              archivo: '04_mermas.png',               icon: 'activity', desc: 'Pérdida de producto en planta Ate, Pachacamac y Terceros' },
+    { tipo: 'compras',              label: 'Compras — Ratio Consumo/Compra', archivo: '05_compras.png',              icon: 'shopping', desc: 'Ratio = Consumo ÷ Compra. >100% jala inventario, <100% sobre-compra' },
+    { tipo: 'control_interno',      label: 'Control interno',                archivo: '07_control_interno.png',      icon: 'check',    desc: 'Cumplimiento de controles por gerente (meta 85%)' },
+    { tipo: 'sop_inventario',       label: 'S&OP — Inventario',              archivo: '10_sop_inventario.png',       icon: 'box',      desc: 'Nivel de inventario, dead stock y días de cobertura' },
+    { tipo: 'fill_rate',            label: 'Fill Rate',                      archivo: '11_fill_rate.png',            icon: 'fill',     desc: 'Porcentaje de pedidos entregados completos y a tiempo' },
+    { tipo: 'productividad',        label: 'Productividad',                  archivo: '12_productividad.png',        icon: 'prod',     desc: 'Eficiencia operativa y rendimiento por turno/planta' },
+    { tipo: 'margen_variable_pag2', label: 'Avance ventas vs presupuesto',   archivo: '13_margen_variable_pag2.png', icon: 'target',   desc: 'Ejecución de ventas versus el presupuesto del mes' },
   ],
   AMAUTA: [
-    { tipo: 'cuentas_por_cobrar', label: 'CxC — Cuentas por cobrar', archivo: '01_reporte_01.png', icon: 'cxc' },
-    { tipo: 'cuentas_por_pagar',  label: 'CxP — Cuentas por pagar',  archivo: '02_reporte_02.png', icon: 'cxp' },
-    { tipo: 'inventario',         label: 'Inventario',                archivo: '03_reporte_03.png', icon: 'box' },
+    { tipo: 'cuentas_por_cobrar', label: 'Cuentas por cobrar (CxC)', archivo: '01_reporte_01.png', icon: 'cxc',    desc: 'Morosidad, cartera vencida y rotación de cobros' },
+    { tipo: 'cuentas_por_pagar',  label: 'Cuentas por pagar (CxP)',  archivo: '02_reporte_02.png', icon: 'cxp',    desc: 'Días de pago a proveedores y deuda vigente' },
+    { tipo: 'inventario',         label: 'Inventario',                archivo: '03_reporte_03.png', icon: 'box',    desc: 'Nivel de stock, rotación y dead stock' },
   ],
   NEOPACK: [
-    { tipo: 'cuentas_por_cobrar', label: 'CxC — Cuentas por cobrar', archivo: '01_reporte_01.png', icon: 'cxc' },
-    { tipo: 'cuentas_por_pagar',  label: 'CxP — Cuentas por pagar',  archivo: '02_reporte_02.png', icon: 'cxp' },
-    { tipo: 'ventas',             label: 'Ventas vs presupuesto',     archivo: '03_reporte_03.png', icon: 'target' },
+    { tipo: 'cuentas_por_cobrar', label: 'Cuentas por cobrar (CxC)', archivo: '01_reporte_01.png', icon: 'cxc',    desc: 'Morosidad, cartera vencida y rotación de cobros' },
+    { tipo: 'cuentas_por_pagar',  label: 'Cuentas por pagar (CxP)',  archivo: '02_reporte_02.png', icon: 'cxp',    desc: 'Días de pago a proveedores y deuda vigente' },
+    { tipo: 'ventas',             label: 'Ventas vs presupuesto',     archivo: '03_reporte_03.png', icon: 'target', desc: 'Ejecución de ventas versus el presupuesto del mes' },
   ],
 };
 
@@ -711,8 +658,31 @@ const ICON_SVG = {
 
 function semEmoji(s) { return s === 'red' ? '🔴' : s === 'yellow' ? '🟡' : '🟢'; }
 function semLabel(s) { return s === 'red' ? 'CRÍTICO' : s === 'yellow' ? 'ATENCIÓN' : 'OK'; }
-function stateClass(s) { return s === 'red' ? 'red' : s === 'yellow' ? 'yellow' : s === 'green' ? 'green' : 'neutral'; }
-function dotBg(s) { return s === 'red' ? 'var(--red)' : s === 'yellow' ? 'var(--yellow)' : 'var(--accent2)'; }
+function sc(s)       { return s === 'red' ? 'red' : s === 'yellow' ? 'yellow' : s === 'green' ? 'green' : 'neutral'; }
+
+// Determina si una tendencia es "buena" o "mala" dado el tipo de KPI
+// Por defecto: sube = malo para mora/dias/vencido; sube = bueno para margen/ventas/cumplimiento
+function trendClass(tendencia, label) {
+  if (!tendencia) return 'flat';
+  const t = tendencia.toLowerCase();
+  const lbl = (label || '').toLowerCase();
+  // KPIs donde "sube" es malo
+  const subeBad = lbl.includes('mora') || lbl.includes('dias') || lbl.includes('cxp') ||
+    lbl.includes('vencido') || lbl.includes('merma') || lbl.includes('dead') || lbl.includes('criticos');
+  // KPIs donde "baja" es malo
+  const bajaGood = !subeBad;
+  if (t.includes('sube') || t.includes('crecien') || t.includes('aument')) return subeBad ? 'bad' : 'good';
+  if (t.includes('baja') || t.includes('descend') || t.includes('dismin') || t.includes('mejor') || t.includes('reduci')) return subeBad ? 'good' : 'bad';
+  return 'flat';
+}
+function trendArrow(tendencia, label) {
+  const cls = trendClass(tendencia, label);
+  const t = (tendencia || '').toLowerCase();
+  const up = t.includes('sube') || t.includes('crecien') || t.includes('aument');
+  const down = t.includes('baja') || t.includes('descend') || t.includes('dismin') || t.includes('mejor') || t.includes('reduci');
+  const arrow = up ? '↑' : down ? '↓' : '→';
+  return { arrow, cls };
+}
 
 async function loadData() {
   try {
@@ -730,44 +700,34 @@ async function loadData() {
 
 function renderAll() {
   renderHome();
-  renderEmpresa('PAUNO', 'pauno-content');
-  renderEmpresa('AMAUTA', 'amauta-content');
+  renderEmpresa('PAUNO',   'pauno-content');
+  renderEmpresa('AMAUTA',  'amauta-content');
   renderEmpresa('NEOPACK', 'neopack-content');
   document.getElementById('top-sub').textContent = DATA.fecha + ' · ' + DATA.hora;
-  // Update nav badges
-  const sems = DATA.semaforos || {};
-  const redCount = Object.values(sems).filter(v => v === 'red').length;
-  if (redCount > 0) {
-    document.querySelectorAll('.nav-item[data-tab="home"] span')[0].insertAdjacentHTML('afterend',
-      `<span class="nav-badge">${redCount}</span>`);
-  }
 }
 
 function renderHome() {
-  const sems = DATA.semaforos || {};
+  const sems   = DATA.semaforos || {};
   const razones = DATA.semaforo_razon || {};
 
-  // Semáforos
-  document.getElementById('semaforos-row').innerHTML = Object.entries(sems).map(([emp, s]) =>
-    `<div class="sem-card ${s}" onclick="showTab('${emp.toLowerCase()}')">
-      <div class="sem-dot ${s}${s === 'red' ? ' sem-pulse' : ''}">
-        ${semEmoji(s)}
-      </div>
-      <div class="sem-estado ${s}">${semLabel(s)}</div>
+  document.getElementById('semaforos-row').innerHTML = Object.entries(sems).map(([emp, s]) => {
+    // Solo la primera parte de la razón (antes de " con ")
+    const razonCorta = (razones[emp] || '').split(' con ')[0];
+    return `<div class="sem-card ${s}" onclick="showTab('${emp.toLowerCase()}')">
+      <span class="sem-badge ${s}">${semLabel(s)}</span>
+      <div class="sem-emoji-big">${semEmoji(s)}</div>
       <div class="sem-name">${emp}</div>
-      <div class="sem-kpi">${(razones[emp] || '').split(' con ')[0]}</div>
-    </div>`
-  ).join('');
+      <div class="sem-kpi">${razonCorta}</div>
+    </div>`;
+  }).join('');
 
-  // Holding
   document.getElementById('h-ventas').textContent = DATA.holding_ventas || '—';
-  document.getElementById('h-mora').textContent = DATA.holding_mora || '—';
+  document.getElementById('h-mora').textContent   = DATA.holding_mora   || '—';
 
-  // Agenda
   const agenda = DATA.agenda_ceo || {};
-  renderAgendaSection('agenda-decidir-section', 'Decidir hoy', 'red', agenda.decidir_hoy || []);
-  renderAgendaSection('agenda-semana-section', 'Escalar esta semana', 'yellow', agenda.escalar_semana || []);
-  renderAgendaSection('agenda-monitorear-section', 'Monitorear', 'blue', agenda.monitorear || []);
+  renderAgendaSection('agenda-decidir-section',    '🔴 Decidir hoy',          'red',    agenda.decidir_hoy   || []);
+  renderAgendaSection('agenda-semana-section',     '🟡 Escalar esta semana',  'yellow', agenda.escalar_semana || []);
+  renderAgendaSection('agenda-monitorear-section', '🔵 Monitorear',           'blue',   agenda.monitorear    || []);
 
   if (window.innerWidth >= 768) {
     document.getElementById('home-right').style.display = 'flex';
@@ -777,85 +737,82 @@ function renderHome() {
 function renderAgendaSection(id, title, color, items) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (!items.length) {
-    el.innerHTML = `<div class="agenda-section">
-      <div class="agenda-section-header">
-        <div class="agenda-section-title">${title}</div>
-      </div>
-      <div class="agenda-items">
-        <div class="agenda-item-card blue" style="opacity:0.5">
-          <div class="agenda-item-content"><div class="agenda-item-text" style="color:var(--text3)">Sin elementos</div></div>
-        </div>
-      </div>
-    </div>`;
-    return;
-  }
-  const countClass = color === 'red' ? '' : color === 'yellow' ? 'yellow' : 'blue';
+  const countClass = color === 'red' ? 'red' : color === 'yellow' ? 'yellow' : 'blue';
   el.innerHTML = `<div class="agenda-section">
     <div class="agenda-section-header">
       <div class="agenda-section-title">${title}</div>
-      <span class="agenda-count ${countClass}">${items.length}</span>
-      <div class="section-divider"></div>
+      ${items.length ? `<span class="agenda-count ${countClass}">${items.length}</span>` : ''}
+      <div class="agenda-divider"></div>
     </div>
     <div class="agenda-items">
-      ${items.map(item => `
+      ${items.length ? items.map(item => `
         <div class="agenda-item-card ${color}">
-          <div class="agenda-item-content">
-            <div class="agenda-item-text">${item.texto || item.text || ''}</div>
-            <div class="agenda-item-meta">
-              ${item.empresa ? `<span class="agenda-tag emp">${item.empresa}</span>` : ''}
-              ${item.responsable ? `<span class="agenda-tag resp">${item.responsable}</span>` : ''}
-            </div>
+          <div class="agenda-item-text">${item.texto || item.text || ''}</div>
+          <div class="agenda-item-meta">
+            ${item.empresa    ? `<span class="agenda-tag emp">${item.empresa}</span>` : ''}
+            ${item.responsable ? `<span class="agenda-tag resp">${item.responsable}</span>` : ''}
           </div>
-        </div>`).join('')}
+        </div>`).join('') : `<div class="agenda-item-card blue" style="opacity:.5"><div class="agenda-item-text" style="color:var(--text3)">Sin elementos</div></div>`}
     </div>
   </div>`;
 }
 
 function renderEmpresa(empresa, containerId) {
   const el = document.getElementById(containerId);
-  const empData = (DATA.empresas || {})[empresa] || {};
-  const semaforo = (DATA.semaforos || {})[empresa] || 'green';
-  const razon = (DATA.semaforo_razon || {})[empresa] || '';
-  const reportes = REPORTES_CONFIG[empresa] || [];
+  const empData    = (DATA.empresas || {})[empresa] || {};
+  const semaforo   = (DATA.semaforos || {})[empresa] || 'green';
+  const razon      = (DATA.semaforo_razon || {})[empresa] || '';
+  const reportes   = REPORTES_CONFIG[empresa] || [];
   const reportesData = empData.reportes || {};
 
-  // Collect top KPIs
+  const statusLabel = semaforo === 'red' ? 'CRÍTICO — ACCIÓN INMEDIATA' : semaforo === 'yellow' ? 'ATENCIÓN — REVISAR' : 'OPERANDO NORMAL';
+
+  // Top KPIs del primer reporte con estado no-green
   const allKpis = [];
   reportes.forEach(r => {
     const rd = reportesData[r.tipo] || {};
-    (rd.kpis || []).slice(0, 1).forEach(k => allKpis.push(k));
+    if (rd.estado && rd.estado !== 'green') {
+      (rd.kpis || []).slice(0,1).forEach(k => allKpis.push({ ...k, _reporte: r.label, _tipo: r.tipo, _archivo: r.archivo, _desc: r.desc || '' }));
+    }
   });
-
-  const statusLabel = semaforo === 'red' ? 'CRÍTICO — ACCIÓN INMEDIATA' : semaforo === 'yellow' ? 'ATENCIÓN — REVISAR' : 'OPERANDO BIEN';
+  // Si no hay alertas, mostrar los primeros KPIs igual
+  if (!allKpis.length) {
+    reportes.forEach(r => {
+      const rd = reportesData[r.tipo] || {};
+      (rd.kpis || []).slice(0,1).forEach(k => allKpis.push({ ...k, _reporte: r.label, _tipo: r.tipo, _archivo: r.archivo, _desc: r.desc || '' }));
+    });
+  }
 
   el.innerHTML = `
     <div class="empresa-header-card ${semaforo}">
-      <div class="empresa-header-icon">${semEmoji(semaforo)}</div>
+      <div class="empresa-emoji">${semEmoji(semaforo)}</div>
       <div class="empresa-header-info">
-        <div class="empresa-header-name ${semaforo}">${empresa}</div>
-        <div class="empresa-header-status ${semaforo}">${statusLabel}</div>
-        <div class="empresa-header-razon">${razon}</div>
+        <div class="empresa-nombre ${semaforo}">${empresa}</div>
+        <div class="empresa-status ${semaforo}">${statusLabel}</div>
+        <div class="empresa-razon">${razon}</div>
       </div>
     </div>
 
     ${allKpis.length ? `
-    <div class="section-title">KPIs Clave
-      <div class="section-divider"></div>
+    <div class="section-header">
+      <div class="section-header-title">KPIs Clave <span style="font-weight:400;opacity:.6;font-size:9px;text-transform:none;letter-spacing:0">— toca para ver detalle</span></div>
+      <div class="section-header-line"></div>
     </div>
     <div class="kpi-grid">
-      ${allKpis.slice(0,6).map(k => renderKpiCard(k)).join('')}
+      ${allKpis.slice(0,6).map(k => renderKpiCard(k, k._reporte, empresa, k._tipo, k._archivo, k._desc)).join('')}
     </div>` : ''}
 
-    <div class="section-title">Reportes
-      <div class="section-divider"></div>
+    <div class="section-header">
+      <div class="section-header-title">Reportes</div>
+      <div class="section-header-line"></div>
     </div>
     <div class="reportes-list">
       ${reportes.map(r => {
         const rd = reportesData[r.tipo] || {};
         const estado = rd.estado || 'neutral';
-        const subtext = rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].valor + (rd.kpis[0].meta ? ' (meta ' + rd.kpis[0].meta + ')' : '') : 'Ver análisis');
-        return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}')">
+        const subtext = rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].label + ': ' + rd.kpis[0].valor : 'Ver análisis');
+        const chipLabel = estado === 'red' ? 'Crítico' : estado === 'yellow' ? 'Alerta' : estado === 'green' ? 'OK' : 'Ver';
+        return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}','${(r.desc||'').replace(/'/g,"\\'")}')">
           <div class="reporte-icon icon-${estado === 'neutral' ? 'neutral' : estado}">
             <svg viewBox="0 0 24 24">${ICON_SVG[r.icon] || ICON_SVG.check}</svg>
           </div>
@@ -863,75 +820,79 @@ function renderEmpresa(empresa, containerId) {
             <div class="reporte-name">${r.label}</div>
             <div class="reporte-sub">${subtext}</div>
           </div>
-          <span class="estado-chip ${estado}">${estado === 'neutral' ? 'Ver' : estado === 'red' ? 'Crítico' : estado === 'yellow' ? 'Alerta' : 'OK'}</span>
+          <span class="estado-chip ${estado}">${chipLabel}</span>
         </div>`;
       }).join('')}
     </div>`;
 }
 
-function renderKpiCard(k) {
-  const cls = stateClass(k.estado);
+function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
+  const cls = sc(k.estado);
+  const { arrow, cls: tCls } = trendArrow(k.tendencia, k.label);
+  const clickable = !!(empresa && tipo && archivo);
+  const onclick = clickable
+    ? `onclick="showDetail('${empresa}','${tipo}','${contexto || tipo}','${archivo}','${(desc||'').replace(/'/g,"\\'")}')" style="cursor:pointer"`
+    : '';
+
   let progressHtml = '';
-  // Try to build a progress bar if we have a numeric value and meta
   if (k.valor && k.meta) {
-    const valNum = parseFloat(k.valor.replace(/[^0-9.]/g, ''));
-    const metaNum = parseFloat(k.meta.replace(/[^0-9.]/g, ''));
-    if (!isNaN(valNum) && !isNaN(metaNum) && metaNum > 0) {
-      const pct = Math.min(100, Math.round((valNum / metaNum) * 100));
+    const valN  = parseFloat((k.valor || '').replace(/[^0-9.]/g, ''));
+    const metaN = parseFloat((k.meta  || '').replace(/[^0-9.]/g, ''));
+    if (!isNaN(valN) && !isNaN(metaN) && metaN > 0) {
+      const pct = Math.min(100, Math.round((valN / metaN) * 100));
       progressHtml = `<div class="kpi-progress">
         <div class="kpi-progress-track">
           <div class="kpi-progress-fill ${cls}" style="width:${pct}%"></div>
         </div>
-        <div class="kpi-progress-labels">
-          <span class="kpi-progress-label">0</span>
-          <span class="kpi-progress-label" style="color:var(--text2)">${pct}% de meta</span>
-          <span class="kpi-progress-label">Meta: ${k.meta}</span>
-        </div>
+        <div class="kpi-progress-meta">Meta: ${k.meta} · ${pct}% alcanzado</div>
       </div>`;
     }
   }
-  const trendArrow = k.tendencia ? (k.tendencia.includes('sube') || k.tendencia.includes('crecien') ? '↑' :
-    k.tendencia.includes('baja') || k.tendencia.includes('descend') || k.tendencia.includes('mejor') ? '↓' : '→') : '';
-  const trendBadgeClass = trendArrow === '↑' ? 'up' : trendArrow === '↓' ? 'down' : 'stable';
 
-  return `<div class="kpi-card ${cls}">
-    <div class="kpi-label">${k.label}</div>
+  return `<div class="kpi-card ${cls}${clickable ? ' kpi-card-link' : ''}" ${onclick}>
+    <div class="kpi-label">${k.label}${contexto ? `<br><span style="opacity:.6;font-size:9px;font-style:italic">${contexto}</span>` : ''}</div>
     <div class="kpi-val ${cls}">${k.valor || '—'}</div>
-    ${k.tendencia ? `<div class="kpi-trend">
-      <span class="kpi-trend-badge ${trendBadgeClass}">${trendArrow} ${k.tendencia}</span>
+    ${k.tendencia ? `<div class="kpi-trend-row">
+      <span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span>
     </div>` : ''}
-    ${k.meta ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
+    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
     ${progressHtml}
+    ${clickable ? `<div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600">Ver detalle →</div>` : ''}
   </div>`;
 }
 
-function showDetail(empresa, tipo, label, archivo) {
+function showDetail(empresa, tipo, label, archivo, desc) {
   navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab });
-
   const empData = (DATA.empresas || {})[empresa] || {};
   const rd = (empData.reportes || {})[tipo] || {};
 
   let html = '';
 
-  // Alert banner
+  // CONTEXTO: qué reporte es y qué mide
+  html += `<div class="detail-reporte-context">
+    <div class="detail-reporte-empresa">${empresa}</div>
+    <div class="detail-reporte-titulo">${label}</div>
+    ${desc ? `<div class="detail-reporte-desc">${desc}</div>` : ''}
+  </div>`;
+
+  // Alerta principal
   if (rd.alerta) {
     const ac = rd.estado === 'red' ? 'red' : 'yellow';
-    const icon = ac === 'red' ? '🚨' : '⚡';
     html += `<div class="alert-banner ${ac}">
-      <div class="alert-icon">${icon}</div>
+      <div class="alert-icon">${ac === 'red' ? '🚨' : '⚡'}</div>
       <div class="alert-text">${rd.alerta}</div>
     </div>`;
   }
 
-  // KPIs
+  // KPIs — con contexto del reporte para que "Ratio Agosto 2026" tenga sentido
   if (rd.kpis?.length) {
-    html += `<div class="section-title">Indicadores clave<div class="section-divider"></div></div>
-    <div class="kpi-grid">${rd.kpis.map(k => renderKpiCard(k)).join('')}</div>`;
+    html += `<div class="section-header"><div class="section-header-title">Indicadores clave</div><div class="section-header-line"></div></div>
+    <div class="kpi-grid">${rd.kpis.map(k => renderKpiCard(k, null)).join('')}</div>`;
   }
 
   // Tramos de cartera
   if (rd.tramos?.length) {
-    html += `<div class="section-title">Distribución de cartera<div class="section-divider"></div></div>
+    html += `<div class="section-header"><div class="section-header-title">Distribución de cartera</div><div class="section-header-line"></div></div>
     <div class="tramos">${rd.tramos.map(t => `
       <div class="tramo ${t.estado}">
         <div class="tramo-label">${t.label}</div>
@@ -940,20 +901,21 @@ function showDetail(empresa, tipo, label, archivo) {
       </div>`).join('')}</div>`;
   }
 
-  // Riesgos / ranking
+  // Mayor riesgo (clientes/proveedores)
   const risks = rd.riesgos || rd.proveedores_criticos || [];
   if (risks.length) {
-    html += `<div class="section-title">Mayor riesgo<div class="section-divider"></div></div>
-    <div class="riesgo-list">${risks.slice(0,5).map(r => `
+    const isProveedores = !!rd.proveedores_criticos;
+    html += `<div class="section-header"><div class="section-header-title">${isProveedores ? 'Proveedores críticos' : 'Clientes en riesgo'}</div><div class="section-header-line"></div></div>
+    <div class="riesgo-list">${risks.slice(0,5).map((r,i) => `
       <div class="riesgo-row">
-        <div class="riesgo-dot" style="background:${dotBg(r.estado)}"></div>
+        <div class="riesgo-rank">#${i+1}</div>
         <div class="riesgo-info">
           <div class="riesgo-name">${r.nombre || r.name || ''}</div>
-          <div class="riesgo-canal">${r.canal || r.categoria || ''}</div>
+          <div class="riesgo-sub">${r.canal || r.categoria || ''}</div>
         </div>
         <div>
-          <div class="riesgo-monto-val">${r.vencido30 || r.monto || r.pct || ''}</div>
-          <div class="riesgo-monto-sub">${r.total || ''}</div>
+          <div class="riesgo-val ${sc(r.estado)}">${r.vencido30 || r.monto || r.pct || ''}</div>
+          <div class="riesgo-sub-right">${r.total ? 'total ' + r.total : ''}</div>
         </div>
       </div>`).join('')}</div>`;
   }
@@ -961,18 +923,18 @@ function showDetail(empresa, tipo, label, archivo) {
   // Cumplimiento por gerente
   const gerentes = rd.por_gerente || [];
   if (gerentes.length) {
-    html += `<div class="section-title">Por gerente<div class="section-divider"></div></div>
+    html += `<div class="section-header"><div class="section-header-title">Cumplimiento por gerente</div><div class="section-header-line"></div></div>
     <div class="riesgo-list">${gerentes.map(g => {
-      const pctNum = parseFloat((g.pct || '0').replace('%',''));
-      const color = pctNum >= 80 ? 'var(--green)' : pctNum >= 60 ? 'var(--yellow)' : 'var(--red)';
+      const pctN = parseFloat((g.pct || '0').replace('%',''));
+      const color = pctN >= 85 ? 'var(--green)' : pctN >= 70 ? 'var(--yellow)' : 'var(--red)';
       return `<div class="gerente-row">
         <div class="gerente-info">
           <div class="gerente-name">${g.nombre || ''}</div>
-          <div class="gerente-pct-track">
-            <div class="gerente-pct-fill" style="width:${Math.min(100,pctNum)}%;background:${color}"></div>
+          <div class="gerente-bar-track">
+            <div class="gerente-bar-fill" style="width:${Math.min(100,pctN)}%;background:${color}"></div>
           </div>
         </div>
-        <div class="gerente-val" style="color:${color}">${g.pct || ''}</div>
+        <div class="gerente-pct" style="color:${color}">${g.pct || ''}</div>
       </div>`;
     }).join('')}</div>`;
   }
@@ -981,60 +943,67 @@ function showDetail(empresa, tipo, label, archivo) {
   const breakdown = rd.por_uen || rd.por_canal || rd.por_marca || rd.por_categoria || rd.clasificacion || [];
   if (breakdown.length) {
     const bKey = Object.keys(breakdown[0]).find(k => !['estado','monto','pct','avance','real','ratio','interpretacion','margen'].includes(k));
-    html += `<div class="section-title">Desglose<div class="section-divider"></div></div>
+    html += `<div class="section-header"><div class="section-header-title">Desglose</div><div class="section-header-line"></div></div>
     <div class="breakdown-grid">${breakdown.map(b => {
-      const val = b.margen || b.avance || b.ratio || b.pct || '';
-      const labelB = b[bKey] || '';
-      const sub = b.monto || b.real || b.interpretacion || '';
+      const val  = b.margen || b.avance || b.ratio || b.pct || '';
+      const lbl2 = b[bKey] || '';
+      const sub  = b.monto || b.real || b.interpretacion || '';
       return `<div class="breakdown-item">
-        <div class="breakdown-label">${labelB}</div>
-        <div class="breakdown-val ${stateClass(b.estado)}">${val}</div>
+        <div class="breakdown-label">${lbl2}</div>
+        <div class="breakdown-val ${sc(b.estado)}">${val}</div>
         <div class="breakdown-sub">${sub}</div>
       </div>`;
     }).join('')}</div>`;
   }
 
-  // Tendencia — gráfico mejorado
+  // Tendencia
   const tendData = rd.tendencia_mora || rd.tendencia || rd.tendencia_ate || rd.tendencia_dias || rd.tendencia_margen || rd.tendencia_ratio || [];
   if (tendData.length > 1) {
     const vals = tendData.map(t => parseFloat(t.pct || t.val || t.dias || t.ratio || 0));
     const maxV = Math.max(...vals) || 1;
-    const minV = Math.min(...vals);
+    const minV = Math.min(...vals) * 0.6;
     const lastV = vals[vals.length - 1];
     const prevV = vals[vals.length - 2];
-    const trend = lastV > prevV ? '↑ Empeorando' : lastV < prevV ? '↓ Mejorando' : '→ Estable';
-    const trendColor = lastV > prevV ? 'var(--red)' : lastV < prevV ? 'var(--green)' : 'var(--text2)';
+    // Detectar si en este KPI "sube = malo"
+    const lbl0 = (rd.kpis?.[0]?.label || tipo).toLowerCase();
+    const subeBad = lbl0.includes('mora') || lbl0.includes('dias') || lbl0.includes('merma') || lbl0.includes('dead');
+    const going = lastV > prevV ? (subeBad ? 'bad' : 'good') : lastV < prevV ? (subeBad ? 'good' : 'bad') : 'flat';
+    const goingText = lastV > prevV ? '↑ Sube' : lastV < prevV ? '↓ Baja' : '→ Estable';
+    const suffix = vals[0] !== undefined && typeof vals[0] === 'number' && tendData[0]?.pct !== undefined ? '%' : '';
 
-    html += `<div class="section-title">Tendencia<div class="section-divider"></div></div>
+    html += `<div class="section-header"><div class="section-header-title">Tendencia histórica</div><div class="section-header-line"></div></div>
     <div class="tend-chart">
-      <div class="tend-title-row">
-        <div class="tend-chart-label">Últimos ${tendData.length} meses</div>
-        <div style="font-size:12px;font-weight:700;color:${trendColor}">${trend}</div>
+      <div class="tend-header">
+        <div class="tend-chart-label">${tendData.length} periodos</div>
+        <div class="tend-trend-text ${going}">${goingText}</div>
       </div>
       <div class="tend-bars">${tendData.map((t,i) => {
         const v = vals[i];
-        const h = Math.max(6, Math.round(((v - minV * 0.5) / (maxV - minV * 0.5 || 1)) * 58));
+        const h = Math.max(6, Math.round(((v - minV) / (maxV - minV || 1)) * 66));
         const isLast = i === tendData.length - 1;
-        const cls = isLast ? (v > maxV * 0.75 ? 'red' : v > maxV * 0.5 ? 'yellow' : 'green') :
-          (v > maxV * 0.75 ? 'red' : v > maxV * 0.5 ? 'yellow' : 'green');
+        // Color de barra: si subeBad, alto = rojo
+        const barCls = subeBad
+          ? (v >= maxV * 0.85 ? 'red' : v >= maxV * 0.65 ? 'yellow' : 'green')
+          : (v >= maxV * 0.85 ? 'green' : v >= maxV * 0.65 ? 'yellow' : 'red');
+        const displayV = typeof v === 'number' ? (v % 1 !== 0 ? v.toFixed(1) : v) : v;
         return `<div class="tend-col">
-          <div class="tend-pct ${isLast ? 'tend-current-marker' : ''}">${typeof v === 'number' ? (v % 1 ? v.toFixed(1) : v) : v}${t.pct !== undefined ? '%' : ''}</div>
-          <div class="tend-bar ${cls}" style="height:${h}px${isLast ? ';opacity:1;box-shadow:0 0 6px rgba(255,255,255,0.2)' : ';opacity:0.75'}"></div>
+          <div class="tend-val${isLast ? ' current' : ''}">${displayV}${suffix}</div>
+          <div class="tend-bar ${barCls}${isLast ? ' current' : ''}" style="height:${h}px"></div>
           <div class="tend-mes">${t.mes || ''}</div>
         </div>`;
       }).join('')}</div>
+      ${rd.kpis?.[0]?.meta ? `<div class="tend-meta-line"><div class="tend-meta-dot"></div><div class="tend-meta-text">Meta: ${rd.kpis[0].meta}</div></div>` : ''}
     </div>`;
   }
 
   // Acciones recomendadas
   if (rd.acciones?.length) {
     html += `<div class="decision-box">
-      <div class="decision-title">💡 Qué hacer con esto</div>
+      <div class="decision-title">💡 Qué hacer</div>
       ${rd.acciones.map(a => `<div class="decision-item">${a}</div>`).join('')}
     </div>`;
   }
 
-  // Ver PNG
   html += `<button class="png-btn" onclick="openPng('data/latest/${empresa}/${archivo}','${label}')">
     <svg viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--text2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
     Ver reporte Power BI original
@@ -1044,11 +1013,12 @@ function showDetail(empresa, tipo, label, archivo) {
   </button>`;
 
   document.getElementById('detail-content').innerHTML = html;
-  document.getElementById('top-title').textContent = label;
-  document.getElementById('top-badge').textContent = empresa;
+  document.getElementById('top-title').textContent  = label;
+  document.getElementById('top-badge').textContent  = empresa;
   document.getElementById('back-btn').classList.add('visible');
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-detail').classList.add('active');
+  document.getElementById('screens-container').scrollTop = 0;
 }
 
 function goBack() {
@@ -1059,6 +1029,7 @@ function goBack() {
   document.getElementById('top-title').textContent = prev.tab === 'home' ? 'Juanito Garcia' : prev.tab.toUpperCase();
   document.getElementById('top-badge').textContent = DATA.fecha || '';
   if (!navHistory.length) document.getElementById('back-btn').classList.remove('visible');
+  document.getElementById('screens-container').scrollTop = 0;
 }
 
 function showTab(tab) {
@@ -1070,7 +1041,6 @@ function showTab(tab) {
   document.getElementById('top-title').textContent = tab === 'home' ? 'Juanito Garcia' : tab.toUpperCase();
   document.getElementById('top-badge').textContent = DATA?.fecha || '';
   document.getElementById('back-btn').classList.remove('visible');
-  // scroll to top
   document.getElementById('screens-container').scrollTop = 0;
 }
 
@@ -1118,14 +1088,8 @@ function addMsg(role, text) {
   return el;
 }
 
-function handleChatKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-}
+function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
 
 async function sendChat() {
   if (!apiKey) { openChat(); return; }
@@ -1134,29 +1098,21 @@ async function sendChat() {
   if (!text) return;
   input.value = '';
   input.style.height = 'auto';
-
   addMsg('user', text);
   const send = document.getElementById('chat-send');
   send.disabled = true;
   const loadingEl = addMsg('assistant', '...');
   loadingEl.classList.add('loading');
-
   try {
     const ctx = JSON.stringify(DATA, null, 2).slice(0, 8000);
-    const systemPrompt = `Eres Juanito Garcia, analista de Control Interno de un holding con 3 empresas: PAUNO, AMAUTA y NEOPACK.
-Fecha de los datos: ${DATA?.fecha} ${DATA?.hora}.
-Responde en español, directo y con números exactos del contexto.
-Si algo no está en los datos, dilo claramente. Nunca inventes cifras. Sé conciso pero preciso.
-
-DATOS DEL DÍA:
-${ctx}`;
-
+    const sys = `Eres Juanito Garcia, analista de Control Interno de un holding con 3 empresas: PAUNO, AMAUTA y NEOPACK.
+Fecha: ${DATA?.fecha} ${DATA?.hora}. Responde en español, directo y con números exactos del contexto. Nunca inventes cifras.
+DATOS: ${ctx}`;
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-calls': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1024, system: systemPrompt, messages: [{ role: 'user', content: text }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1024, system: sys, messages: [{ role: 'user', content: text }] })
     });
-
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message);
     loadingEl.textContent = data.content[0].text;
