@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-generate_summaries.py — Juanito Garcia
+generate_summaries.py -- Juanito Garcia
 Lee los PNGs del scraper, llama a Claude API y genera summaries.json
-para la web app. Se ejecuta desde GitHub Actions después del scraper.
+para la web app. Se ejecuta desde GitHub Actions despues del scraper.
 """
 
 import os
@@ -46,48 +46,48 @@ REPORTES = {
     ],
 }
 
-SEMAFORO_PROMPT = """Analiza TODOS estos reportes del holding (PAUNO, AMAUTA, NEOPACK) y responde SOLO con JSON válido, sin texto adicional.
+SEMAFORO_PROMPT = """Analiza TODOS estos reportes del holding (PAUNO, AMAUTA, NEOPACK) y responde SOLO con JSON valido, sin texto adicional.
 
 REGLAS:
-- Lee números directamente de las imágenes. Si no ves claro escribe null.
+- Lee numeros directamente de las imagenes. Si no ves claro escribe null.
 - Compras ratio = Consumo/Compra: >100% jala stock, 80-100% normal, <80% sobre-compra. NUNCA marques >95% como malo.
-- Semáforo: "red"=KPI crítico fuera de meta, "yellow"=alerta o tendencia negativa, "green"=ok o mejorando
+- Semaforo: "red"=KPI critico fuera de meta, "yellow"=alerta o tendencia negativa, "green"=ok o mejorando
 
 Responde con este JSON exacto:
 {
   "fecha": "DD/MM/YYYY",
   "hora": "HH:MM",
   "semaforos": {"PAUNO": "red|yellow|green", "AMAUTA": "red|yellow|green", "NEOPACK": "red|yellow|green"},
-  "semaforo_razon": {"PAUNO": "KPI más crítico con número", "AMAUTA": "...", "NEOPACK": "..."},
+  "semaforo_razon": {"PAUNO": "KPI mas critico con numero", "AMAUTA": "...", "NEOPACK": "..."},
   "holding_ventas": "S/X.XM",
   "holding_mora": "XX%",
   "agenda_ceo": {
     "decidir_hoy": [
-      {"texto": "acción concreta — número en juego", "empresa": "PAUNO|AMAUTA|NEOPACK", "responsable": "área"}
+      {"texto": "accion concreta -- numero en juego", "empresa": "PAUNO|AMAUTA|NEOPACK", "responsable": "area"}
     ],
     "escalar_semana": [
-      {"texto": "seguimiento o reunión necesaria", "empresa": "...", "responsable": "..."}
+      {"texto": "seguimiento o reunion necesaria", "empresa": "...", "responsable": "..."}
     ],
     "monitorear": [
-      {"texto": "tendencia a vigilar — indicador", "empresa": "..."}
+      {"texto": "tendencia a vigilar -- indicador", "empresa": "..."}
     ]
   }
 }"""
 
 REPORTE_PROMPT = {
-    "cuentas_por_cobrar": """Analiza esta imagen de Cuentas por Cobrar y responde SOLO con JSON válido:
+    "cuentas_por_cobrar": """Analiza esta imagen de Cuentas por Cobrar y responde SOLO con JSON valido:
 {
   "alerta": "una frase de alerta si hay problema, null si todo ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Morosidad", "valor": "XX%", "meta": "<15%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "CxC total", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "→"},
-    {"label": "Rotación", "valor": "XXd", "meta": null, "estado": "green", "tendencia": "→"}
+    {"label": "Morosidad", "valor": "XX%", "meta": "<15%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "CxC total", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "estable"},
+    {"label": "Rotacion", "valor": "XXd", "meta": null, "estado": "green", "tendencia": "estable"}
   ],
   "tramos": [
     {"label": "Por vencer", "valor": "S/X.XM", "pct": "XX%", "estado": "green"},
-    {"label": "0–30 días", "valor": "S/XXXK", "pct": "XX%", "estado": "yellow"},
-    {"label": "+30 días", "valor": "S/XXXK", "pct": "XX%", "estado": "red"}
+    {"label": "0-30 dias", "valor": "S/XXXK", "pct": "XX%", "estado": "yellow"},
+    {"label": "+30 dias", "valor": "S/XXXK", "pct": "XX%", "estado": "red"}
   ],
   "riesgos": [
     {"nombre": "nombre cliente/vendedor", "canal": "canal", "total": "S/XXXK", "vencido30": "S/XXXK", "estado": "red|yellow"}
@@ -95,17 +95,17 @@ REPORTE_PROMPT = {
   "tendencia_mora": [
     {"mes": "Ene", "pct": 11}, {"mes": "Feb", "pct": 11}
   ],
-  "acciones": ["acción 1 concreta", "acción 2", "acción 3"]
+  "acciones": ["accion 1 concreta", "accion 2", "accion 3"]
 }""",
 
-    "cuentas_por_pagar": """Analiza esta imagen de Cuentas por Pagar y responde SOLO con JSON válido:
+    "cuentas_por_pagar": """Analiza esta imagen de Cuentas por Pagar y responde SOLO con JSON valido:
 {
   "alerta": "frase de alerta si hay problema, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Días CxP", "valor": "XXXd", "meta": "<90d", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "CxP total", "valor": "S/XX.XM", "meta": null, "estado": "yellow", "tendencia": "↑"},
-    {"label": "Refinanciado", "valor": "S/X.XM", "meta": null, "estado": "yellow", "tendencia": "→"}
+    {"label": "Dias CxP", "valor": "XXXd", "meta": "<90d", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "CxP total", "valor": "S/XX.XM", "meta": null, "estado": "yellow", "tendencia": "sube"},
+    {"label": "Refinanciado", "valor": "S/X.XM", "meta": null, "estado": "yellow", "tendencia": "estable"}
   ],
   "tramos": [
     {"label": "Vigente", "valor": "S/X.XM", "pct": "XX%", "estado": "green"},
@@ -113,22 +113,22 @@ REPORTE_PROMPT = {
     {"label": "Venc. 16-90d", "valor": "S/X.XM", "pct": "XX%", "estado": "red"}
   ],
   "proveedores_criticos": [
-    {"nombre": "nombre proveedor", "categoria": "categoría", "monto": "S/X.XM", "estado": "red|yellow"}
+    {"nombre": "nombre proveedor", "categoria": "categoria", "monto": "S/X.XM", "estado": "red|yellow"}
   ],
   "tendencia_dias": [
     {"mes": "Ago", "dias": 42}
   ],
-  "acciones": ["acción 1", "acción 2", "acción 3"]
+  "acciones": ["accion 1", "accion 2", "accion 3"]
 }""",
 
-    "margen_variable": """Analiza esta imagen de Margen Variable y responde SOLO con JSON válido:
+    "margen_variable": """Analiza esta imagen de Margen Variable y responde SOLO con JSON valido:
 {
   "alerta": "frase de alerta si margen < 46%, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Margen total", "valor": "XX%", "meta": "52%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Ventas mes", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "→"},
-    {"label": "Precio/kg", "valor": "S/X.XX", "meta": null, "estado": "green", "tendencia": "→"}
+    {"label": "Margen total", "valor": "XX%", "meta": "52%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Ventas mes", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "estable"},
+    {"label": "Precio/kg", "valor": "S/X.XX", "meta": null, "estado": "green", "tendencia": "estable"}
   ],
   "por_uen": [
     {"uen": "B&D", "margen": "XX%", "estado": "red|yellow|green"},
@@ -138,33 +138,33 @@ REPORTE_PROMPT = {
   "tendencia_margen": [
     {"mes": "Ene", "pct": 52.85}
   ],
-  "acciones": ["acción 1", "acción 2"]
+  "acciones": ["accion 1", "accion 2"]
 }""",
 
-    "mermas": """Analiza esta imagen de Mermas y responde SOLO con JSON válido:
+    "mermas": """Analiza esta imagen de Mermas y responde SOLO con JSON valido:
 {
   "alerta": "frase si alguna planta > 3%, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Merma Ate", "valor": "X.X%", "meta": "2%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Merma Pachacamac", "valor": "X.X%", "meta": "2%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Merma Terceros", "valor": "X.X%", "meta": "2%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"}
+    {"label": "Merma Ate", "valor": "X.X%", "meta": "2%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Merma Pachacamac", "valor": "X.X%", "meta": "2%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Merma Terceros", "valor": "X.X%", "meta": "2%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"}
   ],
   "tendencia_ate": [{"mes": "Ene", "pct": 2.21}],
   "tendencia_pachacamac": [{"mes": "Ene", "pct": 1.59}],
-  "acciones": ["acción 1", "acción 2"]
+  "acciones": ["accion 1", "accion 2"]
 }""",
 
-    "compras": """Analiza esta imagen de Compras (Ratio Consumo/Compra) y responde SOLO con JSON válido.
+    "compras": """Analiza esta imagen de Compras (Ratio Consumo/Compra) y responde SOLO con JSON valido.
 REGLA: ratio 80-100% = normal (green), >100% = jala stock (yellow si <120%, red si >120%), <80% = sobre-compra (yellow).
-El ratio de agosto puede ser alto si el mes está incompleto, considera eso.
+El ratio de agosto puede ser alto si el mes esta incompleto, considera eso.
 {
   "alerta": "frase si ratio extremo, null si normal",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Ratio agosto", "valor": "XXX%", "meta": "80-100%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Ratio julio", "valor": "XX%", "meta": "80-100%", "estado": "green", "tendencia": "→"},
-    {"label": "Ratio promedio", "valor": "XX%", "meta": "80-100%", "estado": "green", "tendencia": "→"}
+    {"label": "Ratio agosto", "valor": "XXX%", "meta": "80-100%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Ratio julio", "valor": "XX%", "meta": "80-100%", "estado": "green", "tendencia": "estable"},
+    {"label": "Ratio promedio", "valor": "XX%", "meta": "80-100%", "estado": "green", "tendencia": "estable"}
   ],
   "por_categoria": [
     {"categoria": "Materia Prima", "ratio": "XX%", "interpretacion": "normal|jala stock|sobre-compra", "estado": "red|yellow|green"},
@@ -173,33 +173,33 @@ El ratio de agosto puede ser alto si el mes está incompleto, considera eso.
     {"categoria": "Repuestos", "ratio": "XX%", "interpretacion": "...", "estado": "..."}
   ],
   "tendencia_ratio": [{"mes": "Ago", "ratio": 92.45}],
-  "acciones": ["acción 1", "acción 2"]
+  "acciones": ["accion 1", "accion 2"]
 }""",
 
-    "control_interno": """Analiza esta imagen de Control Interno y responde SOLO con JSON válido:
+    "control_interno": """Analiza esta imagen de Control Interno y responde SOLO con JSON valido:
 {
   "alerta": "frase si cumplimiento < 70%, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Cumplimiento", "valor": "XX%", "meta": "85%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Puntos críticos", "valor": "XX", "meta": "0", "estado": "red", "tendencia": "→"},
-    {"label": "Satisfactorio", "valor": "XX", "meta": null, "estado": "green", "tendencia": "→"}
+    {"label": "Cumplimiento", "valor": "XX%", "meta": "85%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Puntos criticos", "valor": "XX", "meta": "0", "estado": "red", "tendencia": "estable"},
+    {"label": "Satisfactorio", "valor": "XX", "meta": null, "estado": "green", "tendencia": "estable"}
   ],
   "por_gerente": [
     {"nombre": "nombre", "pct": "XX%", "estado": "red|yellow|green"}
   ],
   "tendencia": [{"mes": "Ene", "pct": 44.44}],
-  "acciones": ["acción 1", "acción 2"]
+  "acciones": ["accion 1", "accion 2"]
 }""",
 
-    "sop_inventario": """Analiza esta imagen de S&OP Inventario y responde SOLO con JSON válido:
+    "sop_inventario": """Analiza esta imagen de S&OP Inventario y responde SOLO con JSON valido:
 {
   "alerta": "frase si dead stock > S/1M, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Dead stock", "valor": "S/X.XM", "meta": "<S/500K", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "% Dead", "valor": "XX%", "meta": "<5%", "estado": "red|yellow|green", "tendencia": "→"},
-    {"label": "Working", "valor": "XX%", "meta": ">70%", "estado": "green", "tendencia": "→"}
+    {"label": "Dead stock", "valor": "S/X.XM", "meta": "<S/500K", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "% Dead", "valor": "XX%", "meta": "<5%", "estado": "red|yellow|green", "tendencia": "estable"},
+    {"label": "Working", "valor": "XX%", "meta": ">70%", "estado": "green", "tendencia": "estable"}
   ],
   "clasificacion": [
     {"tipo": "Working", "monto": "S/X.XM", "pct": "XX%", "estado": "green"},
@@ -210,42 +210,42 @@ El ratio de agosto puede ser alto si el mes está incompleto, considera eso.
   "dead_por_categoria": [
     {"categoria": "Envases y Embalajes", "monto": "S/XXXK", "pct_dead": "XX%", "estado": "red"}
   ],
-  "acciones": ["acción 1", "acción 2"]
+  "acciones": ["accion 1", "accion 2"]
 }""",
 
-    "fill_rate": """Analiza esta imagen de Fill Rate y responde SOLO con JSON válido:
+    "fill_rate": """Analiza esta imagen de Fill Rate y responde SOLO con JSON valido:
 {
   "alerta": "frase si fill rate < 85%, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Fill Rate", "valor": "XX%", "meta": "98%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Brecha", "valor": "-Xpp", "meta": "0", "estado": "red|yellow|green", "tendencia": "→"},
-    {"label": "Clientes afect.", "valor": "XX", "meta": null, "estado": "yellow", "tendencia": "→"}
+    {"label": "Fill Rate", "valor": "XX%", "meta": "98%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Brecha", "valor": "-Xpp", "meta": "0", "estado": "red|yellow|green", "tendencia": "estable"},
+    {"label": "Clientes afect.", "valor": "XX", "meta": null, "estado": "yellow", "tendencia": "estable"}
   ],
-  "acciones": ["acción 1", "acción 2"]
+  "acciones": ["accion 1", "accion 2"]
 }""",
 
-    "productividad": """Analiza esta imagen de Productividad y responde SOLO con JSON válido:
+    "productividad": """Analiza esta imagen de Productividad y responde SOLO con JSON valido:
 {
   "alerta": null,
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "S//kg producido", "valor": "S/X.XX", "meta": null, "estado": "green", "tendencia": "↑|↓|→"},
-    {"label": "vs 2025", "valor": "S/X.XX", "meta": null, "estado": "green", "tendencia": "↓"},
-    {"label": "Planilla total", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "→"}
+    {"label": "S//kg producido", "valor": "S/X.XX", "meta": null, "estado": "green", "tendencia": "sube|baja|estable"},
+    {"label": "vs 2025", "valor": "S/X.XX", "meta": null, "estado": "green", "tendencia": "baja"},
+    {"label": "Planilla total", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "estable"}
   ],
   "tendencia": [{"mes": "Ene", "val": 0.51}],
-  "acciones": ["acción 1"]
+  "acciones": ["accion 1"]
 }""",
 
-    "margen_variable_pag2": """Analiza esta imagen de Avance de Ventas vs Presupuesto y responde SOLO con JSON válido:
+    "margen_variable_pag2": """Analiza esta imagen de Avance de Ventas vs Presupuesto y responde SOLO con JSON valido:
 {
   "alerta": "frase si avance < 70% a mitad de mes, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Avance total", "valor": "XX%", "meta": "proporcional al día", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Ventas reales", "valor": "S/XXXK", "meta": null, "estado": "green", "tendencia": "→"},
-    {"label": "Día del mes", "valor": "D/31", "meta": null, "estado": "green", "tendencia": "→"}
+    {"label": "Avance total", "valor": "XX%", "meta": "proporcional al dia", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Ventas reales", "valor": "S/XXXK", "meta": null, "estado": "green", "tendencia": "estable"},
+    {"label": "Dia del mes", "valor": "D/31", "meta": null, "estado": "green", "tendencia": "estable"}
   ],
   "por_canal": [
     {"canal": "Moderno", "avance": "XX%", "real": "S/XXXK", "estado": "red|yellow|green"},
@@ -257,31 +257,31 @@ El ratio de agosto puede ser alto si el mes está incompleto, considera eso.
     {"marca": "B&D", "avance": "XX%", "real": "S/XXXK", "estado": "yellow"},
     {"marca": "TIGO", "avance": "XX%", "real": "S/XXXK", "estado": "red"}
   ],
-  "acciones": ["acción 1", "acción 2"]
+  "acciones": ["accion 1", "accion 2"]
 }""",
 
-    "inventario": """Analiza esta imagen de Inventario y responde SOLO con JSON válido:
+    "inventario": """Analiza esta imagen de Inventario y responde SOLO con JSON valido:
 {
   "alerta": "frase si dead > 5% del total, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Stock total", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "→"},
-    {"label": "Cobertura", "valor": "XXd", "meta": null, "estado": "green", "tendencia": "→"},
-    {"label": "Dead stock", "valor": "X%", "meta": "<5%", "estado": "red|yellow|green", "tendencia": "→"}
+    {"label": "Stock total", "valor": "S/X.XM", "meta": null, "estado": "green", "tendencia": "estable"},
+    {"label": "Cobertura", "valor": "XXd", "meta": null, "estado": "green", "tendencia": "estable"},
+    {"label": "Dead stock", "valor": "X%", "meta": "<5%", "estado": "red|yellow|green", "tendencia": "estable"}
   ],
-  "acciones": ["acción 1"]
+  "acciones": ["accion 1"]
 }""",
 
-    "ventas": """Analiza esta imagen de Ventas y responde SOLO con JSON válido:
+    "ventas": """Analiza esta imagen de Ventas y responde SOLO con JSON valido:
 {
   "alerta": "frase si avance < 60% a mitad de mes, null si ok",
   "estado": "red|yellow|green",
   "kpis": [
-    {"label": "Avance", "valor": "XX%", "meta": "100%", "estado": "red|yellow|green", "tendencia": "↑|↓|→"},
-    {"label": "Facturación", "valor": "S/XXXK", "meta": null, "estado": "green", "tendencia": "→"},
-    {"label": "Categoría líder", "valor": "categoría", "meta": null, "estado": "green", "tendencia": "→"}
+    {"label": "Avance", "valor": "XX%", "meta": "100%", "estado": "red|yellow|green", "tendencia": "sube|baja|estable"},
+    {"label": "Facturacion", "valor": "S/XXXK", "meta": null, "estado": "green", "tendencia": "estable"},
+    {"label": "Categoria lider", "valor": "categoria", "meta": null, "estado": "green", "tendencia": "estable"}
   ],
-  "acciones": ["acción 1"]
+  "acciones": ["accion 1"]
 }"""
 }
 
@@ -312,7 +312,7 @@ def llamar_claude(client, content: list, max_tokens=1500) -> dict:
 
 
 def generar_semaforo_y_agenda(client, data_dir: Path) -> dict:
-    print("Generando semáforo global y agenda CEO...")
+    print("Generando semaforo global y agenda CEO...")
     content = []
     for empresa, reportes in REPORTES.items():
         for archivo, _ in reportes[:3]:
