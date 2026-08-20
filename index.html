@@ -99,14 +99,29 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 8px 12px;
-  text-align: center;
+  padding: 12px 12px 14px;
+  text-align: left;
   cursor: pointer;
   box-shadow: var(--shadow);
   transition: transform 0.12s, box-shadow 0.12s;
   position: relative;
   overflow: hidden;
 }
+.sem-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.sem-card-top .sem-name { flex: 1; font-size: 12px; font-weight: 800; color: var(--text1); letter-spacing: 0.5px; margin: 0; }
+.sem-arrow { font-size: 11px; color: var(--text3); }
+.sem-kpis-list { display: flex; flex-direction: column; gap: 5px; }
+.sem-kpi-row { display: flex; align-items: center; gap: 5px; }
+.sem-kpi-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sem-kpi-dot.red { background: var(--red); }
+.sem-kpi-dot.yellow { background: var(--yellow); }
+.sem-kpi-dot.green { background: var(--green); }
+.sem-kpi-label { font-size: 10px; color: var(--text2); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sem-kpi-val { font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.sem-kpi-val.red { color: var(--red); }
+.sem-kpi-val.yellow { color: var(--yellow); }
+.sem-kpi-val.green { color: var(--green); }
+.sem-kpi-ok { font-size: 10px; color: var(--text3); }
 .sem-card::after {
   content: '';
   position: absolute;
@@ -751,13 +766,33 @@ function renderHome() {
   const razones = DATA.semaforo_razon || {};
 
   document.getElementById('semaforos-row').innerHTML = Object.entries(sems).map(([emp, s]) => {
-    // Solo la primera parte de la razón (antes de " con ")
-    const razonCorta = (razones[emp] || '').split(' con ')[0];
+    // Recoger KPIs críticos de esta empresa en orden de prioridad
+    const empData = (DATA.empresas || {})[emp] || {};
+    const rpts = REPORTES_CONFIG[emp] || [];
+    const criticos = [];
+    rpts.forEach(r => {
+      const rd = (empData.reportes || {})[r.tipo] || {};
+      (rd.kpis || []).forEach(k => {
+        if (k.estado === 'red' || k.estado === 'yellow') {
+          criticos.push({...k, _rpt: r.label});
+        }
+      });
+    });
+    criticos.sort((a,b) => (a.estado==='red'?0:1)-(b.estado==='red'?0:1));
+    const top = criticos.slice(0,4);
+    const kpisHtml = top.map(k => `
+      <div class="sem-kpi-row">
+        <span class="sem-kpi-dot ${k.estado}"></span>
+        <span class="sem-kpi-label">${k.label}</span>
+        <span class="sem-kpi-val ${k.estado}">${k.valor}</span>
+      </div>`).join('');
     return `<div class="sem-card ${s}" onclick="showTab('${emp.toLowerCase()}')">
-      <span class="sem-badge ${s}">${semLabel(s)}</span>
-      <div class="sem-emoji-big">${semEmoji(s)}</div>
-      <div class="sem-name">${emp}</div>
-      <div class="sem-kpi">${razonCorta}</div>
+      <div class="sem-card-top">
+        <span class="sem-badge ${s}">${semLabel(s)}</span>
+        <span class="sem-name">${emp}</span>
+        <span class="sem-arrow">→</span>
+      </div>
+      <div class="sem-kpis-list">${kpisHtml || `<div class="sem-kpi-ok">Sin alertas críticas</div>`}</div>
     </div>`;
   }).join('');
 
