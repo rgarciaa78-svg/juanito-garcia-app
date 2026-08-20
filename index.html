@@ -266,13 +266,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .kpi-trend-pill.good { color: var(--text3); }
 .kpi-trend-pill.flat { color: var(--text3); }
 
-/* Progress bar */
+/* Progress bar — un solo color, el semáforo identifica el estado */
 .kpi-progress { margin-top: 8px; }
 .kpi-progress-track { height: 3px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-.kpi-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-.kpi-progress-fill.red    { background: var(--red); }
-.kpi-progress-fill.yellow { background: var(--yellow); }
-.kpi-progress-fill.green  { background: var(--green); }
+.kpi-progress-fill { height: 100%; border-radius: 3px; background: var(--text3); transition: width 0.5s ease; }
+.kpi-progress-fill.red, .kpi-progress-fill.yellow, .kpi-progress-fill.green { background: var(--text3); }
 .kpi-progress-meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
 
 .kpi-card-link { transition: transform 0.1s, box-shadow 0.1s; }
