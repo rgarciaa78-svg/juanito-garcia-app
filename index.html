@@ -236,8 +236,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
 .kpi-card {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--border);
+  border: 1.5px solid #cbd5e1;
   border-radius: var(--radius);
   padding: 14px 14px 12px;
   box-shadow: var(--shadow);
@@ -245,20 +244,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   overflow: hidden;
 }
 .kpi-card::before { content: none; }
-.kpi-card.red    { border-left-color: var(--red); }
-.kpi-card.yellow { border-left-color: var(--yellow); }
-.kpi-card.green  { border-left-color: var(--green); }
-.kpi-sem-dot { position:absolute; top:12px; right:12px; width:9px; height:9px; border-radius:50%; }
-.kpi-card.red .kpi-sem-dot    { background: var(--red); }
-.kpi-card.yellow .kpi-sem-dot { background: var(--yellow); }
-.kpi-card.green .kpi-sem-dot  { background: var(--green); }
+.kpi-card.red, .kpi-card.yellow, .kpi-card.green { border-color: #cbd5e1; }
 
-.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; line-height: 1.4; }
-.kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; color: var(--text); }
-.kpi-val.red { color: var(--red); }
-.kpi-val.yellow { color: var(--yellow); }
-.kpi-val.green { color: var(--green); }
-.kpi-val.neutral { color: var(--text); }
+/* Semáforo dot junto al valor */
+.kpi-val-row { display: flex; align-items: center; gap: 10px; margin-bottom: 0; }
+.kpi-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.kpi-dot.red    { background: #ef4444; }
+.kpi-dot.yellow { background: #f59e0b; }
+.kpi-dot.green  { background: #22c55e; }
+.kpi-dot.neutral { background: #94a3b8; }
+
+.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; line-height: 1.4; font-weight: 600; }
+.kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; color: #1e293b; }
+.kpi-val.red, .kpi-val.yellow, .kpi-val.green, .kpi-val.neutral { color: #1e293b; }
 
 .kpi-meta { font-size: 11px; color: var(--text3); margin-top: 5px; }
 .kpi-trend-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
@@ -926,9 +924,11 @@ function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
   }
 
   return `<div class="kpi-card ${cls}${clickable ? ' kpi-card-link' : ''}" ${onclick}>
-    <div class="kpi-sem-dot"></div>
     <div class="kpi-label">${k.label}${contexto ? `<br><span style="opacity:.6;font-size:9px;font-style:italic">${contexto}</span>` : ''}</div>
-    <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+    <div class="kpi-val-row">
+      <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+      <div class="kpi-dot ${cls}"></div>
+    </div>
     ${k.tendencia ? `<div class="kpi-trend-row">
       <span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span>
     </div>` : ''}
@@ -961,9 +961,11 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
   const safeAttr = s => s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
   return `<div class="kpi-card ${cls} kpi-card-link" data-pregunta="${safeAttr(pregunta)}" onclick="openChatWithMsg(this.dataset.pregunta)">
-    <div class="kpi-sem-dot"></div>
     <div class="kpi-label">${k.label}</div>
-    <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+    <div class="kpi-val-row">
+      <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+      <div class="kpi-dot ${cls}"></div>
+    </div>
     ${k.tendencia ? `<div class="kpi-trend-row"><span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span></div>` : ''}
     ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${esc(k.meta)}</div>` : ''}
     ${progressHtml}
