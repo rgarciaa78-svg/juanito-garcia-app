@@ -10,7 +10,7 @@
 <title>Juanito Garcia</title>
 <style>
 :root {
-  --bg:     #f2f2f7;
+  --bg:     #ffffff;
   --bg2:    #ffffff;
   --bg3:    #e8e8ed;
   --card:   #ffffff;
@@ -226,7 +226,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .section-header-title {
   font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.6px;
-  color: var(--text2); white-space: nowrap;
+  color: #1e3a5f; white-space: nowrap;
 }
 .section-header-line { flex: 1; height: 1px; background: var(--border); }
 
@@ -254,26 +254,26 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .kpi-dot.green  { background: #22c55e; }
 .kpi-dot.neutral { background: #94a3b8; }
 
-.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; line-height: 1.4; font-weight: 600; }
+.kpi-label { font-size: 10px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; line-height: 1.4; font-weight: 600; }
 .kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; color: #1e293b; }
 .kpi-val.red, .kpi-val.yellow, .kpi-val.green, .kpi-val.neutral { color: #1e293b; }
 
-.kpi-meta { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.kpi-meta { font-size: 11px; color: #374151; margin-top: 5px; }
 .kpi-trend-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
 .kpi-trend-pill {
   font-size: 10px; font-weight: 500; padding: 0; background: none; border: none;
   color: var(--text3);
 }
-.kpi-trend-pill.bad  { color: var(--text3); }
-.kpi-trend-pill.good { color: var(--text3); }
-.kpi-trend-pill.flat { color: var(--text3); }
+.kpi-trend-pill.bad  { color: #374151; }
+.kpi-trend-pill.good { color: #374151; }
+.kpi-trend-pill.flat { color: #374151; }
 
 /* Progress bar — un solo color, el semáforo identifica el estado */
 .kpi-progress { margin-top: 8px; }
 .kpi-progress-track { height: 3px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .kpi-progress-fill { height: 100%; border-radius: 3px; background: var(--text3); transition: width 0.5s ease; }
 .kpi-progress-fill.red, .kpi-progress-fill.yellow, .kpi-progress-fill.green { background: var(--text3); }
-.kpi-progress-meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.kpi-progress-meta { font-size: 10px; color: #374151; margin-top: 4px; }
 
 .kpi-card-link { transition: transform 0.1s, box-shadow 0.1s; }
 .kpi-card-link:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
