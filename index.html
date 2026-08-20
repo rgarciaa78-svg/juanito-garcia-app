@@ -248,6 +248,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .kpi-card.red    { border-left-color: var(--red); }
 .kpi-card.yellow { border-left-color: var(--yellow); }
 .kpi-card.green  { border-left-color: var(--green); }
+.kpi-sem-dot { position:absolute; top:12px; right:12px; width:9px; height:9px; border-radius:50%; }
+.kpi-card.red .kpi-sem-dot    { background: var(--red); }
+.kpi-card.yellow .kpi-sem-dot { background: var(--yellow); }
+.kpi-card.green .kpi-sem-dot  { background: var(--green); }
 
 .kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; line-height: 1.4; }
 .kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; color: var(--text); }
@@ -922,6 +926,7 @@ function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
   }
 
   return `<div class="kpi-card ${cls}${clickable ? ' kpi-card-link' : ''}" ${onclick}>
+    <div class="kpi-sem-dot"></div>
     <div class="kpi-label">${k.label}${contexto ? `<br><span style="opacity:.6;font-size:9px;font-style:italic">${contexto}</span>` : ''}</div>
     <div class="kpi-val ${cls}">${k.valor || '—'}</div>
     ${k.tendencia ? `<div class="kpi-trend-row">
@@ -956,6 +961,7 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
   const safeAttr = s => s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
   return `<div class="kpi-card ${cls} kpi-card-link" data-pregunta="${safeAttr(pregunta)}" onclick="openChatWithMsg(this.dataset.pregunta)">
+    <div class="kpi-sem-dot"></div>
     <div class="kpi-label">${k.label}</div>
     <div class="kpi-val ${cls}">${k.valor || '—'}</div>
     ${k.tendencia ? `<div class="kpi-trend-row"><span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span></div>` : ''}
