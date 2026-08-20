@@ -57,12 +57,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #top-badge { font-size: 10px; font-weight: 600; background: var(--bg3); color: var(--text2); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
 
 #main { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-#nav-bar { background: var(--bg2); border-top: 1px solid var(--border); display: flex; min-height: var(--nav-h); flex-shrink: 0; }
+#nav-bar { background: #1e3a5f; border-top: none; display: flex; min-height: var(--nav-h); flex-shrink: 0; }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; padding: 8px 4px; transition: opacity 0.15s; }
-.nav-item svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
-.nav-item span { font-size: 10px; font-weight: 500; color: var(--text3); transition: color 0.15s; }
-.nav-item.active svg { stroke: var(--accent); }
-.nav-item.active span { color: var(--accent); }
+.nav-item svg { width: 22px; height: 22px; stroke: rgba(255,255,255,0.5); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+.nav-item span { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.5); transition: color 0.15s; }
+.nav-item.active svg { stroke: #ffffff; }
+.nav-item.active span { color: #ffffff; }
 
 /* iPad */
 @media (min-width: 768px) {
@@ -476,6 +476,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .reporte-card-nombre { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
 .reporte-card-empresa { font-size: 11px; color: var(--text3); }
 #screen-reportes { display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+#screen-directorio { overflow: hidden; height: 100%; padding: 0; }
 #reportes-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
 #pbi-viewer { flex: 1; display: flex; flex-direction: column; height: 100%; }
 #pbi-viewer-bar { background: var(--card); padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -574,6 +575,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
         <span>Reportes</span>
       </div>
+      <div class="nav-item" data-tab="directorio" onclick="showTab('directorio')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Directorio</span>
+      </div>
     </div>
 
     <div id="screens-container" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch">
@@ -629,6 +634,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           </div>
           <iframe id="pbi-iframe" src="" allowFullScreen="true" frameborder="0"></iframe>
         </div>
+      </div>
+
+      <!-- DIRECTORIO -->
+      <div id="screen-directorio" class="screen">
+        <iframe src="https://sites.neoreportes.com//private_includes/dashboard_directorio.php" style="width:100%;height:100%;border:none;display:block;" allowfullscreen></iframe>
       </div>
     </div>
   </div>
