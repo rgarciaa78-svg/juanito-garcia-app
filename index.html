@@ -920,10 +920,10 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
     }
   }
 
-  // Escapar la pregunta para uso en onclick
-  const pregEsc = pregunta.replace(/'/g, "\\'").replace(/\n/g, ' ');
+  // Escapar la pregunta para uso en data attribute (evita romper el HTML con " o >)
+  const safeAttr = s => s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  return `<div class="kpi-card ${cls} kpi-card-link" onclick="openChatWithMsg('${pregEsc}')">
+  return `<div class="kpi-card ${cls} kpi-card-link" data-pregunta="${safeAttr(pregunta)}" onclick="openChatWithMsg(this.dataset.pregunta)">
     <div class="kpi-label">${k.label}</div>
     <div class="kpi-val ${cls}">${k.valor || '—'}</div>
     ${k.tendencia ? `<div class="kpi-trend-row"><span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span></div>` : ''}
