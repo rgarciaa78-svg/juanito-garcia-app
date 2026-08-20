@@ -237,24 +237,20 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .kpi-card {
   background: var(--card);
   border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 14px 12px;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
 }
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-}
-.kpi-card.red::before { background: var(--red-light); }
-.kpi-card.yellow::before { background: var(--yellow-light); }
-.kpi-card.green::before { background: var(--green-light); }
+.kpi-card::before { content: none; }
+.kpi-card.red    { border-left-color: var(--red); }
+.kpi-card.yellow { border-left-color: var(--yellow); }
+.kpi-card.green  { border-left-color: var(--green); }
 
 .kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; line-height: 1.4; }
-.kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
+.kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; color: var(--text); }
 .kpi-val.red { color: var(--red); }
 .kpi-val.yellow { color: var(--yellow); }
 .kpi-val.green { color: var(--green); }
@@ -263,20 +259,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .kpi-meta { font-size: 11px; color: var(--text3); margin-top: 5px; }
 .kpi-trend-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
 .kpi-trend-pill {
-  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 500; padding: 0; background: none; border: none;
+  color: var(--text3);
 }
-.kpi-trend-pill.bad  { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-border); }
-.kpi-trend-pill.good { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-border); }
-.kpi-trend-pill.flat { background: var(--bg3);       color: var(--text2); }
+.kpi-trend-pill.bad  { color: var(--text3); }
+.kpi-trend-pill.good { color: var(--text3); }
+.kpi-trend-pill.flat { color: var(--text3); }
 
 /* Progress bar */
 .kpi-progress { margin-top: 8px; }
-.kpi-progress-track { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.kpi-progress-track { height: 3px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .kpi-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-.kpi-progress-fill.red    { background: var(--red-light); }
-.kpi-progress-fill.yellow { background: var(--yellow-light); }
-.kpi-progress-fill.green  { background: var(--green-light); }
-.kpi-progress-meta { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.kpi-progress-fill.red    { background: var(--red); }
+.kpi-progress-fill.yellow { background: var(--yellow); }
+.kpi-progress-fill.green  { background: var(--green); }
+.kpi-progress-meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
 
 .kpi-card-link { transition: transform 0.1s, box-shadow 0.1s; }
 .kpi-card-link:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
