@@ -866,6 +866,8 @@ function renderEmpresa(empresa, containerId) {
     </div>`;
 }
 
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
   const cls = sc(k.estado);
   const { arrow, cls: tCls } = trendArrow(k.tendencia, k.label);
@@ -884,7 +886,7 @@ function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
         <div class="kpi-progress-track">
           <div class="kpi-progress-fill ${cls}" style="width:${pct}%"></div>
         </div>
-        <div class="kpi-progress-meta">Meta: ${k.meta} · ${pct}% alcanzado</div>
+        <div class="kpi-progress-meta">Meta: ${esc(k.meta)} · ${pct}% alcanzado</div>
       </div>`;
     }
   }
@@ -895,7 +897,7 @@ function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
     ${k.tendencia ? `<div class="kpi-trend-row">
       <span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span>
     </div>` : ''}
-    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
+    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${esc(k.meta)}</div>` : ''}
     ${progressHtml}
     ${clickable ? `<div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600">Ver detalle →</div>` : ''}
   </div>`;
@@ -915,7 +917,7 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
       const pct = Math.min(100, Math.round((valN / metaN) * 100));
       progressHtml = `<div class="kpi-progress">
         <div class="kpi-progress-track"><div class="kpi-progress-fill ${cls}" style="width:${pct}%"></div></div>
-        <div class="kpi-progress-meta">Meta: ${k.meta} · ${pct}% alcanzado</div>
+        <div class="kpi-progress-meta">Meta: ${esc(k.meta)} · ${pct}% alcanzado</div>
       </div>`;
     }
   }
@@ -927,7 +929,7 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
     <div class="kpi-label">${k.label}</div>
     <div class="kpi-val ${cls}">${k.valor || '—'}</div>
     ${k.tendencia ? `<div class="kpi-trend-row"><span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span></div>` : ''}
-    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
+    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${esc(k.meta)}</div>` : ''}
     ${progressHtml}
     <div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600">💬 Preguntarle a Juanito →</div>
   </div>`;
@@ -1064,7 +1066,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
           <div class="tend-mes">${t.mes || ''}</div>
         </div>`;
       }).join('')}</div></div>
-      ${rd.kpis?.[0]?.meta ? `<div class="tend-meta-line"><div class="tend-meta-dot"></div><div class="tend-meta-text">Meta: ${rd.kpis[0].meta}</div></div>` : ''}
+      ${rd.kpis?.[0]?.meta ? `<div class="tend-meta-line"><div class="tend-meta-dot"></div><div class="tend-meta-text">Meta: ${esc(rd.kpis[0].meta)}</div></div>` : ''}
     </div>`;
   }
 
