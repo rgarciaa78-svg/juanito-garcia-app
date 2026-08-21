@@ -760,6 +760,13 @@ function trendArrow(tendencia, label) {
 
 let BOARD_PLANS = null;
 
+function datosValidos(d) {
+  if (!d || !d.semaforos || !d.empresas) return false;
+  const emp = Object.values(d.empresas || {})[0] || {};
+  const reps = Object.values(emp.reportes || {});
+  return reps.some(r => r && r.estado);
+}
+
 async function loadData() {
   try {
     document.getElementById('loading-msg').textContent = 'Cargando análisis...';
@@ -769,7 +776,15 @@ async function loadData() {
       fetch('data/latest/board_plans.json?t=' + t).catch(() => null)
     ]);
     if (!r.ok) throw new Error('Sin datos');
-    DATA = await r.json();
+    const fresh = await r.json();
+    if (datosValidos(fresh)) {
+      DATA = fresh;
+      try { localStorage.setItem('jg_summaries_backup', JSON.stringify(fresh)); } catch(e) {}
+    } else {
+      const backup = localStorage.getItem('jg_summaries_backup');
+      if (backup) { DATA = JSON.parse(backup); }
+      else throw new Error('Sin datos válidos');
+    }
     if (rb && rb.ok) BOARD_PLANS = await rb.json();
     renderAll();
     document.getElementById('loading-overlay').style.display = 'none';
