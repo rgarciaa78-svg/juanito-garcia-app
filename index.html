@@ -549,12 +549,14 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div id="top-sub"></div>
     </div>
     <span id="top-badge"></span>
+    <button onclick="window.location.href=window.location.pathname+'?v='+Date.now()" style="background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:4px" title="Actualizar">↻</button>
   </div>
 
   <div id="main">
     <div id="nav-bar">
       <div id="ipad-sidebar-header">
         <span class="logo-text">JG</span>
+        <div onclick="window.location.href=window.location.pathname+'?v='+Date.now()" title="Actualizar app" style="margin-top:12px;cursor:pointer;opacity:.6;font-size:16px;color:#fff">↻</div>
       </div>
       <div class="nav-item active" data-tab="home" onclick="showTab('home')">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
