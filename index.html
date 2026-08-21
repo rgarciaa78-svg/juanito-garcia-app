@@ -316,6 +316,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .board-call-desc { font-size: 12px; color: #374151; margin: 0 0 14px; line-height: 1.5; }
 .board-call-btn { width: 100%; background: #1e3a5f; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.3px; }
 .board-call-btn:active { opacity: 0.85; }
+.board-updated { font-size: 10px; font-weight: 400; color: #6b7280; margin-left: auto; }
+.board-objetivo { font-size: 11px; font-weight: 700; color: #1e3a5f; background: #dbeafe; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; text-align: center; letter-spacing: 0.3px; }
+.board-plan-block { margin-bottom: 12px; }
+.board-plan-block-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.board-plan-item { font-size: 12px; color: #374151; line-height: 1.5; padding: 3px 0; border-bottom: 1px solid #e5e7eb; }
 .reporte-item {
   background: var(--card);
   border: 1px solid var(--border);
@@ -846,6 +851,64 @@ function renderAgendaSection(id, title, color, items) {
   </div>`;
 }
 
+function generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, allKpis) {
+  // Recopilar acciones de todos los reportes rojos/amarillos
+  const acciones = { ingresos: [], costos: [], capital: [], seguimiento: [] };
+
+  reportes.forEach(r => {
+    const rd = reportesData[r.tipo] || {};
+    if (!rd.estado || rd.estado === 'green') return;
+    const acts = rd.acciones || [];
+    acts.forEach(a => {
+      const t = a.toLowerCase();
+      if (t.includes('venta') || t.includes('cobr') || t.includes('comerci') || t.includes('canal') || t.includes('precio') || t.includes('cliente')) acciones.ingresos.push(a);
+      else if (t.includes('costo') || t.includes('merma') || t.includes('gasto') || t.includes('eficien') || t.includes('productiv') || t.includes('margen')) acciones.costos.push(a);
+      else if (t.includes('inventor') || t.includes('pagar') || t.includes('cobrar') || t.includes('mora') || t.includes('rotac') || t.includes('stock') || t.includes('pago')) acciones.capital.push(a);
+      else acciones.seguimiento.push(a);
+    });
+    // KPIs críticos como seguimiento
+    (rd.kpis || []).filter(k => k.estado === 'red' || k.estado === 'yellow').slice(0,1).forEach(k => {
+      acciones.seguimiento.push(`Monitorear ${k.label}: actual ${k.valor} → meta ${k.meta || 'N/A'}`);
+    });
+  });
+
+  // Si no hay acciones de alguna categoría, agregar genéricas según KPIs
+  if (!acciones.ingresos.length) acciones.ingresos.push('Revisar mix de canales y política de precios', 'Acelerar cobranza para mejorar disponibilidad de caja');
+  if (!acciones.costos.length) acciones.costos.push('Auditar estructura de costos fijos vs variables', 'Optimizar procesos con mayor impacto en margen');
+  if (!acciones.capital.length) acciones.capital.push('Reducir días de inventario y CxC para liberar caja', 'Renegociar condiciones de pago con proveedores clave');
+
+  const kpisAlerta = allKpis.filter(k => k.estado === 'red' || k.estado === 'yellow').slice(0, 4);
+  const updatedAt = DATA.fecha || 'hoy';
+
+  const seccion = (icono, titulo, items, color) => items.length ? `
+    <div class="board-plan-block">
+      <div class="board-plan-block-title" style="color:${color}">${icono} ${titulo}</div>
+      ${items.slice(0,3).map(a => `<div class="board-plan-item">• ${a}</div>`).join('')}
+    </div>` : '';
+
+  return `
+    <div class="board-call-section">
+      <div class="board-call-header">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#1e3a5f;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Plan de Board — ${empresa}</span>
+        <span class="board-updated">Actualizado: ${updatedAt}</span>
+      </div>
+      <div class="board-objetivo">Objetivo: EBITDA ≥10% · Utilidad neta positiva</div>
+      ${seccion('📈', 'Palancas de Ingresos', acciones.ingresos, '#166534')}
+      ${seccion('✂️', 'Reducción de Costos', acciones.costos, '#92400e')}
+      ${seccion('🔄', 'Capital de Trabajo', acciones.capital, '#1e3a5f')}
+      ${kpisAlerta.length ? `
+      <div class="board-plan-block">
+        <div class="board-plan-block-title" style="color:#6b21a8">📊 KPIs de Seguimiento Semanal</div>
+        ${kpisAlerta.map(k => `<div class="board-plan-item"><span class="kpi-dot ${k.estado}" style="display:inline-block;margin-right:6px"></span>${k.label}: <strong>${k.valor}</strong> → meta ${k.meta || 'N/A'}</div>`).join('')}
+      </div>` : ''}
+      <button class="board-call-btn" onclick="openChatWithMsg('Profundiza el plan de board para ${empresa}: ${razon}. KPIs críticos: ${kpisAlerta.map(k=>k.label+' '+k.valor).join(', ')}. Dame análisis detallado de cada palanca y responsables.')">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Profundizar con IA
+      </button>
+    </div>`;
+}
+
 function renderEmpresa(empresa, containerId) {
   const el = document.getElementById(containerId);
   const empData    = (DATA.empresas || {})[empresa] || {};
@@ -915,17 +978,7 @@ function renderEmpresa(empresa, containerId) {
       }).join('')}
     </div>
 
-    <div class="board-call-section">
-      <div class="board-call-header">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#1e3a5f;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        <span>Sesión de Board — ${empresa}</span>
-      </div>
-      <p class="board-call-desc">Propuesta de acciones estratégicas para alcanzar EBITDA ≥10% y utilidad neta positiva en ${empresa}.</p>
-      <button class="board-call-btn" onclick="openChatWithMsg(\`Actúa como asesor de directorio para ${empresa}. Basándote en los siguientes datos actuales: semáforo=${semaforo}, razón: ${razon}. Los KPIs críticos son: ${allKpis.slice(0,4).map(k=>k.label+' '+k.valor).join(', ')}. Propón un plan de acción concreto con iniciativas priorizadas para alcanzar EBITDA ≥10% y utilidad neta positiva en ${empresa}. Incluye: 1) Palancas de ingresos, 2) Reducción de costos, 3) Mejora de capital de trabajo, 4) KPIs de seguimiento semanal para el board.\`)">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Convocar al Board
-      </button>
-    </div>
+    ${generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, allKpis)}
   `;
 }
 
