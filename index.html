@@ -1395,6 +1395,7 @@ function construirContexto() {
 }
 
 loadData();
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').then(r => r.update()); }
 </script>
 </body>
 </html>
