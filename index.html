@@ -311,6 +311,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
    REPORTES LIST
    ============================ */
 .reportes-list { display: flex; flex-direction: column; gap: 8px; }
+.board-call-section { margin-top: 24px; background: #f0f4ff; border: 1.5px solid #1e3a5f; border-radius: 12px; padding: 16px; }
+.board-call-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #1e3a5f; margin-bottom: 8px; }
+.board-call-desc { font-size: 12px; color: #374151; margin: 0 0 14px; line-height: 1.5; }
+.board-call-btn { width: 100%; background: #1e3a5f; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.3px; }
+.board-call-btn:active { opacity: 0.85; }
 .reporte-item {
   background: var(--card);
   border: 1px solid var(--border);
@@ -908,6 +913,18 @@ function renderEmpresa(empresa, containerId) {
           <span class="estado-chip ${estado}">${chipLabel}</span>
         </div>`;
       }).join('')}
+    </div>
+
+    <div class="board-call-section">
+      <div class="board-call-header">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#1e3a5f;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Sesión de Board — ${empresa}</span>
+      </div>
+      <p class="board-call-desc">Propuesta de acciones estratégicas para alcanzar EBITDA ≥10% y utilidad neta positiva en ${empresa}.</p>
+      <button class="board-call-btn" onclick="openChatWithMsg(\`Actúa como asesor de directorio para ${empresa}. Basándote en los siguientes datos actuales: semáforo=${semaforo}, razón: ${razon}. Los KPIs críticos son: ${allKpis.slice(0,4).map(k=>k.label+' '+k.valor).join(', ')}. Propón un plan de acción concreto con iniciativas priorizadas para alcanzar EBITDA ≥10% y utilidad neta positiva en ${empresa}. Incluye: 1) Palancas de ingresos, 2) Reducción de costos, 3) Mejora de capital de trabajo, 4) KPIs de seguimiento semanal para el board.\`)">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Convocar al Board
+      </button>
     </div>
   `;
 }
