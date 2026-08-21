@@ -884,6 +884,29 @@ function renderEmpresa(empresa, containerId) {
       ${allKpis.slice(0,6).map(k => renderKpiCard(k, k._reporte, empresa, k._tipo, k._archivo, k._desc)).join('')}
     </div>` : ''}
 
+    <div class="section-header">
+      <div class="section-header-title">Reportes</div>
+      <div class="section-header-line"></div>
+    </div>
+    <div class="reportes-list">
+      ${reportes.map(r => {
+        const rd = reportesData[r.tipo] || {};
+        const estado = rd.estado || 'neutral';
+        const subtext = rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].label + ': ' + rd.kpis[0].valor : 'Ver análisis');
+        const chipLabel = estado === 'red' ? 'Crítico' : estado === 'yellow' ? 'Alerta' : estado === 'green' ? 'OK' : 'Ver';
+        const safeDesc = (r.desc||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}','${safeDesc}')">
+          <div class="reporte-icon icon-${estado === 'neutral' ? 'neutral' : estado}">
+            <svg viewBox="0 0 24 24">${ICON_SVG[r.icon] || ICON_SVG.check}</svg>
+          </div>
+          <div class="reporte-info">
+            <div class="reporte-name">${r.label}</div>
+            <div class="reporte-sub">${subtext}</div>
+          </div>
+          <span class="estado-chip ${estado}">${chipLabel}</span>
+        </div>`;
+      }).join('')}
+    </div>
   `;
 }
 
