@@ -1449,6 +1449,205 @@ function buscarRespuestaLocal(pregunta) {
   return null;
 }
 
+function analizarConJuanito(pregunta) {
+  const p = pregunta.toLowerCase();
+  const d = DATA;
+  const sems = d.semaforos || {};
+  const razones = d.semaforo_razon || {};
+  const agenda = d.agenda_ceo || {};
+
+  // Detectar empresa mencionada
+  const emp = p.includes('pauno') ? 'PAUNO' : p.includes('amauta') ? 'AMAUTA' : p.includes('neopack') ? 'NEOPACK' : null;
+
+  const fmt = s => (s||'').replace(/\n/g,'<br>');
+  const semIcon = s => s==='red'?'🔴':s==='yellow'?'🟡':'🟢';
+  const semTxt  = s => s==='red'?'CRÍTICO':s==='yellow'?'ATENCIÓN':'OK';
+
+  // Función para obtener KPIs clave de una empresa
+  function kpisEmpresa(empresa) {
+    const ed = (d.empresas||{})[empresa]||{};
+    const rpts = REPORTES_CONFIG[empresa]||[];
+    const lista = [];
+    rpts.forEach(r => {
+      const rd = (ed.reportes||{})[r.tipo]||{};
+      if (rd.estado && rd.estado !== 'green' && rd.kpis?.length) {
+        lista.push({ reporte: r.label, estado: rd.estado, alerta: rd.alerta, kpi: rd.kpis[0] });
+      }
+    });
+    return lista;
+  }
+
+  // 1. DECIDIR HOY
+  if (p.includes('decid') || p.includes('hoy') || p.includes('urgente') || p.includes('inmedi')) {
+    const items = agenda.decidir_hoy || [];
+    if (!items.length) return '✅ No hay acciones críticas para decidir hoy según los datos actuales.';
+    const por_empresa = {};
+    items.forEach(i => { (por_empresa[i.empresa||'General'] = por_empresa[i.empresa||'General']||[]).push(i); });
+    let html = `<strong>🔴 DECIDIR HOY — ${items.length} acción${items.length>1?'es':''}</strong><br><br>`;
+    items.forEach((i,n) => {
+      html += `<strong>${n+1}.</strong> ${i.texto||i.text||''}<br>`;
+      if (i.empresa) html += `<span style="font-size:11px;color:var(--text3)">▸ ${i.empresa}${i.responsable?' · '+i.responsable:''}</span><br>`;
+      html += '<br>';
+    });
+    html += `<strong>¿Por qué importa?</strong> Estas acciones tienen impacto directo en liquidez o resultado del mes. Deben resolverse antes del cierre del día.`;
+    return html;
+  }
+
+  // 2. SITUACIÓN GENERAL / SEMÁFOROS
+  if (p.includes('situaci') || p.includes('general') || p.includes('resumen') || p.includes('cómo están') || p.includes('estado')) {
+    let html = `<strong>📊 SITUACIÓN HOLDING — ${d.fecha||'hoy'}</strong><br><br>`;
+    html += `<strong>Ventas:</strong> ${d.holding_ventas||'—'} &nbsp;|&nbsp; <strong>Mora consolidada:</strong> <span style="color:var(--red)">${d.holding_mora||'—'}</span><br><br>`;
+    Object.entries(sems).forEach(([e, s]) => {
+      html += `${semIcon(s)} <strong>${e}</strong> — ${semTxt(s)}<br><span style="font-size:12px;color:var(--text2)">${razones[e]||''}</span><br><br>`;
+    });
+    const critica = Object.entries(sems).find(([e,s])=>s==='red');
+    if (critica) html += `<strong>⚡ FOCO INMEDIATO:</strong> ${critica[0]} está en estado crítico. ${razones[critica[0]]||''}`;
+    return html;
+  }
+
+  // 3. EMPRESA CRÍTICA
+  if (p.includes('crític') || p.includes('peor') || p.includes('problema') || p.includes('riesgo')) {
+    const rojas = Object.entries(sems).filter(([e,s])=>s==='red');
+    const amarillas = Object.entries(sems).filter(([e,s])=>s==='yellow');
+    let html = '';
+    if (rojas.length) {
+      html += `<strong>🔴 EN ESTADO CRÍTICO:</strong><br>`;
+      rojas.forEach(([e,s]) => {
+        const kpis = kpisEmpresa(e);
+        html += `<br><strong>${e}:</strong> ${razones[e]||''}<br>`;
+        kpis.slice(0,3).forEach(k => html += `• ${k.reporte}: ${k.alerta||k.kpi?.valor||''}<br>`);
+      });
+    }
+    if (amarillas.length) {
+      html += `<br><strong>🟡 EN ATENCIÓN:</strong><br>`;
+      amarillas.forEach(([e,s]) => html += `• ${e}: ${razones[e]||''}<br>`);
+    }
+    if (!rojas.length && !amarillas.length) html = '🟢 Todas las empresas operan dentro de parámetros normales.';
+    return html;
+  }
+
+  // 4. MORA / CxC / COBRANZA
+  if (p.includes('mora') || p.includes('cobr') || p.includes('cxc') || p.includes('cartera') || p.includes('vencid')) {
+    let html = `<strong>💰 CxC & MORA — ${d.fecha||'hoy'}</strong><br><br>`;
+    html += `<strong>Mora consolidada holding: ${d.holding_mora||'—'}</strong><br><br>`;
+    ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+      if (emp && emp !== e) return;
+      const rd = ((d.empresas||{})[e]?.reportes||{}).cuentas_por_cobrar || {};
+      if (!rd.kpis?.length && !rd.alerta) return;
+      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
+      (rd.kpis||[]).slice(0,2).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
+      (rd.riesgos||[]).slice(0,2).forEach(r => html += `&nbsp;&nbsp;⚠ ${r.nombre||''}: ${r.vencido30||r.monto||''}<br>`);
+      html += '<br>';
+    });
+    html += `<strong>Recomendación:</strong> Priorizar cobranza en los clientes de mayor vencimiento >30 días para recuperar liquidez en el corto plazo.`;
+    return html;
+  }
+
+  // 5. VENTAS / MARGEN
+  if (p.includes('venta') || p.includes('margen') || p.includes('ingreso') || p.includes('presupuesto') || p.includes('avance')) {
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>📈 VENTAS & MARGEN — ${d.fecha||'hoy'}</strong><br><br>`;
+    objetivo.forEach(e => {
+      const ed = (d.empresas||{})[e]||{};
+      const mv = (ed.reportes||{}).margen_variable || (ed.reportes||{}).ventas || {};
+      if (!mv.kpis?.length) return;
+      html += `<strong>${e}:</strong><br>`;
+      (mv.kpis||[]).slice(0,3).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong>${k.tendencia?' — '+k.tendencia:''}<br>`);
+      if (mv.alerta) html += `&nbsp;&nbsp;⚠ ${mv.alerta}<br>`;
+      (mv.acciones||[]).slice(0,2).forEach(a => html += `&nbsp;&nbsp;💡 ${a}<br>`);
+      html += '<br>';
+    });
+    if (html === `<strong>📈 VENTAS & MARGEN — ${d.fecha||'hoy'}</strong><br><br>`) html += 'No hay datos de ventas disponibles en el reporte actual.';
+    return html;
+  }
+
+  // 6. CxP / PROVEEDORES / PAGOS
+  if (p.includes('cxp') || p.includes('pagar') || p.includes('proveedor') || p.includes('días de pago') || p.includes('pago')) {
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>🏦 CxP & PROVEEDORES — ${d.fecha||'hoy'}</strong><br><br>`;
+    objetivo.forEach(e => {
+      const rd = ((d.empresas||{})[e]?.reportes||{}).cuentas_por_pagar || {};
+      if (!rd.kpis?.length) return;
+      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
+      (rd.kpis||[]).slice(0,2).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
+      (rd.proveedores_criticos||[]).slice(0,2).forEach(p => html += `&nbsp;&nbsp;⚠ ${p.nombre||''}: ${p.monto||p.pct||''}<br>`);
+      html += '<br>';
+    });
+    return html;
+  }
+
+  // 7. MERMAS
+  if (p.includes('merma') || p.includes('pérdida') || p.includes('desperdicio')) {
+    const rd = ((d.empresas||{}).PAUNO?.reportes||{}).mermas || {};
+    let html = `<strong>⚠️ MERMAS PAUNO — ${d.fecha||'hoy'}</strong><br><br>`;
+    if (rd.alerta) html += `${rd.alerta}<br><br>`;
+    (rd.kpis||[]).forEach(k => html += `• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
+    (rd.acciones||[]).slice(0,3).forEach(a => html += `<br>💡 ${a}`);
+    return html || 'No hay datos de mermas disponibles.';
+  }
+
+  // 8. INVENTARIO / STOCK
+  if (p.includes('inventario') || p.includes('stock') || p.includes('s&op') || p.includes('dead')) {
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>📦 INVENTARIO & S&OP — ${d.fecha||'hoy'}</strong><br><br>`;
+    objetivo.forEach(e => {
+      const ed = (d.empresas||{})[e]||{};
+      const rd = (ed.reportes||{}).sop_inventario || (ed.reportes||{}).inventario || {};
+      if (!rd.kpis?.length) return;
+      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
+      (rd.kpis||[]).slice(0,3).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong><br>`);
+      html += '<br>';
+    });
+    return html;
+  }
+
+  // 9. ANÁLISIS DE EMPRESA ESPECÍFICA
+  if (emp) {
+    const s = sems[emp] || 'green';
+    const kpis = kpisEmpresa(emp);
+    let html = `<strong>${semIcon(s)} ${emp} — ${semTxt(s)}</strong><br>`;
+    html += `<span style="font-size:12px">${razones[emp]||''}</span><br><br>`;
+    if (kpis.length) {
+      html += `<strong>Alertas activas:</strong><br>`;
+      kpis.forEach(k => {
+        html += `• ${semIcon(k.estado)} ${k.reporte}: ${k.alerta||k.kpi?.label+' '+k.kpi?.valor||''}<br>`;
+      });
+      html += '<br>';
+    }
+    const escalar = (agenda.escalar_semana||[]).filter(i=>i.empresa===emp);
+    if (escalar.length) {
+      html += `<strong>🟡 Escalar esta semana:</strong><br>`;
+      escalar.forEach(i => html += `• ${i.texto||i.text||''}<br>`);
+    }
+    return html;
+  }
+
+  // 10. ESCALAR / AGENDA SEMANA
+  if (p.includes('escal') || p.includes('semana') || p.includes('monitorear')) {
+    const items = agenda.escalar_semana || [];
+    const mon   = agenda.monitorear || [];
+    let html = '';
+    if (items.length) {
+      html += `<strong>🟡 ESCALAR ESTA SEMANA (${items.length}):</strong><br><br>`;
+      items.forEach((i,n) => html += `${n+1}. ${i.texto||i.text||''} <span style="font-size:11px;color:var(--text3)">${i.empresa||''}</span><br><br>`);
+    }
+    if (mon.length) {
+      html += `<strong>🔵 MONITOREAR (${mon.length}):</strong><br><br>`;
+      mon.forEach((i,n) => html += `${n+1}. ${i.texto||i.text||''} <span style="font-size:11px;color:var(--text3)">${i.empresa||''}</span><br>`);
+    }
+    return html || 'No hay items en la agenda de la semana.';
+  }
+
+  // FALLBACK: resumen general
+  let html = `<strong>📊 HOLDING — ${d.fecha||'hoy'}</strong><br><br>`;
+  html += `Ventas: <strong>${d.holding_ventas||'—'}</strong> · Mora: <strong style="color:var(--red)">${d.holding_mora||'—'}</strong><br><br>`;
+  Object.entries(sems).forEach(([e,s]) => {
+    html += `${semIcon(s)} <strong>${e}:</strong> ${razones[e]||semTxt(s)}<br>`;
+  });
+  html += '<br>Puedes preguntarme sobre: mora, ventas, margen, CxP, mermas, inventario, o el análisis de una empresa específica.';
+  return html;
+}
+
 async function sendJuanito() {
   const input = document.getElementById('juanito-input');
   const text = input.value.trim();
@@ -1459,48 +1658,19 @@ async function sendJuanito() {
 
   const send = document.getElementById('juanito-send');
   send.disabled = true;
-  const loadEl = addJuanitoMsg('assistant', '⏳ Consultando a JUANITO...');
+  const loadEl = addJuanitoMsg('assistant', '⏳ Analizando...');
   loadEl.classList.add('loading');
 
-  // Intentar respuesta local primero
+  await new Promise(r => setTimeout(r, 300));
+
+  // Buscar respuesta en Q&A precargada primero
   const local = buscarRespuestaLocal(text);
   if (local) {
     loadEl.innerHTML = local.replace(/\n/g, '<br>');
-    loadEl.classList.remove('loading');
-    send.disabled = false;
-    return;
+  } else {
+    loadEl.innerHTML = analizarConJuanito(text);
   }
-
-  // Llamar a Claude API con el prompt JUANITO
-  try {
-    const ctx = construirContexto();
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': _K,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-        'anthropic-dangerous-direct-browser-calls': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        system: JUANITO_SYSTEM_PROMPT,
-        messages: [{
-          role: 'user',
-          content: `Datos del dashboard (${DATA.fecha || 'hoy'}):\n${ctx}\n\n---\n\nPregunta del CEO: ${text}`
-        }]
-      })
-    });
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error.message);
-    const reply = data.content?.[0]?.text || 'Sin respuesta';
-    loadEl.innerHTML = reply.replace(/\n/g, '<br>').replace(/## ([^\n<]+)/g, '<strong style="display:block;margin:8px 0 4px;font-size:13px">$1</strong>');
-    loadEl.classList.remove('loading');
-  } catch(e) {
-    loadEl.innerHTML = `Error al conectar con JUANITO IA: ${e.message || 'Verifica conexión a internet.'}`;
-    loadEl.classList.remove('loading');
-  }
+  loadEl.classList.remove('loading');
   send.disabled = false;
 }
 
