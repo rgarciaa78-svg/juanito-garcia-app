@@ -535,6 +535,28 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .chat-chip:active { opacity: 0.7; }
 #api-save-btn { background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
 
+/* JUANITO SCREEN */
+.juanito-header { padding: 16px 0 8px; }
+.juanito-header h2 { font-size: 18px; font-weight: 800; color: #1e3a5f; letter-spacing: -0.4px; }
+.juanito-header p { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.juanito-company-tabs { display: flex; gap: 8px; margin: 12px 0 20px; flex-wrap: wrap; }
+.jct { padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; background: var(--card); color: var(--text2); }
+.jct.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+.juanito-area { margin-bottom: 20px; }
+.juanito-area-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.juanito-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (min-width: 768px) { .juanito-grid { grid-template-columns: repeat(3, 1fr); } }
+.juanito-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: box-shadow 0.15s; display: flex; flex-direction: column; gap: 4px; }
+.juanito-card:active { box-shadow: 0 0 0 2px #1e3a5f; }
+.juanito-card-icon { font-size: 18px; }
+.juanito-card-name { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.juanito-card-area { font-size: 10px; color: var(--text3); }
+.juanito-card-ext { font-size: 10px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+.juanito-ask { margin-top: 20px; background: #1e3a5f; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.juanito-ask-text { color: #fff; }
+.juanito-ask-text strong { font-size: 14px; display: block; margin-bottom: 2px; }
+.juanito-ask-text span { font-size: 11px; opacity: .7; }
+
 /* LOADING */
 #loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 200; }
 #loading-overlay h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
@@ -588,6 +610,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
         <span>Reportes</span>
       </div>
+      <div class="nav-item" data-tab="juanito" onclick="showTab('juanito')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        <span>JUANITO</span>
+      </div>
       <div class="nav-item" onclick="window.open('https://sites.neoreportes.com//private_includes/dashboard_directorio.php','_blank')">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         <span>Directorio</span>
@@ -626,6 +652,27 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
       <!-- NEOPACK -->
       <div id="screen-neopack" class="screen"><div id="neopack-content"></div></div>
+
+      <!-- JUANITO DASHBOARDS -->
+      <div id="screen-juanito" class="screen">
+        <div class="juanito-header">
+          <h2>JUANITO — Análisis BI</h2>
+          <p>Selecciona empresa y abre el dashboard en Power BI</p>
+        </div>
+        <div class="juanito-company-tabs">
+          <div class="jct active" onclick="setJuanitoEmp('PAUNO',this)">PAUNO</div>
+          <div class="jct" onclick="setJuanitoEmp('AMAUTA',this)">AMAUTA</div>
+          <div class="jct" onclick="setJuanitoEmp('NEOPACK',this)">NEOPACK</div>
+        </div>
+        <div id="juanito-content"></div>
+        <div class="juanito-ask" onclick="openChat()">
+          <div style="font-size:28px">🤖</div>
+          <div class="juanito-ask-text">
+            <strong>Consultar a JUANITO con IA</strong>
+            <span>Pregunta sobre cualquier KPI o dashboard</span>
+          </div>
+        </div>
+      </div>
 
       <!-- DETAIL -->
       <div id="screen-detail" class="screen"><div id="detail-content"></div></div>
@@ -1301,6 +1348,111 @@ const REPORTES_PBI = {
   ],
 };
 
+const JUANITO_DASHBOARDS = {
+  PAUNO: {
+    'FINANZAS': [
+      { nombre: 'CxC — Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiNmMxNjNmZGQtMjUxYS00MzhkLTkyYmQtNmVlMWU2MmU2MGY0IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'CxP — Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDQzM2QyNzQtODIxYS00ZTk0LThmZDQtZWQyMjE0Mzg5MGNmIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Margen Variable', icon: '📊', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Margen — Costo Unitario', icon: '🔢', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=cd00f0106b1cac41e207' },
+      { nombre: 'Margen — Orden de Venta', icon: '📋', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=abf841e207a8b903af77' },
+      { nombre: 'Avance PAUNO', icon: '🎯', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=0fa2166e084a7d814807' },
+      { nombre: 'Provisiones', icon: '🏷️', url: 'https://app.powerbi.com/view?r=eyJrIjoiMjg4NzRiOTctZGQxOC00NjlmLWIxMTQtMjdkMGE1MTZlYmFiIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Cuentas Contables', icon: '📒', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTg2MDZhMDYtODZmYi00MjNhLWEyNzYtNDA1MTQyYjQ4OTkwIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    ],
+    'OPERACIONES': [
+      { nombre: 'Compras', icon: '🛒', url: 'https://app.powerbi.com/view?r=eyJrIjoiYTFiZWRkZGUtNGY0NC00ODZmLWEwNzktYTE1ZDBjNTFjODQ5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Inventario', icon: '📦', url: 'https://app.powerbi.com/view?r=eyJrIjoiOGMxMmJkODItYWFjNi00NjdiLWFkYWItMjNhYTU3NTkwZTNhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Merma — Plantas', icon: '⚠️', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTFjMTZmYWUtNDEyOS00ZDkyLWJkYTYtZDhiYzY0ZjI3MzE2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Merma — Producción', icon: '🏭', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTFjMTZmYWUtNDEyOS00ZDkyLWJkYTYtZDhiYzY0ZjI3MzE2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=a938bda1a280255691e8' },
+      { nombre: 'S&OP — Planificaciones', icon: '📋', url: 'https://app.powerbi.com/view?r=eyJrIjoiMmVhNjliNmQtNTU2NC00MzQ0LTljZTAtYzgyMGMwM2Q4Yjg5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Materiales Indirectos', icon: '⚙️', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDhhY2M1NjEtMTU1Mi00M2M4LWEzNmQtYzk4ZjhlYjZlZTg5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Productividad', icon: '👷', url: 'https://app.powerbi.com/view?r=eyJrIjoiNjEzNzRmMTMtOWVmNC00YTk1LTkwMzctZDFhNDRjZWE5NTRkIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    ],
+    'CALIDAD Y CONTROL': [
+      { nombre: 'Calidad 360', icon: '🔬', url: 'https://app.powerbi.com/view?r=eyJrIjoiYWJkMDJmZjUtNjAwZi00YWExLWI4OWQtZjBiOWUwNmRhZTBmIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Auditoría', icon: '✅', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDU3MzhiYjgtOTgyYi00YjllLTkwOGQtZjg5MTM4ZDFlNWMwIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    ],
+  },
+  AMAUTA: {
+    'FINANZAS': [
+      { nombre: 'CxC — Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiMDk2MGY0ZGYtMzJkMC00OTAxLWE2NDAtYmU5OWZhNDU2YjNhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'CxP — Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiYmU1MGEzZDItZWJmNS00YTVjLTk4NDYtZGQyYTE5YmE2NTlhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'Margen / P&L', icon: '📊', url: 'https://app.powerbi.com/view?r=eyJrIjoiYTJkOTFlMmEtYjY1My00ZTc4LThjNTEtOTlmZGJkNDRjOWYxIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    ],
+  },
+  NEOPACK: {
+    'FINANZAS': [
+      { nombre: 'CxC — Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDZiMTRiM2EtNzZhZi00NmMzLTllNmEtMGNiMjYxY2UzYTg4IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+      { nombre: 'CxP — Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiNzRiZGE4ZGItZWE1Mi00YjllLWEzMGMtOWU2MTgyMDUwNDI2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    ],
+  },
+};
+
+let _juanitoEmp = 'PAUNO';
+
+function setJuanitoEmp(emp, el) {
+  _juanitoEmp = emp;
+  document.querySelectorAll('.jct').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  renderJuanito();
+}
+
+function renderJuanito() {
+  const areas = JUANITO_DASHBOARDS[_juanitoEmp] || {};
+  const html = Object.entries(areas).map(([area, dbs]) => `
+    <div class="juanito-area">
+      <div class="juanito-area-title">${area}</div>
+      <div class="juanito-grid">
+        ${dbs.map(d => `
+          <div class="juanito-card" onclick="window.open('${d.url}','_blank')">
+            <div class="juanito-card-icon">${d.icon}</div>
+            <div class="juanito-card-name">${d.nombre}</div>
+            <div class="juanito-card-area">${_juanitoEmp} · ${area}</div>
+            <div class="juanito-card-ext">Abrir en Power BI ↗</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  document.getElementById('juanito-content').innerHTML = html;
+}
+
+const JUANITO_SYSTEM_PROMPT = `Eres JUANITO, un agente de análisis financiero, operativo y BI para las empresas PAUNO, AMAUTA y NEOPACK (holding peruano).
+
+Tu función es analizar los datos del dashboard y convertirlos en conclusiones claras, cuantificadas y accionables para el CEO.
+
+PRINCIPIO CENTRAL: No describes datos — los conviertes en decisiones:
+QUÉ PASA → POR QUÉ IMPORTA → CUÁNTO IMPACTA → QUÉ HACER
+
+METODOLOGÍA:
+- Para KPIs: reporta valor, periodo, comparación vs meta
+- Para tendencias: analiza evolución, crecimiento, caída, cambios relevantes
+- Para problemas: identifica anomalías, desviaciones, mora, sobrecosto, merma, sobrestock, caída de margen
+- Para causas: busca relaciones entre indicadores — NO afirmes causalidad si solo hay correlación
+- Para análisis gerencial: relaciona CxC + CxP + Margen + Mermas + Compras + Inventario según la pregunta
+
+FORMATO cuando el usuario pide análisis general:
+## RESUMEN EJECUTIVO (1 párrafo)
+## HALLAZGOS (cuantificados)
+## RIESGOS
+## RECOMENDACIONES (PROBLEMA → ACCIÓN → IMPACTO → PRIORIDAD con 🔴🟠🟡🟢)
+
+Para preguntas directas: responde en 2-4 párrafos sin headers.
+
+REGLAS DE CONFIABILIDAD:
+- Nunca inventes cifras — solo usa los datos del contexto proporcionado
+- Diferencia entre dato observado e interpretación
+- Si faltan datos, dilo claramente
+- Usa S/, %, días, ratios cuando estén disponibles
+- Conserva el periodo analizado
+
+CONTEXTO EMPRESAS:
+- PAUNO: empresa industrial con plantas (Ate, Pachacamac, Terceros), UENs: B&D, MAQUILA, TIGO
+- AMAUTA: empresa del holding
+- NEOPACK: empresa del holding
+- KPI clave holding: EBITDA ≥10% y utilidad neta positiva
+
+Responde siempre en español. Sé directo y accionable. El CEO necesita decidir en menos de 2 minutos.`;
+
 function initReportes() {
   ['PAUNO','AMAUTA','NEOPACK'].forEach(emp => {
     const grid = document.getElementById('grid-' + emp.toLowerCase());
@@ -1334,12 +1486,13 @@ function showTab(tab) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + tab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
-  const titles = { home: 'Juanito Garcia', reportes: 'Reportes Power BI' };
+  const titles = { home: 'Juanito Garcia', reportes: 'Reportes Power BI', juanito: 'JUANITO — Dashboards BI' };
   document.getElementById('top-title').textContent = titles[tab] || tab.toUpperCase();
   document.getElementById('top-badge').textContent = DATA?.fecha || '';
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('screens-container').scrollTop = 0;
   if (tab === 'reportes') { closePbi(); initReportes(); }
+  if (tab === 'juanito') { renderJuanito(); }
 }
 
 function openPng(src, title) {
@@ -1364,7 +1517,7 @@ function openChat() {
     ).join('');
     const msg = document.createElement('div');
     msg.className = 'msg assistant';
-    msg.innerHTML = `Hola. Soy Juanito Garcia. Datos del <b>${DATA?.fecha || 'hoy'}</b>.<br><br>Puedes preguntarme sobre los KPIs del holding:<div class="chat-chips">${chips}</div>`;
+    msg.innerHTML = `Hola. Soy <b>JUANITO</b>, tu agente de análisis BI. Datos del <b>${DATA?.fecha || 'hoy'}</b>.<br><br>Pregúntame cualquier cosa sobre PAUNO, AMAUTA o NEOPACK:<div class="chat-chips">${chips}</div>`;
     document.getElementById('chat-messages').appendChild(msg);
   }
 }
@@ -1429,7 +1582,7 @@ function buscarRespuestaLocal(pregunta) {
   return null;
 }
 
-function sendChat() {
+async function sendChat() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text || !DATA) return;
@@ -1439,23 +1592,49 @@ function sendChat() {
 
   const send = document.getElementById('chat-send');
   send.disabled = true;
-  const loadEl = addMsg('assistant', '...');
+  const loadEl = addMsg('assistant', '⏳ Consultando a JUANITO...');
   loadEl.classList.add('loading');
 
-  // Intentar respuesta local primero (sin API, funciona en todos los dispositivos)
-  setTimeout(() => {
-    const local = buscarRespuestaLocal(text);
-    if (local) {
-      loadEl.innerHTML = local.replace(/\n/g, '<br>');
-      loadEl.classList.remove('loading');
-      send.disabled = false;
-      return;
-    }
-    // Si no hay match local, mostrar mensaje útil
-    loadEl.innerHTML = 'No tengo una respuesta pre-cargada para esa consulta. Prueba preguntando sobre: ventas, mora, margen, compras, mermas, inventario, fill rate, control interno, o pide el resumen general del holding.';
+  // Intentar respuesta local primero
+  const local = buscarRespuestaLocal(text);
+  if (local) {
+    loadEl.innerHTML = local.replace(/\n/g, '<br>');
     loadEl.classList.remove('loading');
     send.disabled = false;
-  }, 400);
+    return;
+  }
+
+  // Llamar a Claude API con el prompt JUANITO
+  try {
+    const ctx = construirContexto();
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': _K,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: JUANITO_SYSTEM_PROMPT,
+        messages: [{
+          role: 'user',
+          content: `Datos del dashboard (${DATA.fecha || 'hoy'}):\n${ctx}\n\n---\n\nPregunta del CEO: ${text}`
+        }]
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.content?.[0]?.text || 'Sin respuesta';
+    loadEl.innerHTML = reply.replace(/\n/g, '<br>').replace(/## ([^\n<]+)/g, '<strong style="display:block;margin:8px 0 4px;font-size:13px">$1</strong>').replace(/🔴|🟠|🟡|🟢/g, m => `<span style="font-size:14px">${m}</span>`);
+    loadEl.classList.remove('loading');
+  } catch(e) {
+    loadEl.innerHTML = `Error al conectar con JUANITO IA: ${e.message || 'Verifica conexión a internet.'}`;
+    loadEl.classList.remove('loading');
+  }
+  send.disabled = false;
 }
 
 // Contexto compacto — solo datos clave, sin tendencias históricas largas
