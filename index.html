@@ -502,60 +502,23 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #png-viewer-img { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 16px; }
 #png-viewer-img img { max-width: 100%; height: auto; border-radius: 8px; }
 
-/* CHAT FAB */
-#chat-fab { position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50; box-shadow: 0 4px 16px rgba(21,101,192,0.35); transition: transform 0.15s; border: none; }
-#chat-fab:active { transform: scale(0.93); }
-#chat-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-@media (min-width: 768px) { #chat-fab { bottom: 20px; right: 20px; } }
-
-/* CHAT MODAL */
-#chat-modal { position: fixed; inset: 0; z-index: 80; display: none; flex-direction: column; background: var(--bg); }
-#chat-modal.open { display: flex; }
-@media (min-width: 768px) {
-  #chat-modal { left: auto; right: 0; width: 420px; border-left: 1px solid var(--border); box-shadow: -6px 0 30px rgba(0,0,0,0.12); }
-}
-#chat-header { background: var(--bg2); padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-#chat-header h2 { flex: 1; font-size: 16px; font-weight: 700; }
-#chat-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
-#chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .msg { max-width: 85%; padding: 11px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
 .msg.user      { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
 .msg.assistant { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); box-shadow: var(--shadow); }
 .msg.loading   { opacity: 0.6; }
-#chat-input-area { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; gap: 10px; align-items: flex-end; }
-#chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 10px 16px; color: var(--text); font-size: 14px; resize: none; max-height: 100px; outline: none; font-family: inherit; }
-#chat-send { background: var(--accent); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; box-shadow: 0 2px 8px rgba(21,101,192,0.25); }
-#chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
-#chat-send svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-#api-setup { padding: 20px; background: var(--card); margin: 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
-#api-setup p { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
 .chat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .chat-chip { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent); border-radius: 20px; padding: 5px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
 .chat-chip:active { opacity: 0.7; }
-#api-save-btn { background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
 
-/* JUANITO SCREEN */
-.juanito-header { padding: 16px 0 8px; }
-.juanito-header h2 { font-size: 18px; font-weight: 800; color: #1e3a5f; letter-spacing: -0.4px; }
-.juanito-header p { font-size: 12px; color: var(--text2); margin-top: 3px; }
-.juanito-company-tabs { display: flex; gap: 8px; margin: 12px 0 20px; flex-wrap: wrap; }
-.jct { padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; background: var(--card); color: var(--text2); }
-.jct.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
-.juanito-area { margin-bottom: 20px; }
-.juanito-area-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
-.juanito-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-@media (min-width: 768px) { .juanito-grid { grid-template-columns: repeat(3, 1fr); } }
-.juanito-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: box-shadow 0.15s; display: flex; flex-direction: column; gap: 4px; }
-.juanito-card:active { box-shadow: 0 0 0 2px #1e3a5f; }
-.juanito-card-icon { font-size: 18px; }
-.juanito-card-name { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
-.juanito-card-area { font-size: 10px; color: var(--text3); }
-.juanito-card-ext { font-size: 10px; color: var(--accent); font-weight: 600; margin-top: 4px; }
-.juanito-ask { margin-top: 20px; background: #1e3a5f; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-.juanito-ask-text { color: #fff; }
-.juanito-ask-text strong { font-size: 14px; display: block; margin-bottom: 2px; }
-.juanito-ask-text span { font-size: 11px; opacity: .7; }
+/* JUANITO SCREEN — inline chat */
+#screen-juanito { padding: 0; height: 100%; overflow: hidden; }
+#screen-juanito.active { display: flex; flex-direction: column; }
+#juanito-chat-header { background: #1e3a5f; padding: 14px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+#juanito-chat-header .jh-avatar { width: 34px; height: 34px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+#juanito-chat-header h2 { color: #fff; font-size: 15px; font-weight: 700; flex: 1; }
+#juanito-chat-header span { color: rgba(255,255,255,0.6); font-size: 11px; }
+#juanito-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+#juanito-input-area { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
 
 /* LOADING */
 #loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 200; }
@@ -653,24 +616,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <!-- NEOPACK -->
       <div id="screen-neopack" class="screen"><div id="neopack-content"></div></div>
 
-      <!-- JUANITO DASHBOARDS -->
+      <!-- JUANITO CHAT IA -->
       <div id="screen-juanito" class="screen">
-        <div class="juanito-header">
-          <h2>JUANITO — Análisis BI</h2>
-          <p>Selecciona empresa y abre el dashboard en Power BI</p>
+        <div id="juanito-chat-header">
+          <div class="jh-avatar">🤖</div>
+          <h2>JUANITO — Agente BI</h2>
+          <span id="juanito-fecha"></span>
         </div>
-        <div class="juanito-company-tabs">
-          <div class="jct active" onclick="setJuanitoEmp('PAUNO',this)">PAUNO</div>
-          <div class="jct" onclick="setJuanitoEmp('AMAUTA',this)">AMAUTA</div>
-          <div class="jct" onclick="setJuanitoEmp('NEOPACK',this)">NEOPACK</div>
-        </div>
-        <div id="juanito-content"></div>
-        <div class="juanito-ask" onclick="openChat()">
-          <div style="font-size:28px">🤖</div>
-          <div class="juanito-ask-text">
-            <strong>Consultar a JUANITO con IA</strong>
-            <span>Pregunta sobre cualquier KPI o dashboard</span>
-          </div>
+        <div id="juanito-messages"></div>
+        <div id="juanito-input-area">
+          <textarea id="juanito-input" class="chat-input" placeholder="Pregunta sobre PAUNO, AMAUTA o NEOPACK..." rows="1" onkeydown="handleJuanitoKey(event)" oninput="autoResize(this)" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:10px 16px;color:var(--text);font-size:14px;resize:none;max-height:100px;outline:none;font-family:inherit"></textarea>
+          <button id="juanito-send" onclick="sendJuanito()" style="background:var(--accent);border:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(21,101,192,0.25)">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
       </div>
 
@@ -709,26 +667,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <div id="png-viewer-img"><img id="png-img" src="" alt="Reporte"></div>
 </div>
 
-<!-- CHAT FAB -->
-<button id="chat-fab" onclick="openChat()">
-  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-</button>
-
-<!-- CHAT MODAL -->
-<div id="chat-modal">
-  <div id="chat-header">
-    <div style="width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">🤖</div>
-    <h2>Juanito Garcia</h2>
-    <button id="chat-close" onclick="closeChat()">✕</button>
-  </div>
-  <div id="chat-messages"></div>
-  <div id="chat-input-area">
-    <textarea id="chat-input" placeholder="Pregunta sobre PAUNO, AMAUTA o NEOPACK..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
-    <button id="chat-send" onclick="sendChat()">
-      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
-  </div>
-</div>
 
 <script>
 let DATA = null;
@@ -1348,74 +1286,6 @@ const REPORTES_PBI = {
   ],
 };
 
-const JUANITO_DASHBOARDS = {
-  PAUNO: {
-    'FINANZAS': [
-      { nombre: 'CxC — Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiNmMxNjNmZGQtMjUxYS00MzhkLTkyYmQtNmVlMWU2MmU2MGY0IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'CxP — Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDQzM2QyNzQtODIxYS00ZTk0LThmZDQtZWQyMjE0Mzg5MGNmIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Margen Variable', icon: '📊', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Margen — Costo Unitario', icon: '🔢', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=cd00f0106b1cac41e207' },
-      { nombre: 'Margen — Orden de Venta', icon: '📋', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=abf841e207a8b903af77' },
-      { nombre: 'Avance PAUNO', icon: '🎯', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=0fa2166e084a7d814807' },
-      { nombre: 'Provisiones', icon: '🏷️', url: 'https://app.powerbi.com/view?r=eyJrIjoiMjg4NzRiOTctZGQxOC00NjlmLWIxMTQtMjdkMGE1MTZlYmFiIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Cuentas Contables', icon: '📒', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTg2MDZhMDYtODZmYi00MjNhLWEyNzYtNDA1MTQyYjQ4OTkwIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-    ],
-    'OPERACIONES': [
-      { nombre: 'Compras', icon: '🛒', url: 'https://app.powerbi.com/view?r=eyJrIjoiYTFiZWRkZGUtNGY0NC00ODZmLWEwNzktYTE1ZDBjNTFjODQ5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Inventario', icon: '📦', url: 'https://app.powerbi.com/view?r=eyJrIjoiOGMxMmJkODItYWFjNi00NjdiLWFkYWItMjNhYTU3NTkwZTNhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Merma — Plantas', icon: '⚠️', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTFjMTZmYWUtNDEyOS00ZDkyLWJkYTYtZDhiYzY0ZjI3MzE2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Merma — Producción', icon: '🏭', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTFjMTZmYWUtNDEyOS00ZDkyLWJkYTYtZDhiYzY0ZjI3MzE2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9&pageName=a938bda1a280255691e8' },
-      { nombre: 'S&OP — Planificaciones', icon: '📋', url: 'https://app.powerbi.com/view?r=eyJrIjoiMmVhNjliNmQtNTU2NC00MzQ0LTljZTAtYzgyMGMwM2Q4Yjg5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Materiales Indirectos', icon: '⚙️', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDhhY2M1NjEtMTU1Mi00M2M4LWEzNmQtYzk4ZjhlYjZlZTg5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Productividad', icon: '👷', url: 'https://app.powerbi.com/view?r=eyJrIjoiNjEzNzRmMTMtOWVmNC00YTk1LTkwMzctZDFhNDRjZWE5NTRkIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-    ],
-    'CALIDAD Y CONTROL': [
-      { nombre: 'Calidad 360', icon: '🔬', url: 'https://app.powerbi.com/view?r=eyJrIjoiYWJkMDJmZjUtNjAwZi00YWExLWI4OWQtZjBiOWUwNmRhZTBmIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Auditoría', icon: '✅', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDU3MzhiYjgtOTgyYi00YjllLTkwOGQtZjg5MTM4ZDFlNWMwIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-    ],
-  },
-  AMAUTA: {
-    'FINANZAS': [
-      { nombre: 'CxC — Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiMDk2MGY0ZGYtMzJkMC00OTAxLWE2NDAtYmU5OWZhNDU2YjNhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'CxP — Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiYmU1MGEzZDItZWJmNS00YTVjLTk4NDYtZGQyYTE5YmE2NTlhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'Margen / P&L', icon: '📊', url: 'https://app.powerbi.com/view?r=eyJrIjoiYTJkOTFlMmEtYjY1My00ZTc4LThjNTEtOTlmZGJkNDRjOWYxIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-    ],
-  },
-  NEOPACK: {
-    'FINANZAS': [
-      { nombre: 'CxC — Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDZiMTRiM2EtNzZhZi00NmMzLTllNmEtMGNiMjYxY2UzYTg4IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-      { nombre: 'CxP — Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiNzRiZGE4ZGItZWE1Mi00YjllLWEzMGMtOWU2MTgyMDUwNDI2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
-    ],
-  },
-};
-
-let _juanitoEmp = 'PAUNO';
-
-function setJuanitoEmp(emp, el) {
-  _juanitoEmp = emp;
-  document.querySelectorAll('.jct').forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
-  renderJuanito();
-}
-
-function renderJuanito() {
-  const areas = JUANITO_DASHBOARDS[_juanitoEmp] || {};
-  const html = Object.entries(areas).map(([area, dbs]) => `
-    <div class="juanito-area">
-      <div class="juanito-area-title">${area}</div>
-      <div class="juanito-grid">
-        ${dbs.map(d => `
-          <div class="juanito-card" onclick="window.open('${d.url}','_blank')">
-            <div class="juanito-card-icon">${d.icon}</div>
-            <div class="juanito-card-name">${d.nombre}</div>
-            <div class="juanito-card-area">${_juanitoEmp} · ${area}</div>
-            <div class="juanito-card-ext">Abrir en Power BI ↗</div>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
-  document.getElementById('juanito-content').innerHTML = html;
-}
-
 const JUANITO_SYSTEM_PROMPT = `Eres JUANITO, un agente de análisis financiero, operativo y BI para las empresas PAUNO, AMAUTA y NEOPACK (holding peruano).
 
 Tu función es analizar los datos del dashboard y convertirlos en conclusiones claras, cuantificadas y accionables para el CEO.
@@ -1492,7 +1362,7 @@ function showTab(tab) {
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('screens-container').scrollTop = 0;
   if (tab === 'reportes') { closePbi(); initReportes(); }
-  if (tab === 'juanito') { renderJuanito(); }
+  if (tab === 'juanito') { initJuanitoChat(); }
 }
 
 function openPng(src, title) {
@@ -1502,68 +1372,65 @@ function openPng(src, title) {
 }
 function closePng() { document.getElementById('png-viewer').classList.remove('open'); }
 
-function openChat() {
-  document.getElementById('chat-modal').classList.add('open');
-  if (document.getElementById('chat-messages').children.length === 0) {
+function initJuanitoChat() {
+  const msgs = document.getElementById('juanito-messages');
+  if (msgs.children.length === 0) {
+    document.getElementById('juanito-fecha').textContent = DATA?.fecha || '';
     const sugerencias = [
       '¿Qué debo decidir hoy?',
-      '¿Cómo está la situación general?',
+      '¿Situación general del holding?',
       '¿Cómo están las ventas de PAUNO?',
       '¿Cómo está la mora?',
       '¿Cuál empresa está más crítica?',
     ];
     const chips = sugerencias.map(s =>
-      `<button class="chat-chip" onclick="usarChip('${s}')">${s}</button>`
+      `<button class="chat-chip" onclick="usarChipJuanito('${s}')">${s}</button>`
     ).join('');
     const msg = document.createElement('div');
     msg.className = 'msg assistant';
     msg.innerHTML = `Hola. Soy <b>JUANITO</b>, tu agente de análisis BI. Datos del <b>${DATA?.fecha || 'hoy'}</b>.<br><br>Pregúntame cualquier cosa sobre PAUNO, AMAUTA o NEOPACK:<div class="chat-chips">${chips}</div>`;
-    document.getElementById('chat-messages').appendChild(msg);
+    msgs.appendChild(msg);
   }
 }
 
-function usarChip(texto) {
-  const input = document.getElementById('chat-input');
+function usarChipJuanito(texto) {
+  const input = document.getElementById('juanito-input');
   input.value = texto;
   autoResize(input);
-  sendChat();
+  sendJuanito();
 }
-function closeChat() { document.getElementById('chat-modal').classList.remove('open'); }
 
+function openChat() { showTab('juanito'); }
 function openChatWith(empresa, tipo, label) {
-  openChat();
+  showTab('juanito');
   setTimeout(() => {
-    const input = document.getElementById('chat-input');
+    const input = document.getElementById('juanito-input');
     input.value = `Dame más detalle sobre ${label} de ${empresa}.`;
     autoResize(input);
-    input.focus();
-    setTimeout(() => sendChat(), 150);
+    setTimeout(() => sendJuanito(), 150);
   }, 300);
 }
-
 function openChatWithMsg(pregunta) {
-  openChat();
+  showTab('juanito');
   setTimeout(() => {
-    const input = document.getElementById('chat-input');
+    const input = document.getElementById('juanito-input');
     input.value = pregunta;
     autoResize(input);
-    input.focus();
-    setTimeout(() => sendChat(), 150);
+    setTimeout(() => sendJuanito(), 150);
   }, 300);
 }
 
-function addMsg(role, text) {
+function addJuanitoMsg(role, text) {
   const el = document.createElement('div');
   el.className = 'msg ' + role;
-  // Renderizar saltos de línea
   el.innerHTML = text.replace(/\n/g, '<br>');
-  const msgs = document.getElementById('chat-messages');
+  const msgs = document.getElementById('juanito-messages');
   msgs.appendChild(el);
   msgs.scrollTop = msgs.scrollHeight;
   return el;
 }
 
-function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }
+function handleJuanitoKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendJuanito(); } }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
 
 function buscarRespuestaLocal(pregunta) {
@@ -1582,17 +1449,17 @@ function buscarRespuestaLocal(pregunta) {
   return null;
 }
 
-async function sendChat() {
-  const input = document.getElementById('chat-input');
+async function sendJuanito() {
+  const input = document.getElementById('juanito-input');
   const text = input.value.trim();
   if (!text || !DATA) return;
   input.value = '';
   input.style.height = 'auto';
-  addMsg('user', text);
+  addJuanitoMsg('user', text);
 
-  const send = document.getElementById('chat-send');
+  const send = document.getElementById('juanito-send');
   send.disabled = true;
-  const loadEl = addMsg('assistant', '⏳ Consultando a JUANITO...');
+  const loadEl = addJuanitoMsg('assistant', '⏳ Consultando a JUANITO...');
   loadEl.classList.add('loading');
 
   // Intentar respuesta local primero
@@ -1628,7 +1495,7 @@ async function sendChat() {
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message);
     const reply = data.content?.[0]?.text || 'Sin respuesta';
-    loadEl.innerHTML = reply.replace(/\n/g, '<br>').replace(/## ([^\n<]+)/g, '<strong style="display:block;margin:8px 0 4px;font-size:13px">$1</strong>').replace(/🔴|🟠|🟡|🟢/g, m => `<span style="font-size:14px">${m}</span>`);
+    loadEl.innerHTML = reply.replace(/\n/g, '<br>').replace(/## ([^\n<]+)/g, '<strong style="display:block;margin:8px 0 4px;font-size:13px">$1</strong>');
     loadEl.classList.remove('loading');
   } catch(e) {
     loadEl.innerHTML = `Error al conectar con JUANITO IA: ${e.message || 'Verifica conexión a internet.'}`;
