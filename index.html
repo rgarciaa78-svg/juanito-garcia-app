@@ -670,6 +670,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
 <script>
 let DATA = null;
+let BOARD_PLANS = null;
+let RISK_REGISTER = null;
+let HITOS = null;
 let currentTab = 'home';
 let navHistory = [];
 const _E=[25,30,76,15,7,0,66,83,64,91,6,84,76,34,39,36,4,95,28,24,40,47,45,25,66,8,101,66,81,51,31,52,6,59,58,34,0,60,10,18,86,31,4,90,70,63,89,40,60,37,4,19,27,76,88,13,13,36,7,91,119,113,4,25,22,38,40,53,88,68,24,95,1,36,88,91,1,101,66,6,48,11,4,24,15,18,63,22,37,3,33,45,87,127,125,96,16,44,51,78,81,43,50,6,22,47,40,53];
@@ -743,8 +746,6 @@ function trendArrow(tendencia, label) {
   return { arrow, cls };
 }
 
-let BOARD_PLANS = null;
-
 function datosValidos(d) {
   if (!d || !d.semaforos || !d.empresas) return false;
   const emp = Object.values(d.empresas || {})[0] || {};
@@ -756,9 +757,11 @@ async function loadData() {
   try {
     document.getElementById('loading-msg').textContent = 'Cargando análisis...';
     const t = Date.now();
-    const [r, rb] = await Promise.all([
+    const [r, rb, rr, rh] = await Promise.all([
       fetch('data/latest/summaries.json?t=' + t),
-      fetch('data/latest/board_plans.json?t=' + t).catch(() => null)
+      fetch('data/latest/board_plans.json?t=' + t).catch(() => null),
+      fetch('data/latest/risk_register.json?t=' + t).catch(() => null),
+      fetch('data/latest/hitos.json?t=' + t).catch(() => null)
     ]);
     if (!r.ok) throw new Error('Sin datos');
     const fresh = await r.json();
@@ -771,6 +774,8 @@ async function loadData() {
       else throw new Error('Sin datos válidos');
     }
     if (rb && rb.ok) BOARD_PLANS = await rb.json();
+    if (rr && rr.ok) RISK_REGISTER = await rr.json();
+    if (rh && rh.ok) HITOS = await rh.json();
     renderAll();
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
@@ -1378,10 +1383,11 @@ function initJuanitoChat() {
     document.getElementById('juanito-fecha').textContent = DATA?.fecha || '';
     const sugerencias = [
       '¿Qué debo decidir hoy?',
-      '¿Situación general del holding?',
-      '¿Cómo están las ventas de PAUNO?',
+      'Riesgos del holding',
+      'Hitos próximos',
       '¿Cómo está la mora?',
       '¿Cuál empresa está más crítica?',
+      'Analiza AMAUTA',
     ];
     const chips = sugerencias.map(s =>
       `<button class="chat-chip" onclick="usarChipJuanito('${s}')">${s}</button>`
@@ -1636,6 +1642,80 @@ function analizarConJuanito(pregunta) {
       mon.forEach((i,n) => html += `${n+1}. ${i.texto||i.text||''} <span style="font-size:11px;color:var(--text3)">${i.empresa||''}</span><br>`);
     }
     return html || 'No hay items en la agenda de la semana.';
+  }
+
+  // 11. MÓDULO 10 — RIESGOS (risk register vivo)
+  if (p.includes('riesgo') || p.includes('explota') || p.includes('risk') || p.includes('register') || p.includes('contingencia')) {
+    if (!RISK_REGISTER) {
+      return `<strong>⚠️ Risk Register no cargado.</strong><br><br>El archivo <code>data/latest/risk_register.json</code> no existe aún. El agente diario lo genera en cada cierre de mes.<br><br>Mientras tanto, los riesgos detectados en el dashboard son:<br><br>` + (() => {
+        let h = '';
+        ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+          const s = sems[e];
+          if (s === 'red' || s === 'yellow') {
+            const kpis = kpisEmpresa(e);
+            h += `${semIcon(s)} <strong>${e}</strong> — ${razones[e]||''}<br>`;
+            kpis.slice(0,2).forEach(k => h += `&nbsp;&nbsp;• ${k.reporte}: ${k.alerta||''}<br>`);
+            h += '<br>';
+          }
+        });
+        return h || '🟢 Sin riesgos críticos detectados en este momento.';
+      })();
+    }
+    const fecha = RISK_REGISTER.fecha_actualizacion || '';
+    let html = `<strong>🔴 RISK REGISTER VIVO — ${fecha}</strong><br><br>`;
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    objetivo.forEach(e => {
+      const riesgos = (RISK_REGISTER.empresas?.[e]?.riesgos || []);
+      if (!riesgos.length) return;
+      html += `<strong>${e}</strong><br>`;
+      riesgos.forEach(r => {
+        const ic = r.rating==='red'?'🔴':r.rating==='yellow'?'🟡':'🟢';
+        html += `${ic} <strong>${r.riesgo}</strong><br>`;
+        html += `&nbsp;&nbsp;Prob: ${r.probabilidad} · Impacto: ${r.impacto_soles} · Dueño: ${r.dueno||'⚠ SIN DUEÑO'}<br>`;
+        if (r.senal_temprana) html += `&nbsp;&nbsp;📡 Señal: ${r.senal_temprana}<br>`;
+        if (r.mitigacion) html += `&nbsp;&nbsp;💡 ${r.mitigacion}<br>`;
+        html += '<br>';
+      });
+    });
+    const rojos = Object.values(RISK_REGISTER.empresas||{}).flatMap(e=>(e.riesgos||[]).filter(r=>r.rating==='red'));
+    if (rojos.length) {
+      html += `<strong>🎯 FOCO CEO esta semana (${rojos.length} riesgo${rojos.length>1?'s':''} 🔴):</strong><br>`;
+      rojos.slice(0,3).forEach(r => html += `• ${r.riesgo} — Dueño: ${r.dueno||'ASIGNAR'}<br>`);
+    }
+    return html;
+  }
+
+  // 12. MÓDULO 11 — HITOS (calendario rodante)
+  if (p.includes('hito') || p.includes('calendario') || p.includes('qué se viene') || p.includes('próximo') || p.includes('vence') || p.includes('plazo') || p.includes('covenant') || p.includes('directorio') || p.includes('cierre')) {
+    if (!HITOS) {
+      return `<strong>📅 Calendario de Hitos no cargado.</strong><br><br>El archivo <code>data/latest/hitos.json</code> no existe aún. El agente diario lo genera en cada cierre de mes.<br><br>Próximos eventos conocidos por el dashboard:<br>• Cierre contable mensual<br>• Reunión de directorio<br><br>Solicita al equipo que suba el archivo de hitos al sistema para activar el Módulo 11.`;
+    }
+    const fecha = HITOS.fecha_actualizacion || '';
+    let html = `<strong>📅 HITOS — PRÓXIMOS 90 DÍAS (${fecha})</strong><br><br>`;
+    const hitos = HITOS.hitos || [];
+    const pendientes = hitos.filter(h => h.estado !== 'Cerrado');
+    const urgentes  = pendientes.filter(h => h.urgente || h.lead_time_activo);
+    if (urgentes.length) {
+      html += `<strong>⚡ ACTUAR HOY (en ventana de lead time):</strong><br>`;
+      urgentes.forEach(h => {
+        html += `• <strong>${h.hito}</strong> — ${h.fecha_gate}<br>`;
+        html += `&nbsp;&nbsp;Acción: ${h.accion_requerida}<br>`;
+        if (h.insumo_dueno) html += `&nbsp;&nbsp;Insumo: ${h.insumo_dueno}<br>`;
+        html += '<br>';
+      });
+    }
+    html += `<strong>Todos los hitos activos:</strong><br><br>`;
+    pendientes.forEach(h => {
+      const ic = h.urgente ? '🔴' : h.lead_time_activo ? '🟡' : '🟢';
+      html += `${ic} <strong>${h.hito}</strong> [${h.tipo}] — ${h.fecha_gate}<br>`;
+      html += `&nbsp;&nbsp;${h.accion_requerida}<br><br>`;
+    });
+    const vencidos = hitos.filter(h => h.estado === 'Vencido_sin_accion');
+    if (vencidos.length) {
+      html += `<strong>⛔ VENCIDOS SIN ACCIÓN → pasan a Risk Register:</strong><br>`;
+      vencidos.forEach(h => html += `• ${h.hito}<br>`);
+    }
+    return html;
   }
 
   // FALLBACK: resumen general
