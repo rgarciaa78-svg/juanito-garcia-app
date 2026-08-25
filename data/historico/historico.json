@@ -1,0 +1,31 @@
+{
+  "generado_por": "JUANITO — Módulo Histórico",
+  "ultima_actualizacion": "2026-08-24",
+  "meses": ["Jun-26", "Jul-26", "Ago-26"],
+  "empresas": {
+    "PAUNO": {
+      "meses": [
+        { "mes": "Jun-26", "ventas": "S/6.8M", "mora": "14%", "margen": "47%" },
+        { "mes": "Jul-26", "ventas": "S/7.3M", "mora": "16%", "margen": "48%" },
+        { "mes": "Ago-26", "ventas": "S/2.7M", "mora": "18%", "margen": "43%" }
+      ],
+      "observacion": "Caída de ventas -63% en agosto es la peor en 3 meses. Mora en tendencia creciente. Margen bajando desde 48% a 43%."
+    },
+    "AMAUTA": {
+      "meses": [
+        { "mes": "Jun-26", "ventas": "S/4.1M", "mora": "18%", "margen": "38%" },
+        { "mes": "Jul-26", "ventas": "S/4.8M", "mora": "20%", "margen": "36%" },
+        { "mes": "Ago-26", "ventas": "S/1.6M", "mora": "23%", "margen": "34%" }
+      ],
+      "observacion": "Mora en escalada constante. Caída de ventas agosto -66% vs julio. Margen comprimido 3 meses seguidos."
+    },
+    "NEOPACK": {
+      "meses": [
+        { "mes": "Jun-26", "ventas": "S/0.9M", "mora": "20%", "margen": "32%" },
+        { "mes": "Jul-26", "ventas": "S/1.06M", "mora": "23%", "margen": "31%" },
+        { "mes": "Ago-26", "ventas": "S/0.43M", "mora": "26%", "margen": "29%" }
+      ],
+      "observacion": "Todas las métricas deteriorándose. La mora sube 3pp por mes. Ventas agosto -60% vs julio."
+    }
+  }
+}
