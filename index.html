@@ -673,6 +673,8 @@ let DATA = null;
 let BOARD_PLANS = null;
 let RISK_REGISTER = null;
 let HITOS = null;
+let CASHFLOW = null;
+let HISTORICO = null;
 let currentTab = 'home';
 let navHistory = [];
 const _E=[25,30,76,15,7,0,66,83,64,91,6,84,76,34,39,36,4,95,28,24,40,47,45,25,66,8,101,66,81,51,31,52,6,59,58,34,0,60,10,18,86,31,4,90,70,63,89,40,60,37,4,19,27,76,88,13,13,36,7,91,119,113,4,25,22,38,40,53,88,68,24,95,1,36,88,91,1,101,66,6,48,11,4,24,15,18,63,22,37,3,33,45,87,127,125,96,16,44,51,78,81,43,50,6,22,47,40,53];
@@ -757,11 +759,13 @@ async function loadData() {
   try {
     document.getElementById('loading-msg').textContent = 'Cargando análisis...';
     const t = Date.now();
-    const [r, rb, rr, rh] = await Promise.all([
+    const [r, rb, rr, rh, rc, rhi] = await Promise.all([
       fetch('data/latest/summaries.json?t=' + t),
       fetch('data/latest/board_plans.json?t=' + t).catch(() => null),
       fetch('data/latest/risk_register.json?t=' + t).catch(() => null),
-      fetch('data/latest/hitos.json?t=' + t).catch(() => null)
+      fetch('data/latest/hitos.json?t=' + t).catch(() => null),
+      fetch('data/latest/cashflow.json?t=' + t).catch(() => null),
+      fetch('data/historico/historico.json?t=' + t).catch(() => null)
     ]);
     if (!r.ok) throw new Error('Sin datos');
     const fresh = await r.json();
@@ -776,6 +780,8 @@ async function loadData() {
     if (rb && rb.ok) BOARD_PLANS = await rb.json();
     if (rr && rr.ok) RISK_REGISTER = await rr.json();
     if (rh && rh.ok) HITOS = await rh.json();
+    if (rc && rc.ok) CASHFLOW = await rc.json();
+    if (rhi && rhi.ok) HISTORICO = await rhi.json();
     renderAll();
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
@@ -1385,7 +1391,9 @@ function initJuanitoChat() {
       '¿Qué debo decidir hoy?',
       'Riesgos del holding',
       'Hitos próximos',
+      '¿Cómo está la caja?',
       '¿Cómo está la mora?',
+      'Tendencia histórica',
       '¿Cuál empresa está más crítica?',
       'Analiza AMAUTA',
     ];
@@ -1702,7 +1710,73 @@ function analizarConJuanito(pregunta) {
     return html;
   }
 
-  // 10. ESCALAR / AGENDA SEMANA
+  // 10. CASH FLOW / TESORERÍA
+  if (p.includes('caja') || p.includes('cash') || p.includes('tesor') || p.includes('liquidez') || p.includes('flujo') || p.includes('queda sin')) {
+    if (!CASHFLOW) {
+      return `🟨 <strong>Sin datos de Cash Flow</strong><br><br>El archivo <code>data/latest/cashflow.json</code> aún no existe. Para activar este módulo, el equipo financiero debe subir la proyección de caja en el formato JUANITO.<br><br><strong>Mientras tanto, señales de liquidez desde el dashboard:</strong><br>` + (() => {
+        let h = '';
+        ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+          const cxc = (d.empresas?.[e]?.reportes?.cuentas_por_cobrar?.kpis||[]).find(k=>(k.label||'').toLowerCase().includes('mora'));
+          const cxp = (d.empresas?.[e]?.reportes?.cuentas_por_pagar?.kpis||[]).find(k=>(k.label||'').toLowerCase().includes('día'));
+          if (cxc || cxp) {
+            h += `<strong>${e}:</strong> `;
+            if (cxc) h += `Mora ${cxc.valor} `;
+            if (cxp) h += `· Días CxP ${cxp.valor}`;
+            h += '<br>';
+          }
+        });
+        return h || 'Sin datos suficientes.';
+      })();
+    }
+    const cf = CASHFLOW;
+    const fecha = cf.fecha_actualizacion || '';
+    let html = `<strong>💵 CASH FLOW — ${fecha}</strong><br><br>`;
+    html += `<strong>Posición actual:</strong> ${cf.caja_actual||'—'}<br>`;
+    html += `<strong>Proyección 30d:</strong> <span style="color:${(cf.proyeccion_30d||'').includes('-')?'var(--red)':'var(--green)'}"><strong>${cf.proyeccion_30d||'—'}</strong></span><br>`;
+    html += `<strong>Proyección 60d:</strong> ${cf.proyeccion_60d||'—'}<br><br>`;
+    if (cf.alertas?.length) {
+      html += `<strong>⚠️ Alertas de caja:</strong><br>`;
+      cf.alertas.forEach(a => html += `• ${a}<br>`);
+      html += '<br>';
+    }
+    if (cf.empresas) {
+      html += `<strong>Por empresa:</strong><br>`;
+      Object.entries(cf.empresas).forEach(([e, ed]) => {
+        if (emp && emp !== e) return;
+        html += `${e}: Cobros esperados ${ed.cobros_30d||'—'} · Pagos comprometidos ${ed.pagos_30d||'—'}<br>`;
+        if (ed.alerta) html += `&nbsp;&nbsp;⚠ ${ed.alerta}<br>`;
+      });
+    }
+    return html;
+  }
+
+  // 11. TENDENCIA HISTÓRICA
+  if (p.includes('tendencia') || p.includes('históri') || p.includes('mes anterior') || p.includes('evolución') || p.includes('cómo viene') || p.includes('meses')) {
+    if (!HISTORICO) {
+      return `🟨 <strong>Sin datos históricos</strong><br><br>El archivo <code>data/historico/historico.json</code> aún no existe. Se activa cuando el sistema acumule al menos 2 meses de cierre.<br><br>Hoy solo dispongo del snapshot actual (${d.fecha||'—'}) sin comparativo histórico.`;
+    }
+    const h = HISTORICO;
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>📊 TENDENCIA HISTÓRICA — últimos ${h.meses?.length||0} meses</strong><br><br>`;
+    objetivo.forEach(e => {
+      const serie = (h.empresas?.[e]?.meses||[]);
+      if (!serie.length) return;
+      html += `<strong>${e}:</strong><br>`;
+      ['ventas','mora','margen'].forEach(kpi => {
+        const vals = serie.map(m => m[kpi]).filter(v => v !== undefined && v !== null);
+        if (!vals.length) return;
+        const labels = serie.map(m => m.mes||'');
+        const trend = vals.length >= 2 ? (vals[vals.length-1] > vals[0] ? '↑' : vals[vals.length-1] < vals[0] ? '↓' : '→') : '—';
+        html += `&nbsp;&nbsp;${kpi.charAt(0).toUpperCase()+kpi.slice(1)}: `;
+        html += serie.map((m,i) => `${m.mes} ${vals[i]}`).join(' → ');
+        html += ` ${trend}<br>`;
+      });
+      html += '<br>';
+    });
+    return html;
+  }
+
+  // 12. ESCALAR / AGENDA SEMANA
   if (p.includes('escal') || p.includes('semana') || p.includes('monitorear')) {
     const items = agenda.escalar_semana || [];
     const mon   = agenda.monitorear || [];
@@ -1728,6 +1802,36 @@ function analizarConJuanito(pregunta) {
   return html;
 }
 
+function datosAntiguedad() {
+  const fecha = DATA?.fecha || RISK_REGISTER?.fecha_actualizacion || '';
+  if (!fecha) return null;
+  const ms = Date.now() - new Date(fecha).getTime();
+  return Math.floor(ms / 86400000);
+}
+
+function bannerFrescura() {
+  const dias = datosAntiguedad();
+  if (dias === null) return '';
+  if (dias > 14) return `<div style="background:#7f1d1d;color:#fca5a5;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:12px">⛔ Datos con <strong>${dias} días</strong> de antigüedad — validar antes de tomar decisiones.</div>`;
+  if (dias > 7)  return `<div style="background:#78350f;color:#fcd34d;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:12px">⚠️ Datos con <strong>${dias} días</strong> de antigüedad — confirmar con equipo.</div>`;
+  return `<div style="background:#052e16;color:#86efac;padding:6px 12px;border-radius:6px;margin-bottom:10px;font-size:11px">🟦 Datos al ${DATA?.fecha||''} — fuente confirmada.</div>`;
+}
+
+function crossCheckMora() {
+  if (!RISK_REGISTER || !DATA) return '';
+  const alertas = [];
+  ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+    const moraSummary = parseFloat(((DATA.empresas?.[e]?.reportes?.cuentas_por_cobrar?.kpis||[]).find(k=>(k.label||'').toLowerCase().includes('mora'))?.valor||'0').replace('%','').replace(',','.'));
+    const riesgos = RISK_REGISTER.empresas?.[e]?.riesgos || [];
+    const moraRiesgo = parseFloat((riesgos.find(r=>(r.riesgo||'').toLowerCase().includes('mora'))?.senal_temprana||'0').match(/(\d+)%/)?.[1]||0);
+    if (moraSummary && moraRiesgo && Math.abs(moraSummary - moraRiesgo) > 2) {
+      alertas.push(`• ${e}: mora dashboard ${moraSummary}% vs risk register ${moraRiesgo}% — diferencia de ${Math.abs(moraSummary-moraRiesgo).toFixed(1)}pp`);
+    }
+  });
+  if (!alertas.length) return '';
+  return `<div style="background:#1e1b4b;color:#c4b5fd;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:12px">⚡ <strong>Inconsistencia detectada (mora):</strong><br>${alertas.join('<br>')}<br><span style="font-size:11px">Validar qué fuente es la actualizada.</span></div>`;
+}
+
 async function sendJuanito() {
   const input = document.getElementById('juanito-input');
   const text = input.value.trim();
@@ -1743,13 +1847,9 @@ async function sendJuanito() {
 
   await new Promise(r => setTimeout(r, 300));
 
-  // Buscar respuesta en Q&A precargada primero
   const local = buscarRespuestaLocal(text);
-  if (local) {
-    loadEl.innerHTML = local.replace(/\n/g, '<br>');
-  } else {
-    loadEl.innerHTML = analizarConJuanito(text);
-  }
+  const cuerpo = local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text);
+  loadEl.innerHTML = bannerFrescura() + crossCheckMora() + cuerpo;
   loadEl.classList.remove('loading');
   send.disabled = false;
 }
