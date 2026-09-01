@@ -155,6 +155,22 @@ def get_token():
     r.raise_for_status()
     return r.json()["access_token"]
 
+def dax(token, ws_id, dataset_id, query, label="query"):
+    """Ejecuta una consulta DAX cruda. Retorna lista de filas o []."""
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{ws_id}/datasets/{dataset_id}/executeQueries"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    body = {"queries": [{"query": query}], "serializerSettings": {"includeNulls": True}}
+    try:
+        r = requests.post(url, json=body, headers=headers, timeout=30)
+        if r.status_code != 200:
+            print(f"    [dax:{label}] {r.status_code} {r.text[:120]}")
+            return []
+        tables = r.json().get("results", [{}])[0].get("tables", [])
+        return tables[0].get("rows", []) if tables else []
+    except Exception as e:
+        print(f"    [dax:{label}] error: {e}")
+        return []
+
 def try_measure(token, ws_id, dataset_id, name):
     """Prueba si una medida existe. Retorna (valor, True) o (None, False)."""
     r = requests.post(
