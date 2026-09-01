@@ -11,7 +11,7 @@
     "% Merma Total": null
   },
   "compras": {
-    "_compras_cols": null
+    "Valor Compras": null
   },
   "inventario": {
     "Stock Total": null
@@ -19,6 +19,9 @@
   "control_ds": {
     "% Cumplimiento": null,
     "Satisfactorio": null
+  },
+  "planificacion": {
+    "% Avance": null
   },
   "consumo": {
     "Consumo": null,

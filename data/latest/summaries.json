@@ -72,7 +72,12 @@
         "compras": {
           "estado": "green",
           "alerta": null,
-          "kpis": []
+          "kpis": [
+            {
+              "label": "Compras",
+              "valor": "S/77.55M"
+            }
+          ]
         },
         "sop_inventario": {
           "estado": "green",
@@ -92,6 +97,18 @@
               "label": "Satisfactorio",
               "valor": "141",
               "estado": "green"
+            }
+          ]
+        },
+        "margen_variable_pag2": {
+          "estado": "red",
+          "alerta": "Avance 19.2% vs presupuesto",
+          "kpis": [
+            {
+              "label": "Avance vs Ppto",
+              "valor": "19.2%",
+              "meta": "100%",
+              "estado": "red"
             }
           ]
         }
