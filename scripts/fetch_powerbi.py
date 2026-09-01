@@ -544,6 +544,62 @@ def query_avance_presupuesto(token, ws_id, dataset_id, measures):
 # Main
 # ──────────────────────────────────────────────────────────────────────────────
 
+def test_dataset(token, ws_id, dataset_id):
+    """Prueba si un dataset acepta queries DAX. Retorna True/False."""
+    r = requests.post(
+        f"{PBI_BASE}/groups/{ws_id}/datasets/{dataset_id}/executeQueries",
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        json={"queries": [{"query": "EVALUATE {1}"}], "serializerSettings": {"includeNulls": True}},
+        timeout=20,
+    )
+    return r.ok
+
+def discover_all_datasets(token, ws_id):
+    """Lista TODOS los datasets del workspace con nombre e ID."""
+    r = requests.get(f"{PBI_BASE}/groups/{ws_id}/datasets",
+                     headers={"Authorization": f"Bearer {token}"}, timeout=20)
+    if not r.ok:
+        print(f"  Error listando datasets: {r.status_code}")
+        return {}
+    datasets = r.json().get("value", [])
+    return {d["name"]: d["id"] for d in datasets}
+
+def auto_map_datasets(token, ws_id, all_ds):
+    """Mapea datasets por nombre a keys de reporte. Prueba acceso DAX."""
+    mapping = {}
+    for name, did in all_ds.items():
+        nl = name.lower()
+        key = None
+        if "cobrar" in nl or "cxc" in nl: key = "cxc"
+        elif "pagar" in nl or "cxp" in nl: key = "cxp"
+        elif "margen" in nl or "venta" in nl: key = "margen"
+        elif "merma" in nl: key = "mermas"
+        elif "compra" in nl: key = "compras"
+        elif "inventario" in nl or "sop" in nl or "stock" in nl: key = "inventario"
+        elif "productividad" in nl: key = "productividad_ds"
+        elif "fill" in nl or "atenci" in nl: key = "fill_rate_ds"
+        elif "control" in nl or "interno" in nl or "audit" in nl: key = "control_ds"
+        elif "presupuesto" in nl or "ppto" in nl or "avance" in nl: key = "avance_ds"
+        if key:
+            ok = test_dataset(token, ws_id, did)
+            print(f"  '{name}' -> {key} (DAX: {'OK' if ok else 'NO ACCESS'})")
+            if ok:
+                mapping[key] = did
+        else:
+            ok = test_dataset(token, ws_id, did)
+            print(f"  '{name}' -> SIN MAPEO (DAX: {'OK' if ok else 'NO'})")
+    return mapping
+
+def try_measures(token, ws_id, dataset_id, candidates, label=""):
+    """Prueba una lista de nombres de medida y retorna el primero que funciona."""
+    for name in candidates:
+        row = dax_row(token, ws_id, dataset_id, f'EVALUATE ROW("v", [{name}])', f"probe_{name}")
+        v = row.get("[v]") or row.get("v")
+        if v is not None:
+            print(f"    Medida OK: [{name}] = {v}")
+            return name, v
+    return None, None
+
 def main():
     print("=== JUANITO Power BI Fetcher v2 ===")
     print(f"Fecha: {HOY}")
@@ -569,19 +625,36 @@ def main():
     holding_mora_vals = []
 
     for empresa, ws_id in WORKSPACES.items():
-        print(f"\n[{empresa}] Descubriendo medidas...")
-        ids = DATASET_IDS.get(empresa, {})
+        print(f"\n[{empresa}] Descubriendo datasets...")
         empresa_data = {"reportes": {}}
 
-        # Descubrir medidas de cada dataset
+        # Listar todos los datasets del workspace
+        all_ds = discover_all_datasets(token, ws_id)
+        print(f"  Total datasets en workspace: {len(all_ds)}")
+        for name, did in all_ds.items():
+            print(f"    '{name}': {did}")
+
+        # Auto-mapear y verificar acceso DAX
+        ids = auto_map_datasets(token, ws_id, all_ds)
+
+        # Fallback a IDs hardcodeados si no se encontraron por nombre
+        hardcoded = DATASET_IDS.get(empresa, {})
+        for key, did in hardcoded.items():
+            if key not in ids:
+                ok = test_dataset(token, ws_id, did)
+                if ok:
+                    print(f"  Fallback {key} (hardcoded) -> DAX OK")
+                    ids[key] = did
+
+        print(f"  Datasets con acceso DAX: {list(ids.keys())}")
+
+        # Descubrir medidas de cada dataset accesible
         dataset_measures = {}
         for key, did in ids.items():
             ms = discover_measures(token, ws_id, did)
             dataset_measures[key] = ms
-            print(f"  {key}: {len(ms)} medidas encontradas")
             if ms:
-                sample = sorted(list(ms))[:8]
-                print(f"    Muestra: {sample}")
+                print(f"  {key}: {len(ms)} medidas | muestra: {sorted(list(ms))[:5]}")
 
         # ── CxC ──────────────────────────────────────────────────────────────
         if "cxc" in ids:
