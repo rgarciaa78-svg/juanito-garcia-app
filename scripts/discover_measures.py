@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-"""
-Prueba nombres de medidas exactos extraídos de la captura del reporte CxP.
-"""
-import os, json, requests
+"""Prueba nombres exactos de Productividad y Fill Rate desde capturas del reporte."""
+import os, requests
 
 TENANT_ID     = os.environ["AZURE_TENANT_ID"]
 CLIENT_ID     = os.environ["AZURE_CLIENT_ID"]
@@ -34,69 +32,28 @@ def try_m(ds_id, name):
         return v, True
     return None, False
 
-# CxP dataset
-CXP_ID   = "45a8ab8d-e162-4398-a260-3a9a5f90829f"
-PROD_ID  = "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6"
-PLAN_ID  = "30074d92-7ec1-4762-82f2-1cb29c15dcfe"
-CONS_ID  = "c972c8cb-e5fc-4b60-8f5e-265a78e1e796"
+PROD_ID = "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6"
+PLAN_ID = "30074d92-7ec1-4762-82f2-1cb29c15dcfe"
 
-# Candidatos CxP deducidos de la captura
-CXP_CANDIDATES = [
-    # Total
-    "Cuentas x Pagar", "CUENTAS X PAGAR", "Cuentas por Pagar", "Total CxP",
-    "CxP Total", "Total Cuentas Pagar", "Saldo CxP", "Total Saldo",
-    # Vigente
-    "Vigente", "CxP Vigente", "Saldo Vigente", "No Vencido",
-    # Vencido tramos
-    "Vencido", "Total Vencido", "Saldo Vencido",
-    "Vencido 0-15", "Vencido <15", "Vencido Menor 15",
-    "Vencido 16-30", "Vencido 30-60", "Vencido 31-90",
-    "Vencido 31 a 90", "Vencido 16 a 30",
-    # Refinanciado
-    "Refinanciado", "Con Cronograma", "Refinanciamiento",
-    # Dias
-    "Dias CxP", "DPP", "Dias de Pago", "Días de Pago",
-    "Rotación CxP", "Rotacion CxP",
-    # Número proveedores
-    "# Proveedores", "Proveedores", "Nro Proveedores",
-    # Compras (eje del gráfico)
-    "Compras CxP", "Total Compras CxP",
-]
-
-print("=== CxP — probando candidatos ===")
-found_cxp = {}
-for name in CXP_CANDIDATES:
-    v, ok = try_m(CXP_ID, name)
-    if ok:
-        found_cxp[name] = v
-        print(f"  ✓ [{name}] = {v}")
-    else:
-        print(f"  ✗ [{name}]")
-
-print(f"\nEncontradas CxP: {found_cxp}")
-
-# Candidatos Productividad deducidos del nombre del reporte
-# "Reporte de productividad por funcionario" + página "R. PRODUCTIVIDAD VAL"
+# Candidatos Productividad exactos desde la captura
 PROD_CANDIDATES = [
-    # Planilla / costo MOD
-    "Planilla", "Total Planilla", "Costo Planilla", "Gasto Planilla",
-    "MOD", "Costo MOD", "Total MOD",
-    "Planilla kg", "Planilla/kg", "S/.kg", "S/.Kg", "S/kg",
-    "Costo x kg", "Costo por kg", "S/ x kg",
-    # Kg producidos
-    "Kg", "Total Kg", "Kg Producidos", "Kg Produccion", "Kg Producción",
-    "Produccion", "Producción", "Total Produccion",
-    # Productividad
-    "Productividad", "Indice Productividad", "Ratio Productividad",
-    "Eficiencia", "% Eficiencia",
-    # Por funcionario
-    "Funcionario", "Total Funcionarios",
-    # Costo valorizado
-    "Planilla Val", "MOD Valorizado", "Costo Valorizado",
-    "VAL", "Valorizado",
+    # Producción KG
+    "Produccion Total (KG)", "PRODUCCION TOTAL (KG)", "Produccion Total",
+    "Producción Total (KG)", "Producción Total",
+    "KG Total", "Total KG", "KG Produccion", "KG Producción",
+    # Venta Neta KG
+    "Venta Neta (KG)", "VENTA NETA (KG)", "Venta Neta",
+    "Ventas Neta KG", "Venta KG", "KG Vendidos",
+    # Planilla
+    "Planilla Total (S/.)", "PLANILLA TOTAL (S/.)", "Planilla Total",
+    "Planilla (S/.)", "Total Planilla S/.", "Planilla S/.",
+    # Ratio S/kg
+    "Planilla (S/.) entre Kg Producido", "PLANILLA (S/.) ENTRE KG PRODUCIDO",
+    "Planilla entre KG", "S/. x KG", "S/.xKG", "S/Kg", "Planilla/KG",
+    "Ratio Planilla KG", "Costo Planilla KG",
 ]
 
-print("\n=== Productividad — probando candidatos ===")
+print("=== PRODUCTIVIDAD ===")
 found_prod = {}
 for name in PROD_CANDIDATES:
     v, ok = try_m(PROD_ID, name)
@@ -106,48 +63,32 @@ for name in PROD_CANDIDATES:
     else:
         print(f"  ✗ [{name}]")
 
-print(f"\nEncontradas Prod: {found_prod}")
+print(f"\nEncontradas: {found_prod}")
 
-# Fill Rate en planificacion — página "REPORTE DE S&OP"
+# Fill Rate — en el reporte de Planificaciones (11) hay página "REPORTE DE S&OP"
+# y "ANALISIS DE COMPRA" — probar nombres que encajan con S&OP
 FR_CANDIDATES = [
-    "Fill Rate", "% Fill Rate", "FR", "% FR",
-    "Nivel Servicio", "% Nivel Servicio", "Nivel de Servicio",
-    "Atendido", "% Atendido", "Pedidos Atendidos",
-    "S&OP", "REPORTE S&OP",
-    "Cumplimiento Pedidos", "% Cumplimiento Pedidos",
-    "OC Atendidas", "% OC Atendidas",
-    "Demanda Atendida", "% Demanda",
-    # Consumo ratio
-    "Ratio Consumo", "Ratio C/C", "Consumo/Compra", "Ratio",
+    # Fill Rate variantes
+    "Fill Rate", "% Fill Rate", "Fill Rate (%)", "FR", "% FR",
+    "Fill Rate Unidades", "Fill Rate Valor",
+    # S&OP
+    "Nivel Servicio", "Nivel de Servicio", "% Nivel Servicio",
+    "Atendido %", "% Atendido", "Demanda Atendida", "% Demanda Atendida",
+    "Pedidos Atendidos", "% Pedidos Atendidos", "Cumplimiento Pedidos",
+    # Análisis compra — posibles medidas
+    "Ratio C/C", "Ratio Consumo", "Ratio Compras",
+    "Consumo/Compra", "C/C",
 ]
 
-print("\n=== Planificacion — Fill Rate y S&OP ===")
-found_plan = {}
+print("\n=== FILL RATE (Planificacion) ===")
+found_fr = {}
 for name in FR_CANDIDATES:
     v, ok = try_m(PLAN_ID, name)
     if ok:
-        found_plan[name] = v
+        found_fr[name] = v
         print(f"  ✓ [{name}] = {v}")
     else:
         print(f"  ✗ [{name}]")
 
-print(f"\nEncontradas Plan: {found_plan}")
-
-# Consumo
-CONS_CANDIDATES = [
-    "Consumo", "Total Consumo", "Importe Consumo",
-    "Compras", "Total Compras",
-    "Ratio", "Ratio Consumo",
-]
-print("\n=== Consumo ===")
-found_cons = {}
-for name in CONS_CANDIDATES:
-    v, ok = try_m(CONS_ID, name)
-    if ok:
-        found_cons[name] = v
-        print(f"  ✓ [{name}] = {v}")
-    else:
-        print(f"  ✗ [{name}]")
-
-print(f"\nEncontradas Consumo: {found_cons}")
+print(f"\nEncontradas FR: {found_fr}")
 print("\n=== FIN ===")
