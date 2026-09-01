@@ -1,44 +1,34 @@
 {
-  "fecha": "01/09/2026",
-  "fecha_actualizacion": "2026-09-01",
-  "generado_por": "JUANITO — Power BI Direct",
-  "semaforos": {
-    "PAUNO": "red"
-  },
-  "semaforo_razon": {
-    "PAUNO": "Morosidad 23.0% — crítica"
-  },
-  "holding_ventas": "—",
-  "holding_mora": "23.0%",
-  "agenda_ceo": {
-    "decidir_hoy": [
-      {
-        "empresa": "PAUNO",
-        "texto": "Mora 23.0% en PAUNO — vencido S/2,688,582. Activar cobranza intensiva.",
-        "responsable": "Gerencia Financiera"
-      }
-    ],
-    "escalar_semana": []
-  },
+  "generado_en": "2026-09-01T15:38:39.360021",
   "empresas": {
     "PAUNO": {
       "reportes": {
-        "cuentas_por_cobrar": {
-          "estado": "red",
-          "alerta": "Morosidad 23.0% — crítica",
-          "kpis": [
-            {
-              "label": "Morosidad",
-              "valor": "23.0%",
-              "meta": "15%"
-            },
-            {
-              "label": "CxC por vencer",
-              "valor": "S/2,688,582"
-            }
-          ]
-        }
+        "cuentas_por_cobrar": {},
+        "cuentas_por_pagar": {},
+        "margen_variable": {},
+        "mermas": {},
+        "compras": {},
+        "control_interno": {},
+        "sop_inventario": {},
+        "fill_rate": {},
+        "productividad": {},
+        "margen_variable_pag2": {}
+      }
+    },
+    "AMAUTA": {
+      "reportes": {
+        "cuentas_por_cobrar": {},
+        "cuentas_por_pagar": {},
+        "inventario": {}
+      }
+    },
+    "NEOPACK": {
+      "reportes": {
+        "cuentas_por_cobrar": {},
+        "cuentas_por_pagar": {},
+        "ventas": {}
       }
     }
-  }
+  },
+  "chat_qa": []
 }
