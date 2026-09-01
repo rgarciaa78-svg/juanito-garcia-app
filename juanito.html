@@ -775,7 +775,19 @@ async function loadData() {
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
   } catch(e) {
-    document.getElementById('loading-msg').textContent = 'Sin datos. El scraper corre a las 7am (días hábiles).';
+    // Mostrar error detallado para diagnóstico
+    const el = document.getElementById('loading-msg');
+    const t = Date.now();
+    let diagMsg = 'ERROR: ' + e.message;
+    try {
+      const tr = await fetch('https://rgarciaa78-svg.github.io/juanito-garcia-app/data/latest/summaries.json?diag=' + t, {cache:'no-store'});
+      diagMsg += ' | summaries: HTTP ' + tr.status;
+      if (tr.ok) {
+        const d = await tr.json();
+        diagMsg += ' | fecha=' + (d.fecha||'?') + ' | sems=' + Object.keys(d.semaforos||{}).join(',');
+      }
+    } catch(fe) { diagMsg += ' | fetch-err: ' + fe.message; }
+    el.textContent = diagMsg;
   }
 }
 
