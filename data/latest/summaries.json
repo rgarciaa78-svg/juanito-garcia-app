@@ -8,25 +8,56 @@
     "NEOPACK": "yellow"
   },
   "semaforo_razon": {
-    "PAUNO": "Dataset no conectado aún",
-    "AMAUTA": "Dataset no conectado aún",
-    "NEOPACK": "Dataset no conectado aún"
+    "PAUNO": "Morosidad 22.9% — sobre meta",
+    "AMAUTA": "Pendiente conexión directa Power BI",
+    "NEOPACK": "Pendiente conexión directa Power BI"
   },
   "holding_ventas": "—",
-  "holding_mora": "—",
+  "holding_mora": "22.9%",
   "agenda_ceo": {
-    "decidir_hoy": [],
+    "decidir_hoy": [
+      {
+        "empresa": "PAUNO",
+        "texto": "Morosidad PAUNO en 22.9% — vence S/2,689,144. Activar cobranza intensiva esta semana.",
+        "responsable": "Gerencia Financiera"
+      }
+    ],
     "escalar_semana": []
   },
   "empresas": {
     "PAUNO": {
-      "reportes": {}
+      "reportes": {
+        "cuentas_por_cobrar": {
+          "estado": "yellow",
+          "alerta": "Morosidad 22.9% — sobre meta del 15%",
+          "kpis": [
+            { "label": "Morosidad", "valor": "22.9%", "meta": "15%" },
+            { "label": "CxC por vencer", "valor": "S/2,689,144" }
+          ]
+        }
+      }
     },
     "AMAUTA": {
-      "reportes": {}
+      "reportes": {
+        "general": {
+          "estado": "yellow",
+          "alerta": "Datos vía reportes Power BI. Conexión directa pendiente.",
+          "kpis": [
+            { "label": "Fuente", "valor": "Imágenes BI" }
+          ]
+        }
+      }
     },
     "NEOPACK": {
-      "reportes": {}
+      "reportes": {
+        "general": {
+          "estado": "yellow",
+          "alerta": "Datos vía reportes Power BI. Conexión directa pendiente.",
+          "kpis": [
+            { "label": "Fuente", "valor": "Imágenes BI" }
+          ]
+        }
+      }
     }
   }
 }
