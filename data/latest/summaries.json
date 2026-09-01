@@ -1,34 +1,44 @@
 {
-  "generado_en": "2026-09-01T15:38:39.360021",
+  "fecha": "01/09/2026",
+  "fecha_actualizacion": "2026-09-01",
+  "generado_por": "JUANITO — Power BI Direct",
+  "semaforos": {
+    "PAUNO": "red"
+  },
+  "semaforo_razon": {
+    "PAUNO": "Morosidad 20.4% — crítica"
+  },
+  "holding_ventas": "—",
+  "holding_mora": "20.4%",
+  "agenda_ceo": {
+    "decidir_hoy": [
+      {
+        "empresa": "PAUNO",
+        "texto": "Mora 20.4% en PAUNO — vencido S/3,019,494. Activar cobranza intensiva.",
+        "responsable": "Gerencia Financiera"
+      }
+    ],
+    "escalar_semana": []
+  },
   "empresas": {
     "PAUNO": {
       "reportes": {
-        "cuentas_por_cobrar": {},
-        "cuentas_por_pagar": {},
-        "margen_variable": {},
-        "mermas": {},
-        "compras": {},
-        "control_interno": {},
-        "sop_inventario": {},
-        "fill_rate": {},
-        "productividad": {},
-        "margen_variable_pag2": {}
-      }
-    },
-    "AMAUTA": {
-      "reportes": {
-        "cuentas_por_cobrar": {},
-        "cuentas_por_pagar": {},
-        "inventario": {}
-      }
-    },
-    "NEOPACK": {
-      "reportes": {
-        "cuentas_por_cobrar": {},
-        "cuentas_por_pagar": {},
-        "ventas": {}
+        "cuentas_por_cobrar": {
+          "estado": "red",
+          "alerta": "Morosidad 20.4% — crítica",
+          "kpis": [
+            {
+              "label": "Morosidad",
+              "valor": "20.4%",
+              "meta": "15%"
+            },
+            {
+              "label": "CxC por vencer",
+              "valor": "S/3,019,494"
+            }
+          ]
+        }
       }
     }
-  },
-  "chat_qa": []
+  }
 }
