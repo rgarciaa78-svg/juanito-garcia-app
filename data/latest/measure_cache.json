@@ -4,6 +4,11 @@
     "Morosidad": null,
     "Por Vencer": null
   },
+  "cxp": {
+    "Cuentas x Pagar": null,
+    "Refinanciamiento": null,
+    "Proveedores": null
+  },
   "margen": {
     "Venta Total": null
   },

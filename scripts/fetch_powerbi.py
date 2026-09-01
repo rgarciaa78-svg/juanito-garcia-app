@@ -59,24 +59,22 @@ SCAN_CANDIDATES = {
         "Rotacion CxC", "Días CxC", "Días de Cobro",
     ],
     "cxp": [
-        "DPP", "Días de Pago", "Dias de Pago", "Días CxP", "Dias CxP",
-        "Plazo Pago", "Plazo Promedio Pago", "Días Promedio de Pago",
-        "Días Promedio de Pago Actual", "Días Promedio",
-        "CxP Total", "Total CxP", "Saldo CxP", "Saldo Proveedores",
-        "Deuda Total", "Importe CxP", "Total Proveedores",
-        "Vencido CxP", "Por Vencer CxP", "Saldo Pagar",
-        "Refinanciado", "Saldo Refinanciado",
-        "Monto CxP", "Total Deuda", "CxP",
-        "Días de Crédito", "Rotacion CxP", "Plazo Crédito",
-        "Dias Promedio Pago", "Dias de Credito", "Dias Credito",
-        "Total Pagar", "Saldo Total", "Periodo Promedio Pago",
-        "PPP", "PPagos", "Plazo Promedio",
-        "% Vencido", "Vencido Total", "Vencimiento",
-        # Más variantes de nombre
-        "Total", "Saldo", "Importe", "Deuda", "Por Pagar",
-        "Total Facturas", "Facturas Pendientes", "Obligaciones",
-        "Monto Total", "Total Pago", "Saldo Actual",
-        "0-30d", "31-60d", "+60d", "0-30 días", "31-60 días", "+60 días",
+        # ── CONFIRMADOS por prueba directa ──
+        "Cuentas x Pagar", "CUENTAS X PAGAR", "Refinanciamiento", "Proveedores",
+        # ── Tramos vencido (deducidos de la captura del reporte) ──
+        "Vigente CxP", "CxP Vigente", "No Vencido CxP",
+        "Vencido < 15", "Vencido Menor 15d", "Vencido 0-15d",
+        "Vencido 16-30d", "Vencido 30d", "Vencido 1-30",
+        "Vencido 31-90", "Vencido 31-90d", "Vencido 90d",
+        "Vencido >90", "Vencido >90d", "Vencido Mayor 90",
+        "Saldo Vigente", "Saldo Vencido",
+        # ── Días de pago (eje del gráfico) ──
+        "Dias CxP", "DPP", "Dias Pago", "Rotacion CxP",
+        "Dias Promedio Pago", "Dias de Pago", "Días de Pago",
+        "PPP", "Plazo Pago", "Plazo Promedio Pago",
+        # ── Otros candidatos ──
+        "Total CxP", "Saldo CxP", "CxP Total",
+        "Deuda Total", "Total Deuda", "Monto CxP",
     ],
     "margen": [
         "Margen Variable", "% Margen Variable", "MV", "Margen Bruto",
@@ -356,28 +354,56 @@ def build_cxc(found):
     return result, sem, razon, mora_pct, vencer_val
 
 def build_cxp(found):
-    dias_val = (found.get("DPP") or found.get("Días de Pago") or found.get("Dias de Pago") or
-                found.get("Días CxP") or found.get("Dias CxP") or found.get("Plazo Pago") or
-                found.get("Plazo Promedio Pago") or found.get("Días Promedio de Pago"))
-    total_val = (found.get("CxP Total") or found.get("Total CxP") or found.get("Saldo CxP") or
-                 found.get("Saldo Proveedores") or found.get("Deuda Total"))
-    refin_val = found.get("Refinanciado") or found.get("Saldo Refinanciado")
+    # Nombres confirmados: "Cuentas x Pagar", "Refinanciamiento", "Proveedores"
+    total_val = (found.get("Cuentas x Pagar") or found.get("CUENTAS X PAGAR") or
+                 found.get("CxP Total") or found.get("Total CxP") or found.get("Saldo CxP") or
+                 found.get("Deuda Total"))
+    refin_val = (found.get("Refinanciamiento") or found.get("Refinanciado") or
+                 found.get("Saldo Refinanciado"))
+    proveed_val = found.get("Proveedores") or found.get("Nro Proveedores")
+    # Tramos vencido
+    vigente_val = found.get("Vigente CxP") or found.get("CxP Vigente") or found.get("Saldo Vigente")
+    venc15_val  = found.get("Vencido < 15") or found.get("Vencido Menor 15d") or found.get("Vencido 0-15d")
+    venc30_val  = found.get("Vencido 16-30d") or found.get("Vencido 30d") or found.get("Vencido 1-30")
+    venc90_val  = found.get("Vencido 31-90") or found.get("Vencido 31-90d")
+    # Días CxP
+    dias_val = (found.get("Dias CxP") or found.get("DPP") or found.get("Dias Pago") or
+                found.get("Rotacion CxP") or found.get("Dias Promedio Pago") or
+                found.get("Dias de Pago") or found.get("Días de Pago") or
+                found.get("PPP") or found.get("Plazo Pago"))
 
-    dias = to_float(dias_val)
+    total = to_float(total_val)
+    refin = to_float(refin_val)
+    dias  = to_float(dias_val)
+
+    # Semáforo: si refinanciado > 30% del total, amarillo; dias > 90, rojo
     sem = "green"
-    if dias:
-        if dias > 90: sem = "red"
-        elif dias > 60: sem = "yellow"
+    if dias and dias > 90: sem = "red"
+    elif dias and dias > 60: sem = "yellow"
+    elif refin and total and refin / total > 0.30: sem = "yellow"
 
     kpis = []
-    if dias is not None:
-        kpis.append({"label": "Días CxP", "valor": f"{dias:.0f} días", "meta": "<90d", "estado": sem})
     if total_val is not None:
         kpis.append({"label": "CxP Total", "valor": fmt_soles(total_val)})
+    if vigente_val is not None:
+        kpis.append({"label": "Vigente", "valor": fmt_soles(vigente_val), "estado": "green"})
+    if venc15_val is not None:
+        kpis.append({"label": "Vencido <15d", "valor": fmt_soles(venc15_val), "estado": "yellow"})
+    if venc30_val is not None:
+        kpis.append({"label": "Vencido 16-30d", "valor": fmt_soles(venc30_val), "estado": "red"})
+    if venc90_val is not None:
+        kpis.append({"label": "Vencido 31-90d", "valor": fmt_soles(venc90_val), "estado": "red"})
     if refin_val is not None:
-        kpis.append({"label": "Refinanciado", "valor": fmt_soles(refin_val)})
+        s = "yellow" if refin and total and refin/total > 0.30 else "green"
+        kpis.append({"label": "Refinanciado", "valor": fmt_soles(refin_val), "estado": s})
+    if proveed_val is not None:
+        kpis.append({"label": "# Proveedores", "valor": str(int(to_float(proveed_val) or 0))})
+    if dias is not None:
+        s_d = "red" if dias > 90 else ("yellow" if dias > 60 else "green")
+        kpis.append({"label": "Días CxP", "valor": f"{dias:.0f}d", "meta": "<90d", "estado": s_d})
 
-    alerta = f"CxP {dias:.0f}d — revisar flujo" if sem != "green" and dias else None
+    alerta = f"CxP {dias:.0f}d — revisar flujo" if dias and dias > 60 else (
+             f"Refinanciado {fmt_soles(refin_val)} — gestionar" if refin and total and refin/total > 0.30 else None)
     return {"estado": sem, "alerta": alerta, "kpis": kpis}, dias
 
 def build_margen(found):
@@ -734,8 +760,9 @@ def main():
         if scanned.get("cxp"):
             r, dias = build_cxp(scanned["cxp"])
             empresa_data["reportes"]["cuentas_por_pagar"] = r
-            print(f"  CxP dias={dias} sem={r['estado']}")
-            if r["estado"] == "red":
+            dias_str = f"{dias:.0f}" if dias is not None else "—"
+            print(f"  CxP dias={dias_str} sem={r['estado']}")
+            if r["estado"] == "red" and dias:
                 summary["agenda_ceo"]["escalar_semana"].append({
                     "empresa": empresa, "texto": f"CxP {dias:.0f}d — riesgo con proveedores.", "responsable": "Finanzas"
                 })
