@@ -1,0 +1,28 @@
+{
+  "generado_por": "JUANITO — Módulo Histórico",
+  "ultima_actualizacion": "2026-08-31",
+  "meses": ["Jun-26", "Jul-26", "Ago-26"],
+  "empresas": {
+    "PAUNO": {
+      "meses": [
+        {"mes": "Jun-26", "ventas": "S/6.8M", "mora": "14%", "margen": "47%"},
+        {"mes": "Jul-26", "ventas": "S/7.3M", "mora": "16%", "margen": "48%"},
+        {"mes": "Ago-26", "ventas": "S/2.7M", "mora": "18%", "margen": "43%"}
+      ]
+    },
+    "AMAUTA": {
+      "meses": [
+        {"mes": "Jun-26", "ventas": "S/4.1M", "mora": "18%", "margen": "38%"},
+        {"mes": "Jul-26", "ventas": "S/4.8M", "mora": "20%", "margen": "36%"},
+        {"mes": "Ago-26", "ventas": "S/1.6M", "mora": "23%", "margen": "34%"}
+      ]
+    },
+    "NEOPACK": {
+      "meses": [
+        {"mes": "Jun-26", "ventas": "S/0.9M", "mora": "20%", "margen": "32%"},
+        {"mes": "Jul-26", "ventas": "S/1.06M", "mora": "23%", "margen": "31%"},
+        {"mes": "Ago-26", "ventas": "S/0.43M", "mora": "26%", "margen": "29%"}
+      ]
+    }
+  }
+}

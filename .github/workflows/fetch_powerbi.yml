@@ -1,0 +1,40 @@
+name: JUANITO — Fetch Power BI Data
+
+on:
+  schedule:
+    # 7:30am Lima (UTC-5) = 12:30 UTC, lunes a viernes
+    - cron: '30 12 * * 1-5'
+  workflow_dispatch:  # permite correr manualmente
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch Power BI data
+        env:
+          AZURE_TENANT_ID:     ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID:     ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          PBI_USERNAME:        ${{ secrets.PBI_USERNAME }}
+          PBI_PASSWORD:        ${{ secrets.PBI_PASSWORD }}
+          PBI_WORKSPACE_ID:    ${{ secrets.PBI_WORKSPACE_ID }}
+        run: python scripts/fetch_powerbi.py
+
+      - name: Commit & push JSON files
+        run: |
+          git config user.name  "JUANITO Bot"
+          git config user.email "juanito@pauno.pe"
+          git add data/latest/summaries.json data/historico/historico.json || true
+          git diff --staged --quiet || git commit -m "data: auto-update Power BI $(date +'%Y-%m-%d %H:%M')"
+          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/rgarciaa78-svg/juanito-garcia-app.git HEAD:main

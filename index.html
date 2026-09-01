@@ -6,11 +6,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Juanito">
-<meta name="theme-color" content="#f5f5f7">
+<meta name="theme-color" content="#ffffff">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Juanito Garcia</title>
 <style>
 :root {
-  --bg:     #f2f2f7;
+  --bg:     #ffffff;
   --bg2:    #ffffff;
   --bg3:    #e8e8ed;
   --card:   #ffffff;
@@ -54,12 +57,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #top-badge { font-size: 10px; font-weight: 600; background: var(--bg3); color: var(--text2); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
 
 #main { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-#nav-bar { background: var(--bg2); border-top: 1px solid var(--border); display: flex; min-height: var(--nav-h); flex-shrink: 0; }
+#nav-bar { background: #1e3a5f; border-top: none; display: flex; min-height: var(--nav-h); flex-shrink: 0; }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; padding: 8px 4px; transition: opacity 0.15s; }
-.nav-item svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
-.nav-item span { font-size: 10px; font-weight: 500; color: var(--text3); transition: color 0.15s; }
-.nav-item.active svg { stroke: var(--accent); }
-.nav-item.active span { color: var(--accent); }
+.nav-item svg { width: 22px; height: 22px; stroke: rgba(255,255,255,0.5); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+.nav-item span { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.5); transition: color 0.15s; }
+.nav-item.active svg { stroke: #ffffff; }
+.nav-item.active span { color: #ffffff; }
 
 /* iPad */
 @media (min-width: 768px) {
@@ -85,7 +88,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .screen.active { display: block; }
 @media (min-width: 768px) {
   .screen { padding: 24px 24px 32px; }
-  #screen-home { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  #screen-home { grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
   #screen-home.active { display: grid; }
   .home-col-right { display: flex; flex-direction: column; gap: 16px; }
 }
@@ -99,14 +102,29 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 8px 12px;
-  text-align: center;
+  padding: 12px 12px 14px;
+  text-align: left;
   cursor: pointer;
   box-shadow: var(--shadow);
   transition: transform 0.12s, box-shadow 0.12s;
   position: relative;
   overflow: hidden;
 }
+.sem-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.sem-card-top .sem-name { flex: 1; font-size: 12px; font-weight: 800; color: var(--text1); letter-spacing: 0.5px; margin: 0; }
+.sem-arrow { font-size: 11px; color: var(--text3); }
+.sem-kpis-list { display: flex; flex-direction: column; gap: 5px; }
+.sem-kpi-row { display: flex; align-items: center; gap: 5px; }
+.sem-kpi-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sem-kpi-dot.red { background: var(--red); }
+.sem-kpi-dot.yellow { background: var(--yellow); }
+.sem-kpi-dot.green { background: var(--green); }
+.sem-kpi-label { font-size: 10px; color: var(--text2); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sem-kpi-val { font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.sem-kpi-val.red { color: var(--red); }
+.sem-kpi-val.yellow { color: var(--yellow); }
+.sem-kpi-val.green { color: var(--green); }
+.sem-kpi-ok { font-size: 10px; color: var(--text3); }
 .sem-card::after {
   content: '';
   position: absolute;
@@ -211,7 +229,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .section-header-title {
   font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.6px;
-  color: var(--text2); white-space: nowrap;
+  color: #1e3a5f; white-space: nowrap;
 }
 .section-header-line { flex: 1; height: 1px; background: var(--border); }
 
@@ -221,47 +239,44 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
 .kpi-card {
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1.5px solid #cbd5e1;
   border-radius: var(--radius);
   padding: 14px 14px 12px;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
 }
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-}
-.kpi-card.red::before { background: var(--red-light); }
-.kpi-card.yellow::before { background: var(--yellow-light); }
-.kpi-card.green::before { background: var(--green-light); }
+.kpi-card::before { content: none; }
+.kpi-card.red, .kpi-card.yellow, .kpi-card.green { border-color: #cbd5e1; }
 
-.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; line-height: 1.4; }
-.kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
-.kpi-val.red { color: var(--red); }
-.kpi-val.yellow { color: var(--yellow); }
-.kpi-val.green { color: var(--green); }
-.kpi-val.neutral { color: var(--text); }
+/* Semáforo dot junto al valor */
+.kpi-val-row { display: flex; align-items: center; gap: 10px; margin-bottom: 0; }
+.kpi-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.kpi-dot.red    { background: #ef4444; }
+.kpi-dot.yellow { background: #f59e0b; }
+.kpi-dot.green  { background: #22c55e; }
+.kpi-dot.neutral { background: #94a3b8; }
 
-.kpi-meta { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.kpi-label { font-size: 10px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; line-height: 1.4; font-weight: 600; }
+.kpi-val { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; color: #1e293b; }
+.kpi-val.red, .kpi-val.yellow, .kpi-val.green, .kpi-val.neutral { color: #1e293b; }
+
+.kpi-meta { font-size: 11px; color: #374151; margin-top: 5px; }
 .kpi-trend-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
 .kpi-trend-pill {
-  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 500; padding: 0; background: none; border: none;
+  color: var(--text3);
 }
-.kpi-trend-pill.bad  { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-border); }
-.kpi-trend-pill.good { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-border); }
-.kpi-trend-pill.flat { background: var(--bg3);       color: var(--text2); }
+.kpi-trend-pill.bad  { color: #374151; }
+.kpi-trend-pill.good { color: #374151; }
+.kpi-trend-pill.flat { color: #374151; }
 
-/* Progress bar */
+/* Progress bar — un solo color, el semáforo identifica el estado */
 .kpi-progress { margin-top: 8px; }
-.kpi-progress-track { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-.kpi-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-.kpi-progress-fill.red    { background: var(--red-light); }
-.kpi-progress-fill.yellow { background: var(--yellow-light); }
-.kpi-progress-fill.green  { background: var(--green-light); }
-.kpi-progress-meta { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.kpi-progress-track { height: 3px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.kpi-progress-fill { height: 100%; border-radius: 3px; background: var(--text3); transition: width 0.5s ease; }
+.kpi-progress-fill.red, .kpi-progress-fill.yellow, .kpi-progress-fill.green { background: var(--text3); }
+.kpi-progress-meta { font-size: 10px; color: #374151; margin-top: 4px; }
 
 .kpi-card-link { transition: transform 0.1s, box-shadow 0.1s; }
 .kpi-card-link:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
@@ -296,6 +311,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
    REPORTES LIST
    ============================ */
 .reportes-list { display: flex; flex-direction: column; gap: 8px; }
+.board-call-section { margin-top: 24px; background: #f0f4ff; border: 1.5px solid #1e3a5f; border-radius: 12px; padding: 16px; }
+.board-call-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #1e3a5f; margin-bottom: 8px; }
+.board-call-desc { font-size: 12px; color: #374151; margin: 0 0 14px; line-height: 1.5; }
+.board-call-btn { width: 100%; background: #1e3a5f; color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.3px; }
+.board-call-btn:active { opacity: 0.85; }
+.board-updated { font-size: 10px; font-weight: 400; color: #6b7280; margin-left: auto; }
+.board-objetivo { font-size: 11px; font-weight: 700; color: #1e3a5f; background: #dbeafe; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; text-align: center; letter-spacing: 0.3px; }
+.board-plan-block { margin-bottom: 12px; }
+.board-plan-block-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.board-plan-item { font-size: 12px; color: #374151; line-height: 1.5; padding: 3px 0; border-bottom: 1px solid #e5e7eb; }
 .reporte-item {
   background: var(--card);
   border: 1px solid var(--border);
@@ -453,6 +478,22 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .ask-btn:active { opacity: 0.85; }
 
 /* PNG VIEWER */
+.reportes-empresa-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--text3); text-transform: uppercase; padding: 14px 16px 6px; }
+.reportes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 4px; }
+.reporte-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: box-shadow 0.15s; display: flex; flex-direction: column; gap: 6px; }
+.reporte-card:active { box-shadow: 0 0 0 2px var(--accent); }
+.reporte-card-icon { font-size: 20px; }
+.reporte-card-nombre { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.reporte-card-empresa { font-size: 11px; color: var(--text3); }
+#screen-reportes { flex-direction: column; overflow: hidden; height: 100%; }
+#screen-reportes.active { display: flex; }
+#screen-directorio { overflow: hidden; height: 100%; padding: 0; }
+#reportes-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+#pbi-viewer { flex: 1; display: flex; flex-direction: column; height: 100%; }
+#pbi-viewer-bar { background: var(--card); padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+#pbi-viewer-bar button { background: none; border: none; color: var(--accent); font-size: 14px; font-weight: 600; cursor: pointer; padding: 4px 0; }
+#pbi-viewer-title { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#pbi-iframe { flex: 1; width: 100%; border: none; min-height: 0; }
 #png-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 100; display: none; flex-direction: column; }
 #png-viewer.open { display: flex; }
 #png-viewer-bar { background: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
@@ -461,38 +502,23 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #png-viewer-img { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 16px; }
 #png-viewer-img img { max-width: 100%; height: auto; border-radius: 8px; }
 
-/* CHAT FAB */
-#chat-fab { position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50; box-shadow: 0 4px 16px rgba(21,101,192,0.35); transition: transform 0.15s; border: none; }
-#chat-fab:active { transform: scale(0.93); }
-#chat-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-@media (min-width: 768px) { #chat-fab { bottom: 20px; right: 20px; } }
-
-/* CHAT MODAL */
-#chat-modal { position: fixed; inset: 0; z-index: 80; display: none; flex-direction: column; background: var(--bg); }
-#chat-modal.open { display: flex; }
-@media (min-width: 768px) {
-  #chat-modal { left: auto; right: 0; width: 420px; border-left: 1px solid var(--border); box-shadow: -6px 0 30px rgba(0,0,0,0.12); }
-}
-#chat-header { background: var(--bg2); padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-#chat-header h2 { flex: 1; font-size: 16px; font-weight: 700; }
-#chat-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
-#chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .msg { max-width: 85%; padding: 11px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
 .msg.user      { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
 .msg.assistant { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); box-shadow: var(--shadow); }
 .msg.loading   { opacity: 0.6; }
-#chat-input-area { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; gap: 10px; align-items: flex-end; }
-#chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 10px 16px; color: var(--text); font-size: 14px; resize: none; max-height: 100px; outline: none; font-family: inherit; }
-#chat-send { background: var(--accent); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; box-shadow: 0 2px 8px rgba(21,101,192,0.25); }
-#chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
-#chat-send svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-#api-setup { padding: 20px; background: var(--card); margin: 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
-#api-setup p { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
 .chat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .chat-chip { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent); border-radius: 20px; padding: 5px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
 .chat-chip:active { opacity: 0.7; }
-#api-save-btn { background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
+
+/* JUANITO SCREEN — inline chat */
+#screen-juanito { padding: 0; height: 100%; overflow: hidden; }
+#screen-juanito.active { display: flex; flex-direction: column; }
+#juanito-chat-header { background: #1e3a5f; padding: 14px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+#juanito-chat-header .jh-avatar { width: 34px; height: 34px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+#juanito-chat-header h2 { color: #fff; font-size: 15px; font-weight: 700; flex: 1; }
+#juanito-chat-header span { color: rgba(255,255,255,0.6); font-size: 11px; }
+#juanito-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+#juanito-input-area { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
 
 /* LOADING */
 #loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 200; }
@@ -518,12 +544,14 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div id="top-sub"></div>
     </div>
     <span id="top-badge"></span>
+    <button onclick="window.location.href=window.location.pathname+'?v='+Date.now()" style="background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:4px" title="Actualizar">↻</button>
   </div>
 
   <div id="main">
     <div id="nav-bar">
       <div id="ipad-sidebar-header">
         <span class="logo-text">JG</span>
+        <div onclick="window.location.href=window.location.pathname+'?v='+Date.now()" title="Actualizar app" style="margin-top:12px;cursor:pointer;opacity:.6;font-size:16px;color:#fff">↻</div>
       </div>
       <div class="nav-item active" data-tab="home" onclick="showTab('home')">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -540,6 +568,18 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div class="nav-item" data-tab="neopack" onclick="showTab('neopack')">
         <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
         <span>NEOPACK</span>
+      </div>
+      <div class="nav-item" data-tab="reportes" onclick="showTab('reportes')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <span>Reportes</span>
+      </div>
+      <div class="nav-item" data-tab="juanito" onclick="showTab('juanito')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        <span>JUANITO</span>
+      </div>
+      <div class="nav-item" onclick="window.open('https://sites.neoreportes.com//private_includes/dashboard_directorio.php','_blank')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Directorio</span>
       </div>
     </div>
 
@@ -576,8 +616,44 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <!-- NEOPACK -->
       <div id="screen-neopack" class="screen"><div id="neopack-content"></div></div>
 
+      <!-- JUANITO CHAT IA -->
+      <div id="screen-juanito" class="screen">
+        <div id="juanito-chat-header">
+          <div class="jh-avatar">🤖</div>
+          <h2>JUANITO — Agente BI</h2>
+          <span id="juanito-fecha"></span>
+        </div>
+        <div id="juanito-messages"></div>
+        <div id="juanito-input-area">
+          <textarea id="juanito-input" class="chat-input" placeholder="Pregunta sobre PAUNO, AMAUTA o NEOPACK..." rows="1" onkeydown="handleJuanitoKey(event)" oninput="autoResize(this)" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:10px 16px;color:var(--text);font-size:14px;resize:none;max-height:100px;outline:none;font-family:inherit"></textarea>
+          <button id="juanito-send" onclick="sendJuanito()" style="background:var(--accent);border:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(21,101,192,0.25)">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+
       <!-- DETAIL -->
       <div id="screen-detail" class="screen"><div id="detail-content"></div></div>
+
+      <!-- REPORTES POWER BI -->
+      <div id="screen-reportes" class="screen">
+        <div id="reportes-list">
+          <div class="reportes-empresa-label">PAUNO</div>
+          <div class="reportes-grid" id="grid-pauno"></div>
+          <div class="reportes-empresa-label">AMAUTA</div>
+          <div class="reportes-grid" id="grid-amauta"></div>
+          <div class="reportes-empresa-label">NEOPACK</div>
+          <div class="reportes-grid" id="grid-neopack"></div>
+        </div>
+        <div id="pbi-viewer" style="display:none">
+          <div id="pbi-viewer-bar">
+            <button onclick="closePbi()">← Volver</button>
+            <span id="pbi-viewer-title"></span>
+          </div>
+          <iframe id="pbi-iframe" src="" allowFullScreen="true" frameborder="0"></iframe>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -591,29 +667,14 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <div id="png-viewer-img"><img id="png-img" src="" alt="Reporte"></div>
 </div>
 
-<!-- CHAT FAB -->
-<button id="chat-fab" onclick="openChat()">
-  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-</button>
-
-<!-- CHAT MODAL -->
-<div id="chat-modal">
-  <div id="chat-header">
-    <div style="width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">🤖</div>
-    <h2>Juanito Garcia</h2>
-    <button id="chat-close" onclick="closeChat()">✕</button>
-  </div>
-  <div id="chat-messages"></div>
-  <div id="chat-input-area">
-    <textarea id="chat-input" placeholder="Pregunta sobre PAUNO, AMAUTA o NEOPACK..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
-    <button id="chat-send" onclick="sendChat()">
-      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
-  </div>
-</div>
 
 <script>
 let DATA = null;
+let BOARD_PLANS = null;
+let RISK_REGISTER = null;
+let HITOS = null;
+let CASHFLOW = null;
+let HISTORICO = null;
 let currentTab = 'home';
 let navHistory = [];
 const _E=[25,30,76,15,7,0,66,83,64,91,6,84,76,34,39,36,4,95,28,24,40,47,45,25,66,8,101,66,81,51,31,52,6,59,58,34,0,60,10,18,86,31,4,90,70,63,89,40,60,37,4,19,27,76,88,13,13,36,7,91,119,113,4,25,22,38,40,53,88,68,24,95,1,36,88,91,1,101,66,6,48,11,4,24,15,18,63,22,37,3,33,45,87,127,125,96,16,44,51,78,81,43,50,6,22,47,40,53];
@@ -687,12 +748,40 @@ function trendArrow(tendencia, label) {
   return { arrow, cls };
 }
 
+function datosValidos(d) {
+  if (!d || !d.semaforos || !d.empresas) return false;
+  const emp = Object.values(d.empresas || {})[0] || {};
+  const reps = Object.values(emp.reportes || {});
+  return reps.some(r => r && r.estado);
+}
+
 async function loadData() {
   try {
     document.getElementById('loading-msg').textContent = 'Cargando análisis...';
-    const r = await fetch('data/latest/summaries.json?t=' + Date.now());
+    const t = Date.now();
+    const [r, rb, rr, rh, rc, rhi] = await Promise.all([
+      fetch('data/latest/summaries.json?t=' + t),
+      fetch('data/latest/board_plans.json?t=' + t).catch(() => null),
+      fetch('data/latest/risk_register.json?t=' + t).catch(() => null),
+      fetch('data/latest/hitos.json?t=' + t).catch(() => null),
+      fetch('data/latest/cashflow.json?t=' + t).catch(() => null),
+      fetch('data/historico/historico.json?t=' + t).catch(() => null)
+    ]);
     if (!r.ok) throw new Error('Sin datos');
-    DATA = await r.json();
+    const fresh = await r.json();
+    if (datosValidos(fresh)) {
+      DATA = fresh;
+      try { localStorage.setItem('jg_summaries_backup', JSON.stringify(fresh)); } catch(e) {}
+    } else {
+      const backup = localStorage.getItem('jg_summaries_backup');
+      if (backup) { DATA = JSON.parse(backup); }
+      else throw new Error('Sin datos válidos');
+    }
+    if (rb && rb.ok) BOARD_PLANS = await rb.json();
+    if (rr && rr.ok) RISK_REGISTER = await rr.json();
+    if (rh && rh.ok) HITOS = await rh.json();
+    if (rc && rc.ok) CASHFLOW = await rc.json();
+    if (rhi && rhi.ok) HISTORICO = await rhi.json();
     renderAll();
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
@@ -714,13 +803,33 @@ function renderHome() {
   const razones = DATA.semaforo_razon || {};
 
   document.getElementById('semaforos-row').innerHTML = Object.entries(sems).map(([emp, s]) => {
-    // Solo la primera parte de la razón (antes de " con ")
-    const razonCorta = (razones[emp] || '').split(' con ')[0];
+    // Recoger KPIs críticos de esta empresa en orden de prioridad
+    const empData = (DATA.empresas || {})[emp] || {};
+    const rpts = REPORTES_CONFIG[emp] || [];
+    const criticos = [];
+    rpts.forEach(r => {
+      const rd = (empData.reportes || {})[r.tipo] || {};
+      (rd.kpis || []).forEach(k => {
+        if (k.estado === 'red' || k.estado === 'yellow') {
+          criticos.push({...k, _rpt: r.label});
+        }
+      });
+    });
+    criticos.sort((a,b) => (a.estado==='red'?0:1)-(b.estado==='red'?0:1));
+    const top = criticos.slice(0,4);
+    const kpisHtml = top.map(k => `
+      <div class="sem-kpi-row">
+        <span class="sem-kpi-dot ${k.estado}"></span>
+        <span class="sem-kpi-label">${k.label}</span>
+        <span class="sem-kpi-val ${k.estado}">${k.valor}</span>
+      </div>`).join('');
     return `<div class="sem-card ${s}" onclick="showTab('${emp.toLowerCase()}')">
-      <span class="sem-badge ${s}">${semLabel(s)}</span>
-      <div class="sem-emoji-big">${semEmoji(s)}</div>
-      <div class="sem-name">${emp}</div>
-      <div class="sem-kpi">${razonCorta}</div>
+      <div class="sem-card-top">
+        <span class="sem-badge ${s}">${semLabel(s)}</span>
+        <span class="sem-name">${emp}</span>
+        <span class="sem-arrow">→</span>
+      </div>
+      <div class="sem-kpis-list">${kpisHtml || `<div class="sem-kpi-ok">Sin alertas críticas</div>`}</div>
     </div>`;
   }).join('');
 
@@ -758,6 +867,88 @@ function renderAgendaSection(id, title, color, items) {
         </div>`).join('') : `<div class="agenda-item-card blue" style="opacity:.5"><div class="agenda-item-text" style="color:var(--text3)">Sin elementos</div></div>`}
     </div>
   </div>`;
+}
+
+function generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, allKpis) {
+  // Usar plan IA si está disponible
+  const bp = BOARD_PLANS && BOARD_PLANS.empresas && BOARD_PLANS.empresas[empresa];
+  if (bp) {
+    const kpisHTML = (bp.kpis_seguimiento || []).map(k => `<div class="board-plan-item"><span class="kpi-dot ${k.estado}" style="display:inline-block;margin-right:6px"></span>${k.label}: <strong>${k.actual}</strong> → meta ${k.meta}</div>`).join('');
+    return `
+    <div class="board-call-section">
+      <div class="board-call-header">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#1e3a5f;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Plan de Board — ${empresa}</span>
+        <span class="board-updated">IA · ${BOARD_PLANS.fecha}</span>
+      </div>
+      <div class="board-objetivo">${bp.objetivo}</div>
+      ${bp.alerta_principal ? `<div style="font-size:12px;color:#b91c1c;background:#fef2f2;border-radius:6px;padding:8px 10px;margin-bottom:10px">⚠️ ${bp.alerta_principal}</div>` : ''}
+      <div class="board-plan-block"><div class="board-plan-block-title" style="color:#166534">📈 Palancas de Ingresos</div>${(bp.ingresos||[]).map(a=>`<div class="board-plan-item">• ${a}</div>`).join('')}</div>
+      <div class="board-plan-block"><div class="board-plan-block-title" style="color:#92400e">✂️ Reducción de Costos</div>${(bp.costos||[]).map(a=>`<div class="board-plan-item">• ${a}</div>`).join('')}</div>
+      <div class="board-plan-block"><div class="board-plan-block-title" style="color:#1e3a5f">🔄 Capital de Trabajo</div>${(bp.capital_trabajo||[]).map(a=>`<div class="board-plan-item">• ${a}</div>`).join('')}</div>
+      ${kpisHTML ? `<div class="board-plan-block"><div class="board-plan-block-title" style="color:#6b21a8">📊 KPIs de Seguimiento Semanal</div>${kpisHTML}</div>` : ''}
+      <button class="board-call-btn" onclick="openChatWithMsg('Profundiza el plan de board para ${empresa}: ${razon}. Dame análisis detallado de cada palanca y responsables.')">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Profundizar con IA
+      </button>
+    </div>`;
+  }
+
+  // Recopilar acciones de todos los reportes rojos/amarillos
+  const acciones = { ingresos: [], costos: [], capital: [], seguimiento: [] };
+
+  reportes.forEach(r => {
+    const rd = reportesData[r.tipo] || {};
+    if (!rd.estado || rd.estado === 'green') return;
+    const acts = rd.acciones || [];
+    acts.forEach(a => {
+      const t = a.toLowerCase();
+      if (t.includes('venta') || t.includes('cobr') || t.includes('comerci') || t.includes('canal') || t.includes('precio') || t.includes('cliente')) acciones.ingresos.push(a);
+      else if (t.includes('costo') || t.includes('merma') || t.includes('gasto') || t.includes('eficien') || t.includes('productiv') || t.includes('margen')) acciones.costos.push(a);
+      else if (t.includes('inventor') || t.includes('pagar') || t.includes('cobrar') || t.includes('mora') || t.includes('rotac') || t.includes('stock') || t.includes('pago')) acciones.capital.push(a);
+      else acciones.seguimiento.push(a);
+    });
+    // KPIs críticos como seguimiento
+    (rd.kpis || []).filter(k => k.estado === 'red' || k.estado === 'yellow').slice(0,1).forEach(k => {
+      acciones.seguimiento.push(`Monitorear ${k.label}: actual ${k.valor} → meta ${k.meta || 'N/A'}`);
+    });
+  });
+
+  // Si no hay acciones de alguna categoría, agregar genéricas según KPIs
+  if (!acciones.ingresos.length) acciones.ingresos.push('Revisar mix de canales y política de precios', 'Acelerar cobranza para mejorar disponibilidad de caja');
+  if (!acciones.costos.length) acciones.costos.push('Auditar estructura de costos fijos vs variables', 'Optimizar procesos con mayor impacto en margen');
+  if (!acciones.capital.length) acciones.capital.push('Reducir días de inventario y CxC para liberar caja', 'Renegociar condiciones de pago con proveedores clave');
+
+  const kpisAlerta = allKpis.filter(k => k.estado === 'red' || k.estado === 'yellow').slice(0, 4);
+  const updatedAt = DATA.fecha || 'hoy';
+
+  const seccion = (icono, titulo, items, color) => items.length ? `
+    <div class="board-plan-block">
+      <div class="board-plan-block-title" style="color:${color}">${icono} ${titulo}</div>
+      ${items.slice(0,3).map(a => `<div class="board-plan-item">• ${a}</div>`).join('')}
+    </div>` : '';
+
+  return `
+    <div class="board-call-section">
+      <div class="board-call-header">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#1e3a5f;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Plan de Board — ${empresa}</span>
+        <span class="board-updated">Actualizado: ${updatedAt}</span>
+      </div>
+      <div class="board-objetivo">Objetivo: EBITDA ≥10% · Utilidad neta positiva</div>
+      ${seccion('📈', 'Palancas de Ingresos', acciones.ingresos, '#166534')}
+      ${seccion('✂️', 'Reducción de Costos', acciones.costos, '#92400e')}
+      ${seccion('🔄', 'Capital de Trabajo', acciones.capital, '#1e3a5f')}
+      ${kpisAlerta.length ? `
+      <div class="board-plan-block">
+        <div class="board-plan-block-title" style="color:#6b21a8">📊 KPIs de Seguimiento Semanal</div>
+        ${kpisAlerta.map(k => `<div class="board-plan-item"><span class="kpi-dot ${k.estado}" style="display:inline-block;margin-right:6px"></span>${k.label}: <strong>${k.valor}</strong> → meta ${k.meta || 'N/A'}</div>`).join('')}
+      </div>` : ''}
+      <button class="board-call-btn" onclick="openChatWithMsg('Profundiza el plan de board para ${empresa}: ${razon}. KPIs críticos: ${kpisAlerta.map(k=>k.label+' '+k.valor).join(', ')}. Dame análisis detallado de cada palanca y responsables.')">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Profundizar con IA
+      </button>
+    </div>`;
 }
 
 function renderEmpresa(empresa, containerId) {
@@ -815,7 +1006,8 @@ function renderEmpresa(empresa, containerId) {
         const estado = rd.estado || 'neutral';
         const subtext = rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].label + ': ' + rd.kpis[0].valor : 'Ver análisis');
         const chipLabel = estado === 'red' ? 'Crítico' : estado === 'yellow' ? 'Alerta' : estado === 'green' ? 'OK' : 'Ver';
-        return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}','${(r.desc||'').replace(/'/g,"\\'")}')">
+        const safeDesc = (r.desc||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}','${safeDesc}')">
           <div class="reporte-icon icon-${estado === 'neutral' ? 'neutral' : estado}">
             <svg viewBox="0 0 24 24">${ICON_SVG[r.icon] || ICON_SVG.check}</svg>
           </div>
@@ -826,8 +1018,13 @@ function renderEmpresa(empresa, containerId) {
           <span class="estado-chip ${estado}">${chipLabel}</span>
         </div>`;
       }).join('')}
-    </div>`;
+    </div>
+
+    ${generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, allKpis)}
+  `;
 }
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
   const cls = sc(k.estado);
@@ -847,18 +1044,21 @@ function renderKpiCard(k, contexto, empresa, tipo, archivo, desc) {
         <div class="kpi-progress-track">
           <div class="kpi-progress-fill ${cls}" style="width:${pct}%"></div>
         </div>
-        <div class="kpi-progress-meta">Meta: ${k.meta} · ${pct}% alcanzado</div>
+        <div class="kpi-progress-meta">Meta: ${esc(k.meta)} · ${pct}% alcanzado</div>
       </div>`;
     }
   }
 
   return `<div class="kpi-card ${cls}${clickable ? ' kpi-card-link' : ''}" ${onclick}>
     <div class="kpi-label">${k.label}${contexto ? `<br><span style="opacity:.6;font-size:9px;font-style:italic">${contexto}</span>` : ''}</div>
-    <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+    <div class="kpi-val-row">
+      <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+      <div class="kpi-dot ${cls}"></div>
+    </div>
     ${k.tendencia ? `<div class="kpi-trend-row">
       <span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span>
     </div>` : ''}
-    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
+    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${esc(k.meta)}</div>` : ''}
     ${progressHtml}
     ${clickable ? `<div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600">Ver detalle →</div>` : ''}
   </div>`;
@@ -878,19 +1078,22 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
       const pct = Math.min(100, Math.round((valN / metaN) * 100));
       progressHtml = `<div class="kpi-progress">
         <div class="kpi-progress-track"><div class="kpi-progress-fill ${cls}" style="width:${pct}%"></div></div>
-        <div class="kpi-progress-meta">Meta: ${k.meta} · ${pct}% alcanzado</div>
+        <div class="kpi-progress-meta">Meta: ${esc(k.meta)} · ${pct}% alcanzado</div>
       </div>`;
     }
   }
 
-  // Escapar la pregunta para uso en onclick
-  const pregEsc = pregunta.replace(/'/g, "\\'").replace(/\n/g, ' ');
+  // Escapar la pregunta para uso en data attribute (evita romper el HTML con " o >)
+  const safeAttr = s => s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  return `<div class="kpi-card ${cls} kpi-card-link" onclick="openChatWithMsg('${pregEsc}')">
+  return `<div class="kpi-card ${cls} kpi-card-link" data-pregunta="${safeAttr(pregunta)}" onclick="openChatWithMsg(this.dataset.pregunta)">
     <div class="kpi-label">${k.label}</div>
-    <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+    <div class="kpi-val-row">
+      <div class="kpi-val ${cls}">${k.valor || '—'}</div>
+      <div class="kpi-dot ${cls}"></div>
+    </div>
     ${k.tendencia ? `<div class="kpi-trend-row"><span class="kpi-trend-pill ${tCls}">${arrow} ${k.tendencia}</span></div>` : ''}
-    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${k.meta}</div>` : ''}
+    ${k.meta && !progressHtml ? `<div class="kpi-meta">Meta: ${esc(k.meta)}</div>` : ''}
     ${progressHtml}
     <div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600">💬 Preguntarle a Juanito →</div>
   </div>`;
@@ -1027,7 +1230,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
           <div class="tend-mes">${t.mes || ''}</div>
         </div>`;
       }).join('')}</div></div>
-      ${rd.kpis?.[0]?.meta ? `<div class="tend-meta-line"><div class="tend-meta-dot"></div><div class="tend-meta-text">Meta: ${rd.kpis[0].meta}</div></div>` : ''}
+      ${rd.kpis?.[0]?.meta ? `<div class="tend-meta-line"><div class="tend-meta-dot"></div><div class="tend-meta-text">Meta: ${esc(rd.kpis[0].meta)}</div></div>` : ''}
     </div>`;
   }
 
@@ -1067,16 +1270,110 @@ function goBack() {
   document.getElementById('screens-container').scrollTop = 0;
 }
 
+const REPORTES_PBI = {
+  PAUNO: [
+    { nombre: 'Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiNmMxNjNmZGQtMjUxYS00MzhkLTkyYmQtNmVlMWU2MmU2MGY0IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDQzM2QyNzQtODIxYS00ZTk0LThmZDQtZWQyMjE0Mzg5MGNmIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Margen Variable', icon: '📊', url: 'https://app.powerbi.com/view?r=eyJrIjoiZWY4YWViZWItMGI4OS00ZDc5LWE5YmItMjI5ODExNmE4MTVlIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Mermas', icon: '⚠️', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTFjMTZmYWUtNDEyOS00ZDkyLWJkYTYtZDhiYzY0ZjI3MzE2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Compras', icon: '🛒', url: 'https://app.powerbi.com/view?r=eyJrIjoiYTFiZWRkZGUtNGY0NC00ODZmLWEwNzktYTE1ZDBjNTFjODQ5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Inventario S&OP', icon: '📦', url: 'https://app.powerbi.com/view?r=eyJrIjoiOGMxMmJkODItYWFjNi00NjdiLWFkYWItMjNhYTU3NTkwZTNhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Control Interno', icon: '✅', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDU3MzhiYjgtOTgyYi00YjllLTkwOGQtZjg5MTM4ZDFlNWMwIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Calidad 360', icon: '🔬', url: 'https://app.powerbi.com/view?r=eyJrIjoiYWJkMDJmZjUtNjAwZi00YWExLWI4OWQtZjBiOWUwNmRhZTBmIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Materiales Indirectos', icon: '⚙️', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDhhY2M1NjEtMTU1Mi00M2M4LWEzNmQtYzk4ZjhlYjZlZTg5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Productividad', icon: '👷', url: 'https://app.powerbi.com/view?r=eyJrIjoiNjEzNzRmMTMtOWVmNC00YTk1LTkwMzctZDFhNDRjZWE5NTRkIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Provisiones', icon: '🏷️', url: 'https://app.powerbi.com/view?r=eyJrIjoiMjg4NzRiOTctZGQxOC00NjlmLWIxMTQtMjdkMGE1MTZlYmFiIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'S&OP', icon: '📋', url: 'https://app.powerbi.com/view?r=eyJrIjoiMmVhNjliNmQtNTU2NC00MzQ0LTljZTAtYzgyMGMwM2Q4Yjg5IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Cuentas Contables', icon: '📒', url: 'https://app.powerbi.com/view?r=eyJrIjoiMTg2MDZhMDYtODZmYi00MjNhLWEyNzYtNDA1MTQyYjQ4OTkwIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+  ],
+  AMAUTA: [
+    { nombre: 'Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiMDk2MGY0ZGYtMzJkMC00OTAxLWE2NDAtYmU5OWZhNDU2YjNhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiYmU1MGEzZDItZWJmNS00YTVjLTk4NDYtZGQyYTE5YmE2NTlhIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Margen / P&L', icon: '📊', url: 'https://app.powerbi.com/view?r=eyJrIjoiYTJkOTFlMmEtYjY1My00ZTc4LThjNTEtOTlmZGJkNDRjOWYxIiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+  ],
+  NEOPACK: [
+    { nombre: 'Cuentas por Cobrar', icon: '💰', url: 'https://app.powerbi.com/view?r=eyJrIjoiZDZiMTRiM2EtNzZhZi00NmMzLTllNmEtMGNiMjYxY2UzYTg4IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+    { nombre: 'Cuentas por Pagar', icon: '🏦', url: 'https://app.powerbi.com/view?r=eyJrIjoiNzRiZGE4ZGItZWE1Mi00YjllLWEzMGMtOWU2MTgyMDUwNDI2IiwidCI6Ijc3ZTAwODA5LWEzNmUtNDkzNS04ZWRjLTU1YWI3Y2YxODYxZiIsImMiOjR9' },
+  ],
+};
+
+const JUANITO_SYSTEM_PROMPT = `Eres JUANITO, un agente de análisis financiero, operativo y BI para las empresas PAUNO, AMAUTA y NEOPACK (holding peruano).
+
+Tu función es analizar los datos del dashboard y convertirlos en conclusiones claras, cuantificadas y accionables para el CEO.
+
+PRINCIPIO CENTRAL: No describes datos — los conviertes en decisiones:
+QUÉ PASA → POR QUÉ IMPORTA → CUÁNTO IMPACTA → QUÉ HACER
+
+METODOLOGÍA:
+- Para KPIs: reporta valor, periodo, comparación vs meta
+- Para tendencias: analiza evolución, crecimiento, caída, cambios relevantes
+- Para problemas: identifica anomalías, desviaciones, mora, sobrecosto, merma, sobrestock, caída de margen
+- Para causas: busca relaciones entre indicadores — NO afirmes causalidad si solo hay correlación
+- Para análisis gerencial: relaciona CxC + CxP + Margen + Mermas + Compras + Inventario según la pregunta
+
+FORMATO cuando el usuario pide análisis general:
+## RESUMEN EJECUTIVO (1 párrafo)
+## HALLAZGOS (cuantificados)
+## RIESGOS
+## RECOMENDACIONES (PROBLEMA → ACCIÓN → IMPACTO → PRIORIDAD con 🔴🟠🟡🟢)
+
+Para preguntas directas: responde en 2-4 párrafos sin headers.
+
+REGLAS DE CONFIABILIDAD:
+- Nunca inventes cifras — solo usa los datos del contexto proporcionado
+- Diferencia entre dato observado e interpretación
+- Si faltan datos, dilo claramente
+- Usa S/, %, días, ratios cuando estén disponibles
+- Conserva el periodo analizado
+
+CONTEXTO EMPRESAS:
+- PAUNO: empresa industrial con plantas (Ate, Pachacamac, Terceros), UENs: B&D, MAQUILA, TIGO
+- AMAUTA: empresa del holding
+- NEOPACK: empresa del holding
+- KPI clave holding: EBITDA ≥10% y utilidad neta positiva
+
+Responde siempre en español. Sé directo y accionable. El CEO necesita decidir en menos de 2 minutos.`;
+
+function initReportes() {
+  ['PAUNO','AMAUTA','NEOPACK'].forEach(emp => {
+    const grid = document.getElementById('grid-' + emp.toLowerCase());
+    if (!grid) return;
+    grid.innerHTML = REPORTES_PBI[emp].map(r =>
+      `<div class="reporte-card" onclick="openPbi('${r.url}','${emp} — ${r.nombre}')">
+        <div class="reporte-card-icon">${r.icon}</div>
+        <div class="reporte-card-nombre">${r.nombre}</div>
+        <div class="reporte-card-empresa">${emp}</div>
+      </div>`
+    ).join('');
+  });
+}
+
+function openPbi(url, titulo) {
+  document.getElementById('pbi-iframe').src = url;
+  document.getElementById('pbi-viewer-title').textContent = titulo;
+  document.getElementById('reportes-list').style.display = 'none';
+  document.getElementById('pbi-viewer').style.display = 'flex';
+}
+
+function closePbi() {
+  document.getElementById('pbi-iframe').src = '';
+  document.getElementById('pbi-viewer').style.display = 'none';
+  document.getElementById('reportes-list').style.display = 'block';
+}
+
 function showTab(tab) {
   navHistory = [];
   currentTab = tab;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + tab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
-  document.getElementById('top-title').textContent = tab === 'home' ? 'Juanito Garcia' : tab.toUpperCase();
+  const titles = { home: 'Juanito Garcia', reportes: 'Reportes Power BI', juanito: 'JUANITO — Dashboards BI' };
+  document.getElementById('top-title').textContent = titles[tab] || tab.toUpperCase();
   document.getElementById('top-badge').textContent = DATA?.fecha || '';
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('screens-container').scrollTop = 0;
+  if (tab === 'reportes') { closePbi(); initReportes(); }
+  if (tab === 'juanito') { initJuanitoChat(); }
 }
 
 function openPng(src, title) {
@@ -1086,68 +1383,68 @@ function openPng(src, title) {
 }
 function closePng() { document.getElementById('png-viewer').classList.remove('open'); }
 
-function openChat() {
-  document.getElementById('chat-modal').classList.add('open');
-  if (document.getElementById('chat-messages').children.length === 0) {
+function initJuanitoChat() {
+  const msgs = document.getElementById('juanito-messages');
+  if (msgs.children.length === 0) {
+    document.getElementById('juanito-fecha').textContent = DATA?.fecha || '';
     const sugerencias = [
       '¿Qué debo decidir hoy?',
-      '¿Cómo está la situación general?',
-      '¿Cómo están las ventas de PAUNO?',
+      'Riesgos del holding',
+      'Hitos próximos',
+      '¿Cómo está la caja?',
       '¿Cómo está la mora?',
+      'Tendencia histórica',
       '¿Cuál empresa está más crítica?',
+      'Analiza AMAUTA',
     ];
     const chips = sugerencias.map(s =>
-      `<button class="chat-chip" onclick="usarChip('${s}')">${s}</button>`
+      `<button class="chat-chip" onclick="usarChipJuanito('${s}')">${s}</button>`
     ).join('');
     const msg = document.createElement('div');
     msg.className = 'msg assistant';
-    msg.innerHTML = `Hola. Soy Juanito Garcia. Datos del <b>${DATA?.fecha || 'hoy'}</b>.<br><br>Puedes preguntarme sobre los KPIs del holding:<div class="chat-chips">${chips}</div>`;
-    document.getElementById('chat-messages').appendChild(msg);
+    msg.innerHTML = `Hola. Soy <b>JUANITO</b>, tu agente de análisis BI. Datos del <b>${DATA?.fecha || 'hoy'}</b>.<br><br>Pregúntame cualquier cosa sobre PAUNO, AMAUTA o NEOPACK:<div class="chat-chips">${chips}</div>`;
+    msgs.appendChild(msg);
   }
 }
 
-function usarChip(texto) {
-  const input = document.getElementById('chat-input');
+function usarChipJuanito(texto) {
+  const input = document.getElementById('juanito-input');
   input.value = texto;
   autoResize(input);
-  sendChat();
+  sendJuanito();
 }
-function closeChat() { document.getElementById('chat-modal').classList.remove('open'); }
 
+function openChat() { showTab('juanito'); }
 function openChatWith(empresa, tipo, label) {
-  openChat();
+  showTab('juanito');
   setTimeout(() => {
-    const input = document.getElementById('chat-input');
+    const input = document.getElementById('juanito-input');
     input.value = `Dame más detalle sobre ${label} de ${empresa}.`;
     autoResize(input);
-    input.focus();
-    setTimeout(() => sendChat(), 150);
+    setTimeout(() => sendJuanito(), 150);
   }, 300);
 }
-
 function openChatWithMsg(pregunta) {
-  openChat();
+  showTab('juanito');
   setTimeout(() => {
-    const input = document.getElementById('chat-input');
+    const input = document.getElementById('juanito-input');
     input.value = pregunta;
     autoResize(input);
-    input.focus();
-    setTimeout(() => sendChat(), 150);
+    setTimeout(() => sendJuanito(), 150);
   }, 300);
 }
 
-function addMsg(role, text) {
+function addJuanitoMsg(role, text) {
   const el = document.createElement('div');
   el.className = 'msg ' + role;
-  // Renderizar saltos de línea
   el.innerHTML = text.replace(/\n/g, '<br>');
-  const msgs = document.getElementById('chat-messages');
+  const msgs = document.getElementById('juanito-messages');
   msgs.appendChild(el);
   msgs.scrollTop = msgs.scrollHeight;
   return el;
 }
 
-function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }
+function handleJuanitoKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendJuanito(); } }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
 
 function buscarRespuestaLocal(pregunta) {
@@ -1166,33 +1463,395 @@ function buscarRespuestaLocal(pregunta) {
   return null;
 }
 
-function sendChat() {
-  const input = document.getElementById('chat-input');
+function analizarConJuanito(pregunta) {
+  const p = pregunta.toLowerCase();
+  const d = DATA;
+  const sems = d.semaforos || {};
+  const razones = d.semaforo_razon || {};
+  const agenda = d.agenda_ceo || {};
+
+  // Detectar empresa mencionada
+  const emp = p.includes('pauno') ? 'PAUNO' : p.includes('amauta') ? 'AMAUTA' : p.includes('neopack') ? 'NEOPACK' : null;
+
+  const fmt = s => (s||'').replace(/\n/g,'<br>');
+  const semIcon = s => s==='red'?'🔴':s==='yellow'?'🟡':'🟢';
+  const semTxt  = s => s==='red'?'CRÍTICO':s==='yellow'?'ATENCIÓN':'OK';
+
+  // Función para obtener KPIs clave de una empresa
+  function kpisEmpresa(empresa) {
+    const ed = (d.empresas||{})[empresa]||{};
+    const rpts = REPORTES_CONFIG[empresa]||[];
+    const lista = [];
+    rpts.forEach(r => {
+      const rd = (ed.reportes||{})[r.tipo]||{};
+      if (rd.estado && rd.estado !== 'green' && rd.kpis?.length) {
+        lista.push({ reporte: r.label, estado: rd.estado, alerta: rd.alerta, kpi: rd.kpis[0] });
+      }
+    });
+    return lista;
+  }
+
+  // 1. DECIDIR HOY
+  if (p.includes('decid') || p.includes('hoy') || p.includes('urgente') || p.includes('inmedi')) {
+    const items = agenda.decidir_hoy || [];
+    if (!items.length) return '✅ No hay acciones críticas para decidir hoy según los datos actuales.';
+    const por_empresa = {};
+    items.forEach(i => { (por_empresa[i.empresa||'General'] = por_empresa[i.empresa||'General']||[]).push(i); });
+    let html = `<strong>🔴 DECIDIR HOY — ${items.length} acción${items.length>1?'es':''}</strong><br><br>`;
+    items.forEach((i,n) => {
+      html += `<strong>${n+1}.</strong> ${i.texto||i.text||''}<br>`;
+      if (i.empresa) html += `<span style="font-size:11px;color:var(--text3)">▸ ${i.empresa}${i.responsable?' · '+i.responsable:''}</span><br>`;
+      html += '<br>';
+    });
+    html += `<strong>¿Por qué importa?</strong> Estas acciones tienen impacto directo en liquidez o resultado del mes. Deben resolverse antes del cierre del día.`;
+    return html;
+  }
+
+  // 2. SITUACIÓN GENERAL / SEMÁFOROS
+  if (p.includes('situaci') || p.includes('general') || p.includes('resumen') || p.includes('cómo están') || p.includes('estado')) {
+    let html = `<strong>📊 SITUACIÓN HOLDING — ${d.fecha||'hoy'}</strong><br><br>`;
+    html += `<strong>Ventas:</strong> ${d.holding_ventas||'—'} &nbsp;|&nbsp; <strong>Mora consolidada:</strong> <span style="color:var(--red)">${d.holding_mora||'—'}</span><br><br>`;
+    Object.entries(sems).forEach(([e, s]) => {
+      html += `${semIcon(s)} <strong>${e}</strong> — ${semTxt(s)}<br><span style="font-size:12px;color:var(--text2)">${razones[e]||''}</span><br><br>`;
+    });
+    const critica = Object.entries(sems).find(([e,s])=>s==='red');
+    if (critica) html += `<strong>⚡ FOCO INMEDIATO:</strong> ${critica[0]} está en estado crítico. ${razones[critica[0]]||''}`;
+    return html;
+  }
+
+  // 3. EMPRESA CRÍTICA
+  if (p.includes('crític') || p.includes('peor') || p.includes('problema')) {
+    const rojas = Object.entries(sems).filter(([e,s])=>s==='red');
+    const amarillas = Object.entries(sems).filter(([e,s])=>s==='yellow');
+    let html = '';
+    if (rojas.length) {
+      html += `<strong>🔴 EN ESTADO CRÍTICO:</strong><br>`;
+      rojas.forEach(([e,s]) => {
+        const kpis = kpisEmpresa(e);
+        html += `<br><strong>${e}:</strong> ${razones[e]||''}<br>`;
+        kpis.slice(0,3).forEach(k => html += `• ${k.reporte}: ${k.alerta||k.kpi?.valor||''}<br>`);
+      });
+    }
+    if (amarillas.length) {
+      html += `<br><strong>🟡 EN ATENCIÓN:</strong><br>`;
+      amarillas.forEach(([e,s]) => html += `• ${e}: ${razones[e]||''}<br>`);
+    }
+    if (!rojas.length && !amarillas.length) html = '🟢 Todas las empresas operan dentro de parámetros normales.';
+    return html;
+  }
+
+  // 4. MÓDULO 10 — RIESGOS (va primero para capturar "riesgo" antes que otros handlers)
+  if (p.includes('riesgo') || p.includes('explota') || p.includes('risk') || p.includes('register') || p.includes('contingencia')) {
+    if (!RISK_REGISTER) {
+      return `<strong>⚠️ Risk Register no cargado.</strong><br><br>El archivo <code>data/latest/risk_register.json</code> no existe aún.<br><br>Riesgos detectados en el dashboard:<br><br>` + (() => {
+        let h = '';
+        ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+          const s = sems[e];
+          if (s === 'red' || s === 'yellow') {
+            const kpis = kpisEmpresa(e);
+            h += `${semIcon(s)} <strong>${e}</strong> — ${razones[e]||''}<br>`;
+            kpis.slice(0,2).forEach(k => h += `&nbsp;&nbsp;• ${k.reporte}: ${k.alerta||''}<br>`);
+            h += '<br>';
+          }
+        });
+        return h || '🟢 Sin riesgos críticos detectados.';
+      })();
+    }
+    const fecha = RISK_REGISTER.fecha_actualizacion || '';
+    let html = `<strong>🔴 RISK REGISTER VIVO — ${fecha}</strong><br><br>`;
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    objetivo.forEach(e => {
+      const riesgos = (RISK_REGISTER.empresas?.[e]?.riesgos || []);
+      if (!riesgos.length) return;
+      html += `<strong>${e}</strong><br>`;
+      riesgos.forEach(r => {
+        const ic = r.rating==='red'?'🔴':r.rating==='yellow'?'🟡':'🟢';
+        html += `${ic} <strong>${r.riesgo}</strong><br>`;
+        html += `&nbsp;&nbsp;Prob: ${r.probabilidad} · Impacto: ${r.impacto_soles} · Dueño: ${r.dueno||'⚠ SIN DUEÑO'}<br>`;
+        if (r.senal_temprana) html += `&nbsp;&nbsp;📡 Señal: ${r.senal_temprana}<br>`;
+        if (r.mitigacion) html += `&nbsp;&nbsp;💡 ${r.mitigacion}<br>`;
+        html += '<br>';
+      });
+    });
+    const rojos = Object.values(RISK_REGISTER.empresas||{}).flatMap(e=>(e.riesgos||[]).filter(r=>r.rating==='red'));
+    if (rojos.length) {
+      html += `<strong>🎯 FOCO CEO esta semana (${rojos.length} riesgo${rojos.length>1?'s':''} 🔴):</strong><br>`;
+      rojos.slice(0,3).forEach(r => html += `• ${r.riesgo} — Dueño: ${r.dueno||'ASIGNAR'}<br>`);
+    }
+    return html;
+  }
+
+  // 4b. MÓDULO 11 — HITOS
+  if (p.includes('hito') || p.includes('calendario') || p.includes('qué se viene') || p.includes('próximo') || p.includes('vence') || p.includes('plazo') || p.includes('covenant') || p.includes('directorio') || p.includes('cierre')) {
+    if (!HITOS) {
+      return `<strong>📅 Calendario de Hitos no cargado.</strong><br><br>El archivo <code>data/latest/hitos.json</code> no existe aún.`;
+    }
+    const fecha = HITOS.fecha_actualizacion || '';
+    let html = `<strong>📅 HITOS — PRÓXIMOS 90 DÍAS (${fecha})</strong><br><br>`;
+    const hitos = HITOS.hitos || [];
+    const pendientes = hitos.filter(h => h.estado !== 'Cerrado');
+    const urgentes  = pendientes.filter(h => h.urgente || h.lead_time_activo);
+    if (urgentes.length) {
+      html += `<strong>⚡ ACTUAR HOY (en ventana de lead time):</strong><br><br>`;
+      urgentes.forEach(h => {
+        html += `• <strong>${h.hito}</strong> — ${h.fecha_gate}<br>`;
+        html += `&nbsp;&nbsp;Acción: ${h.accion_requerida}<br>`;
+        if (h.insumo_dueno) html += `&nbsp;&nbsp;Insumo: ${h.insumo_dueno}<br>`;
+        html += '<br>';
+      });
+    }
+    html += `<strong>Todos los hitos activos:</strong><br><br>`;
+    pendientes.forEach(h => {
+      const ic = h.urgente ? '🔴' : h.lead_time_activo ? '🟡' : '🟢';
+      html += `${ic} <strong>${h.hito}</strong> [${h.tipo}] — ${h.fecha_gate}<br>`;
+      html += `&nbsp;&nbsp;${h.accion_requerida}<br><br>`;
+    });
+    const vencidos = hitos.filter(h => h.estado === 'Vencido_sin_accion');
+    if (vencidos.length) {
+      html += `<strong>⛔ VENCIDOS SIN ACCIÓN → pasan a Risk Register:</strong><br>`;
+      vencidos.forEach(h => html += `• ${h.hito}<br>`);
+    }
+    return html;
+  }
+
+  // 5. MORA / CxC / COBRANZA
+  if (p.includes('mora') || p.includes('cobr') || p.includes('cxc') || p.includes('cartera') || p.includes('vencid')) {
+    let html = `<strong>💰 CxC & MORA — ${d.fecha||'hoy'}</strong><br><br>`;
+    html += `<strong>Mora consolidada holding: ${d.holding_mora||'—'}</strong><br><br>`;
+    ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+      if (emp && emp !== e) return;
+      const rd = ((d.empresas||{})[e]?.reportes||{}).cuentas_por_cobrar || {};
+      if (!rd.kpis?.length && !rd.alerta) return;
+      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
+      (rd.kpis||[]).slice(0,2).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
+      (rd.riesgos||[]).slice(0,2).forEach(r => html += `&nbsp;&nbsp;⚠ ${r.nombre||''}: ${r.vencido30||r.monto||''}<br>`);
+      html += '<br>';
+    });
+    html += `<strong>Recomendación:</strong> Priorizar cobranza en los clientes de mayor vencimiento >30 días para recuperar liquidez en el corto plazo.`;
+    return html;
+  }
+
+  // 5. VENTAS / MARGEN
+  if (p.includes('venta') || p.includes('margen') || p.includes('ingreso') || p.includes('presupuesto') || p.includes('avance')) {
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>📈 VENTAS & MARGEN — ${d.fecha||'hoy'}</strong><br><br>`;
+    objetivo.forEach(e => {
+      const ed = (d.empresas||{})[e]||{};
+      const mv = (ed.reportes||{}).margen_variable || (ed.reportes||{}).ventas || {};
+      if (!mv.kpis?.length) return;
+      html += `<strong>${e}:</strong><br>`;
+      (mv.kpis||[]).slice(0,3).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong>${k.tendencia?' — '+k.tendencia:''}<br>`);
+      if (mv.alerta) html += `&nbsp;&nbsp;⚠ ${mv.alerta}<br>`;
+      (mv.acciones||[]).slice(0,2).forEach(a => html += `&nbsp;&nbsp;💡 ${a}<br>`);
+      html += '<br>';
+    });
+    if (html === `<strong>📈 VENTAS & MARGEN — ${d.fecha||'hoy'}</strong><br><br>`) html += 'No hay datos de ventas disponibles en el reporte actual.';
+    return html;
+  }
+
+  // 6. CxP / PROVEEDORES / PAGOS
+  if (p.includes('cxp') || p.includes('pagar') || p.includes('proveedor') || p.includes('días de pago') || p.includes('pago')) {
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>🏦 CxP & PROVEEDORES — ${d.fecha||'hoy'}</strong><br><br>`;
+    objetivo.forEach(e => {
+      const rd = ((d.empresas||{})[e]?.reportes||{}).cuentas_por_pagar || {};
+      if (!rd.kpis?.length) return;
+      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
+      (rd.kpis||[]).slice(0,2).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
+      (rd.proveedores_criticos||[]).slice(0,2).forEach(p => html += `&nbsp;&nbsp;⚠ ${p.nombre||''}: ${p.monto||p.pct||''}<br>`);
+      html += '<br>';
+    });
+    return html;
+  }
+
+  // 7. MERMAS
+  if (p.includes('merma') || p.includes('pérdida') || p.includes('desperdicio')) {
+    const rd = ((d.empresas||{}).PAUNO?.reportes||{}).mermas || {};
+    let html = `<strong>⚠️ MERMAS PAUNO — ${d.fecha||'hoy'}</strong><br><br>`;
+    if (rd.alerta) html += `${rd.alerta}<br><br>`;
+    (rd.kpis||[]).forEach(k => html += `• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
+    (rd.acciones||[]).slice(0,3).forEach(a => html += `<br>💡 ${a}`);
+    return html || 'No hay datos de mermas disponibles.';
+  }
+
+  // 8. INVENTARIO / STOCK
+  if (p.includes('inventario') || p.includes('stock') || p.includes('s&op') || p.includes('dead')) {
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>📦 INVENTARIO & S&OP — ${d.fecha||'hoy'}</strong><br><br>`;
+    objetivo.forEach(e => {
+      const ed = (d.empresas||{})[e]||{};
+      const rd = (ed.reportes||{}).sop_inventario || (ed.reportes||{}).inventario || {};
+      if (!rd.kpis?.length) return;
+      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
+      (rd.kpis||[]).slice(0,3).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong><br>`);
+      html += '<br>';
+    });
+    return html;
+  }
+
+  // 9. ANÁLISIS DE EMPRESA ESPECÍFICA
+  if (emp) {
+    const s = sems[emp] || 'green';
+    const kpis = kpisEmpresa(emp);
+    let html = `<strong>${semIcon(s)} ${emp} — ${semTxt(s)}</strong><br>`;
+    html += `<span style="font-size:12px">${razones[emp]||''}</span><br><br>`;
+    if (kpis.length) {
+      html += `<strong>Alertas activas:</strong><br>`;
+      kpis.forEach(k => {
+        html += `• ${semIcon(k.estado)} ${k.reporte}: ${k.alerta||k.kpi?.label+' '+k.kpi?.valor||''}<br>`;
+      });
+      html += '<br>';
+    }
+    const escalar = (agenda.escalar_semana||[]).filter(i=>i.empresa===emp);
+    if (escalar.length) {
+      html += `<strong>🟡 Escalar esta semana:</strong><br>`;
+      escalar.forEach(i => html += `• ${i.texto||i.text||''}<br>`);
+    }
+    return html;
+  }
+
+  // 10. CASH FLOW / TESORERÍA
+  if (p.includes('caja') || p.includes('cash') || p.includes('tesor') || p.includes('liquidez') || p.includes('flujo') || p.includes('queda sin')) {
+    if (!CASHFLOW) {
+      return `🟨 <strong>Sin datos de Cash Flow</strong><br><br>El archivo <code>data/latest/cashflow.json</code> aún no existe. Para activar este módulo, el equipo financiero debe subir la proyección de caja en el formato JUANITO.<br><br><strong>Mientras tanto, señales de liquidez desde el dashboard:</strong><br>` + (() => {
+        let h = '';
+        ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+          const cxc = (d.empresas?.[e]?.reportes?.cuentas_por_cobrar?.kpis||[]).find(k=>(k.label||'').toLowerCase().includes('mora'));
+          const cxp = (d.empresas?.[e]?.reportes?.cuentas_por_pagar?.kpis||[]).find(k=>(k.label||'').toLowerCase().includes('día'));
+          if (cxc || cxp) {
+            h += `<strong>${e}:</strong> `;
+            if (cxc) h += `Mora ${cxc.valor} `;
+            if (cxp) h += `· Días CxP ${cxp.valor}`;
+            h += '<br>';
+          }
+        });
+        return h || 'Sin datos suficientes.';
+      })();
+    }
+    const cf = CASHFLOW;
+    const fecha = cf.fecha_actualizacion || '';
+    let html = `<strong>💵 CASH FLOW — ${fecha}</strong><br><br>`;
+    html += `<strong>Posición actual:</strong> ${cf.caja_actual||'—'}<br>`;
+    html += `<strong>Proyección 30d:</strong> <span style="color:${(cf.proyeccion_30d||'').includes('-')?'var(--red)':'var(--green)'}"><strong>${cf.proyeccion_30d||'—'}</strong></span><br>`;
+    html += `<strong>Proyección 60d:</strong> ${cf.proyeccion_60d||'—'}<br><br>`;
+    if (cf.alertas?.length) {
+      html += `<strong>⚠️ Alertas de caja:</strong><br>`;
+      cf.alertas.forEach(a => html += `• ${a}<br>`);
+      html += '<br>';
+    }
+    if (cf.empresas) {
+      html += `<strong>Por empresa:</strong><br>`;
+      Object.entries(cf.empresas).forEach(([e, ed]) => {
+        if (emp && emp !== e) return;
+        html += `${e}: Cobros esperados ${ed.cobros_30d||'—'} · Pagos comprometidos ${ed.pagos_30d||'—'}<br>`;
+        if (ed.alerta) html += `&nbsp;&nbsp;⚠ ${ed.alerta}<br>`;
+      });
+    }
+    return html;
+  }
+
+  // 11. TENDENCIA HISTÓRICA
+  if (p.includes('tendencia') || p.includes('históri') || p.includes('mes anterior') || p.includes('evolución') || p.includes('cómo viene') || p.includes('meses')) {
+    if (!HISTORICO) {
+      return `🟨 <strong>Sin datos históricos</strong><br><br>El archivo <code>data/historico/historico.json</code> aún no existe. Se activa cuando el sistema acumule al menos 2 meses de cierre.<br><br>Hoy solo dispongo del snapshot actual (${d.fecha||'—'}) sin comparativo histórico.`;
+    }
+    const h = HISTORICO;
+    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+    let html = `<strong>📊 TENDENCIA HISTÓRICA — últimos ${h.meses?.length||0} meses</strong><br><br>`;
+    objetivo.forEach(e => {
+      const serie = (h.empresas?.[e]?.meses||[]);
+      if (!serie.length) return;
+      html += `<strong>${e}:</strong><br>`;
+      ['ventas','mora','margen'].forEach(kpi => {
+        const vals = serie.map(m => m[kpi]).filter(v => v !== undefined && v !== null);
+        if (!vals.length) return;
+        const labels = serie.map(m => m.mes||'');
+        const trend = vals.length >= 2 ? (vals[vals.length-1] > vals[0] ? '↑' : vals[vals.length-1] < vals[0] ? '↓' : '→') : '—';
+        html += `&nbsp;&nbsp;${kpi.charAt(0).toUpperCase()+kpi.slice(1)}: `;
+        html += serie.map((m,i) => `${m.mes} ${vals[i]}`).join(' → ');
+        html += ` ${trend}<br>`;
+      });
+      html += '<br>';
+    });
+    return html;
+  }
+
+  // 12. ESCALAR / AGENDA SEMANA
+  if (p.includes('escal') || p.includes('semana') || p.includes('monitorear')) {
+    const items = agenda.escalar_semana || [];
+    const mon   = agenda.monitorear || [];
+    let html = '';
+    if (items.length) {
+      html += `<strong>🟡 ESCALAR ESTA SEMANA (${items.length}):</strong><br><br>`;
+      items.forEach((i,n) => html += `${n+1}. ${i.texto||i.text||''} <span style="font-size:11px;color:var(--text3)">${i.empresa||''}</span><br><br>`);
+    }
+    if (mon.length) {
+      html += `<strong>🔵 MONITOREAR (${mon.length}):</strong><br><br>`;
+      mon.forEach((i,n) => html += `${n+1}. ${i.texto||i.text||''} <span style="font-size:11px;color:var(--text3)">${i.empresa||''}</span><br>`);
+    }
+    return html || 'No hay items en la agenda de la semana.';
+  }
+
+  // FALLBACK: resumen general
+  let html = `<strong>📊 HOLDING — ${d.fecha||'hoy'}</strong><br><br>`;
+  html += `Ventas: <strong>${d.holding_ventas||'—'}</strong> · Mora: <strong style="color:var(--red)">${d.holding_mora||'—'}</strong><br><br>`;
+  Object.entries(sems).forEach(([e,s]) => {
+    html += `${semIcon(s)} <strong>${e}:</strong> ${razones[e]||semTxt(s)}<br>`;
+  });
+  html += '<br>Puedes preguntarme sobre: mora, ventas, margen, CxP, mermas, inventario, o el análisis de una empresa específica.';
+  return html;
+}
+
+function datosAntiguedad() {
+  const fecha = DATA?.fecha || RISK_REGISTER?.fecha_actualizacion || '';
+  if (!fecha) return null;
+  const ms = Date.now() - new Date(fecha).getTime();
+  return Math.floor(ms / 86400000);
+}
+
+function bannerFrescura() {
+  const dias = datosAntiguedad();
+  if (dias === null) return '';
+  if (dias > 14) return `<div style="background:#7f1d1d;color:#fca5a5;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:12px">⛔ Datos con <strong>${dias} días</strong> de antigüedad — validar antes de tomar decisiones.</div>`;
+  if (dias > 7)  return `<div style="background:#78350f;color:#fcd34d;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:12px">⚠️ Datos con <strong>${dias} días</strong> de antigüedad — confirmar con equipo.</div>`;
+  return `<div style="background:#052e16;color:#86efac;padding:6px 12px;border-radius:6px;margin-bottom:10px;font-size:11px">🟦 Datos al ${DATA?.fecha||''} — fuente confirmada.</div>`;
+}
+
+function crossCheckMora() {
+  if (!RISK_REGISTER || !DATA) return '';
+  const alertas = [];
+  ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
+    const moraSummary = parseFloat(((DATA.empresas?.[e]?.reportes?.cuentas_por_cobrar?.kpis||[]).find(k=>(k.label||'').toLowerCase().includes('mora'))?.valor||'0').replace('%','').replace(',','.'));
+    const riesgos = RISK_REGISTER.empresas?.[e]?.riesgos || [];
+    const moraRiesgo = parseFloat((riesgos.find(r=>(r.riesgo||'').toLowerCase().includes('mora'))?.senal_temprana||'0').match(/(\d+)%/)?.[1]||0);
+    if (moraSummary && moraRiesgo && Math.abs(moraSummary - moraRiesgo) > 2) {
+      alertas.push(`• ${e}: mora dashboard ${moraSummary}% vs risk register ${moraRiesgo}% — diferencia de ${Math.abs(moraSummary-moraRiesgo).toFixed(1)}pp`);
+    }
+  });
+  if (!alertas.length) return '';
+  return `<div style="background:#1e1b4b;color:#c4b5fd;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:12px">⚡ <strong>Inconsistencia detectada (mora):</strong><br>${alertas.join('<br>')}<br><span style="font-size:11px">Validar qué fuente es la actualizada.</span></div>`;
+}
+
+async function sendJuanito() {
+  const input = document.getElementById('juanito-input');
   const text = input.value.trim();
   if (!text || !DATA) return;
   input.value = '';
   input.style.height = 'auto';
-  addMsg('user', text);
+  addJuanitoMsg('user', text);
 
-  const send = document.getElementById('chat-send');
+  const send = document.getElementById('juanito-send');
   send.disabled = true;
-  const loadEl = addMsg('assistant', '...');
+  const loadEl = addJuanitoMsg('assistant', '⏳ Analizando...');
   loadEl.classList.add('loading');
 
-  // Intentar respuesta local primero (sin API, funciona en todos los dispositivos)
-  setTimeout(() => {
-    const local = buscarRespuestaLocal(text);
-    if (local) {
-      loadEl.innerHTML = local.replace(/\n/g, '<br>');
-      loadEl.classList.remove('loading');
-      send.disabled = false;
-      return;
-    }
-    // Si no hay match local, mostrar mensaje útil
-    loadEl.innerHTML = 'No tengo una respuesta pre-cargada para esa consulta. Prueba preguntando sobre: ventas, mora, margen, compras, mermas, inventario, fill rate, control interno, o pide el resumen general del holding.';
-    loadEl.classList.remove('loading');
-    send.disabled = false;
-  }, 400);
+  await new Promise(r => setTimeout(r, 300));
+
+  const local = buscarRespuestaLocal(text);
+  const cuerpo = local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text);
+  loadEl.innerHTML = bannerFrescura() + crossCheckMora() + cuerpo;
+  loadEl.classList.remove('loading');
+  send.disabled = false;
 }
 
 // Contexto compacto — solo datos clave, sin tendencias históricas largas
@@ -1231,6 +1890,7 @@ function construirContexto() {
 }
 
 loadData();
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').then(r => r.update()); }
 </script>
 </body>
 </html>

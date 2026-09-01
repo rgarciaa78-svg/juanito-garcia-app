@@ -1,0 +1,29 @@
+{
+  "fecha_actualizacion": "2026-08-24",
+  "generado_por": "JUANITO — Módulo Cash Flow",
+  "caja_actual": "S/1.2M holding consolidado",
+  "proyeccion_30d": "S/0.4M (⚠ presión alta por CxP vencido)",
+  "proyeccion_60d": "S/0.8M (si se recupera S/972K mora AMAUTA)",
+  "alertas": [
+    "AMAUTA: S/1.7M en CxP vencido >90d — riesgo de corte de proveedores en sept",
+    "PAUNO: caída de ventas -63% reduce flujo de ingreso en S/4.6M/mes",
+    "NEOPACK: mora 26% retrasa cobros. Recuperación estimada parcial en 45 días"
+  ],
+  "empresas": {
+    "PAUNO": {
+      "cobros_30d": "S/2.7M (ventas agosto + recuperación mora parcial)",
+      "pagos_30d": "S/3.5M (planilla + proveedores refinanciados)",
+      "alerta": "Flujo neto negativo estimado -S/0.8M. Monitorear semanalmente."
+    },
+    "AMAUTA": {
+      "cobros_30d": "S/3.2M (ventas + plan cobranza S/972K)",
+      "pagos_30d": "S/3.8M (CxP crítico a proveedores de materia prima)",
+      "alerta": "Riesgo de default técnico si no se recupera mora PACKAGING+FLEXOGRAFÍA."
+    },
+    "NEOPACK": {
+      "cobros_30d": "S/0.4M (ventas reducidas + mora alta)",
+      "pagos_30d": "S/0.5M",
+      "alerta": "Margen de caja ajustado. Mantener cobranza activa."
+    }
+  }
+}

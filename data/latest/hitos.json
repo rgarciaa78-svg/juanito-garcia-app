@@ -1,0 +1,78 @@
+{
+  "fecha_actualizacion": "2026-08-24",
+  "generado_por": "JUANITO — Módulo 11",
+  "hitos": [
+    {
+      "id": "H-01",
+      "hito": "Cierre contable agosto 2026",
+      "tipo": "Fecha fija",
+      "fecha_gate": "2026-09-05",
+      "lead_time": "10 días antes = actuar desde hoy",
+      "lead_time_activo": true,
+      "urgente": true,
+      "accion_requerida": "Preparar conciliaciones CxC, CxP y P&L agosto. Confirmar mora real vs provisionada en AMAUTA y NEOPACK.",
+      "insumo_dueno": "Estados financieros preliminares — Gerencia Financiera holding",
+      "estado": "En prep"
+    },
+    {
+      "id": "H-02",
+      "hito": "Reunión de Directorio — revisión resultado agosto",
+      "tipo": "Fecha fija",
+      "fecha_gate": "2026-09-10",
+      "lead_time": "10 días antes = preparar desde hoy",
+      "lead_time_activo": true,
+      "urgente": false,
+      "accion_requerida": "Preparar board deck con: semáforos, KPIs críticos, plan de acción para mora AMAUTA y caída ventas PAUNO/NEOPACK, actualización Risk Register.",
+      "insumo_dueno": "Datos agosto cerrados — CFO + CEO",
+      "estado": "Pendiente"
+    },
+    {
+      "id": "H-03",
+      "hito": "Revisión plan recuperación ventas PAUNO",
+      "tipo": "Gate de proyecto",
+      "fecha_gate": "2026-09-01",
+      "lead_time": "Inmediato — ventas ya cayeron 63%",
+      "lead_time_activo": true,
+      "urgente": true,
+      "accion_requerida": "Gerencia Comercial PAUNO presenta plan de recuperación: pipeline, clientes, pricing, canales. CEO aprueba o redirige.",
+      "insumo_dueno": "Plan comercial — Gerencia Comercial PAUNO",
+      "estado": "Pendiente"
+    },
+    {
+      "id": "H-04",
+      "hito": "Intervención cobranza AMAUTA — recuperación S/972K",
+      "tipo": "Umbral financiero",
+      "fecha_gate": "2026-08-31",
+      "lead_time": "Inmediato — señal ya activada",
+      "lead_time_activo": true,
+      "urgente": true,
+      "accion_requerida": "Activar plan de cobranza intensiva en cartera PACKAGING (S/406K) y FLEXOGRAFÍA (S/377K). Gerencia Financiera reporta avance cada 3 días.",
+      "insumo_dueno": "Reporte cobranza actualizado — Gerencia Financiera AMAUTA",
+      "estado": "Pendiente"
+    },
+    {
+      "id": "H-05",
+      "hito": "Revisión covenant / covenants bancarios Q3",
+      "tipo": "Fecha fija",
+      "fecha_gate": "2026-09-30",
+      "lead_time": "30 días antes = preparar en septiembre",
+      "lead_time_activo": false,
+      "urgente": false,
+      "accion_requerida": "Preparar proyección de indicadores vs covenants. Si CxP AMAUTA sigue >120 días, evaluar riesgo de incumplimiento.",
+      "insumo_dueno": "Proyecciones financieras — CFO",
+      "estado": "Pendiente"
+    },
+    {
+      "id": "H-06",
+      "hito": "Liquidación dead stock AMAUTA (S/543K)",
+      "tipo": "Umbral financiero",
+      "fecha_gate": "2026-09-15",
+      "lead_time": "Actuar en septiembre",
+      "lead_time_activo": false,
+      "urgente": false,
+      "accion_requerida": "Logística AMAUTA presenta plan de liquidación: clientes target, descuentos, líneas a liquidar.",
+      "insumo_dueno": "Reporte inventario detallado — Logística AMAUTA",
+      "estado": "Pendiente"
+    }
+  ]
+}
