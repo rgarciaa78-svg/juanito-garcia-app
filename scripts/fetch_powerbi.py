@@ -209,6 +209,38 @@ def scan_dataset(token, ws_id, dataset_id, ds_key, cache=None):
             print(f"      ✓ [{name}] = {v}")
     return found
 
+def discover_tables_in_dataset(token, ws_id, dataset_id):
+    """Descubre tablas del dataset probando nombres comunes. Retorna {table_name: [cols]}."""
+    common_tables = [
+        "Proveedores", "Facturas", "CxP", "Comprobantes", "Pagos",
+        "Cuentas por Pagar", "Tabla CxP", "Detalle CxP",
+        "Compras", "Ordenes de Compra", "OC", "Materiales",
+        "Consumo", "Tabla Compras", "Detalle Compras",
+        "Mermas", "Produccion", "Planilla", "Empleados",
+        "Ventas", "Clientes", "Facturas Ventas",
+        "Inventario", "Stock", "Articulos", "Productos",
+        "Control Interno", "Auditoría", "Auditoria",
+        "Medidas", "_Medidas", "KPIs",
+        "Calendario", "Fecha", "Calendar",
+        "fCalendario", "dCalendario",
+    ]
+    found_tables = {}
+    for tbl in common_tables:
+        r = requests.post(
+            f"{PBI_BASE}/groups/{ws_id}/datasets/{dataset_id}/executeQueries",
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            json={"queries": [{"query": f"EVALUATE TOPN(3, '{tbl}')"}],
+                  "serializerSettings": {"includeNulls": True}},
+            timeout=15,
+        )
+        if r.ok:
+            rows = r.json().get("results", [{}])[0].get("tables", [{}])[0].get("rows", [])
+            if rows:
+                cols = list(rows[0].keys())
+                found_tables[tbl] = cols
+                print(f"    Tabla '{tbl}': {cols[:5]}")
+    return found_tables
+
 def discover_all_datasets(token, ws_id):
     r = requests.get(f"{PBI_BASE}/groups/{ws_id}/datasets",
                      headers={"Authorization": f"Bearer {token}"}, timeout=20)
@@ -531,6 +563,16 @@ def main():
         for ds_key, did in ids.items():
             print(f"  Escaneando {ds_key}...")
             scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
+
+        # Para datasets sin medidas: descubrir tablas y columnas
+        for ds_key in ["cxp", "compras", "productividad_ds"]:
+            if ds_key in ids and not scanned.get(ds_key):
+                print(f"  Descubriendo tablas en {ds_key}...")
+                tables = discover_tables_in_dataset(token, ws_id, ids[ds_key])
+                if tables:
+                    print(f"  {ds_key}: tablas encontradas = {list(tables.keys())}")
+                    # Intentar usarlas para armar KPIs simples
+                    scanned[ds_key]["_tables"] = tables
 
         # Guardar caché de medidas confirmadas
         new_cache = {}
