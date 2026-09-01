@@ -1,24 +1,45 @@
 {
   "fecha": "31/08/2026",
   "fecha_actualizacion": "2026-08-31",
-  "generado_por": "JUANITO — Power BI Direct",
+  "generado_por": "JUANITO — Power BI Direct + Imágenes 18/08/2026",
   "semaforos": {
-    "PAUNO": "yellow"
+    "PAUNO": "red"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 22.9% — sobre meta del 15%"
+    "PAUNO": "Mora 22.9% · Compras 199.72% jalando inventario · Canal Tradicional 2% vs presupuesto"
   },
-  "holding_ventas": "—",
+  "holding_ventas": "S/2,712,119",
   "holding_mora": "22.9%",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Morosidad PAUNO en 22.9% — vencido S/2,689,144. Activar cobranza intensiva esta semana.",
+        "texto": "Compras al 199.72% — consumo duplica compras, se está jalando inventario agresivamente. Revisar stock disponible con logística hoy.",
+        "responsable": "Gerencia de Logística"
+      },
+      {
+        "empresa": "PAUNO",
+        "texto": "Morosidad 22.9% — S/2,689,144 vencido. Activar cobranza intensiva. Meta 15%.",
         "responsable": "Gerencia Financiera"
+      },
+      {
+        "empresa": "PAUNO",
+        "texto": "Canal Tradicional en 2% de avance vs presupuesto — riesgo de cierre de mes muy debajo de meta.",
+        "responsable": "Gerencia Comercial"
       }
     ],
-    "escalar_semana": []
+    "escalar_semana": [
+      {
+        "empresa": "PAUNO",
+        "texto": "S&OP: Dead Stock al 98.27% del inventario. Envases y Embalajes 47.46% muerto, Materia Prima 31.06%. Liquidar o replantear.",
+        "responsable": "Gerencia de Supply Chain"
+      },
+      {
+        "empresa": "PAUNO",
+        "texto": "Mermas PAUNO 2.35% — sobre meta del 2%. Planta Ate 1.97% (OK), Pachacamac 1.80% (OK). Revisar planta total.",
+        "responsable": "Gerencia de Operaciones"
+      }
+    ]
   },
   "empresas": {
     "PAUNO": {
@@ -27,8 +48,96 @@
           "estado": "yellow",
           "alerta": "Morosidad 22.9% — sobre meta del 15%",
           "kpis": [
-            { "label": "Morosidad", "valor": "22.9%", "meta": "15%", "estado": "yellow" },
-            { "label": "CxC por vencer", "valor": "S/2,689,144", "estado": "yellow" }
+            { "label": "Morosidad", "valor": "22.9%", "meta": "15%", "estado": "yellow", "tendencia": "sube" },
+            { "label": "CxC por vencer", "valor": "S/2,689,144", "estado": "yellow" },
+            { "label": "CxC Total", "valor": "S/4,088,745", "estado": "neutral" },
+            { "label": "Ventas mes actual", "valor": "S/2,712,119", "estado": "neutral" },
+            { "label": "Ventas mes anterior", "valor": "S/7,320,997", "estado": "neutral" },
+            { "label": "Rotación CxC", "valor": "15 días", "meta": "<30d", "estado": "green" }
+          ]
+        },
+        "cuentas_por_pagar": {
+          "estado": "green",
+          "alerta": "Días CxP 54 días — dentro de meta (<90 días)",
+          "kpis": [
+            { "label": "Días CxP", "valor": "54 días", "meta": "<90d", "estado": "green", "tendencia": "mejora" },
+            { "label": "CxP Total", "valor": "S/17,035,259", "estado": "neutral" },
+            { "label": "Vigente", "valor": "S/6,328,950", "estado": "green" },
+            { "label": "Vencido <15 días", "valor": "S/1,479,052", "estado": "yellow" },
+            { "label": "Proveedores activos", "valor": "142", "estado": "neutral" }
+          ]
+        },
+        "margen_variable": {
+          "estado": "yellow",
+          "alerta": "Margen 43.00% en agosto — tendencia bajista desde 52.85% en enero",
+          "kpis": [
+            { "label": "Margen Variable", "valor": "43.00%", "estado": "yellow", "tendencia": "baja" },
+            { "label": "Ventas agosto (parcial)", "valor": "S/2.7 mill", "estado": "neutral" },
+            { "label": "Ventas julio", "valor": "S/7.3 mill", "estado": "neutral" }
+          ]
+        },
+        "mermas": {
+          "estado": "yellow",
+          "alerta": "Merma PAUNO 2.35% — sobre meta del 2%",
+          "kpis": [
+            { "label": "Merma PAUNO total", "valor": "2.35%", "meta": "2%", "estado": "yellow", "tendencia": "sube" },
+            { "label": "Planta Ate", "valor": "1.97%", "meta": "2.3%", "estado": "green" },
+            { "label": "Planta Pachacamac", "valor": "1.80%", "estado": "green" }
+          ]
+        },
+        "compras": {
+          "estado": "red",
+          "alerta": "Ratio 199.72% — consumo duplica compras, jalando inventario",
+          "kpis": [
+            { "label": "Ratio Consumo/Compra", "valor": "199.72%", "meta": "~100%", "estado": "red", "tendencia": "sube" },
+            { "label": "Suministros", "valor": "115.55%", "estado": "green" },
+            { "label": "Materia Prima", "valor": "98.60%", "estado": "green" },
+            { "label": "Envases y Embalajes", "valor": "91.96%", "estado": "yellow" }
+          ]
+        },
+        "control_interno": {
+          "estado": "neutral",
+          "alerta": "Ver imagen Power BI para detalle de controles",
+          "kpis": []
+        },
+        "sop_inventario": {
+          "estado": "red",
+          "alerta": "Dead Stock 98.27% del inventario total — crítico",
+          "kpis": [
+            { "label": "Dead Stock", "valor": "98.27%", "meta": "<10%", "estado": "red" },
+            { "label": "Working Stock", "valor": "1.73%", "estado": "red" },
+            { "label": "Env. y Embalajes dead", "valor": "47.46%", "estado": "red" },
+            { "label": "Materia Prima dead", "valor": "31.06%", "estado": "red" }
+          ]
+        },
+        "fill_rate": {
+          "estado": "neutral",
+          "alerta": "Provisión de gastos agosto — ver imagen para detalle",
+          "kpis": [
+            { "label": "Moderno avance vs PPTO", "valor": "92%", "estado": "yellow" },
+            { "label": "HORECA avance vs PPTO", "valor": "110%", "estado": "green" }
+          ]
+        },
+        "productividad": {
+          "estado": "green",
+          "alerta": "Planilla/Kg S/0.54 — mejorando vs 2025 (S/0.57)",
+          "kpis": [
+            { "label": "Producción total", "valor": "8,389,967 kg", "estado": "green" },
+            { "label": "Venta neta", "valor": "8,546,851 kg", "estado": "green" },
+            { "label": "Planilla total", "valor": "S/4,454,555", "estado": "neutral" },
+            { "label": "Planilla/Kg producido", "valor": "S/0.54", "meta": "S/0.57 (2025)", "estado": "green", "tendencia": "mejora" }
+          ]
+        },
+        "margen_variable_pag2": {
+          "estado": "red",
+          "alerta": "Avance vs presupuesto 88% — Canal Tradicional solo 2%",
+          "kpis": [
+            { "label": "Avance vs Presupuesto", "valor": "88%", "meta": "100%", "estado": "red" },
+            { "label": "Canal Moderno", "valor": "92%", "estado": "yellow" },
+            { "label": "Canal Tradicional", "valor": "2%", "estado": "red" },
+            { "label": "HORECA", "valor": "110%", "estado": "green" },
+            { "label": "Presupuesto agosto", "valor": "S/7,830,000", "estado": "neutral" },
+            { "label": "Real (F+PF)", "valor": "S/3,110,684", "estado": "red" }
           ]
         }
       }
