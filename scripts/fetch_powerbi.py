@@ -68,6 +68,11 @@ SCAN_CANDIDATES = {
         "Refinanciado", "Saldo Refinanciado",
         "Monto CxP", "Total Deuda", "CxP",
         "Días de Crédito", "Rotacion CxP", "Plazo Crédito",
+        # Variantes sin tilde/acento
+        "Dias Promedio Pago", "Dias de Credito", "Dias Credito",
+        "Total Pagar", "Saldo Total", "Periodo Promedio Pago",
+        "PPP", "PPagos", "Plazo Promedio",
+        "% Vencido", "Vencido Total", "Vencimiento",
     ],
     "margen": [
         "Margen Variable", "% Margen Variable", "MV", "Margen Bruto",
@@ -91,6 +96,13 @@ SCAN_CANDIDATES = {
         "Compra Total", "Monto Compras", "Importe Compras", "Valor Compras",
         "MP Consumo", "MP Compras", "Materia Prima Consumo",
         "Total Compras Periodo", "Reposicion", "Ordenes de Compra",
+        # Variantes adicionales
+        "Consumo vs Compras", "Eficiencia Compras", "% Eficiencia",
+        "Compra Mes", "Consumo Mes", "Compras Mes",
+        "Valor Compra", "Valor Consumo",
+        "Total", "Importe Total",
+        "Compra Neta", "Compra Bruta",
+        "Req Compras", "Requerimiento",
     ],
     "inventario": [
         "Dead Stock", "Stock Muerto", "Inmovilizado", "Stock Inmovilizado",
@@ -158,11 +170,38 @@ def try_measure(token, ws_id, dataset_id, name):
     v = (rows[0].get("[v]") or rows[0].get("v")) if rows else None
     return v, True
 
-def scan_dataset(token, ws_id, dataset_id, ds_key):
-    """Escanea medidas reales del dataset. Retorna dict {name: value}."""
+MEASURE_CACHE_FILE = OUTPUT_DIR / "measure_cache.json"
+
+def load_measure_cache():
+    try:
+        if MEASURE_CACHE_FILE.exists():
+            return json.loads(MEASURE_CACHE_FILE.read_text())
+    except: pass
+    return {}
+
+def save_measure_cache(cache):
+    try:
+        MEASURE_CACHE_FILE.write_text(json.dumps(cache, ensure_ascii=False, indent=2))
+    except: pass
+
+def scan_dataset(token, ws_id, dataset_id, ds_key, cache=None):
+    """Escanea medidas reales. Usa caché para omitir candidatos ya descartados."""
     candidates = SCAN_CANDIDATES.get(ds_key, [])
     found = {}
-    print(f"    Escaneando {len(candidates)} candidatos...")
+    # Medidas ya confirmadas en caché
+    cached_found = (cache or {}).get(ds_key, {})
+    if cached_found:
+        # Verificar que las medidas cacheadas siguen funcionando
+        print(f"    Verificando {len(cached_found)} medidas en caché...")
+        for name in list(cached_found.keys()):
+            v, exists = try_measure(token, ws_id, dataset_id, name)
+            if exists:
+                found[name] = v
+                print(f"      ✓ [{name}] = {v} (caché)")
+        # Solo scan nuevos candidatos no cacheados
+        scanned_before = set(cached_found.keys())
+        candidates = [c for c in candidates if c not in scanned_before]
+    print(f"    Escaneando {len(candidates)} candidatos nuevos...")
     for name in candidates:
         v, exists = try_measure(token, ws_id, dataset_id, name)
         if exists:
@@ -354,10 +393,12 @@ def build_compras(found):
     return {"estado": sem, "alerta": alerta, "kpis": kpis}, ratio
 
 def build_inventario(found):
-    dead_val    = found.get("Dead Stock") or found.get("Stock Muerto") or found.get("Inmovilizado")
-    deadpct_val = found.get("% Dead Stock") or found.get("% Inmovilizado") or found.get("% Dead")
-    total_val   = found.get("Inventario Total") or found.get("Total Inventario") or found.get("Saldo Inventario")
-    working_val = found.get("Working Stock") or found.get("Stock Activo") or found.get("Stock Working")
+    dead_val    = found.get("Dead Stock") or found.get("Stock Muerto") or found.get("Inmovilizado") or found.get("Stock Inmovilizado")
+    deadpct_val = found.get("% Dead Stock") or found.get("% Inmovilizado") or found.get("% Dead") or found.get("Pct Dead")
+    total_val   = (found.get("Inventario Total") or found.get("Total Inventario") or
+                   found.get("Saldo Inventario") or found.get("Valor Inventario") or
+                   found.get("Stock Total") or found.get("Total Stock") or found.get("Costo Inventario"))
+    working_val = found.get("Working Stock") or found.get("Stock Activo") or found.get("Stock Working") or found.get("Stock Normal")
 
     dead_pct = to_float(deadpct_val)
     if dead_pct and abs(dead_pct) < 1: dead_pct *= 100
@@ -383,7 +424,8 @@ def build_inventario(found):
 def build_control(found):
     cumpl_val  = found.get("% Cumplimiento") or found.get("Cumplimiento") or found.get("Conformidad") or found.get("% Conformidad")
     crit_val   = (found.get("Puntos Críticos") or found.get("Puntos Criticos") or
-                  found.get("Hallazgos Críticos") or found.get("No Conformidades"))
+                  found.get("Hallazgos Críticos") or found.get("No Conformidades") or found.get("Incumplimientos"))
+    satisf_val = found.get("Satisfactorio") or found.get("Observaciones")
 
     cumpl_pct = to_float(cumpl_val)
     if cumpl_pct and abs(cumpl_pct) < 1: cumpl_pct *= 100
@@ -394,10 +436,12 @@ def build_control(found):
         kpis.append({"label": "Cumplimiento", "valor": f"{cumpl_pct:.1f}%", "meta": "85%", "estado": sem})
     if crit_val is not None:
         s = "red" if to_float(crit_val) and to_float(crit_val) > 0 else "green"
-        kpis.append({"label": "Puntos críticos", "valor": str(crit_val), "meta": "0", "estado": s})
+        kpis.append({"label": "Puntos críticos", "valor": str(int(to_float(crit_val) or 0)), "meta": "0", "estado": s})
+    if satisf_val is not None:
+        kpis.append({"label": "Satisfactorio", "valor": str(int(to_float(satisf_val) or satisf_val)), "estado": "green"})
 
     alerta = f"Cumplimiento {fmt_pct(cumpl_pct)} — bajo meta 85%" if sem != "green" and cumpl_pct else None
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}
+    return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
 
 def build_productividad(found):
     pkg_val  = found.get("Planilla/kg") or found.get("S//kg") or found.get("Costo/kg") or found.get("Productividad")
@@ -482,10 +526,18 @@ def main():
         empresa_data = {"reportes": {}}
 
         # Escanear medidas reales de cada dataset
+        measure_cache = load_measure_cache()
         scanned = {}
         for ds_key, did in ids.items():
-            print(f"  Escaneando {ds_key} ({ds_key})...")
-            scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key)
+            print(f"  Escaneando {ds_key}...")
+            scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
+
+        # Guardar caché de medidas confirmadas
+        new_cache = {}
+        for ds_key, found in scanned.items():
+            if found:
+                new_cache[ds_key] = {k: None for k in found.keys()}  # guardar nombres, no valores
+        save_measure_cache(new_cache)
 
         # Combinamos consumo en compras si aplica
         if "consumo" in scanned and "compras" in scanned:

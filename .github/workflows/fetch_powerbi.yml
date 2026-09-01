@@ -35,6 +35,6 @@ jobs:
         run: |
           git config user.name  "JUANITO Bot"
           git config user.email "juanito@pauno.pe"
-          git add data/latest/summaries.json data/historico/historico.json || true
+          git add data/latest/summaries.json data/latest/measure_cache.json data/historico/historico.json || true
           git diff --staged --quiet || git commit -m "data: auto-update Power BI $(date +'%Y-%m-%d %H:%M')"
           git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/rgarciaa78-svg/juanito-garcia-app.git HEAD:main
