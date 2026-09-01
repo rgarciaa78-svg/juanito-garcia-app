@@ -47,6 +47,11 @@
             }
           ]
         },
+        "cuentas_por_pagar": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": []
+        },
         "margen_variable": {
           "estado": "green",
           "alerta": null,
