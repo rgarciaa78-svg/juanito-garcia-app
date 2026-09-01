@@ -564,15 +564,37 @@ def main():
             print(f"  Escaneando {ds_key}...")
             scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
 
-        # Para datasets sin medidas: descubrir tablas y columnas
+        # Para datasets sin medidas: descubrir tablas y columnas, luego query directa
         for ds_key in ["cxp", "compras", "productividad_ds"]:
             if ds_key in ids and not scanned.get(ds_key):
                 print(f"  Descubriendo tablas en {ds_key}...")
                 tables = discover_tables_in_dataset(token, ws_id, ids[ds_key])
                 if tables:
-                    print(f"  {ds_key}: tablas encontradas = {list(tables.keys())}")
-                    # Intentar usarlas para armar KPIs simples
-                    scanned[ds_key]["_tables"] = tables
+                    print(f"  {ds_key}: tablas = {list(tables.keys())}")
+                    # Para Compras: sumar columnas numéricas de la tabla Compras
+                    if "Compras" in tables and ds_key == "compras":
+                        cols = tables["Compras"]
+                        # Ver todas las columnas con más filas
+                        rows = dax(token, ws_id, ids[ds_key],
+                                   "EVALUATE TOPN(5, 'Compras')", "compras_topn")
+                        if rows:
+                            all_cols = list(rows[0].keys())
+                            print(f"    Columnas Compras: {all_cols}")
+                            scanned[ds_key]["_compras_cols"] = all_cols
+                    # Para Productividad: ver qué hay en Medidas
+                    if "Medidas" in tables and ds_key == "productividad_ds":
+                        rows = dax(token, ws_id, ids[ds_key],
+                                   "EVALUATE VALUES('Medidas'[Column])", "medidas_vals")
+                        if rows:
+                            vals = [r.get("[Column]") or r.get("Column") or "" for r in rows]
+                            print(f"    Medidas[Column] vals: {vals[:20]}")
+                            # Estas son los nombres de medidas en ese dataset
+                            for m_name in vals:
+                                if m_name:
+                                    v, exists = try_measure(token, ws_id, ids[ds_key], m_name)
+                                    if exists:
+                                        scanned[ds_key][m_name] = v
+                                        print(f"      ✓ [{m_name}] = {v}")
 
         # Guardar caché de medidas confirmadas
         new_cache = {}
