@@ -535,6 +535,25 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </head>
 <body>
 
+<script>
+// Limpiar todo el caché viejo al abrir la app
+(async function() {
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) {
+        if (r.active && r.active.scriptURL && !r.active.scriptURL.includes('v18')) {
+          await r.unregister();
+        }
+      }
+    }
+  } catch(e) {}
+})();
+</script>
 <div id="loading-overlay">
   <div class="spinner"></div>
   <h1>Juanito Garcia</h1>
