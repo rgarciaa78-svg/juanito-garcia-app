@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prueba nombres exactos de Productividad y Fill Rate desde capturas del reporte."""
+"""Prueba medidas de Productividad con y sin filtro de fecha."""
 import os, requests
 
 TENANT_ID     = os.environ["AZURE_TENANT_ID"]
@@ -20,75 +20,83 @@ r = requests.post(TOKEN_URL, data={
 token = r.json()["access_token"]
 H = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-def try_m(ds_id, name):
+def dax_raw(ds_id, q):
     url = f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/executeQueries"
     resp = requests.post(url, headers=H,
-                         json={"queries": [{"query": f'EVALUATE ROW("v", [{name}])'}],
+                         json={"queries": [{"query": q}],
                                "serializerSettings": {"includeNulls": True}},
-                         timeout=15)
+                         timeout=20)
     if resp.ok:
-        rows = resp.json().get("results", [{}])[0].get("tables", [{}])[0].get("rows", [])
-        v = list(rows[0].values())[0] if rows else None
-        return v, True
-    return None, False
+        rows = resp.json().get("results",[{}])[0].get("tables",[{}])[0].get("rows",[])
+        return rows, None
+    err = resp.json().get("error",{}).get("pbi.error",{}).get("code","?")
+    return [], err
 
 PROD_ID = "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6"
-PLAN_ID = "30074d92-7ec1-4762-82f2-1cb29c15dcfe"
 
-# Candidatos Productividad exactos desde la captura
-PROD_CANDIDATES = [
-    # Producción KG
+# 1. Descubrir columnas del Calendario en Productividad
+print("=== CALENDARIO PRODUCTIVIDAD ===")
+for q in [
+    "EVALUATE TOPN(3, 'Calendario')",
+    "EVALUATE TOPN(3, 'Calendar')",
+    "EVALUATE TOPN(3, 'Fecha')",
+]:
+    rows, err = dax_raw(PROD_ID, q)
+    if rows:
+        print(f"  ✓ {q[:30]}: {list(rows[0].keys())[:6]}")
+        for row in rows[:2]: print(f"    {row}")
+    else:
+        print(f"  ✗ {err}")
+
+# 2. Probar medidas con filtro de año=2026
+print("\n=== MEDIDAS CON FILTRO ANO=2026 ===")
+NAMES = [
     "Produccion Total (KG)", "PRODUCCION TOTAL (KG)", "Produccion Total",
     "Producción Total (KG)", "Producción Total",
-    "KG Total", "Total KG", "KG Produccion", "KG Producción",
-    # Venta Neta KG
+    "KG Total", "Total KG", "KG Produccion", "KG Prod",
     "Venta Neta (KG)", "VENTA NETA (KG)", "Venta Neta",
-    "Ventas Neta KG", "Venta KG", "KG Vendidos",
-    # Planilla
     "Planilla Total (S/.)", "PLANILLA TOTAL (S/.)", "Planilla Total",
-    "Planilla (S/.)", "Total Planilla S/.", "Planilla S/.",
-    # Ratio S/kg
     "Planilla (S/.) entre Kg Producido", "PLANILLA (S/.) ENTRE KG PRODUCIDO",
-    "Planilla entre KG", "S/. x KG", "S/.xKG", "S/Kg", "Planilla/KG",
-    "Ratio Planilla KG", "Costo Planilla KG",
+    "Planilla entre KG", "S/Kg Producido", "Planilla KG",
+    "Planilla", "Total Planilla", "Costo Planilla",
+    "MOD", "Costo MOD", "Gasto MOD",
+    "Kg Producidos", "Kg Producción", "Kg Prod",
+    "Eficiencia", "Productividad", "Ratio MOD",
 ]
 
-print("=== PRODUCTIVIDAD ===")
-found_prod = {}
-for name in PROD_CANDIDATES:
-    v, ok = try_m(PROD_ID, name)
-    if ok:
-        found_prod[name] = v
-        print(f"  ✓ [{name}] = {v}")
+found = {}
+for name in NAMES:
+    # Sin filtro
+    rows, err = dax_raw(PROD_ID, f'EVALUATE ROW("v", [{name}])')
+    if rows:
+        v = list(rows[0].values())[0]
+        found[name] = v
+        print(f"  ✓ (sin filtro) [{name}] = {v}")
+        continue
+    # Con filtro Calendario[Año] = 2026
+    rows2, err2 = dax_raw(PROD_ID,
+        f'EVALUATE CALCULATETABLE(ROW("v", [{name}]), \'Calendario\'[Año] = 2026)')
+    if rows2:
+        v = list(rows2[0].values())[0]
+        found[name] = v
+        print(f"  ✓ (con filtro) [{name}] = {v}")
     else:
-        print(f"  ✗ [{name}]")
+        print(f"  ✗ [{name}] — {err}/{err2}")
 
-print(f"\nEncontradas: {found_prod}")
+print(f"\nEncontradas: {found}")
 
-# Fill Rate — en el reporte de Planificaciones (11) hay página "REPORTE DE S&OP"
-# y "ANALISIS DE COMPRA" — probar nombres que encajan con S&OP
-FR_CANDIDATES = [
-    # Fill Rate variantes
-    "Fill Rate", "% Fill Rate", "Fill Rate (%)", "FR", "% FR",
-    "Fill Rate Unidades", "Fill Rate Valor",
-    # S&OP
-    "Nivel Servicio", "Nivel de Servicio", "% Nivel Servicio",
-    "Atendido %", "% Atendido", "Demanda Atendida", "% Demanda Atendida",
-    "Pedidos Atendidos", "% Pedidos Atendidos", "Cumplimiento Pedidos",
-    # Análisis compra — posibles medidas
-    "Ratio C/C", "Ratio Consumo", "Ratio Compras",
-    "Consumo/Compra", "C/C",
-]
-
-print("\n=== FILL RATE (Planificacion) ===")
-found_fr = {}
-for name in FR_CANDIDATES:
-    v, ok = try_m(PLAN_ID, name)
-    if ok:
-        found_fr[name] = v
-        print(f"  ✓ [{name}] = {v}")
+# 3. Intentar SUMMARIZE sobre Medidas para ver qué columnas existen
+print("\n=== MEDIDAS tabla ===")
+for q in [
+    "EVALUATE 'Medidas'",
+    "EVALUATE VALUES('Medidas'[Column])",
+    "EVALUATE TOPN(20, 'Medidas')",
+    "EVALUATE SELECTCOLUMNS('Medidas', \"col\", 'Medidas'[Column])",
+]:
+    rows, err = dax_raw(PROD_ID, q)
+    if rows:
+        print(f"  ✓ {q[:40]}: {rows[:5]}")
     else:
-        print(f"  ✗ [{name}]")
+        print(f"  ✗ {q[:40]}: {err}")
 
-print(f"\nEncontradas FR: {found_fr}")
 print("\n=== FIN ===")
