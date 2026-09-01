@@ -45,8 +45,8 @@ p { font-size: 13px; opacity: 0.7; margin: 0; text-align: center; }
   // 4. Fetch del index.html fresco DESDE ESTA MISMA PÁGINA
   //    (no redirect — evita que el SW viejo intercepte)
   try {
-    const url = './index.html?bust=' + Date.now();
-    const response = await fetch(url, {
+    const base = 'https://rgarciaa78-svg.github.io/juanito-garcia-app/index.html?bust=' + Date.now();
+    const response = await fetch(base, {
       cache: 'no-store',
       headers: { 'Cache-Control': 'no-cache, no-store' }
     });
@@ -67,7 +67,7 @@ p { font-size: 13px; opacity: 0.7; margin: 0; text-align: center; }
   } catch(e) {
     msg.textContent = 'Error: ' + e.message + '. Redirigiendo...';
     setTimeout(() => {
-      window.location.href = './index.html?bust=' + Date.now();
+      window.location.href = 'https://rgarciaa78-svg.github.io/juanito-garcia-app/index.html?bust=' + Date.now();
     }, 1500);
   }
 })();
