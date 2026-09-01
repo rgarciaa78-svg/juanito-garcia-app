@@ -748,13 +748,14 @@ async function loadData() {
   try {
     document.getElementById('loading-msg').textContent = 'Cargando análisis...';
     const t = Date.now();
+    const B = 'https://rgarciaa78-svg.github.io/juanito-garcia-app/';
     const [r, rb, rr, rh, rc, rhi] = await Promise.all([
-      fetch('data/latest/summaries.json?t=' + t),
-      fetch('data/latest/board_plans.json?t=' + t).catch(() => null),
-      fetch('data/latest/risk_register.json?t=' + t).catch(() => null),
-      fetch('data/latest/hitos.json?t=' + t).catch(() => null),
-      fetch('data/latest/cashflow.json?t=' + t).catch(() => null),
-      fetch('data/historico/historico.json?t=' + t).catch(() => null)
+      fetch(B + 'data/latest/summaries.json?t=' + t, {cache:'no-store'}),
+      fetch(B + 'data/latest/board_plans.json?t=' + t, {cache:'no-store'}).catch(() => null),
+      fetch(B + 'data/latest/risk_register.json?t=' + t, {cache:'no-store'}).catch(() => null),
+      fetch(B + 'data/latest/hitos.json?t=' + t, {cache:'no-store'}).catch(() => null),
+      fetch(B + 'data/latest/cashflow.json?t=' + t, {cache:'no-store'}).catch(() => null),
+      fetch(B + 'data/historico/historico.json?t=' + t, {cache:'no-store'}).catch(() => null)
     ]);
     if (!r.ok) throw new Error('Sin datos');
     const fresh = await r.json();
