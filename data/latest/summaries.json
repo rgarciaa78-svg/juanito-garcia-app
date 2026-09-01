@@ -77,7 +77,35 @@
         "sop_inventario": {
           "estado": "green",
           "alerta": null,
-          "kpis": []
+          "kpis": [
+            {
+              "label": "Inventario Total",
+              "valor": "S/167,819"
+            }
+          ]
+        },
+        "control_interno": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": [
+            {
+              "label": "Satisfactorio",
+              "valor": "141",
+              "estado": "green"
+            }
+          ]
+        },
+        "margen_variable_pag2": {
+          "estado": "red",
+          "alerta": "Avance 19.2% vs presupuesto",
+          "kpis": [
+            {
+              "label": "Avance vs Ppto",
+              "valor": "19.2%",
+              "meta": "100%",
+              "estado": "red"
+            }
+          ]
         }
       }
     }

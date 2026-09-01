@@ -1,0 +1,27 @@
+{
+  "cxc": {
+    "% Morosidad": null,
+    "Morosidad": null,
+    "Por Vencer": null
+  },
+  "margen": {
+    "Venta Total": null
+  },
+  "mermas": {
+    "% Merma Total": null
+  },
+  "inventario": {
+    "Stock Total": null
+  },
+  "control_ds": {
+    "% Cumplimiento": null,
+    "Satisfactorio": null
+  },
+  "planificacion": {
+    "% Avance": null
+  },
+  "consumo": {
+    "Consumo": null,
+    "Compras": null
+  }
+}
