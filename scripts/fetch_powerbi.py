@@ -153,6 +153,20 @@ SCAN_CANDIDATES = {
 
 # ─────────────────────────────────────────────────────────────────────────────
 
+def get_dataset_schema(token, ws_id, dataset_id):
+    """Obtiene el schema completo del dataset via REST API (tablas + columnas + medidas)."""
+    url = f"{PBI_BASE}/groups/{ws_id}/datasets/{dataset_id}/tables"
+    r = requests.get(url, headers={"Authorization": f"Bearer {token}"}, timeout=20)
+    if not r.ok:
+        return {}
+    schema = {}
+    for tbl in r.json().get("value", []):
+        tbl_name = tbl.get("name", "")
+        cols = [c["name"] for c in tbl.get("columns", [])]
+        measures = [m["name"] for m in tbl.get("measures", [])]
+        schema[tbl_name] = {"columns": cols, "measures": measures}
+    return schema
+
 def get_token():
     r = requests.post(TOKEN_URL, data={
         "grant_type": "password", "client_id": CLIENT_ID,
@@ -624,67 +638,63 @@ def main():
                 if scanned.get("consumo", {}).get("Total Consumo"):
                     break
 
-        # ── CxP: probar tablas adicionales
+        # ── CxP: schema REST + probe medidas reales por nombre
         if "cxp" in ids and not scanned.get("cxp"):
-            print("  CxP: probando tablas adicionales...")
-            extra_cxp = [
-                "Facturas", "Facturas CxP", "CxP", "Saldos", "Deuda", "Proveedores",
-                "Por Pagar", "Cuentas por Pagar", "Cuentas Pagar", "fCxP", "dCxP",
-                "Pagos", "Comprobantes", "Detalle", "Saldo", "Obligaciones",
-                "hCxP", "fFacturas", "Vencimientos", "Aging", "Aging CxP",
-            ]
-            for tbl_name in extra_cxp:
-                rows_t = dax(token, ws_id, ids["cxp"],
-                             f"EVALUATE TOPN(3, '{tbl_name}')", f"cxp_tbl_{tbl_name[:10]}")
-                if rows_t:
-                    cols_t = list(rows_t[0].keys())
-                    print(f"    CxP tabla '{tbl_name}': {cols_t[:5]}")
-                    # Si hay columna de monto/saldo, sumarla
-                    for col in cols_t:
-                        col_lower = col.lower()
-                        if any(kw in col_lower for kw in ["monto", "saldo", "importe", "total", "deuda"]):
-                            col_bare = col.split("[")[-1].rstrip("]")
+            print("  CxP: leyendo schema REST...")
+            schema_cxp = get_dataset_schema(token, ws_id, ids["cxp"])
+            if schema_cxp:
+                print(f"    Tablas/medidas CxP: { {t: s['measures'][:5] for t,s in schema_cxp.items()} }")
+                # Probar cada medida real del schema
+                for tbl_name, tbl_info in schema_cxp.items():
+                    for m_name in tbl_info["measures"]:
+                        v, exists = try_measure(token, ws_id, ids["cxp"], m_name)
+                        if exists:
+                            scanned.setdefault("cxp", {})[m_name] = v
+                            print(f"      ✓ CxP [{m_name}] = {v}")
+                # SUM sobre columnas numéricas de tablas de datos (no Calendario)
+                for tbl_name, tbl_info in schema_cxp.items():
+                    if tbl_name.lower() in ["calendario", "calendar", "fecha"]:
+                        continue
+                    for col_name in tbl_info["columns"]:
+                        col_lower = col_name.lower()
+                        if any(kw in col_lower for kw in ["monto", "saldo", "importe", "total", "deuda", "pagar"]):
                             rows_s = dax(token, ws_id, ids["cxp"],
-                                         f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_bare}]))",
+                                         f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_name}]))",
                                          f"cxp_sum")
                             if rows_s:
                                 sv = rows_s[0].get("[v]") or rows_s[0].get("v")
                                 if sv is not None and float(sv or 0) != 0:
                                     scanned.setdefault("cxp", {})["CxP Total"] = sv
-                                    print(f"    CxP Total SUM '{col}': {sv}")
+                                    print(f"    CxP SUM '{tbl_name}'[{col_name}] = {sv}")
                                     break
 
-        # ── Productividad: probar más tablas y sumas directas
+        # ── Productividad: schema REST + probe medidas reales
         if "productividad_ds" in ids and not scanned.get("productividad_ds"):
-            print("  Productividad: probando tablas adicionales...")
-            extra_prod = [
-                "Produccion", "Producción", "Planilla", "fProduccion", "hProduccion",
-                "fPlanilla", "hPlanilla", "MOD", "Mano de Obra", "Costos",
-                "Hechos", "Datos", "Data", "Resultados", "KPIs", "Resumen",
-                "fMOD", "dProductividad", "Productividad",
-            ]
-            for tbl_name in extra_prod:
-                rows_t = dax(token, ws_id, ids["productividad_ds"],
-                             f"EVALUATE TOPN(3, '{tbl_name}')", f"prod_tbl_{tbl_name[:10]}")
-                if rows_t:
-                    cols_t = list(rows_t[0].keys())
-                    print(f"    Prod tabla '{tbl_name}': {cols_t[:6]}")
-                    for col in cols_t:
-                        col_lower = col.lower()
+            print("  Productividad: leyendo schema REST...")
+            schema_prod = get_dataset_schema(token, ws_id, ids["productividad_ds"])
+            if schema_prod:
+                print(f"    Tablas/medidas Prod: { {t: s['measures'][:5] for t,s in schema_prod.items()} }")
+                for tbl_name, tbl_info in schema_prod.items():
+                    for m_name in tbl_info["measures"]:
+                        v, exists = try_measure(token, ws_id, ids["productividad_ds"], m_name)
+                        if exists:
+                            scanned.setdefault("productividad_ds", {})[m_name] = v
+                            print(f"      ✓ Prod [{m_name}] = {v}")
+                for tbl_name, tbl_info in schema_prod.items():
+                    if tbl_name.lower() in ["calendario", "calendar", "fecha", "medidas"]:
+                        continue
+                    for col_name in tbl_info["columns"]:
+                        col_lower = col_name.lower()
                         if any(kw in col_lower for kw in ["planilla", "monto", "costo", "kg", "produccion", "total"]):
-                            col_bare = col.split("[")[-1].rstrip("]")
                             rows_s = dax(token, ws_id, ids["productividad_ds"],
-                                         f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_bare}]))",
+                                         f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_name}]))",
                                          f"prod_sum")
                             if rows_s:
                                 sv = rows_s[0].get("[v]") or rows_s[0].get("v")
                                 if sv is not None and float(sv or 0) != 0:
-                                    label = col_bare.lower()
-                                    if "planilla" in label or "costo" in label or "monto" in label:
-                                        scanned.setdefault("productividad_ds", {})["Planilla Total"] = sv
-                                    elif "kg" in label or "produccion" in label:
-                                        scanned.setdefault("productividad_ds", {})["Kg Producidos"] = sv
-                                    print(f"    Prod SUM '{col}': {sv}")
+                                    lbl = "Planilla Total" if any(k in col_lower for k in ["planilla","costo","monto"]) else "Kg Producidos"
+                                    scanned.setdefault("productividad_ds", {})[lbl] = sv
+                                    print(f"    Prod SUM '{tbl_name}'[{col_name}] = {sv}")
 
         # Guardar caché de medidas confirmadas
         new_cache = {}
