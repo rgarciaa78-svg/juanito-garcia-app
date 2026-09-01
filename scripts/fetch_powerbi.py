@@ -32,9 +32,8 @@ HOY = datetime.date.today().strftime("%Y-%m-%d")
 
 # ── Workspaces y Datasets ─────────────────────────────────────────────────────
 WORKSPACES = {
-    "PAUNO":  "461932ad-b5ec-4fd6-aa97-f1fc7bdc5169",
-    "AMAUTA": "8266b260-4af1-41fa-a011-cff28e984a6d",
-    "NEOPACK":"317a3742-3a89-4a9b-b9ab-3a5ee8be2505",
+    "PAUNO": "461932ad-b5ec-4fd6-aa97-f1fc7bdc5169",
+    # AMAUTA y NEOPACK: solo acceso Viewer — queries vía imágenes Power BI
 }
 
 # Dataset IDs conocidos (PAUNO confirmados; AMAUTA/NEOPACK se descubren en runtime)
