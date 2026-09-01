@@ -45,6 +45,7 @@ DATASET_IDS = {
         "productividad_ds": "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6", # 13. Productividad
         "planificacion":  "30074d92-7ec1-4762-82f2-1cb29c15dcfe",  # 11. Planificaciones
         "consumo":        "c972c8cb-e5fc-4b60-8f5e-265a78e1e796",  # 14. Consumo Materiales
+        "fill_rate":      "7f4ebe22-5e90-4e35-973b-4af3c58497e5",  # 12. Calculo de Provisiones
     }
 }
 
@@ -146,6 +147,11 @@ SCAN_CANDIDATES = {
         "Consumo", "Total Consumo", "Importe Consumo",
         "Compras", "Total Compras",
         "Ratio", "Ratio Consumo", "% Ratio",
+    ],
+    "fill_rate": [
+        "% FILLRATE", "% Fill Rate", "% FillRate",
+        "ORDEN DE VENTA", "FACTURACION", "VENTA PERDIDA",
+        "Orden de Venta", "Facturacion", "Venta Perdida",
     ],
 }
 
@@ -556,16 +562,28 @@ def build_productividad(found):
     return {"estado": "green", "alerta": None, "kpis": kpis}
 
 def build_fill_rate(found):
-    fill_val = found.get("Fill Rate") or found.get("% Fill Rate") or found.get("Tasa Atención") or found.get("Tasa Atencion")
+    fill_val = (found.get("% FILLRATE") or found.get("% Fill Rate") or found.get("% FillRate") or
+                found.get("Fill Rate") or found.get("Tasa Atención") or found.get("Tasa Atencion"))
     fill_pct = to_float(fill_val)
     if fill_pct and abs(fill_pct) < 1: fill_pct *= 100
     sem = sem_thresh(fill_pct, red_below=85, yellow_below=95)
 
+    ov_val     = found.get("ORDEN DE VENTA") or found.get("Orden de Venta")
+    fact_val   = found.get("FACTURACION") or found.get("Facturacion")
+    vp_val     = found.get("VENTA PERDIDA") or found.get("Venta Perdida")
+    ov         = to_float(ov_val)
+    fact       = to_float(fact_val)
+    vp         = to_float(vp_val)
+
     kpis = []
     if fill_pct is not None:
         kpis.append({"label": "Fill Rate", "valor": f"{fill_pct:.1f}%", "meta": "98%", "estado": sem})
-        if fill_pct < 98:
-            kpis.append({"label": "Brecha", "valor": f"-{98-fill_pct:.1f}pp"})
+    if ov:
+        kpis.append({"label": "Orden de Venta", "valor": fmt_money(ov)})
+    if fact:
+        kpis.append({"label": "Facturación", "valor": fmt_money(fact)})
+    if vp:
+        kpis.append({"label": "Venta Perdida", "valor": fmt_money(vp), "estado": "red" if vp > 0 else "green"})
 
     alerta = f"Fill Rate {fmt_pct(fill_pct)} — bajo meta 98%" if sem != "green" and fill_pct else None
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
@@ -818,10 +836,9 @@ def main():
                 empresa_data["reportes"]["productividad"] = r
                 print(f"  Productividad {len(r['kpis'])} KPIs")
 
-        # ── Fill Rate / Avance (planificacion o inventario)
-        inv_sc = scanned.get("inventario", {})
-        if inv_sc:
-            fr = build_fill_rate(inv_sc)
+        # ── Fill Rate (dataset dedicado 12. Calculo de Provisiones)
+        if scanned.get("fill_rate"):
+            fr = build_fill_rate(scanned["fill_rate"])
             if fr["kpis"]:
                 empresa_data["reportes"]["fill_rate"] = fr
                 print(f"  Fill Rate {fr['kpis'][0]['valor'] if fr['kpis'] else '—'}")

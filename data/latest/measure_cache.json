@@ -32,5 +32,11 @@
   "consumo": {
     "Consumo": null,
     "Compras": null
+  },
+  "fill_rate": {
+    "% FILLRATE": null,
+    "ORDEN DE VENTA": null,
+    "FACTURACION": null,
+    "VENTA PERDIDA": null
   }
 }
