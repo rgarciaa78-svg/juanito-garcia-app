@@ -1,20 +1,20 @@
 {
   "fecha": "01/09/2026",
   "fecha_actualizacion": "2026-09-01",
-  "generado_por": "JUANITO — Power BI Direct v2",
+  "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "red"
   },
   "semaforo_razon": {
     "PAUNO": "Morosidad 20.4% — crítica"
   },
-  "holding_ventas": "—",
+  "holding_ventas": "S/251.52M",
   "holding_mora": "20.4%",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 20.4% en PAUNO — vencido S/3.02M. Activar cobranza intensiva.",
+        "texto": "Mora 20.4% — vencido S/3.02M. Activar cobranza.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -38,22 +38,36 @@
               "label": "CxC por vencer",
               "valor": "S/3.02M"
             }
+          ],
+          "tramos": [
+            {
+              "label": "Por vencer",
+              "valor": "S/3.02M",
+              "estado": "green"
+            }
           ]
-        },
-        "cuentas_por_pagar": {
-          "estado": "green",
-          "alerta": null,
-          "kpis": []
         },
         "margen_variable": {
           "estado": "green",
           "alerta": null,
-          "kpis": []
+          "kpis": [
+            {
+              "label": "Ventas mes",
+              "valor": "S/251.52M"
+            }
+          ]
         },
         "mermas": {
-          "estado": "green",
-          "alerta": null,
-          "kpis": []
+          "estado": "red",
+          "alerta": "Merma 4.79% — sobre meta 2%",
+          "kpis": [
+            {
+              "label": "Merma Total",
+              "valor": "4.79%",
+              "meta": "2%",
+              "estado": "red"
+            }
+          ]
         },
         "compras": {
           "estado": "green",
