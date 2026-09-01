@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Descubre TODOS los nombres de medidas en datasets de CxP, Productividad,
-Planificacion y Consumo usando múltiples técnicas de la API de Power BI.
+Descubre medidas via páginas/visuales de reportes y Export API.
 """
-import os, json, requests
+import os, json, requests, time
 
 TENANT_ID     = os.environ["AZURE_TENANT_ID"]
 CLIENT_ID     = os.environ["AZURE_CLIENT_ID"]
@@ -22,78 +21,100 @@ r = requests.post(TOKEN_URL, data={
 })
 token = r.json()["access_token"]
 H = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-
-def dax_raw(ds_id, query):
-    url = f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/executeQueries"
-    resp = requests.post(url, headers=H,
-                         json={"queries": [{"query": query}],
-                               "serializerSettings": {"includeNulls": True}},
-                         timeout=30)
-    if resp.ok:
-        rows = resp.json().get("results", [{}])[0].get("tables", [{}])[0].get("rows", [])
-        return rows, None
-    return [], resp.json().get("error", {})
+HG = {"Authorization": f"Bearer {token}"}
 
 DATASETS = {
-    "cxp":            "45a8ab8d-e162-4398-a260-3a9a5f90829f",
-    "productividad":  "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6",
-    "planificacion":  "30074d92-7ec1-4762-82f2-1cb29c15dcfe",
-    "consumo":        "c972c8cb-e5fc-4b60-8f5e-265a78e1e796",
+    "cxp":           "45a8ab8d-e162-4398-a260-3a9a5f90829f",
+    "productividad": "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6",
+    "planificacion": "30074d92-7ec1-4762-82f2-1cb29c15dcfe",
+    "consumo":       "c972c8cb-e5fc-4b60-8f5e-265a78e1e796",
 }
 
-# 1. Listar reportes del workspace para ver sus nombres
-print("\n=== REPORTES EN WORKSPACE PAUNO ===")
-reps = requests.get(f"{PBI_BASE}/groups/{WS_ID}/reports", headers=H).json().get("value", [])
+# 1. Listar reportes y mapear a dataset
+print("\n=== REPORTES ===")
+reps = requests.get(f"{PBI_BASE}/groups/{WS_ID}/reports", headers=HG).json().get("value", [])
+rep_by_ds = {}
 for rep in reps:
     ds = rep.get("datasetId", "")
-    ds_key = next((k for k, v in DATASETS.items() if v == ds), ds[:8])
-    print(f"  [{ds_key}] {rep['name']} — id={rep['id']}")
+    ds_key = next((k for k, v in DATASETS.items() if v == ds), None)
+    print(f"  {rep['name']} | report_id={rep['id']} | ds_key={ds_key}")
+    if ds_key:
+        rep_by_ds[ds_key] = rep["id"]
 
-# 2. Para cada dataset: intentar DMV queries para descubrir medidas
-print("\n=== DMV QUERIES POR DATASET ===")
-DMV_QUERIES = [
-    ('INFO.MEASURES',
-     'EVALUATE SELECTCOLUMNS(INFO.MEASURES(), "Tabla", [TableID], "Nombre", [Name], "Expr", [Expression])'),
-    ('INFO.TABLES',
-     'EVALUATE SELECTCOLUMNS(INFO.TABLES(), "ID", [ID], "Nombre", [Name])'),
-    ('INFO.COLUMNS',
-     'EVALUATE SELECTCOLUMNS(INFO.COLUMNS(), "Tabla", [TableID], "Nombre", [ExplicitName], "Tipo", [DataType])'),
-    ('MDSCHEMA_MEASURES',
-     'EVALUATE MDSCHEMA_MEASURES()'),
-]
-
-for ds_key, ds_id in DATASETS.items():
-    print(f"\n--- {ds_key} ({ds_id[:8]}...) ---")
-    for qname, q in DMV_QUERIES:
-        rows, err = dax_raw(ds_id, q)
-        if rows:
-            print(f"  ✓ {qname}: {len(rows)} filas")
-            for row in rows[:30]:
-                print(f"    {row}")
+# 2. Para cada reporte: explorar páginas y visuales
+print("\n=== PÁGINAS Y VISUALES ===")
+for ds_key, rep_id in rep_by_ds.items():
+    print(f"\n--- {ds_key} (report={rep_id[:8]}...) ---")
+    pages_r = requests.get(f"{PBI_BASE}/groups/{WS_ID}/reports/{rep_id}/pages", headers=HG)
+    if not pages_r.ok:
+        print(f"  ERROR páginas: {pages_r.status_code}")
+        continue
+    pages = pages_r.json().get("value", [])
+    for page in pages[:3]:  # primeras 3 páginas
+        pname = page["name"]
+        pdisplay = page.get("displayName", pname)
+        print(f"  Página: {pdisplay} ({pname})")
+        vis_r = requests.get(
+            f"{PBI_BASE}/groups/{WS_ID}/reports/{rep_id}/pages/{pname}/visuals",
+            headers=HG)
+        if vis_r.ok:
+            visuals = vis_r.json().get("value", [])
+            for vis in visuals[:10]:
+                vtype = vis.get("type", "?")
+                vtitle = vis.get("title", "")
+                print(f"    Visual: [{vtype}] {vtitle}")
+                # Imprimir todo el contenido del visual para ver campos
+                if "dataViews" in vis or "fields" in vis or "columns" in vis:
+                    print(f"      data: {json.dumps(vis, ensure_ascii=False)[:300]}")
         else:
-            code = err.get("pbi.error", {}).get("code", "?") if err else "empty"
-            print(f"  ✗ {qname}: {code}")
+            print(f"    ERROR visuals: {vis_r.status_code} {vis_r.text[:100]}")
 
-    # 3. Intentar EVALUATE sobre posibles nombres de tablas con schema completo
-    print(f"  Schema REST API:")
-    schema_r = requests.get(
-        f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/tables", headers=H)
-    if schema_r.ok:
-        for tbl in schema_r.json().get("value", []):
-            cols = [c["name"] for c in tbl.get("columns", [])]
-            meas = [m["name"] for m in tbl.get("measures", [])]
-            print(f"    Tabla '{tbl['name']}': cols={cols[:5]}, medidas={meas[:10]}")
-    else:
-        print(f"    {schema_r.status_code}: {schema_r.text[:100]}")
+# 3. Intentar Export To File para obtener datos de visuals
+print("\n=== EXPORT TO FILE (CSV) ===")
+for ds_key, rep_id in rep_by_ds.items():
+    print(f"\n--- {ds_key} ---")
+    # Exportar primera página a CSV de underlying data
+    export_body = {
+        "format": "CSV",
+        "paginatedReportConfiguration": None,
+        "powerBIReportConfiguration": {
+            "pages": [{"pageName": None}],  # primera página
+        }
+    }
+    # Intentar exportar a XLSX para ver datos
+    export_r = requests.post(
+        f"{PBI_BASE}/groups/{WS_ID}/reports/{rep_id}/ExportTo",
+        headers=H,
+        json={"format": "XLSX"}
+    )
+    print(f"  ExportTo XLSX: {export_r.status_code} {export_r.text[:200]}")
+    if export_r.ok:
+        export_id = export_r.json().get("id")
+        print(f"  Export ID: {export_id}")
+        # Esperar que termine
+        for _ in range(10):
+            time.sleep(3)
+            status_r = requests.get(
+                f"{PBI_BASE}/groups/{WS_ID}/reports/{rep_id}/exports/{export_id}",
+                headers=HG)
+            status = status_r.json().get("status", "?")
+            print(f"  Status: {status}")
+            if status == "Succeeded":
+                # Descargar
+                dl_r = requests.get(
+                    f"{PBI_BASE}/groups/{WS_ID}/reports/{rep_id}/exports/{export_id}/file",
+                    headers=HG)
+                print(f"  Archivo: {dl_r.status_code}, size={len(dl_r.content)} bytes")
+                break
+            elif status in ["Failed", "Undefined"]:
+                break
 
-    # 4. Probar EVALUATE ROW con nombres de medidas genericos
-    generic = ["Total", "Saldo", "Importe", "Monto", "Valor", "Resultado",
-               "KPI", "Indicador", "Dato", "Numero", "N", "V", "Medida"]
-    print(f"  Medidas genéricas:")
-    for m in generic:
-        rows2, _ = dax_raw(ds_id, f'EVALUATE ROW("v", [{m}])')
-        if rows2:
-            v = list(rows2[0].values())[0] if rows2 else None
-            print(f"    ✓ [{m}] = {v}")
+# 4. Intentar Analyze in Excel (genera un archivo ODC con schema)
+print("\n=== ANALYZE IN EXCEL (schema) ===")
+for ds_key, ds_id in DATASETS.items():
+    analyze_r = requests.get(
+        f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/analyzeInExcel",
+        headers=HG)
+    print(f"  {ds_key}: {analyze_r.status_code} {analyze_r.text[:300]}")
 
 print("\n=== FIN ===")
