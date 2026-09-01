@@ -3,14 +3,10 @@
   "fecha_actualizacion": "2026-08-31",
   "generado_por": "JUANITO — Power BI Direct",
   "semaforos": {
-    "PAUNO": "yellow",
-    "AMAUTA": "yellow",
-    "NEOPACK": "yellow"
+    "PAUNO": "yellow"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 22.9% — sobre meta",
-    "AMAUTA": "Pendiente conexión directa Power BI",
-    "NEOPACK": "Pendiente conexión directa Power BI"
+    "PAUNO": "Morosidad 22.9% — sobre meta del 15%"
   },
   "holding_ventas": "—",
   "holding_mora": "22.9%",
@@ -18,7 +14,7 @@
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Morosidad PAUNO en 22.9% — vence S/2,689,144. Activar cobranza intensiva esta semana.",
+        "texto": "Morosidad PAUNO en 22.9% — vencido S/2,689,144. Activar cobranza intensiva esta semana.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -31,30 +27,8 @@
           "estado": "yellow",
           "alerta": "Morosidad 22.9% — sobre meta del 15%",
           "kpis": [
-            { "label": "Morosidad", "valor": "22.9%", "meta": "15%" },
-            { "label": "CxC por vencer", "valor": "S/2,689,144" }
-          ]
-        }
-      }
-    },
-    "AMAUTA": {
-      "reportes": {
-        "general": {
-          "estado": "yellow",
-          "alerta": "Datos vía reportes Power BI. Conexión directa pendiente.",
-          "kpis": [
-            { "label": "Fuente", "valor": "Imágenes BI" }
-          ]
-        }
-      }
-    },
-    "NEOPACK": {
-      "reportes": {
-        "general": {
-          "estado": "yellow",
-          "alerta": "Datos vía reportes Power BI. Conexión directa pendiente.",
-          "kpis": [
-            { "label": "Fuente", "valor": "Imágenes BI" }
+            { "label": "Morosidad", "valor": "22.9%", "meta": "15%", "estado": "yellow" },
+            { "label": "CxC por vencer", "valor": "S/2,689,144", "estado": "yellow" }
           ]
         }
       }
