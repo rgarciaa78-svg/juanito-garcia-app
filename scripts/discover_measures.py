@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prueba medidas de Productividad con y sin filtro de fecha."""
+"""Busca dataset de Fill Rate y prueba % FILLRATE en todos los datasets del workspace."""
 import os, requests
 
 TENANT_ID     = os.environ["AZURE_TENANT_ID"]
@@ -18,85 +18,86 @@ r = requests.post(TOKEN_URL, data={
     "password": PASSWORD, "scope": "https://analysis.windows.net/powerbi/api/.default",
 })
 token = r.json()["access_token"]
-H = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+H  = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+HG = {"Authorization": f"Bearer {token}"}
 
-def dax_raw(ds_id, q):
+def try_m(ds_id, name):
     url = f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/executeQueries"
     resp = requests.post(url, headers=H,
-                         json={"queries": [{"query": q}],
+                         json={"queries": [{"query": f'EVALUATE ROW("v", [{name}])'}],
                                "serializerSettings": {"includeNulls": True}},
-                         timeout=20)
+                         timeout=15)
     if resp.ok:
         rows = resp.json().get("results",[{}])[0].get("tables",[{}])[0].get("rows",[])
-        return rows, None
-    err = resp.json().get("error",{}).get("pbi.error",{}).get("code","?")
-    return [], err
+        v = list(rows[0].values())[0] if rows else None
+        return v, True
+    return None, False
 
-PROD_ID = "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6"
+# 1. Listar TODOS los datasets del workspace
+print("=== TODOS LOS DATASETS ===")
+ds_r = requests.get(f"{PBI_BASE}/groups/{WS_ID}/datasets", headers=HG)
+all_datasets = ds_r.json().get("value", [])
+for ds in all_datasets:
+    print(f"  [{ds['id'][:8]}] {ds['name']}")
 
-# 1. Descubrir columnas del Calendario en Productividad
-print("=== CALENDARIO PRODUCTIVIDAD ===")
-for q in [
-    "EVALUATE TOPN(3, 'Calendario')",
-    "EVALUATE TOPN(3, 'Calendar')",
-    "EVALUATE TOPN(3, 'Fecha')",
-]:
-    rows, err = dax_raw(PROD_ID, q)
-    if rows:
-        print(f"  ✓ {q[:30]}: {list(rows[0].keys())[:6]}")
-        for row in rows[:2]: print(f"    {row}")
-    else:
-        print(f"  ✗ {err}")
-
-# 2. Probar medidas con filtro de año=2026
-print("\n=== MEDIDAS CON FILTRO ANO=2026 ===")
-NAMES = [
-    "Produccion Total (KG)", "PRODUCCION TOTAL (KG)", "Produccion Total",
-    "Producción Total (KG)", "Producción Total",
-    "KG Total", "Total KG", "KG Produccion", "KG Prod",
-    "Venta Neta (KG)", "VENTA NETA (KG)", "Venta Neta",
-    "Planilla Total (S/.)", "PLANILLA TOTAL (S/.)", "Planilla Total",
-    "Planilla (S/.) entre Kg Producido", "PLANILLA (S/.) ENTRE KG PRODUCIDO",
-    "Planilla entre KG", "S/Kg Producido", "Planilla KG",
-    "Planilla", "Total Planilla", "Costo Planilla",
-    "MOD", "Costo MOD", "Gasto MOD",
-    "Kg Producidos", "Kg Producción", "Kg Prod",
-    "Eficiencia", "Productividad", "Ratio MOD",
+# 2. Probar % FILLRATE en TODOS los datasets
+print("\n=== % FILLRATE EN TODOS LOS DATASETS ===")
+fr_candidates = [
+    "% FILLRATE", "% Fill Rate", "% FillRate", "FILLRATE",
+    "% FR", "Fill Rate", "FR",
+    "ORDEN DE VENTA", "FACTURACION", "VENTA PERDIDA", "AMONESTACION",
 ]
 
-found = {}
-for name in NAMES:
-    # Sin filtro
-    rows, err = dax_raw(PROD_ID, f'EVALUATE ROW("v", [{name}])')
-    if rows:
-        v = list(rows[0].values())[0]
-        found[name] = v
-        print(f"  ✓ (sin filtro) [{name}] = {v}")
-        continue
-    # Con filtro Calendario[Año] = 2026
-    rows2, err2 = dax_raw(PROD_ID,
-        f'EVALUATE CALCULATETABLE(ROW("v", [{name}]), \'Calendario\'[Año] = 2026)')
-    if rows2:
-        v = list(rows2[0].values())[0]
-        found[name] = v
-        print(f"  ✓ (con filtro) [{name}] = {v}")
-    else:
-        print(f"  ✗ [{name}] — {err}/{err2}")
+known_datasets = {
+    "cxc":            "2eec70cd-0820-408f-b938-a2cd547b0c18",
+    "cxp":            "45a8ab8d-e162-4398-a260-3a9a5f90829f",
+    "margen":         "38076daa-d2cd-4a93-858a-82c0a4cf8cb6",
+    "mermas":         "35866214-f4da-45a3-a5a2-aa0c8caffe78",
+    "compras":        "06408938-8202-424e-80c0-b42c178dabde",
+    "inventario":     "0e27d784-41a4-48f0-9208-60210119f0a7",
+    "control_ds":     "0aca7bdd-6b72-49c2-be41-17ae0f6b5848",
+    "productividad":  "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6",
+    "planificacion":  "30074d92-7ec1-4762-82f2-1cb29c15dcfe",
+    "consumo":        "c972c8cb-e5fc-4b60-8f5e-265a78e1e796",
+}
 
-print(f"\nEncontradas: {found}")
+# Agregar datasets desconocidos
+all_ds_ids = {ds["name"]: ds["id"] for ds in all_datasets}
+for ds_name, ds_id in all_ds_ids.items():
+    if ds_id not in known_datasets.values():
+        known_datasets[ds_name[:20]] = ds_id
 
-# 3. Intentar SUMMARIZE sobre Medidas para ver qué columnas existen
-print("\n=== MEDIDAS tabla ===")
-for q in [
-    "EVALUATE 'Medidas'",
-    "EVALUATE VALUES('Medidas'[Column])",
-    "EVALUATE TOPN(20, 'Medidas')",
-    "EVALUATE SELECTCOLUMNS('Medidas', \"col\", 'Medidas'[Column])",
-]:
-    rows, err = dax_raw(PROD_ID, q)
-    if rows:
-        print(f"  ✓ {q[:40]}: {rows[:5]}")
-    else:
-        print(f"  ✗ {q[:40]}: {err}")
+for ds_key, ds_id in known_datasets.items():
+    for name in fr_candidates:
+        v, ok = try_m(ds_id, name)
+        if ok:
+            print(f"  ✓ [{ds_key}] [{name}] = {v}")
+
+# 3. Para Productividad: probar SUM directo sobre tabla con datos reales
+PROD_ID = "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6"
+print("\n=== PRODUCTIVIDAD: tablas y SUM directos ===")
+# Intentar nombres de tablas más específicos
+prod_tables = [
+    "Planilla", "fPlanilla", "hPlanilla",
+    "Produccion", "fProduccion", "hProduccion",
+    "MOD", "Funcionario", "Funcionarios",
+    "Empleado", "Personal", "RR HH", "RRHH",
+    "Hechos Planilla", "Hechos Produccion",
+    "HechosProductividad", "FactProductividad",
+    "API_Planilla", "API_Produccion",
+    "data", "datos", "master",
+    "Planilla Funcionario", "Produccion Funcionario",
+]
+for tbl in prod_tables:
+    url = f"{PBI_BASE}/groups/{WS_ID}/datasets/{PROD_ID}/executeQueries"
+    resp = requests.post(url, headers=H,
+                         json={"queries": [{"query": f"EVALUATE TOPN(1, '{tbl}')"}],
+                               "serializerSettings": {"includeNulls": True}},
+                         timeout=10)
+    if resp.ok:
+        rows = resp.json().get("results",[{}])[0].get("tables",[{}])[0].get("rows",[])
+        if rows:
+            cols = list(rows[0].keys())
+            print(f"  ✓ Tabla '{tbl}': {cols[:6]}")
 
 print("\n=== FIN ===")
