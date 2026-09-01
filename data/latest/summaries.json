@@ -2,42 +2,53 @@
   "fecha": "31/08/2026",
   "fecha_actualizacion": "2026-08-31",
   "generado_por": "JUANITO — Power BI Direct + Imágenes 18/08/2026",
-  "semaforos": {
-    "PAUNO": "red"
-  },
+  "semaforos": { "PAUNO": "red" },
   "semaforo_razon": {
     "PAUNO": "Mora 22.9% · Compras 199.72% jalando inventario · Canal Tradicional 2% vs presupuesto"
   },
   "holding_ventas": "S/2,712,119",
   "holding_mora": "22.9%",
+  "resumen_ejecutivo": "PAUNO en estado crítico: el ratio de compras al 199.72% indica que se está consumiendo inventario al doble de la velocidad de reposición. Al mismo tiempo, el dead stock llega al 98.27% — hay inventario paralizado que no rota. Esto combinado con mora del 22.9% y el Canal Tradicional en solo 2% de avance vs presupuesto exige decisiones esta semana.",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
         "texto": "Compras al 199.72% — consumo duplica compras, se está jalando inventario agresivamente. Revisar stock disponible con logística hoy.",
-        "responsable": "Gerencia de Logística"
+        "responsable": "Gerencia de Logística",
+        "impacto": "Riesgo de quiebre de stock en materias primas si no se repone esta semana"
       },
       {
         "empresa": "PAUNO",
         "texto": "Morosidad 22.9% — S/2,689,144 vencido. Activar cobranza intensiva. Meta 15%.",
-        "responsable": "Gerencia Financiera"
+        "responsable": "Gerencia Financiera",
+        "impacto": "Cada punto sobre meta representa ~S/120K en caja bloqueada"
       },
       {
         "empresa": "PAUNO",
         "texto": "Canal Tradicional en 2% de avance vs presupuesto — riesgo de cierre de mes muy debajo de meta.",
-        "responsable": "Gerencia Comercial"
+        "responsable": "Gerencia Comercial",
+        "impacto": "S/7.8M de presupuesto mes, solo S/3.1M ejecutado al 18/08"
       }
     ],
     "escalar_semana": [
       {
         "empresa": "PAUNO",
-        "texto": "S&OP: Dead Stock al 98.27% del inventario. Envases y Embalajes 47.46% muerto, Materia Prima 31.06%. Liquidar o replantear.",
-        "responsable": "Gerencia de Supply Chain"
+        "texto": "S&OP: Dead Stock al 98.27% del inventario. Envases y Embalajes 47.46% muerto, Materia Prima 31.06%. Plan de liquidación urgente.",
+        "responsable": "Gerencia de Supply Chain",
+        "impacto": "Capital inmovilizado — estimar valor en soles para decisión de liquidar vs reubicar"
       },
       {
         "empresa": "PAUNO",
-        "texto": "Mermas PAUNO 2.35% — sobre meta del 2%. Planta Ate 1.97% (OK), Pachacamac 1.80% (OK). Revisar planta total.",
-        "responsable": "Gerencia de Operaciones"
+        "texto": "Mermas PAUNO 2.35% — sobre meta del 2%. Investigar líneas con mayor pérdida.",
+        "responsable": "Gerencia de Operaciones",
+        "impacto": "Cada 0.1% de merma sobre meta = ~S/70K de pérdida mensual estimada"
+      }
+    ],
+    "monitorear": [
+      {
+        "empresa": "PAUNO",
+        "texto": "Margen variable 43% — tendencia bajista desde 52.85% en enero. Revisar mix de UEN.",
+        "responsable": "Gerencia de Finanzas"
       }
     ]
   },
@@ -47,100 +58,214 @@
         "cuentas_por_cobrar": {
           "estado": "yellow",
           "alerta": "Morosidad 22.9% — sobre meta del 15%",
+          "contexto": "La morosidad subió de 18% (jul) a 22.9% (ago) — tendencia alcista preocupante. El Canal Moderno concentra el mayor vencido (Juan Cancharis S/41,679 en +30d). Rotación CxC en 15 días es buena, pero la cartera vencida >30d de S/316,829 es el riesgo inmediato.",
           "kpis": [
             { "label": "Morosidad", "valor": "22.9%", "meta": "15%", "estado": "yellow", "tendencia": "sube" },
             { "label": "CxC por vencer", "valor": "S/2,689,144", "estado": "yellow" },
             { "label": "CxC Total", "valor": "S/4,088,745", "estado": "neutral" },
             { "label": "Ventas mes actual", "valor": "S/2,712,119", "estado": "neutral" },
             { "label": "Ventas mes anterior", "valor": "S/7,320,997", "estado": "neutral" },
-            { "label": "Rotación CxC", "valor": "15 días", "meta": "<30d", "estado": "green" }
+            { "label": "Rotación CxC", "valor": "15 días", "meta": "<30d", "estado": "green" },
+            { "label": "Vencido 16-30 días", "valor": "S/372,543", "estado": "yellow" },
+            { "label": "Vencido +30 días", "valor": "S/316,829", "estado": "red" }
+          ],
+          "clientes_criticos": [
+            { "nombre": "Mori Collazos Martín", "vencido30": "S/67,203", "total": "S/182,549" },
+            { "nombre": "Juan Cancharis (Can. Mod.)", "vencido30": "S/41,679", "total": "S/1,589,642" },
+            { "nombre": "Juan Chávez (Can. Mod.)", "vencido30": "S/45,774", "total": "S/62,493" }
+          ],
+          "acciones": [
+            "Activar protocolo de cobranza intensiva en clientes con >30 días de mora",
+            "Congelar nuevos créditos a clientes con vencido >30 días hasta que regularicen",
+            "Revisar límites de crédito del Canal Tradicional — solo 2 clientes representan el 85% del vencido"
           ]
         },
         "cuentas_por_pagar": {
           "estado": "green",
           "alerta": "Días CxP 54 días — dentro de meta (<90 días)",
+          "contexto": "CxP bajo control: días de pago en 54 días vs meta <90d. El refinanciamiento con E&M S.R.L. (S/4.7M) y Diverplast (S/834K) está aceptado. Vigente S/6.3M y vencido <15 días S/1.5M son manejables. El proveedor más crítico es E&M con S/5.5M en leche descremada.",
           "kpis": [
             { "label": "Días CxP", "valor": "54 días", "meta": "<90d", "estado": "green", "tendencia": "mejora" },
             { "label": "CxP Total", "valor": "S/17,035,259", "estado": "neutral" },
             { "label": "Vigente", "valor": "S/6,328,950", "estado": "green" },
             { "label": "Vencido <15 días", "valor": "S/1,479,052", "estado": "yellow" },
+            { "label": "Vencido 16-30 días", "valor": "S/1,016,803", "estado": "yellow" },
+            { "label": "Vencido 31-90 días", "valor": "S/998,062", "estado": "red" },
             { "label": "Proveedores activos", "valor": "142", "estado": "neutral" }
+          ],
+          "proveedores_criticos": [
+            { "nombre": "E & M S.R.L. (Leche)", "monto": "S/5,561,649", "dias_credito": "120d" },
+            { "nombre": "Diverplast (Botellas)", "monto": "S/1,087,539", "dias_credito": "120d" },
+            { "nombre": "GEKA Corp (Envases)", "monto": "S/805,488", "dias_credito": "90d" }
+          ],
+          "acciones": [
+            "Confirmar cronograma de pagos de refinanciamiento con E&M y Diverplast para setiembre",
+            "Monitorear vencido 31-90d (S/998K) — prioritario para evitar corte de suministro",
+            "Negociar extensión de plazo con GEKA Corp si hay presión de caja"
           ]
         },
         "margen_variable": {
           "estado": "yellow",
           "alerta": "Margen 43.00% en agosto — tendencia bajista desde 52.85% en enero",
+          "contexto": "El margen variable cayó 10pp desde el inicio del año (52.85% ene → 43.00% ago). Las ventas de agosto S/2.7M son bajas por ser mes parcial (al 18/08). MAQUILA lidera con S/1.8M, B&D en S/1.6M y TIGO en S/0.0M (sin venta). La tendencia bajista en margen es la señal más preocupante estructuralmente.",
           "kpis": [
             { "label": "Margen Variable", "valor": "43.00%", "estado": "yellow", "tendencia": "baja" },
-            { "label": "Ventas agosto (parcial)", "valor": "S/2.7 mill", "estado": "neutral" },
-            { "label": "Ventas julio", "valor": "S/7.3 mill", "estado": "neutral" }
+            { "label": "Ventas agosto (parcial 18/08)", "valor": "S/2.7 mill", "estado": "neutral" },
+            { "label": "Ventas julio", "valor": "S/7.3 mill", "estado": "neutral" },
+            { "label": "MAQUILA ventas ago", "valor": "S/1.8 mill", "estado": "neutral" },
+            { "label": "B&D ventas ago", "valor": "S/1.6 mill", "estado": "neutral" }
+          ],
+          "acciones": [
+            "Revisar mix de productos por UEN — identificar cuáles comprimen el margen",
+            "Analizar incremento de costos de materias primas vs precio de venta",
+            "Establecer precio mínimo de venta por SKU para recuperar margen objetivo >50%"
           ]
         },
         "mermas": {
           "estado": "yellow",
           "alerta": "Merma PAUNO 2.35% — sobre meta del 2%",
+          "contexto": "Merma total PAUNO 2.35% supera la meta del 2% por 0.35pp. Planta Ate en 1.97% (bajo meta 2.3% — OK), Planta Pachacamac en 1.80% (OK). El problema está en la merma consolidada que incluye mermas de terceros. Agosto marcó el valor más alto del año (vs 1.89% en junio).",
           "kpis": [
             { "label": "Merma PAUNO total", "valor": "2.35%", "meta": "2%", "estado": "yellow", "tendencia": "sube" },
             { "label": "Planta Ate", "valor": "1.97%", "meta": "2.3%", "estado": "green" },
             { "label": "Planta Pachacamac", "valor": "1.80%", "estado": "green" }
+          ],
+          "acciones": [
+            "Identificar proceso específico que eleva la merma consolidada sobre la meta",
+            "Revisar merma de terceros (Planta Terceros) que no aparece en las plantas propias",
+            "Establecer target semanal por planta para reconducir a meta del 2%"
           ]
         },
         "compras": {
           "estado": "red",
           "alerta": "Ratio 199.72% — consumo duplica compras, jalando inventario",
+          "contexto": "Ratio Consumo/Compra = 199.72% significa que se está consumiendo casi el doble de lo que se compra. Esto solo es sostenible si hay inventario de reserva. El dato más preocupante: Envases y Embalajes tiene 91.96% de ratio pero Dead Stock al 47.46% — hay exceso histórico que ahora se está liquidando. Materia Prima a 98.60% está bien balanceada.",
           "kpis": [
-            { "label": "Ratio Consumo/Compra", "valor": "199.72%", "meta": "~100%", "estado": "red", "tendencia": "sube" },
-            { "label": "Suministros", "valor": "115.55%", "estado": "green" },
-            { "label": "Materia Prima", "valor": "98.60%", "estado": "green" },
-            { "label": "Envases y Embalajes", "valor": "91.96%", "estado": "yellow" }
+            { "label": "Ratio Consumo/Compra Total", "valor": "199.72%", "meta": "~100%", "estado": "red", "tendencia": "sube" },
+            { "label": "Suministros", "valor": "115.55%", "meta": "~100%", "estado": "yellow" },
+            { "label": "Repuestos", "valor": "95.35%", "meta": "~100%", "estado": "green" },
+            { "label": "Materia Prima", "valor": "98.60%", "meta": "~100%", "estado": "green" },
+            { "label": "Envases y Embalajes", "valor": "91.96%", "meta": "~100%", "estado": "yellow" }
+          ],
+          "acciones": [
+            "Verificar stock de seguridad actual — con ratio 199% el inventario se agota en días",
+            "Generar orden de compra de emergencia para categorías con menor stock",
+            "Investigar por qué el ratio total es 199% si las categorías principales están en rango — revisar datos consolidados"
           ]
         },
         "control_interno": {
           "estado": "neutral",
-          "alerta": "Ver imagen Power BI para detalle de controles",
-          "kpis": []
+          "alerta": "Ver imagen Power BI para detalle de controles por gerente",
+          "contexto": "Reporte de control interno disponible en imagen Power BI. Meta de cumplimiento 85% por gerente.",
+          "kpis": [],
+          "acciones": [
+            "Revisar imagen del reporte de control interno para identificar gerentes bajo el 85% de cumplimiento"
+          ]
         },
         "sop_inventario": {
           "estado": "red",
-          "alerta": "Dead Stock 98.27% del inventario total — crítico",
+          "alerta": "Dead Stock 98.27% del inventario — Envases y Embalajes 47.46% muerto",
+          "contexto": "SITUACIÓN CRÍTICA: solo el 1.73% del inventario es Working Stock (activo). El 98.27% está clasificado como Dead Stock. Esto no significa que el inventario esté perdido — significa que no rota en el horizonte de planificación. Las categorías más críticas: Envases y Embalajes (47.46% dead), Materia Prima (31.06% dead). Stock total agosto: S/3.6MM. Cobertura total: 68 días.",
           "kpis": [
-            { "label": "Dead Stock", "valor": "98.27%", "meta": "<10%", "estado": "red" },
+            { "label": "Dead Stock total", "valor": "98.27%", "meta": "<10%", "estado": "red" },
             { "label": "Working Stock", "valor": "1.73%", "estado": "red" },
-            { "label": "Env. y Embalajes dead", "valor": "47.46%", "estado": "red" },
-            { "label": "Materia Prima dead", "valor": "31.06%", "estado": "red" }
+            { "label": "Envases y Embalajes dead", "valor": "47.46%", "estado": "red" },
+            { "label": "Materia Prima dead", "valor": "31.06%", "estado": "red" },
+            { "label": "PT Salsas dead", "valor": "5.98%", "estado": "yellow" },
+            { "label": "PT Yogurts dead", "valor": "5.04%", "estado": "yellow" },
+            { "label": "Stock total agosto", "valor": "S/3.6 MM", "estado": "neutral" },
+            { "label": "Cobertura total", "valor": "68 días", "estado": "neutral" },
+            { "label": "Cobertura MP", "valor": "19.2 días", "estado": "neutral" }
+          ],
+          "categorias_criticas": [
+            { "categoria": "Envases y Embalajes", "dead_pct": "47.46%", "working_pct": "1.58%" },
+            { "categoria": "Materia Prima", "dead_pct": "31.06%", "working_pct": "31.06%" },
+            { "categoria": "PT Salsas", "dead_pct": "5.98%", "working_pct": "5.98%" }
+          ],
+          "acciones": [
+            "Reunión urgente con Supply Chain: cuantificar valor en soles del dead stock por categoría",
+            "Plan de liquidación para Envases y Embalajes — evaluar venta a terceros o destrucción controlada",
+            "Revisar parámetros del S&OP — posible error de clasificación si la metodología no se actualizó"
           ]
         },
         "fill_rate": {
-          "estado": "neutral",
-          "alerta": "Provisión de gastos agosto — ver imagen para detalle",
+          "estado": "yellow",
+          "alerta": "Avance Canal Moderno 92% · HORECA supera presupuesto 110%",
+          "contexto": "Este reporte muestra la Provisión de Gastos por canal y cliente. Canal Moderno con Supermercados Peruanos lidera con S/1.1M de facturación en agosto. HORECA supera el presupuesto (110%). Canal Tradicional muy por debajo.",
           "kpis": [
-            { "label": "Moderno avance vs PPTO", "valor": "92%", "estado": "yellow" },
-            { "label": "HORECA avance vs PPTO", "valor": "110%", "estado": "green" }
+            { "label": "Canal Moderno avance PPTO", "valor": "92%", "estado": "yellow" },
+            { "label": "HORECA avance PPTO", "valor": "110%", "estado": "green" },
+            { "label": "Supermercados Peruanos", "valor": "S/1,109,414", "estado": "neutral" },
+            { "label": "Hipermercados Tottus", "valor": "S/322,368", "estado": "neutral" }
+          ],
+          "acciones": [
+            "Replicar estrategia HORECA (110% avance) en Canal Moderno",
+            "Revisar con Supermercados Peruanos el plan de aceleramiento de ventas para agosto"
           ]
         },
         "productividad": {
           "estado": "green",
           "alerta": "Planilla/Kg S/0.54 — mejorando vs 2025 (S/0.57)",
+          "contexto": "La productividad muestra mejora: el costo de planilla por kilo producido bajó de S/0.57 (2025) a S/0.53 (2026 promedio). En julio fue S/0.54. Producción total 8.4M kg. Venta neta 8.5M kg. La planilla total es S/4.45M. Esta es la única señal positiva fuerte del mes.",
           "kpis": [
-            { "label": "Producción total", "valor": "8,389,967 kg", "estado": "green" },
-            { "label": "Venta neta", "valor": "8,546,851 kg", "estado": "green" },
+            { "label": "Producción total (kg)", "valor": "8,389,967", "estado": "green" },
+            { "label": "Venta neta (kg)", "valor": "8,546,851", "estado": "green" },
             { "label": "Planilla total", "valor": "S/4,454,555", "estado": "neutral" },
-            { "label": "Planilla/Kg producido", "valor": "S/0.54", "meta": "S/0.57 (2025)", "estado": "green", "tendencia": "mejora" }
+            { "label": "Planilla/Kg producido 2026", "valor": "S/0.53", "meta": "S/0.57 (2025)", "estado": "green", "tendencia": "mejora" },
+            { "label": "Planilla/Kg producido jul", "valor": "S/0.54", "estado": "green" }
+          ],
+          "acciones": [
+            "Mantener ritmo actual — productividad es la fortaleza operativa del mes",
+            "Evaluar si el ahorro en planilla/kg puede compensar parcialmente la baja de margen"
           ]
         },
         "margen_variable_pag2": {
           "estado": "red",
           "alerta": "Avance vs presupuesto 88% — Canal Tradicional solo 2%",
+          "contexto": "Al 18/08 se ha ejecutado S/3.11M de S/7.83M presupuestados (88% de avance proporcional al día). Canal Tradicional en solo 2% es la alarma más grave — su presupuesto era S/1.9M y llevan S/152,859. MAQUILA al 93% y TIGO al 98% van bien. B&D sin ventas registradas. El avance vs presupuesto total del 18/08 fue S/3.54M acumulado vs S/2.72M mismo período agosto 2025.",
           "kpis": [
-            { "label": "Avance vs Presupuesto", "valor": "88%", "meta": "100%", "estado": "red" },
-            { "label": "Canal Moderno", "valor": "92%", "estado": "yellow" },
-            { "label": "Canal Tradicional", "valor": "2%", "estado": "red" },
-            { "label": "HORECA", "valor": "110%", "estado": "green" },
+            { "label": "Avance vs Presupuesto Total", "valor": "88%", "meta": "100%", "estado": "red" },
             { "label": "Presupuesto agosto", "valor": "S/7,830,000", "estado": "neutral" },
-            { "label": "Real (F+PF)", "valor": "S/3,110,684", "estado": "red" }
+            { "label": "Real al 18/08 (F+PF)", "valor": "S/3,110,684", "estado": "red" },
+            { "label": "Canal Moderno", "valor": "92%", "estado": "yellow" },
+            { "label": "Canal Tradicional", "valor": "2%", "meta": "100%", "estado": "red" },
+            { "label": "HORECA", "valor": "110%", "estado": "green" },
+            { "label": "MAQUILA", "valor": "93%", "estado": "yellow" },
+            { "label": "TIGO", "valor": "98%", "estado": "yellow" }
+          ],
+          "acciones": [
+            "Reunión urgente con Jefe de Canal Tradicional: entender por qué está en 2%",
+            "Activar plan de recuperación de ventas en Canal Tradicional para los días restantes del mes",
+            "Establecer meta diaria mínima para Canal Tradicional: necesita vender S/1.75M en los días restantes"
           ]
         }
       }
     }
-  }
+  },
+  "chat_qa": [
+    {
+      "pregunta": "¿Qué significa ratio compras 199%?",
+      "respuesta": "El Ratio Consumo/Compra al 199.72% significa que se está consumiendo casi el doble de lo que se compra. Por cada S/1 que se compra en materiales, se consumen S/2 en producción. Esto solo es sostenible si hay inventario previo de reserva. En este caso parece que se está jalando el dead stock (98.27% del inventario) para cubrir la producción. Acción inmediata: verificar días de stock disponible por categoría."
+    },
+    {
+      "pregunta": "¿Por qué el dead stock está al 98%?",
+      "respuesta": "El S&OP clasifica el inventario como 'Dead' cuando no tiene demanda proyectada en el horizonte de planificación. Con 98.27% dead y solo 1.73% working, hay dos posibles causas: (1) el modelo de clasificación S&OP no está actualizado con el plan de ventas real, o (2) genuinamente hay exceso masivo de inventario. Las categorías más críticas son Envases y Embalajes (47.46% dead) y Materia Prima (31.06% dead). Recomendación: cuantificar en soles y decidir liquidar vs reubicar."
+    },
+    {
+      "pregunta": "¿Cómo va Canal Tradicional?",
+      "respuesta": "Canal Tradicional está en estado crítico: solo 2% de avance vs presupuesto al 18 de agosto. De S/1,900,000 presupuestado, solo se han vendido S/152,859. Para cerrar el mes en meta, necesitarían vender S/1.75M en los días restantes — prácticamente imposible sin una intervención comercial inmediata. HORECA en cambio está al 110% — hay aprendizajes de esa gestión que se pueden replicar."
+    },
+    {
+      "pregunta": "¿Qué hago con la mora?",
+      "respuesta": "Morosidad 22.9% vs meta 15% — la tendencia es alcista (18% en julio → 22.9% agosto). Los clientes críticos son Mori Collazos Martín (S/67K vencido +30d), Juan Cancharis (S/41K) y Juan Chávez (S/45K). Acciones inmediatas: (1) congelar crédito a clientes con >30 días hasta que paguen, (2) activar cobranza intensiva esta semana, (3) no esperar al cierre de mes para actuar — cada día aumenta el riesgo de incobrables."
+    },
+    {
+      "pregunta": "¿Cómo va el margen?",
+      "respuesta": "Margen variable PAUNO en 43% en agosto — caída sostenida desde 52.85% en enero 2026. En 8 meses se perdieron casi 10 puntos de margen. Las causas probables: incremento de costos de materias primas (leche, envases) sin ajuste de precios de venta, y mix de productos menos rentables. La productividad SÍ mejoró (planilla/kg S/0.53 vs S/0.57 el año pasado), pero no compensa la caída de margen."
+    },
+    {
+      "pregunta": "¿Qué hay que hacer esta semana?",
+      "respuesta": "Esta semana hay 5 acciones críticas para PAUNO: (1) URGENTE: verificar stock disponible — ratio compras 199% puede generar quiebre de stock; (2) URGENTE: activar cobranza intensiva — mora 22.9%; (3) URGENTE: reunión con Canal Tradicional — solo 2% de avance presupuesto; (4) ESTA SEMANA: cuantificar dead stock en soles para plan de liquidación; (5) ESTA SEMANA: investigar mermas sobre meta del 2%."
+    }
+  ]
 }

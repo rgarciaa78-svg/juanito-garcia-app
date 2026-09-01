@@ -1303,42 +1303,33 @@ const REPORTES_PBI = {
   ],
 };
 
-const JUANITO_SYSTEM_PROMPT = `Eres JUANITO, un agente de análisis financiero, operativo y BI para las empresas PAUNO, AMAUTA y NEOPACK (holding peruano).
+const JUANITO_SYSTEM_PROMPT = `Eres JUANITO, un agente de análisis financiero, operativo y BI para el holding peruano (PAUNO es la empresa principal activa).
 
-Tu función es analizar los datos del dashboard y convertirlos en conclusiones claras, cuantificadas y accionables para el CEO.
+Tu función: convertir datos del dashboard en decisiones claras para el CEO. Formato: QUÉ PASA → POR QUÉ IMPORTA → CUÁNTO IMPACTA → QUÉ HACER.
 
-PRINCIPIO CENTRAL: No describes datos — los conviertes en decisiones:
-QUÉ PASA → POR QUÉ IMPORTA → CUÁNTO IMPACTA → QUÉ HACER
+DATOS ACTUALES PAUNO (31/08/2026):
+• Mora CxC: 22.9% (meta 15%) — vencido S/2,689,144 · tendencia alcista
+• CxP: 54 días (meta <90d) — VERDE · CxP total S/17,035,259
+• Margen variable: 43.00% agosto · caída desde 52.85% en enero
+• Mermas: 2.35% (meta 2%) · Planta Ate 1.97% OK
+• Compras ratio: 199.72% — consumo duplica compras, jalando inventario
+• S&OP Dead Stock: 98.27% · Envases 47.46% dead · MP 31.06% dead
+• Ventas vs PPTO: 88% total · Canal Tradicional SOLO 2% · HORECA 110%
+• Productividad: planilla/kg S/0.53 (mejora vs S/0.57 en 2025)
+• Ventas agosto parcial: S/2.7M · julio S/7.3M
 
 METODOLOGÍA:
-- Para KPIs: reporta valor, periodo, comparación vs meta
-- Para tendencias: analiza evolución, crecimiento, caída, cambios relevantes
-- Para problemas: identifica anomalías, desviaciones, mora, sobrecosto, merma, sobrestock, caída de margen
-- Para causas: busca relaciones entre indicadores — NO afirmes causalidad si solo hay correlación
-- Para análisis gerencial: relaciona CxC + CxP + Margen + Mermas + Compras + Inventario según la pregunta
+- Para KPIs: valor actual, meta, desviación en puntos/soles
+- Para causas: relaciona CxC + CxP + Margen + Compras + Inventario
+- Para recomendaciones: ACCIÓN ESPECÍFICA + RESPONSABLE + PLAZO
+- Nunca inventes cifras fuera del contexto
 
-FORMATO cuando el usuario pide análisis general:
-## RESUMEN EJECUTIVO (1 párrafo)
-## HALLAZGOS (cuantificados)
-## RIESGOS
-## RECOMENDACIONES (PROBLEMA → ACCIÓN → IMPACTO → PRIORIDAD con 🔴🟠🟡🟢)
+FORMATO para análisis extenso:
+## SITUACIÓN (1 párrafo)
+## ALERTAS (bullets cuantificados 🔴🟡🟢)
+## ACCIONES INMEDIATAS (numeradas, con responsable)
 
-Para preguntas directas: responde en 2-4 párrafos sin headers.
-
-REGLAS DE CONFIABILIDAD:
-- Nunca inventes cifras — solo usa los datos del contexto proporcionado
-- Diferencia entre dato observado e interpretación
-- Si faltan datos, dilo claramente
-- Usa S/, %, días, ratios cuando estén disponibles
-- Conserva el periodo analizado
-
-CONTEXTO EMPRESAS:
-- PAUNO: empresa industrial con plantas (Ate, Pachacamac, Terceros), UENs: B&D, MAQUILA, TIGO
-- AMAUTA: empresa del holding
-- NEOPACK: empresa del holding
-- KPI clave holding: EBITDA ≥10% y utilidad neta positiva
-
-Responde siempre en español. Sé directo y accionable. El CEO necesita decidir en menos de 2 minutos.`;
+Para preguntas directas: 2-3 párrafos sin headers. Responde en español. CEO decide en menos de 2 minutos.`;
 
 function initReportes() {
   ['PAUNO','AMAUTA','NEOPACK'].forEach(emp => {
@@ -1399,21 +1390,26 @@ function initJuanitoChat() {
     const sugerencias = [
       '¿Qué debo decidir hoy?',
       '¿Cómo está la mora?',
-      'Riesgos del holding',
-      '¿Cómo está la caja?',
-      'Tendencia histórica',
-      'Hitos próximos',
+      '¿Cómo van las compras?',
+      'Avance vs presupuesto',
+      '¿Cómo está el inventario?',
+      '¿Cómo está el margen?',
     ];
     const chips = sugerencias.map(s =>
       `<button class="chat-chip" onclick="usarChipJuanito('${s}')">${s}</button>`
     ).join('');
-    // Detectar empresa más crítica para el saludo
+    // Saludo con datos reales del dashboard
     const sems = DATA?.semaforos || {};
-    const critica = Object.entries(sems).find(([,v])=>v==='red')?.[0] || Object.entries(sems).find(([,v])=>v==='yellow')?.[0] || null;
-    const alertaInicial = critica ? ` Atención: <b>${critica}</b> tiene señales de alerta hoy.` : '';
+    const agenda = DATA?.agenda_ceo || {};
+    const nDecisiones = (agenda.decidir_hoy||[]).length;
+    const rojas = Object.entries(sems).filter(([,v])=>v==='red').map(([e])=>e);
+    const resumen = DATA?.resumen_ejecutivo || '';
+    let alertaInicial = '';
+    if (rojas.length) alertaInicial = `<br><br>⚠️ <b>${rojas.join(', ')}</b> en estado CRÍTICO — ${nDecisiones} acción${nDecisiones!==1?'es':''} para decidir hoy.`;
+    else if (nDecisiones > 0) alertaInicial = `<br><br>🟡 Hay <b>${nDecisiones}</b> tema${nDecisiones!==1?'s':''} de atención en la agenda CEO.`;
     const msg = document.createElement('div');
     msg.className = 'msg assistant';
-    msg.innerHTML = `Buenos días. Soy <b>JUANITO</b>, tu agente de análisis BI.${alertaInicial}<br><br>¿Qué quieres revisar hoy?<div class="chat-chips">${chips}</div>`;
+    msg.innerHTML = `Hola. Soy <b>JUANITO</b>, tu agente BI.${alertaInicial}<br><br>¿Qué quieres analizar?<div class="chat-chips">${chips}</div>`;
     msgs.appendChild(msg);
   }
 }
@@ -1422,27 +1418,33 @@ function initJuanitoChat() {
 function chipsFollowUp(pregunta) {
   const p = pregunta.toLowerCase();
   if (p.includes('decid') || p.includes('hoy')) {
-    return ['¿Cómo está la mora?', 'Riesgos del holding', 'Detalle PAUNO'];
+    return ['¿Cómo está la mora?', '¿Cómo van las compras?', 'Avance vs presupuesto'];
   }
-  if (p.includes('mora') || p.includes('cobrar')) {
-    return ['¿Cómo está la caja?', 'Detalle PAUNO', 'Tendencia histórica'];
+  if (p.includes('mora') || p.includes('cobrar') || p.includes('cxc')) {
+    return ['¿Cómo está la caja?', 'Avance vs presupuesto', '¿Cómo está el margen?'];
   }
-  if (p.includes('caja') || p.includes('cash') || p.includes('flujo')) {
-    return ['¿Qué debo decidir hoy?', 'Riesgos del holding', 'Tendencia histórica'];
+  if (p.includes('compra') || p.includes('ratio') || p.includes('consumo')) {
+    return ['¿Cómo está el inventario?', '¿Qué debo decidir hoy?', '¿Cómo está el margen?'];
   }
-  if (p.includes('riesgo')) {
-    return ['¿Qué debo decidir hoy?', 'Hitos próximos', '¿Cómo está la caja?'];
+  if (p.includes('inventario') || p.includes('stock') || p.includes('s&op') || p.includes('dead')) {
+    return ['¿Cómo van las compras?', '¿Qué debo decidir hoy?', 'Avance vs presupuesto'];
   }
-  if (p.includes('hito')) {
-    return ['Riesgos del holding', '¿Qué debo decidir hoy?', '¿Cómo está la mora?'];
+  if (p.includes('presupuesto') || p.includes('avance') || p.includes('canal') || p.includes('ppto')) {
+    return ['¿Cómo está la mora?', '¿Cómo está el margen?', '¿Qué debo decidir hoy?'];
   }
-  if (p.includes('tendencia') || p.includes('histor')) {
-    return ['¿Cómo está la mora?', '¿Cómo está la caja?', 'Riesgos del holding'];
+  if (p.includes('margen') || p.includes('venta') || p.includes('ingreso')) {
+    return ['¿Cómo van las compras?', 'Avance vs presupuesto', '¿Cómo está la mora?'];
+  }
+  if (p.includes('caja') || p.includes('cash') || p.includes('flujo') || p.includes('liquidez')) {
+    return ['¿Qué debo decidir hoy?', '¿Cómo está la mora?', '¿Cómo está el margen?'];
+  }
+  if (p.includes('merma') || p.includes('productividad') || p.includes('planilla')) {
+    return ['¿Cómo está el margen?', '¿Cómo van las compras?', '¿Qué debo decidir hoy?'];
   }
   if (p.includes('pauno')) {
-    return ['¿Cómo está la mora?', 'Riesgos del holding', '¿Cómo está la caja?'];
+    return ['¿Cómo está la mora?', '¿Cómo van las compras?', 'Avance vs presupuesto'];
   }
-  return ['¿Qué debo decidir hoy?', '¿Cómo está la mora?', 'Riesgos del holding'];
+  return ['¿Qué debo decidir hoy?', '¿Cómo van las compras?', 'Avance vs presupuesto'];
 }
 
 function usarChipJuanito(texto) {
@@ -1655,17 +1657,28 @@ function analizarConJuanito(pregunta) {
   // 5. MORA / CxC / COBRANZA
   if (p.includes('mora') || p.includes('cobr') || p.includes('cxc') || p.includes('cartera') || p.includes('vencid')) {
     let html = `<strong>💰 CxC & MORA — ${d.fecha||'hoy'}</strong><br><br>`;
-    html += `<strong>Mora consolidada holding: ${d.holding_mora||'—'}</strong><br><br>`;
-    ['PAUNO','AMAUTA','NEOPACK'].forEach(e => {
-      if (emp && emp !== e) return;
+    html += `<strong>Mora consolidada: ${d.holding_mora||'—'}</strong><br><br>`;
+    const objetivo = emp ? [emp] : ['PAUNO'];
+    objetivo.forEach(e => {
       const rd = ((d.empresas||{})[e]?.reportes||{}).cuentas_por_cobrar || {};
       if (!rd.kpis?.length && !rd.alerta) return;
-      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
-      (rd.kpis||[]).slice(0,2).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
-      (rd.riesgos||[]).slice(0,2).forEach(r => html += `&nbsp;&nbsp;⚠ ${r.nombre||''}: ${r.vencido30||r.monto||''}<br>`);
+      html += `${rd.estado==='red'?'🔴':rd.estado==='yellow'?'🟡':'🟢'} <strong>${e}:</strong> ${rd.alerta||''}<br><br>`;
+      if (rd.contexto) html += `${rd.contexto}<br><br>`;
+      const kpisShow = (rd.kpis||[]).filter(k => !k.label.includes('Ventas')).slice(0,5);
+      kpisShow.forEach(k => {
+        const ic = k.estado==='red'?'🔴':k.estado==='yellow'?'🟡':'🟢';
+        html += `${ic} ${k.label}: <strong>${k.valor}</strong>${k.meta?' (meta '+k.meta+')':''}<br>`;
+      });
+      if (rd.clientes_criticos?.length) {
+        html += `<br><strong>Clientes prioritarios para cobranza:</strong><br>`;
+        rd.clientes_criticos.forEach(c => html += `• ${c.nombre}: vencido +30d <strong>${c.vencido30}</strong> · total ${c.total}<br>`);
+      }
+      if (rd.acciones?.length) {
+        html += `<br><strong>💡 Acciones:</strong><br>`;
+        rd.acciones.forEach((a,i) => html += `${i+1}. ${a}<br>`);
+      }
       html += '<br>';
     });
-    html += `<strong>Recomendación:</strong> Priorizar cobranza en los clientes de mayor vencimiento >30 días para recuperar liquidez en el corto plazo.`;
     return html;
   }
 
@@ -1702,26 +1715,111 @@ function analizarConJuanito(pregunta) {
     return html;
   }
 
+  // 6b. COMPRAS / RATIO CONSUMO
+  if (p.includes('compra') || p.includes('ratio') || p.includes('consumo') || p.includes('reposición') || p.includes('materiales')) {
+    const rd = ((d.empresas||{}).PAUNO?.reportes||{}).compras || {};
+    const ratio = rd.kpis?.find(k => k.label.includes('Total'));
+    let html = `<strong>🛒 COMPRAS — RATIO CONSUMO/COMPRA</strong><br><br>`;
+    if (rd.alerta) html += `⚠️ <strong>${rd.alerta}</strong><br><br>`;
+    if (rd.contexto) html += `${rd.contexto}<br><br>`;
+    if (rd.kpis?.length) {
+      html += `<strong>Por categoría:</strong><br>`;
+      rd.kpis.forEach(k => {
+        const ic = k.estado === 'red' ? '🔴' : k.estado === 'yellow' ? '🟡' : '🟢';
+        html += `${ic} ${k.label}: <strong>${k.valor}</strong><br>`;
+      });
+      html += '<br>';
+    }
+    if (rd.acciones?.length) {
+      html += `<strong>💡 Acciones inmediatas:</strong><br>`;
+      rd.acciones.forEach((a,i) => html += `${i+1}. ${a}<br>`);
+    }
+    return html;
+  }
+
+  // 6c. PRODUCTIVIDAD / PLANILLA / KG
+  if (p.includes('productividad') || p.includes('planilla') || p.includes('producción') || p.includes('eficiencia') || p.includes('rendimiento')) {
+    const rd = ((d.empresas||{}).PAUNO?.reportes||{}).productividad || {};
+    let html = `<strong>⚙️ PRODUCTIVIDAD PAUNO — ${d.fecha||'hoy'}</strong><br><br>`;
+    if (rd.alerta) html += `✅ <strong>${rd.alerta}</strong><br><br>`;
+    if (rd.contexto) html += `${rd.contexto}<br><br>`;
+    if (rd.kpis?.length) {
+      rd.kpis.forEach(k => {
+        const ic = k.estado === 'green' ? '🟢' : k.estado === 'yellow' ? '🟡' : '⚪';
+        html += `${ic} ${k.label}: <strong>${k.valor}</strong>${k.meta ? ` (meta/ref: ${k.meta})` : ''}<br>`;
+      });
+      html += '<br>';
+    }
+    if (rd.acciones?.length) {
+      html += `<strong>💡 Recomendaciones:</strong><br>`;
+      rd.acciones.forEach((a,i) => html += `${i+1}. ${a}<br>`);
+    }
+    return html;
+  }
+
+  // 6d. AVANCE PRESUPUESTO / CANAL / FILL RATE
+  if (p.includes('presupuesto') || p.includes('avance') || p.includes('canal') || p.includes('tradicional') || p.includes('moderno') || p.includes('horeca') || p.includes('fill') || p.includes('ppto')) {
+    const rd2 = ((d.empresas||{}).PAUNO?.reportes||{}).margen_variable_pag2 || {};
+    const rd3 = ((d.empresas||{}).PAUNO?.reportes||{}).fill_rate || {};
+    let html = `<strong>🎯 AVANCE VENTAS VS PRESUPUESTO — ${d.fecha||'hoy'}</strong><br><br>`;
+    if (rd2.alerta) html += `${rd2.estado==='red'?'🔴':'🟡'} <strong>${rd2.alerta}</strong><br><br>`;
+    if (rd2.contexto) html += `${rd2.contexto}<br><br>`;
+    if (rd2.kpis?.length) {
+      html += `<strong>Por canal/marca:</strong><br>`;
+      rd2.kpis.forEach(k => {
+        if (k.label.includes('Presupuesto') || k.label.includes('Real')) return;
+        const ic = k.estado === 'red' ? '🔴' : k.estado === 'yellow' ? '🟡' : '🟢';
+        html += `${ic} ${k.label}: <strong>${k.valor}</strong>${k.meta ? ` · meta ${k.meta}` : ''}<br>`;
+      });
+      html += '<br>';
+    }
+    if (rd2.acciones?.length) {
+      html += `<strong>💡 Acciones urgentes:</strong><br>`;
+      rd2.acciones.forEach((a,i) => html += `${i+1}. ${a}<br>`);
+    }
+    return html;
+  }
+
   // 7. MERMAS
   if (p.includes('merma') || p.includes('pérdida') || p.includes('desperdicio')) {
     const rd = ((d.empresas||{}).PAUNO?.reportes||{}).mermas || {};
     let html = `<strong>⚠️ MERMAS PAUNO — ${d.fecha||'hoy'}</strong><br><br>`;
-    if (rd.alerta) html += `${rd.alerta}<br><br>`;
-    (rd.kpis||[]).forEach(k => html += `• ${k.label}: <strong>${k.valor}</strong> (meta ${k.meta||'—'})<br>`);
-    (rd.acciones||[]).slice(0,3).forEach(a => html += `<br>💡 ${a}`);
+    if (rd.alerta) html += `${rd.estado==='red'?'🔴':'🟡'} <strong>${rd.alerta}</strong><br><br>`;
+    if (rd.contexto) html += `${rd.contexto}<br><br>`;
+    (rd.kpis||[]).forEach(k => {
+      const ic = k.estado==='red'?'🔴':k.estado==='yellow'?'🟡':'🟢';
+      html += `${ic} ${k.label}: <strong>${k.valor}</strong>${k.meta?' (meta '+k.meta+')':''}<br>`;
+    });
+    if (rd.acciones?.length) {
+      html += `<br><strong>💡 Acciones:</strong><br>`;
+      rd.acciones.slice(0,3).forEach((a,i) => html += `${i+1}. ${a}<br>`);
+    }
     return html || 'No hay datos de mermas disponibles.';
   }
 
   // 8. INVENTARIO / STOCK
-  if (p.includes('inventario') || p.includes('stock') || p.includes('s&op') || p.includes('dead')) {
-    const objetivo = emp ? [emp] : ['PAUNO','AMAUTA','NEOPACK'];
+  if (p.includes('inventario') || p.includes('stock') || p.includes('s&op') || p.includes('dead') || p.includes('cobertura')) {
+    const objetivo = emp ? [emp] : ['PAUNO'];
     let html = `<strong>📦 INVENTARIO & S&OP — ${d.fecha||'hoy'}</strong><br><br>`;
     objetivo.forEach(e => {
       const ed = (d.empresas||{})[e]||{};
       const rd = (ed.reportes||{}).sop_inventario || (ed.reportes||{}).inventario || {};
-      if (!rd.kpis?.length) return;
-      html += `<strong>${e}:</strong> ${rd.alerta||''}<br>`;
-      (rd.kpis||[]).slice(0,3).forEach(k => html += `&nbsp;&nbsp;• ${k.label}: <strong>${k.valor}</strong><br>`);
+      if (!rd.alerta && !rd.kpis?.length) return;
+      html += `${rd.estado==='red'?'🔴':rd.estado==='yellow'?'🟡':'⚪'} <strong>${e}:</strong> ${rd.alerta||''}<br><br>`;
+      if (rd.contexto) html += `${rd.contexto}<br><br>`;
+      const mostrar = (rd.kpis||[]).slice(0,6);
+      mostrar.forEach(k => {
+        const ic = k.estado==='red'?'🔴':k.estado==='yellow'?'🟡':'🟢';
+        html += `${ic} ${k.label}: <strong>${k.valor}</strong>${k.meta?' (meta: '+k.meta+')':''}<br>`;
+      });
+      if (rd.categorias_criticas?.length) {
+        html += `<br><strong>Categorías más críticas:</strong><br>`;
+        rd.categorias_criticas.forEach(c => html += `• ${c.categoria}: Dead ${c.dead_pct} · Working ${c.working_pct}<br>`);
+      }
+      if (rd.acciones?.length) {
+        html += `<br><strong>💡 Acciones:</strong><br>`;
+        rd.acciones.slice(0,3).forEach((a,i) => html += `${i+1}. ${a}<br>`);
+      }
       html += '<br>';
     });
     return html;
