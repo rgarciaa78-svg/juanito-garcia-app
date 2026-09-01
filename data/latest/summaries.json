@@ -47,11 +47,6 @@
             }
           ]
         },
-        "cuentas_por_pagar": {
-          "estado": "green",
-          "alerta": null,
-          "kpis": []
-        },
         "margen_variable": {
           "estado": "green",
           "alerta": null,
@@ -97,18 +92,6 @@
               "label": "Satisfactorio",
               "valor": "141",
               "estado": "green"
-            }
-          ]
-        },
-        "margen_variable_pag2": {
-          "estado": "red",
-          "alerta": "Avance 19.2% vs presupuesto",
-          "kpis": [
-            {
-              "label": "Avance vs Ppto",
-              "valor": "19.2%",
-              "meta": "100%",
-              "estado": "red"
             }
           ]
         }

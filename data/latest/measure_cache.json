@@ -4,9 +4,6 @@
     "Morosidad": null,
     "Por Vencer": null
   },
-  "cxp": {
-    "_tables": null
-  },
   "margen": {
     "Venta Total": null
   },
@@ -14,7 +11,7 @@
     "% Merma Total": null
   },
   "compras": {
-    "_tables": null
+    "_compras_cols": null
   },
   "inventario": {
     "Stock Total": null
@@ -22,12 +19,6 @@
   "control_ds": {
     "% Cumplimiento": null,
     "Satisfactorio": null
-  },
-  "productividad_ds": {
-    "_tables": null
-  },
-  "planificacion": {
-    "% Avance": null
   },
   "consumo": {
     "Consumo": null,
