@@ -61,10 +61,13 @@ SCAN_CANDIDATES = {
     "cxp": [
         "DPP", "Días de Pago", "Dias de Pago", "Días CxP", "Dias CxP",
         "Plazo Pago", "Plazo Promedio Pago", "Días Promedio de Pago",
+        "Días Promedio de Pago Actual", "Días Promedio",
         "CxP Total", "Total CxP", "Saldo CxP", "Saldo Proveedores",
         "Deuda Total", "Importe CxP", "Total Proveedores",
-        "Vencido CxP", "Por Vencer CxP",
+        "Vencido CxP", "Por Vencer CxP", "Saldo Pagar",
         "Refinanciado", "Saldo Refinanciado",
+        "Monto CxP", "Total Deuda", "CxP",
+        "Días de Crédito", "Rotacion CxP", "Plazo Crédito",
     ],
     "margen": [
         "Margen Variable", "% Margen Variable", "MV", "Margen Bruto",
@@ -83,18 +86,21 @@ SCAN_CANDIDATES = {
     ],
     "compras": [
         "Ratio", "Ratio C/V", "Ratio Compras", "Ratio Consumo/Compra",
-        "% Ratio", "Ratio C/C", "Consumo/Compra",
-        "Consumo", "Total Consumo", "Importe Consumo",
-        "Compras", "Total Compras", "Importe Compras", "Valor Compras",
-        "MP Consumo", "MP Compras",
+        "% Ratio", "Ratio C/C", "Consumo/Compra", "C/C",
+        "Consumo Total", "Consumo Periodo", "Importe Consumo", "Monto Consumo",
+        "Compra Total", "Monto Compras", "Importe Compras", "Valor Compras",
+        "MP Consumo", "MP Compras", "Materia Prima Consumo",
+        "Total Compras Periodo", "Reposicion", "Ordenes de Compra",
     ],
     "inventario": [
-        "Dead Stock", "Stock Muerto", "Inmovilizado",
-        "% Dead Stock", "% Inmovilizado", "% Dead",
-        "Inventario Total", "Total Inventario", "Saldo Inventario",
-        "Working Stock", "Stock Activo", "Stock Working",
-        "Días de Inventario", "Dias Inventario", "Cobertura",
-        "Exceso 1", "Exceso 2",
+        "Dead Stock", "Stock Muerto", "Inmovilizado", "Stock Inmovilizado",
+        "% Dead Stock", "% Inmovilizado", "% Dead", "Pct Dead",
+        "Inventario Total", "Total Inventario", "Saldo Inventario", "Valor Inventario",
+        "Working Stock", "Stock Activo", "Stock Working", "Stock Normal",
+        "Días de Inventario", "Dias Inventario", "Cobertura", "Cobertura Días",
+        "Exceso 1", "Exceso 2", "Sobre Stock",
+        "Rotacion", "Rotación", "Veces Rotacion",
+        "Stock Total", "Total Stock", "Costo Inventario",
     ],
     "control_ds": [
         "% Cumplimiento", "Cumplimiento", "Conformidad", "% Conformidad",
@@ -106,7 +112,11 @@ SCAN_CANDIDATES = {
         "Planilla/kg", "S//kg", "Costo/kg", "Costo Planilla kg",
         "Productividad", "Planilla Total", "Costo Planilla",
         "Kg Producidos", "Kg Producción", "Produccion Total",
-        "Eficiencia", "HH/kg",
+        "Eficiencia", "HH/kg", "Costo por kg", "S/ por kg",
+        "Planilla Mensual", "Total Planilla", "Gasto Planilla",
+        "Kg Produccion", "Produccion Kg", "Total Kg",
+        "Ratio Planilla", "Costo Mano de Obra",
+        "MOD", "MOD/kg", "Mano de Obra",
     ],
     "planificacion": [
         "Fill Rate", "% Fill Rate", "Tasa Atención", "Tasa Atencion",
@@ -492,7 +502,8 @@ def main():
             summary["semaforos"][empresa] = sem
             summary["semaforo_razon"][empresa] = razon
             if mora_pct: holding_mora_vals.append(mora_pct)
-            print(f"  CxC mora={mora_pct:.1f if mora_pct else '—'}% sem={sem}")
+            mora_str = f"{mora_pct:.1f}" if mora_pct is not None else "—"
+            print(f"  CxC mora={mora_str}% sem={sem}")
             if sem == "red":
                 summary["agenda_ceo"]["decidir_hoy"].append({
                     "empresa": empresa,
