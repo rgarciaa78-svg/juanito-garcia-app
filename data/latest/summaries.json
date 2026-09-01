@@ -1,7 +1,7 @@
 {
   "fecha": "01/09/2026",
   "fecha_actualizacion": "2026-09-01",
-  "generado_por": "JUANITO — Power BI Direct",
+  "generado_por": "JUANITO — Power BI Direct v2",
   "semaforos": {
     "PAUNO": "red"
   },
@@ -14,11 +14,12 @@
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 20.4% en PAUNO — vencido S/3,019,494. Activar cobranza intensiva.",
+        "texto": "Mora 20.4% en PAUNO — vencido S/3.02M. Activar cobranza intensiva.",
         "responsable": "Gerencia Financiera"
       }
     ],
-    "escalar_semana": []
+    "escalar_semana": [],
+    "monitorear": []
   },
   "empresas": {
     "PAUNO": {
@@ -30,13 +31,39 @@
             {
               "label": "Morosidad",
               "valor": "20.4%",
-              "meta": "15%"
+              "meta": "15%",
+              "estado": "red"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3,019,494"
+              "valor": "S/3.02M"
             }
           ]
+        },
+        "cuentas_por_pagar": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": []
+        },
+        "margen_variable": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": []
+        },
+        "mermas": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": []
+        },
+        "compras": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": []
+        },
+        "sop_inventario": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": []
         }
       }
     }
