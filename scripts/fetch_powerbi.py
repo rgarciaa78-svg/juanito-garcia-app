@@ -68,11 +68,15 @@ SCAN_CANDIDATES = {
         "Refinanciado", "Saldo Refinanciado",
         "Monto CxP", "Total Deuda", "CxP",
         "Días de Crédito", "Rotacion CxP", "Plazo Crédito",
-        # Variantes sin tilde/acento
         "Dias Promedio Pago", "Dias de Credito", "Dias Credito",
         "Total Pagar", "Saldo Total", "Periodo Promedio Pago",
         "PPP", "PPagos", "Plazo Promedio",
         "% Vencido", "Vencido Total", "Vencimiento",
+        # Más variantes de nombre
+        "Total", "Saldo", "Importe", "Deuda", "Por Pagar",
+        "Total Facturas", "Facturas Pendientes", "Obligaciones",
+        "Monto Total", "Total Pago", "Saldo Actual",
+        "0-30d", "31-60d", "+60d", "0-30 días", "31-60 días", "+60 días",
     ],
     "margen": [
         "Margen Variable", "% Margen Variable", "MV", "Margen Bruto",
@@ -132,10 +136,13 @@ SCAN_CANDIDATES = {
     ],
     "planificacion": [
         "Fill Rate", "% Fill Rate", "Tasa Atención", "Tasa Atencion",
-        "% Atención", "% Atencion",
+        "% Atención", "% Atencion", "Nivel de Servicio", "% Nivel Servicio",
+        "Atendido", "% Atendido", "Cumplimiento Pedidos", "% Cumplimiento Pedidos",
+        "Pedidos Atendidos", "Pedidos Total", "OC Atendidas",
         "Dead Stock", "% Dead Stock",
         "Avance", "% Avance", "Avance PPTO", "% Avance Presupuesto",
         "Presupuesto", "PPTO", "Ventas PPTO",
+        "Ventas Real", "Real vs Ppto", "% Real vs Ppto",
     ],
     "consumo": [
         "Consumo", "Total Consumo", "Importe Consumo",
@@ -580,37 +587,104 @@ def main():
             print(f"  Escaneando {ds_key}...")
             scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
 
-        # Para datasets sin medidas: descubrir tablas y columnas, luego query directa
-        for ds_key in ["cxp", "compras", "productividad_ds"]:
-            if ds_key in ids and not scanned.get(ds_key):
-                print(f"  Descubriendo tablas en {ds_key}...")
-                tables = discover_tables_in_dataset(token, ws_id, ids[ds_key])
-                if tables:
-                    print(f"  {ds_key}: tablas = {list(tables.keys())}")
-                    # Para Compras: sumar columnas numéricas de la tabla Compras
-                    if "Compras" in tables and ds_key == "compras":
-                        cols = tables["Compras"]
-                        # Ver todas las columnas con más filas
-                        rows = dax(token, ws_id, ids[ds_key],
-                                   "EVALUATE TOPN(5, 'Compras')", "compras_topn")
-                        if rows:
-                            all_cols = list(rows[0].keys())
-                            print(f"    Columnas Compras: {all_cols}")
-                            scanned[ds_key]["_compras_cols"] = all_cols
-                    # Para Productividad: ver qué hay en Medidas
-                    if "Medidas" in tables and ds_key == "productividad_ds":
-                        rows = dax(token, ws_id, ids[ds_key],
-                                   "EVALUATE VALUES('Medidas'[Column])", "medidas_vals")
-                        if rows:
-                            vals = [r.get("[Column]") or r.get("Column") or "" for r in rows]
-                            print(f"    Medidas[Column] vals: {vals[:20]}")
-                            # Estas son los nombres de medidas en ese dataset
-                            for m_name in vals:
-                                if m_name:
-                                    v, exists = try_measure(token, ws_id, ids[ds_key], m_name)
-                                    if exists:
-                                        scanned[ds_key][m_name] = v
-                                        print(f"      ✓ [{m_name}] = {v}")
+        # ── Compras: SUM directo desde tabla Compras
+        if "compras" in ids:
+            print("  Compras: sumando monto_total_linea...")
+            rows_sum = dax(token, ws_id, ids["compras"],
+                           "EVALUATE ROW(\"Total\", SUM('Compras'[data.monto_total_linea]))",
+                           "compras_sum")
+            if rows_sum:
+                v = rows_sum[0].get("[Total]") or rows_sum[0].get("Total")
+                if v is not None:
+                    scanned.setdefault("compras", {})["Valor Compras"] = v
+                    print(f"    Valor Compras SUM: {v}")
+
+        # ── Consumo: SUM directo desde tablas del dataset consumo
+        if "consumo" in ids:
+            print("  Consumo: descubriendo tablas...")
+            consumo_tables = discover_tables_in_dataset(token, ws_id, ids["consumo"])
+            if consumo_tables:
+                print(f"    Tablas consumo: {list(consumo_tables.keys())}")
+            for tbl_name in consumo_tables:
+                cols_c = consumo_tables[tbl_name]
+                # Buscar columna de monto/importe/costo
+                for col in cols_c:
+                    col_lower = col.lower()
+                    if any(kw in col_lower for kw in ["monto", "importe", "costo", "valor", "consumo", "total"]):
+                        col_bare = col.split("[")[-1].rstrip("]")
+                        rows_c = dax(token, ws_id, ids["consumo"],
+                                     f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_bare}]))",
+                                     f"consumo_sum_{col_bare[:20]}")
+                        if rows_c:
+                            cv = rows_c[0].get("[v]") or rows_c[0].get("v")
+                            if cv is not None and float(cv or 0) != 0:
+                                scanned.setdefault("consumo", {})["Total Consumo"] = cv
+                                print(f"    Consumo SUM '{col}': {cv}")
+                                break
+                if scanned.get("consumo", {}).get("Total Consumo"):
+                    break
+
+        # ── CxP: probar tablas adicionales
+        if "cxp" in ids and not scanned.get("cxp"):
+            print("  CxP: probando tablas adicionales...")
+            extra_cxp = [
+                "Facturas", "Facturas CxP", "CxP", "Saldos", "Deuda", "Proveedores",
+                "Por Pagar", "Cuentas por Pagar", "Cuentas Pagar", "fCxP", "dCxP",
+                "Pagos", "Comprobantes", "Detalle", "Saldo", "Obligaciones",
+                "hCxP", "fFacturas", "Vencimientos", "Aging", "Aging CxP",
+            ]
+            for tbl_name in extra_cxp:
+                rows_t = dax(token, ws_id, ids["cxp"],
+                             f"EVALUATE TOPN(3, '{tbl_name}')", f"cxp_tbl_{tbl_name[:10]}")
+                if rows_t:
+                    cols_t = list(rows_t[0].keys())
+                    print(f"    CxP tabla '{tbl_name}': {cols_t[:5]}")
+                    # Si hay columna de monto/saldo, sumarla
+                    for col in cols_t:
+                        col_lower = col.lower()
+                        if any(kw in col_lower for kw in ["monto", "saldo", "importe", "total", "deuda"]):
+                            col_bare = col.split("[")[-1].rstrip("]")
+                            rows_s = dax(token, ws_id, ids["cxp"],
+                                         f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_bare}]))",
+                                         f"cxp_sum")
+                            if rows_s:
+                                sv = rows_s[0].get("[v]") or rows_s[0].get("v")
+                                if sv is not None and float(sv or 0) != 0:
+                                    scanned.setdefault("cxp", {})["CxP Total"] = sv
+                                    print(f"    CxP Total SUM '{col}': {sv}")
+                                    break
+
+        # ── Productividad: probar más tablas y sumas directas
+        if "productividad_ds" in ids and not scanned.get("productividad_ds"):
+            print("  Productividad: probando tablas adicionales...")
+            extra_prod = [
+                "Produccion", "Producción", "Planilla", "fProduccion", "hProduccion",
+                "fPlanilla", "hPlanilla", "MOD", "Mano de Obra", "Costos",
+                "Hechos", "Datos", "Data", "Resultados", "KPIs", "Resumen",
+                "fMOD", "dProductividad", "Productividad",
+            ]
+            for tbl_name in extra_prod:
+                rows_t = dax(token, ws_id, ids["productividad_ds"],
+                             f"EVALUATE TOPN(3, '{tbl_name}')", f"prod_tbl_{tbl_name[:10]}")
+                if rows_t:
+                    cols_t = list(rows_t[0].keys())
+                    print(f"    Prod tabla '{tbl_name}': {cols_t[:6]}")
+                    for col in cols_t:
+                        col_lower = col.lower()
+                        if any(kw in col_lower for kw in ["planilla", "monto", "costo", "kg", "produccion", "total"]):
+                            col_bare = col.split("[")[-1].rstrip("]")
+                            rows_s = dax(token, ws_id, ids["productividad_ds"],
+                                         f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_bare}]))",
+                                         f"prod_sum")
+                            if rows_s:
+                                sv = rows_s[0].get("[v]") or rows_s[0].get("v")
+                                if sv is not None and float(sv or 0) != 0:
+                                    label = col_bare.lower()
+                                    if "planilla" in label or "costo" in label or "monto" in label:
+                                        scanned.setdefault("productividad_ds", {})["Planilla Total"] = sv
+                                    elif "kg" in label or "produccion" in label:
+                                        scanned.setdefault("productividad_ds", {})["Kg Producidos"] = sv
+                                    print(f"    Prod SUM '{col}': {sv}")
 
         # Guardar caché de medidas confirmadas
         new_cache = {}
