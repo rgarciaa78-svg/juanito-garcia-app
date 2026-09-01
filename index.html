@@ -755,6 +755,8 @@ function trendArrow(tendencia, label) {
 
 function datosValidos(d) {
   if (!d || !d.semaforos || !d.empresas) return false;
+  // Acepta si tiene semáforos con al menos una empresa, aunque reportes estén vacíos
+  if (Object.keys(d.semaforos).length > 0) return true;
   const emp = Object.values(d.empresas || {})[0] || {};
   const reps = Object.values(emp.reportes || {});
   return reps.some(r => r && r.estado);
