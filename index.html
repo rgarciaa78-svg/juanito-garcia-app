@@ -1487,19 +1487,31 @@ function addJuanitoMsg(role, text) {
 function handleJuanitoKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendJuanito(); } }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
 
+const STOPWORDS = new Set(['como','cómo','está','están','qué','que','debo','hacer','cual','cuál','cuánto','cuanto','para','esta','este','esto','tiene','tienen','puedo','hago','pasa','pasan','más','menos','algo','algo','todo','toda','todos','todas','cada','donde','dónde','cuando','cuándo','algo','algunas','algunos','mucho','muchos','poco','pocos','bien','mal','muy','solo','sólo','pero','también','además','entre','sobre','desde','hasta','durante','mientras','aunque','porque','porqué']);
+
 function buscarRespuestaLocal(pregunta) {
   const qa = DATA?.chat_qa;
   if (!qa || !qa.length) return null;
+  // Si la pregunta coincide con un handler de analizarConJuanito, no usar QA local
   const p = pregunta.toLowerCase();
-  // Buscar la pregunta pre-generada más similar por palabras clave
+  const tieneHandlerDirecto = p.includes('compra') || p.includes('ratio') || p.includes('consumo') ||
+    p.includes('inventario') || p.includes('stock') || p.includes('dead') || p.includes('s&op') ||
+    p.includes('productividad') || p.includes('planilla') || p.includes('canal') ||
+    p.includes('presupuesto') || p.includes('avance') || p.includes('ppto') ||
+    p.includes('merma') || p.includes('mora') || p.includes('cxc') || p.includes('cobr') ||
+    p.includes('venta') || p.includes('margen') || p.includes('cxp') || p.includes('pagar') ||
+    p.includes('decid') || p.includes('hoy') || p.includes('semana') || p.includes('escal');
+  if (tieneHandlerDirecto) return null;
+  // Solo usar QA local para preguntas sin handler — umbral alto y solo palabras de contenido
   const scores = qa.map(item => {
     const q = item.pregunta.toLowerCase();
-    const palabras = p.split(/\s+/).filter(w => w.length > 3);
+    const palabras = p.split(/\s+/).filter(w => w.length > 4 && !STOPWORDS.has(w));
+    if (!palabras.length) return { item, score: 0 };
     const matches = palabras.filter(w => q.includes(w)).length;
-    return { item, score: matches / Math.max(palabras.length, 1) };
+    return { item, score: matches / palabras.length };
   });
   scores.sort((a, b) => b.score - a.score);
-  if (scores[0].score >= 0.3) return scores[0].item.respuesta;
+  if (scores[0].score >= 0.5) return scores[0].item.respuesta;
   return null;
 }
 
