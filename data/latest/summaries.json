@@ -47,6 +47,25 @@
             }
           ]
         },
+        "cuentas_por_pagar": {
+          "estado": "yellow",
+          "alerta": "Refinanciado S/6.79M — gestionar",
+          "kpis": [
+            {
+              "label": "CxP Total",
+              "valor": "S/17.56M"
+            },
+            {
+              "label": "Refinanciado",
+              "valor": "S/6.79M",
+              "estado": "yellow"
+            },
+            {
+              "label": "# Proveedores",
+              "valor": "143"
+            }
+          ]
+        },
         "margen_variable": {
           "estado": "green",
           "alerta": null,
