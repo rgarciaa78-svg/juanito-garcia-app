@@ -777,9 +777,11 @@ ROW("Total",
                 existing_cache[ds_key] = {k: None for k in found.keys()}
         save_measure_cache(existing_cache)
 
-        # Combinamos consumo en compras si aplica
-        if "consumo" in scanned and "compras" in scanned:
-            scanned["compras"].update(scanned.get("consumo", {}))
+        # Merge consumo→compras: solo "Consumo" (para ratio), NO "Compras" del consumo (acumulada, incorrecta)
+        if scanned.get("consumo") and scanned.get("compras"):
+            consumo_v = scanned["consumo"].get("Consumo")
+            if consumo_v is not None:
+                scanned["compras"]["Consumo"] = consumo_v
 
         # Combinamos planificacion con inventario (avance vs ppto)
         if scanned.get("planificacion"):
