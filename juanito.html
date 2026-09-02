@@ -1505,19 +1505,26 @@ function renderChartForReporte(tipo, rd) {
   }
 
   if (tipo === 'margen_variable_pag2') {
-    const av    = num('Avance vs Ppto');
-    const venta = parseVal(rd.kpis?.find?.(k => k.label==='Ventas mes')?.valor);
+    const av = num('Avance vs Ppto');
     if (!av) return '';
-    const col     = av >= 90 ? 'var(--green)' : av >= 70 ? 'var(--yellow)' : 'var(--red)';
-    // Derivar ppto implícito si tenemos ventas
-    const pptoHtml = '';
+    const col = av >= 90 ? 'var(--green)' : av >= 70 ? 'var(--yellow)' : 'var(--red)';
     return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
       ${svgGauge(av, 'Avance vs Ppto', col, '100%')}
       <div style="flex:1;min-width:130px">
         <div style="font-size:13px;font-weight:700;color:${col}">${av.toFixed(1)}% del presupuesto</div>
-        <div style="font-size:11px;color:var(--sub);margin-top:6px">Brecha para cerrar el mes: <strong style="color:var(--red)">${(100-av).toFixed(1)}pp restantes</strong></div>
-        <div style="font-size:11px;color:var(--sub);margin-top:6px">Acción: Revisar pipeline comercial. Identificar dónde está la brecha: volumen, precio o canal.</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">Brecha para cerrar: <strong style="color:var(--red)">${(100-av).toFixed(1)}pp restantes</strong></div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">→ Revisar pipeline. ¿La brecha es volumen, precio o canal?</div>
       </div>
+    </div>`;
+  }
+
+  if (tipo === 'margen_variable') {
+    const venta = num('Ventas mes');
+    if (!venta) return '';
+    return `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:12px">
+      <div style="font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Ventas agosto 2026</div>
+      <div style="font-size:28px;font-weight:800;color:var(--accent)">${fmtM(venta)}</div>
+      <div style="font-size:11px;color:var(--sub);margin-top:4px">Fuente: Power BI — dato real del mes</div>
     </div>`;
   }
 
@@ -1588,10 +1595,198 @@ function renderTablaEjecutiva(empresa) {
   </div>`;
 }
 
+// ── Análisis McKinsey de Ventas ───────────────────────────────────────────────
+function renderVentasMcKinsey(empresa) {
+  const rp = (DATA.empresas || {})[empresa]?.reportes || {};
+  const kv = (tipo, lbl) => rp[tipo]?.kpis?.find(k => k.label === lbl)?.valor;
+
+  const ventaV  = kv('margen_variable', 'Ventas mes');
+  const avanceV = kv('margen_variable_pag2', 'Avance vs Ppto');
+  const frV     = kv('fill_rate', 'Fill Rate');
+  const vpV     = kv('fill_rate', 'Venta Perdida');
+  const ovV     = kv('fill_rate', 'Orden de Venta');
+
+  const venta  = parseVal(ventaV);
+  const avance = parseVal(avanceV);   // % e.g. 63
+  const vp     = parseVal(vpV);
+  const ov     = parseVal(ovV);
+
+  // Derivados
+  const ppto   = (venta && avance) ? venta / (avance / 100) : null;
+  const gap    = (ppto && venta)   ? ppto - venta            : null;
+  const recFR  = (ov && vp)        ? ov * 0.98 - (ov - vp)  : null; // ventas adicionales si FR=98%
+
+  const col = (avance||0) >= 90 ? 'var(--green)' : (avance||0) >= 70 ? 'var(--yellow)' : 'var(--red)';
+
+  // Proyección fin de año: asume agosto es mes 8, mensual promedio = venta actual
+  const proySepDic = venta ? venta * 4 : null;
+
+  const mcSection = (n, title, content) => `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${n}</div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)">${title}</div>
+      </div>
+      <div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">${content}</div>
+    </div>`;
+
+  const row2 = (lbl, val, sub, color) => `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--sub)">${lbl}</span>
+      <span style="font-size:13px;font-weight:700;color:${color||'var(--fg)'};">${val}${sub?` <span style="font-size:10px;font-weight:400;color:var(--sub)">${sub}</span>`:''}</span>
+    </div>`;
+
+  let html = `
+  <!-- HEADLINE KPI -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+    <div style="padding:14px;background:var(--accent);border-radius:10px;text-align:center">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.7);text-transform:uppercase">Ventas Agosto 2026</div>
+      <div style="font-size:24px;font-weight:900;color:#fff;margin-top:4px">${ventaV || '—'}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">Dato real — Power BI</div>
+    </div>
+    <div style="padding:14px;background:${col}22;border:1px solid ${col}44;border-radius:10px;text-align:center">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:${col};text-transform:uppercase">Avance vs Ppto</div>
+      <div style="font-size:24px;font-weight:900;color:${col};margin-top:4px">${avanceV || '—'}</div>
+      <div style="font-size:10px;color:var(--sub);margin-top:2px">meta 100%</div>
+    </div>
+    <div style="padding:14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;text-align:center">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--red);text-transform:uppercase">Brecha vs Plan</div>
+      <div style="font-size:24px;font-weight:900;color:var(--red);margin-top:4px">${gap ? fmtM(gap) : '—'}</div>
+      <div style="font-size:10px;color:var(--sub);margin-top:2px">${avance ? (100-avance).toFixed(1)+'pp' : ''} por cerrar</div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN I: DIAGNÓSTICO -->
+  ${mcSection('I','Diagnóstico — ¿Dónde estamos?',`
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      ${avance ? svgGauge(avance, 'Avance agosto', col, '100%') : ''}
+      <div style="flex:1;min-width:140px">
+        ${row2('Ventas reales agosto 2026', ventaV||'—', '', 'var(--fg)')}
+        ${row2('Presupuesto implícito mensual', ppto ? fmtM(ppto) : '—', '(= real ÷ 63%)', 'var(--sub)')}
+        ${row2('Brecha absoluta', gap ? fmtM(gap) : '—', 'faltante vs plan', 'var(--red)')}
+        ${row2('Avance porcentual', avanceV||'—', 'vs meta 100%', col)}
+        <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
+          ⚠️ Presupuesto implícito derivado de ${avanceV} avance. Para análisis exacto se requiere el presupuesto absoluto de agosto.
+        </div>
+      </div>
+    </div>
+  `)}
+
+  <!-- SECCIÓN II: ANÁLISIS VENTAS 2025 vs 2026 -->
+  ${mcSection('II','Ventas 2025 vs 2026 — Comparativo YoY',`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="padding:10px;background:rgba(0,0,0,.04);border-radius:8px">
+        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:6px">2025 (histórico)</div>
+        <div style="font-size:20px;font-weight:700;color:var(--sub)">Sin datos</div>
+        <div style="font-size:10px;color:var(--sub);margin-top:4px">Requiere habilitar histórico en la API de Power BI (tabla de cierre mensual)</div>
+      </div>
+      <div style="padding:10px;background:var(--accent)11;border:1px solid var(--accent)33;border-radius:8px">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px">2026 — Agosto YTD</div>
+        <div style="font-size:20px;font-weight:700;color:var(--accent)">${ventaV||'—'} <span style="font-size:11px;font-weight:400;color:var(--sub)">agosto</span></div>
+        <div style="font-size:10px;color:var(--sub);margin-top:4px">Solo disponible el mes actual. Histórico acumulado requiere activar historico.json</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:8px;background:rgba(234,179,8,.08);border-left:3px solid var(--yellow);border-radius:4px;font-size:11px;color:var(--sub)">
+      <strong>Para activar comparativo 2025 vs 2026:</strong> Ejecutar el workflow <code>discover_measures</code> con período 2025-08 y persistir en historico.json. McKinsey recomienda mínimo 24 meses para tendencia.
+    </div>
+  `)}
+
+  <!-- SECCIÓN III: ANÁLISIS ACUMULADO -->
+  ${mcSection('III','Análisis Acumulado 2026',`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      ${[
+        {lbl:'Ene-Jul 2026', val:'Sin datos', sub:'requiere histórico', col:'var(--sub)'},
+        {lbl:'Agosto 2026', val: ventaV||'—', sub:'dato real', col:'var(--accent)'},
+        {lbl:'Sep-Dic 2026', val: proySepDic ? fmtM(proySepDic) : '—', sub:'proyección lineal', col:'var(--yellow)'},
+      ].map(c => `<div style="padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border);text-align:center">
+        <div style="font-size:9px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:4px">${c.lbl}</div>
+        <div style="font-size:16px;font-weight:800;color:${c.col}">${c.val}</div>
+        <div style="font-size:9px;color:var(--sub);margin-top:2px">${c.sub}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+      📌 Proyección Sep-Dic = extrapolación lineal de agosto (${ventaV} × 4 meses). Requiere ajuste estacional con histórico 2025 para proyección precisa.
+    </div>
+  `)}
+
+  <!-- SECCIÓN IV: PALANCAS DE CRECIMIENTO -->
+  ${mcSection('IV','Palancas de Crecimiento — So What?',`
+    ${[
+      {
+        palanca: 'Recuperar Venta Perdida (Fill Rate)',
+        impacto: vp ? `+${fmtM(vp)} potencial (YTD)` : 'alto',
+        accion: `Fill Rate actual 81.7% vs meta 98%. Mejorar disponibilidad de producto recuperaría venta perdida.`,
+        prioridad: 'ALTA', col: 'var(--red)'
+      },
+      {
+        palanca: 'Cerrar brecha vs presupuesto',
+        impacto: gap ? `+${fmtM(gap)} en agosto` : 'alto',
+        accion: 'Revisar pipeline comercial por canal. Identificar si la brecha es volumen (menos pedidos) o precio (descuentos excesivos).',
+        prioridad: 'ALTA', col: 'var(--red)'
+      },
+      {
+        palanca: 'Aceleración últimos 4 meses 2026',
+        impacto: 'Cierre del año fiscal',
+        accion: 'Con Sep-Dic = 4 meses restantes, definir si el plan anual es alcanzable o requiere revisión de presupuesto.',
+        prioridad: 'MEDIA', col: 'var(--yellow)'
+      },
+    ].map((p, i) => `<div style="display:flex;gap:10px;padding:10px;${i>0?'border-top:1px solid var(--border)':''}">
+      <span style="padding:2px 7px;border-radius:10px;background:${p.col}22;color:${p.col};font-size:9px;font-weight:800;height:fit-content;white-space:nowrap;flex-shrink:0">${p.prioridad}</span>
+      <div>
+        <div style="font-weight:700;font-size:12px">${p.palanca}</div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-top:2px">${p.impacto}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:4px">${p.accion}</div>
+      </div>
+    </div>`).join('')}
+  `)}
+
+  <!-- SECCIÓN V: DATOS REQUERIDOS -->
+  ${mcSection('V','Datos Necesarios para Análisis Completo',`
+    <div style="font-size:11px;color:var(--sub)">
+      ${[
+        'Ventas mensuales 2025 (12 meses) — comparativo YoY',
+        'Ventas YTD 2026 acumulado (enero–agosto)',
+        'Presupuesto absoluto por mes (no solo el %)',
+        'Breakdown por canal de venta / UEN / gerente',
+        'Precio promedio vs volumen (decomposición de brecha)',
+        'Pipeline comercial: pedidos en proceso y probabilidad de cierre',
+      ].map(d => `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--yellow)">○</span> ${d}
+      </div>`).join('')}
+      <div style="margin-top:8px;font-size:10px;padding:6px;background:rgba(234,179,8,.08);border-radius:4px">
+        Estos datos están en Power BI — requieren habilitarlos en el scraper con medidas filtradas por período.
+      </div>
+    </div>
+  `)}`;
+
+  return html;
+}
+
 function showDetail(empresa, tipo, label, archivo, desc) {
   navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab });
   const empData = (DATA.empresas || {})[empresa] || {};
   const rd = (empData.reportes || {})[tipo] || {};
+
+  // Para ventas: mostrar análisis McKinsey completo
+  if (tipo === 'margen_variable' || tipo === 'margen_variable_pag2') {
+    const mcHtml = renderVentasMcKinsey(empresa);
+    const cfg = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===tipo);
+    const safeDesc = (cfg?.desc||'').replace(/'/g,"\\'");
+    document.getElementById('screen-' + currentTab).innerHTML =
+      `<div style="display:flex;align-items:center;gap:10px;padding:12px 0 16px;cursor:pointer" onclick="goBack()">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--accent);stroke-width:2.5;fill:none"><polyline points="15 18 9 12 15 6"/></svg>
+        <span style="font-size:13px;font-weight:700;color:var(--accent)">← ${empresa}</span>
+      </div>
+      <div style="font-size:20px;font-weight:800;margin-bottom:4px">Análisis de Ventas</div>
+      <div style="font-size:11px;color:var(--sub);margin-bottom:16px">Marco analítico — Agosto 2026 · Fuente: Power BI</div>
+      ${mcHtml}
+      <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+        <button onclick="openChatWithMsg('Analiza las ventas de ${empresa} en agosto 2026. Ventas: ${rp=>(DATA.empresas||{})[empresa]?.reportes?.margen_variable?.kpis?.[0]?.valor||''}, Avance vs ppto: ${(DATA.empresas||{})[empresa]?.reportes?.margen_variable_pag2?.kpis?.[0]?.valor||''}. Dame un diagnóstico ejecutivo y recomendaciones.')" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">
+          💬 Analizar con Juanito (IA)
+        </button>
+      </div>`;
+    return;
+  }
 
   let html = '';
 
