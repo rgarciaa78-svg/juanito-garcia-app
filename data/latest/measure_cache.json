@@ -11,10 +11,15 @@
     "CUENTAS X PAGAR": null
   },
   "margen": {
-    "Venta Total": null
+    "Venta Total": null,
+    "Precio x Kilo": null,
+    "Costo x Kilo": null
   },
   "compras": {
-    "Valor Compras": null
+    "Stock PP": null,
+    "Stock Valorizado": null,
+    "Consumo Prom 3M": null,
+    "Consumo Prom 6M": null
   },
   "inventario": {
     "Stock Total": null
@@ -25,12 +30,7 @@
   },
   "consumo": {
     "Consumo": null,
-    "Compras": null,
-    "Ratio": null,
-    "% Ratio": null,
-    "Eficiencia": null,
-    "Cant Compra": null,
-    "Cant Consumo": null
+    "Compras": null
   },
   "fill_rate": {
     "% FILLRATE": null,
@@ -44,7 +44,8 @@
     "Venta Perdida": null
   },
   "mermas": {
-    "% Merma Total": null
+    "% Merma Total": null,
+    "Merma": null
   },
   "planificacion": {
     "% Avance": null

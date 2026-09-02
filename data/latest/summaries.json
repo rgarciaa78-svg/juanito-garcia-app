@@ -8,7 +8,7 @@
   "semaforo_razon": {
     "PAUNO": "Morosidad 21.1% — crítica"
   },
-  "holding_ventas": "S/6.42M",
+  "holding_ventas": "S/6.90M",
   "holding_mora": "21.1%",
   "agenda_ceo": {
     "decidir_hoy": [
@@ -31,7 +31,7 @@
             {
               "label": "Morosidad",
               "valor": "21.1%",
-              "meta": "<5%",
+              "meta": "15%",
               "estado": "red"
             },
             {
@@ -42,7 +42,7 @@
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/3.04M",
+              "valor": "S/3.15M",
               "estado": "green"
             }
           ]
@@ -57,7 +57,8 @@
             },
             {
               "label": "Refinanciado",
-              "valor": "S/6.71M"
+              "valor": "S/6.71M",
+              "estado": "yellow"
             },
             {
               "label": "# Proveedores",
@@ -71,7 +72,15 @@
           "kpis": [
             {
               "label": "Ventas mes",
-              "valor": "S/6.42M"
+              "valor": "S/6.90M"
+            },
+            {
+              "label": "Precio/kg",
+              "valor": "S/5.79"
+            },
+            {
+              "label": "Costo/kg",
+              "valor": "S/3.32"
             }
           ]
         },
@@ -82,7 +91,7 @@
             {
               "label": "Merma Total",
               "valor": "4.87%",
-              "meta": "<3%",
+              "meta": "2%",
               "estado": "red"
             }
           ]
@@ -98,31 +107,42 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/167,819"
+              "valor": "S/151,279"
+            }
+          ]
+        },
+        "control_interno": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": [
+            {
+              "label": "Satisfactorio",
+              "valor": "141",
+              "estado": "green"
             }
           ]
         },
         "fill_rate": {
-          "estado": "yellow",
-          "alerta": "Fill Rate 81.7% — bajo meta 98%",
+          "estado": "red",
+          "alerta": "Fill Rate 74.8% — bajo meta 98%",
           "kpis": [
             {
               "label": "Fill Rate",
-              "valor": "81.7%",
+              "valor": "74.8%",
               "meta": "98%",
-              "estado": "yellow"
+              "estado": "red"
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/124.89M"
+              "valor": "S/125.09M"
             },
             {
               "label": "Facturación",
-              "valor": "S/93.22M"
+              "valor": "S/93.57M"
             },
             {
               "label": "Venta Perdida",
-              "valor": "S/31.66M",
+              "valor": "S/31.51M",
               "estado": "red"
             }
           ]
@@ -141,5 +161,12 @@
         }
       }
     }
+  },
+  "yoy_periodo": "2025-08",
+  "yoy": {
+    "ventas": 6764917.550000001,
+    "fill_rate": 0.8647581189382418,
+    "mermas": 0.04987907894946126,
+    "avance": 0.6295519287006067
   }
 }
