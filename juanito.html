@@ -1772,17 +1772,55 @@ function renderMcKinseyArea(empresa, tipo) {
           </div>
         </div>`,
         II: yoyBlock(m, yoy.mermas ?? null, 'Merma', v => v.toFixed(2)+'%'),
-        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-          <div style="font-size:11px;font-weight:700;margin-bottom:8px">Impacto por brecha vs meta 3%</div>
-          ${m && brecha ? `
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
-            <div><div style="font-size:10px;color:var(--sub)">Meta 3%</div><div style="font-size:18px;font-weight:800;color:var(--green)">3.00%</div></div>
-            <div><div style="font-size:10px;color:var(--sub)">Real agosto</div><div style="font-size:18px;font-weight:800;color:${col}">${m.toFixed(2)}%</div></div>
-            <div><div style="font-size:10px;color:var(--sub)">Exceso</div><div style="font-size:18px;font-weight:800;color:var(--red)">+${brecha}pp</div></div>
-          </div>
-          <div style="font-size:11px;color:var(--sub);margin-top:10px">Auditar plantas Ate y Pachacamac. Foco en temperatura, manipulación y vencimientos.</div>
-          ` : 'Sin datos suficientes para desglose.'}
-        </div>`,
+        III: (() => {
+          const rp_m = rp.mermas || {};
+          const porUEN    = rp_m.por_uen    || [];
+          const porPlanta = rp_m.por_planta || [];
+          const colFn = v => {
+            const n = parseFloat(v);
+            return n > 3 ? 'var(--red)' : n > 2 ? 'var(--yellow)' : 'var(--green)';
+          };
+          let html = `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">`;
+          // Totales
+          if (m && brecha) {
+            html += `<div style="font-size:11px;font-weight:700;margin-bottom:8px">Brecha vs meta 3%</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:12px">
+              <div><div style="font-size:10px;color:var(--sub)">Meta</div><div style="font-size:18px;font-weight:800;color:var(--green)">3.00%</div></div>
+              <div><div style="font-size:10px;color:var(--sub)">Real agosto</div><div style="font-size:18px;font-weight:800;color:${col}">${m.toFixed(2)}%</div></div>
+              <div><div style="font-size:10px;color:var(--sub)">Exceso</div><div style="font-size:18px;font-weight:800;color:var(--red)">+${brecha}pp</div></div>
+            </div>`;
+          }
+          // Por UEN (B&D / TIGO / MAQUILA)
+          if (porUEN.length) {
+            html += `<div style="font-size:11px;font-weight:700;margin-bottom:6px">Por Unidad de Negocio</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">`;
+            porUEN.forEach(u => {
+              const c = colFn(u.merma);
+              html += `<div style="text-align:center;padding:6px;background:rgba(0,0,0,.04);border-radius:6px;border:1px solid ${c}">
+                <div style="font-size:10px;color:var(--sub)">${u.uen}</div>
+                <div style="font-size:15px;font-weight:800;color:${c}">${u.merma}</div>
+                <div style="font-size:9px;color:var(--sub)">meta 2%</div>
+              </div>`;
+            });
+            html += `</div>`;
+          }
+          // Por planta (ATE / PACHACAMAC / TERCEROS)
+          if (porPlanta.length) {
+            html += `<div style="font-size:11px;font-weight:700;margin-bottom:6px">Por Planta</div>
+            <div style="display:grid;grid-template-columns:repeat(${porPlanta.length},1fr);gap:6px">`;
+            porPlanta.forEach(p2 => {
+              const c = colFn(p2.merma);
+              html += `<div style="text-align:center;padding:6px;background:rgba(0,0,0,.04);border-radius:6px;border:1px solid ${c}">
+                <div style="font-size:10px;color:var(--sub)">${p2.planta}</div>
+                <div style="font-size:15px;font-weight:800;color:${c}">${p2.merma}</div>
+              </div>`;
+            });
+            html += `</div>`;
+          }
+          if (!porUEN.length && !porPlanta.length && !m) html += `<div style="font-size:11px;color:var(--sub)">Sin datos de desglose. Ejecutar workflow fetch_powerbi.</div>`;
+          html += `</div>`;
+          return html;
+        })(),
         IV: [
           {palanca:'Auditoría de línea por turno', impacto:'Identificar fuente primaria de merma', accion:'Medir merma por turno/línea esta semana. La dispersión entre turnos revelará si es proceso, equipamiento o personal.', prioridad:'ALTA', col:'var(--red)'},
           {palanca:'Control de temperatura en cámara', impacto:'Reducir merma por deterioro', accion:'Instalar monitoreo continuo de temperatura. El 40% de mermas en alimentos es por ruptura de cadena de frío.', prioridad:'ALTA', col:'var(--red)'},

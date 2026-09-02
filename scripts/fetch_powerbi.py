@@ -127,14 +127,29 @@ SCAN_CANDIDATES = {
         "Resultado Bruto", "Utilidad Bruta", "% Utilidad Bruta",
     ],
     "mermas": [
+        # Columnas exactas del "Detalle de Mermas por Planta" (Control de Producción)
+        "REAL", "STD", "DESVIACION", "ITEM DESVIADO", "% MERMAS",
+        "Stock Prod", "Stock Obs", "Merma",
+        # Medidas estándar
         "% Merma", "Merma %", "Tasa Merma", "Merma Total", "% Merma Total",
         "% Merma Ate", "Merma Ate", "Merma Planta Ate",
         "% Merma Pachacamac", "Merma Pachacamac", "Merma Lurin",
         "% Merma Terceros", "Merma Terceros",
+        # Por UEN
+        "% Merma B&D", "Merma B&D", "% Merma BD",
+        "% Merma Tigo", "Merma Tigo", "% Merma TIGO",
+        "% Merma Maquila", "Merma Maquila", "% Merma MAQUILA",
         "Merma Valorizada", "Kg Merma",
     ],
     "compras": [
-        # Nombres exactos visibles en el reporte Power BI
+        # Columnas exactas "ANALISIS DE MATERIALES (PLANIFICACION Y COMPRA)" / "Reporte Compras"
+        "Lead Time", "Stock PP", "Stock Valorizado",
+        "Costo Unit", "Costo Unitario",
+        "Cons Mes Ant", "Consumo Mes Anterior",
+        "Consumo Prom 3M", "Consumo Promedio 3M",
+        "Consumo Prom 6M", "Consumo Promedio 6M",
+        "Faltantes", "Requerimiento",
+        # Fila total: Consumo | Compra | Ratio por período
         "Ratio", "Cant Compra", "Cant Consumo",
         "% Ratio", "Ratio C/V", "Ratio Compras", "Ratio Consumo/Compra",
         "Eficiencia", "Eficiencia Costo", "% Eficiencia",
@@ -163,12 +178,23 @@ SCAN_CANDIDATES = {
         "No Conformidades", "Incumplimientos",
     ],
     "productividad_ds": [
-        "Planilla/kg", "S//kg", "Costo/kg", "Costo Planilla kg",
-        "Productividad", "Planilla Total", "Costo Planilla",
-        "Kg Producidos", "Kg Producción", "Produccion Total",
+        # Columnas exactas "Productividad por Funcionario" Power BI PAUNO
+        "Planilla (S/.) entre KG Vendido", "Planilla Entre KG Vendido", "Planilla/KG Vendido",
+        "Planilla (S/.) entre KG Producido", "Planilla Entre KG Producido", "Planilla/KG Producido",
+        "Produccion Total (KG)", "Produccion Total KG", "KG Producido", "Produccion Total",
+        "Venta Neta (KG)", "Venta Neta KG", "KG Vendido", "Venta Neta",
+        "Planilla Total (S/.)", "Planilla Total", "Costo Planilla",
+        # Por planta (ATE / PACHACAMAC)
+        "Produccion ATE (KG)", "Produccion ATE", "KG Producido ATE",
+        "Produccion Pachacamac (KG)", "Produccion Pachacamac", "KG Producido Pachacamac",
+        "Venta Neta ATE (KG)", "Venta Neta Pachacamac (KG)",
+        "Planilla Total ATE", "Planilla Total Pachacamac",
+        "Planilla ATE KG Producido", "Planilla Pachacamac KG Producido",
+        # Alternativas
+        "Planilla/kg", "S//kg", "Costo Planilla kg",
         "Eficiencia", "HH/kg", "Costo por kg", "S/ por kg",
+        "Kg Producidos", "Kg Producción", "Kg Produccion",
         "Planilla Mensual", "Total Planilla", "Gasto Planilla",
-        "Kg Produccion", "Produccion Kg", "Total Kg",
         "Ratio Planilla", "Costo Mano de Obra",
         "MOD", "MOD/kg", "Mano de Obra",
     ],
@@ -512,8 +538,19 @@ def build_margen(found):
 def build_mermas(found):
     ate_val  = found.get("% Merma Ate") or found.get("Merma Ate") or found.get("Merma Planta Ate")
     pach_val = found.get("% Merma Pachacamac") or found.get("Merma Pachacamac") or found.get("Merma Lurin")
-    tot_val  = found.get("% Merma") or found.get("Merma %") or found.get("Tasa Merma") or found.get("Merma Total") or found.get("% Merma Total")
+    tot_val  = (found.get("% Merma Total") or found.get("% Merma") or
+                found.get("% MERMAS") or found.get("Merma %") or
+                found.get("Tasa Merma") or found.get("Merma Total"))
     terc_val = found.get("% Merma Terceros") or found.get("Merma Terceros")
+    # UEN (Control de Producción: B&D, TIGO, MAQUILA)
+    bd_val   = found.get("% Merma B&D") or found.get("Merma B&D") or found.get("% Merma BD")
+    tigo_val = found.get("% Merma Tigo") or found.get("Merma Tigo") or found.get("% Merma TIGO")
+    maq_val  = found.get("% Merma Maquila") or found.get("Merma Maquila") or found.get("% Merma MAQUILA")
+    # Detalle: REAL, STD, DESVIACION (tabla "Detalle de Mermas por Planta")
+    real_val  = found.get("REAL")
+    std_val   = found.get("STD")
+    desv_val  = found.get("DESVIACION")
+    item_val  = found.get("ITEM DESVIADO")
 
     def pct(v):
         n = to_float(v)
@@ -522,6 +559,7 @@ def build_mermas(found):
         return n
 
     ate, pach, tot, terc = pct(ate_val), pct(pach_val), pct(tot_val), pct(terc_val)
+    bd, tigo, maq = pct(bd_val), pct(tigo_val), pct(maq_val)
     worst = max(filter(lambda x: x is not None, [ate, pach, tot, terc]), default=None)
     sem = "green"
     if worst:
@@ -529,13 +567,42 @@ def build_mermas(found):
         elif worst > 2: sem = "yellow"
 
     kpis = []
-    for label, val in [("Merma Ate", ate), ("Merma Pachacamac", pach), ("Merma Terceros", terc), ("Merma Total", tot)]:
+    for label, val, meta in [
+        ("Merma Total",       tot,  "2%"),
+        ("Merma Ate",         ate,  "2%"),
+        ("Merma Pachacamac",  pach, "2%"),
+        ("Merma Terceros",    terc, "2%"),
+        ("Merma B&D",         bd,   "2%"),
+        ("Merma TIGO",        tigo, "2%"),
+        ("Merma MAQUILA",     maq,  "2%"),
+    ]:
         if val is not None:
             s = "red" if val > 3 else ("yellow" if val > 2 else "green")
-            kpis.append({"label": label, "valor": f"{val:.2f}%", "meta": "2%", "estado": s})
+            kpis.append({"label": label, "valor": f"{val:.2f}%", "meta": meta, "estado": s})
+
+    if real_val  is not None: kpis.append({"label": "REAL (unidades)", "valor": str(real_val)})
+    if std_val   is not None: kpis.append({"label": "STD (estándar)", "valor": str(std_val)})
+    if desv_val  is not None: kpis.append({"label": "Desviación", "valor": str(desv_val)})
+    if item_val  is not None: kpis.append({"label": "Ítems Desviados", "valor": str(item_val)})
 
     alerta = f"Merma {worst:.2f}% — sobre meta 2%" if sem != "green" and worst else None
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}
+    # Guardar por_uen para el frontend
+    por_uen = []
+    for uen, val in [("B&D", bd), ("TIGO", tigo), ("MAQUILA", maq)]:
+        if val is not None:
+            s = "red" if val > 3 else ("yellow" if val > 2 else "green")
+            por_uen.append({"uen": uen, "merma": f"{val:.2f}%", "estado": s})
+    # Guardar por_planta
+    por_planta = []
+    for planta, val in [("ATE", ate), ("PACHACAMAC", pach), ("TERCEROS", terc)]:
+        if val is not None:
+            s = "red" if val > 3 else ("yellow" if val > 2 else "green")
+            por_planta.append({"planta": planta, "merma": f"{val:.2f}%", "estado": s})
+
+    result = {"estado": sem, "alerta": alerta, "kpis": kpis}
+    if por_uen:    result["por_uen"]    = por_uen
+    if por_planta: result["por_planta"] = por_planta
+    return result
 
 def build_consumo_materiales(found):
     """Reporte PRODUCCIÓN: Consumo de Materiales — CECO Ajustado y MIP (S/.) / TN Producida."""
@@ -662,21 +729,47 @@ def build_control(found):
     return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
 
 def build_productividad(found):
-    pkg_val  = found.get("Planilla/kg") or found.get("S//kg") or found.get("Costo/kg") or found.get("Productividad")
-    plan_val = found.get("Planilla Total") or found.get("Costo Planilla")
-    kg_val   = found.get("Kg Producidos") or found.get("Kg Producción") or found.get("Produccion Total")
+    # Nombres exactos del reporte "Productividad por Funcionario" Power BI
+    plan_kg_vend  = (found.get("Planilla (S/.) entre KG Vendido") or
+                     found.get("Planilla Entre KG Vendido") or found.get("Planilla/KG Vendido") or
+                     found.get("Planilla/kg") or found.get("S//kg"))
+    plan_kg_prod  = (found.get("Planilla (S/.) entre KG Producido") or
+                     found.get("Planilla Entre KG Producido") or found.get("Planilla/KG Producido") or
+                     found.get("Costo/kg") or found.get("Costo Planilla kg"))
+    prod_total    = (found.get("Produccion Total (KG)") or found.get("Produccion Total KG") or
+                     found.get("Produccion Total") or found.get("Kg Producidos") or found.get("Kg Producción"))
+    venta_neta_kg = (found.get("Venta Neta (KG)") or found.get("Venta Neta KG") or
+                     found.get("KG Vendido") or found.get("Venta Neta"))
+    plan_total    = (found.get("Planilla Total (S/.)") or found.get("Planilla Total") or
+                     found.get("Costo Planilla") or found.get("Total Planilla"))
 
     kpis = []
-    if pkg_val is not None:
-        n = to_float(pkg_val)
-        kpis.append({"label": "S/kg producido", "valor": f"S/{n:.2f}" if n else "—"})
-    if plan_val is not None:
-        kpis.append({"label": "Planilla total", "valor": fmt_soles(plan_val)})
-    if kg_val is not None:
-        n = to_float(kg_val)
-        kpis.append({"label": "Kg producidos", "valor": f"{n:,.0f} kg" if n else "—"})
+    def sf2(v, prefix="S/"):
+        n = to_float(v)
+        return f"{prefix}{n:.2f}" if n else None
+    def kg_fmt(v):
+        n = to_float(v)
+        return f"{n:,.0f} kg" if n else None
 
-    return {"estado": "green", "alerta": None, "kpis": kpis}
+    if plan_kg_prod is not None:
+        kpis.append({"label": "Planilla S/. / KG Producido", "valor": sf2(plan_kg_prod) or "—"})
+    if plan_kg_vend is not None:
+        kpis.append({"label": "Planilla S/. / KG Vendido",   "valor": sf2(plan_kg_vend) or "—"})
+    if prod_total is not None:
+        kpis.append({"label": "Producción Total (KG)",        "valor": kg_fmt(prod_total) or "—"})
+    if venta_neta_kg is not None:
+        kpis.append({"label": "Venta Neta (KG)",              "valor": kg_fmt(venta_neta_kg) or "—"})
+    if plan_total is not None:
+        kpis.append({"label": "Planilla Total",               "valor": fmt_soles(plan_total)})
+
+    # Tendencia: menor S//kg = mayor eficiencia
+    n_prod = to_float(plan_kg_prod)
+    sem = "green"
+    if n_prod:
+        if n_prod > 0.60: sem = "red"
+        elif n_prod > 0.50: sem = "yellow"
+    alerta = f"Planilla/KG Producido S/{n_prod:.2f} — revisar eficiencia" if sem != "green" and n_prod else None
+    return {"estado": sem, "alerta": alerta, "kpis": kpis}
 
 def build_fill_rate(found):
     fill_val = (found.get("% FILLRATE") or found.get("% Fill Rate") or found.get("% FillRate") or
