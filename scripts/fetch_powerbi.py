@@ -127,19 +127,17 @@ SCAN_CANDIDATES = {
         "Merma Valorizada", "Kg Merma",
     ],
     "compras": [
-        "Ratio", "Ratio C/V", "Ratio Compras", "Ratio Consumo/Compra",
-        "% Ratio", "Ratio C/C", "Consumo/Compra", "C/C",
+        # Nombres exactos visibles en el reporte Power BI
+        "Ratio", "Cant Compra", "Cant Consumo",
+        "% Ratio", "Ratio C/V", "Ratio Compras", "Ratio Consumo/Compra",
+        "Eficiencia", "Eficiencia Costo", "% Eficiencia",
+        "Ratio C/C", "Consumo/Compra", "C/C",
         "Consumo Total", "Consumo Periodo", "Importe Consumo", "Monto Consumo",
         "Compra Total", "Monto Compras", "Importe Compras", "Valor Compras",
-        "MP Consumo", "MP Compras", "Materia Prima Consumo",
-        "Total Compras Periodo", "Reposicion", "Ordenes de Compra",
-        # Variantes adicionales
-        "Consumo vs Compras", "Eficiencia Compras", "% Eficiencia",
+        "MP Consumo", "MP Compras",
+        "Total Compras Periodo", "Ordenes de Compra",
         "Compra Mes", "Consumo Mes", "Compras Mes",
         "Valor Compra", "Valor Consumo",
-        "Total", "Importe Total",
-        "Compra Neta", "Compra Bruta",
-        "Req Compras", "Requerimiento",
     ],
     "inventario": [
         "Dead Stock", "Stock Muerto", "Inmovilizado", "Stock Inmovilizado",
@@ -512,16 +510,19 @@ def build_mermas(found):
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
 
 def build_compras(found):
-    ratio_val  = (found.get("Ratio") or found.get("Ratio C/V") or found.get("Ratio Compras") or
+    ratio_val  = (found.get("Ratio") or found.get("Eficiencia") or found.get("Eficiencia Costo") or
+                  found.get("Ratio C/V") or found.get("Ratio Compras") or
                   found.get("Ratio Consumo/Compra") or found.get("% Ratio") or found.get("Consumo/Compra"))
-    consumo_val = found.get("Consumo") or found.get("Total Consumo") or found.get("Importe Consumo")
-    # Preferir "Valor Compras" (SUM filtrado al mes) sobre "Compras" del dataset consumo (acumulado)
-    compra_val  = found.get("Valor Compras") or found.get("Compras") or found.get("Total Compras") or found.get("Importe Compras")
+    # Cant Consumo y Cant Compra son los nombres exactos visibles en el reporte Power BI
+    consumo_val = (found.get("Cant Consumo") or found.get("Consumo") or
+                   found.get("Total Consumo") or found.get("Importe Consumo"))
+    compra_val  = (found.get("Cant Compra") or found.get("Valor Compras") or
+                   found.get("Compras") or found.get("Total Compras") or found.get("Importe Compras"))
 
     ratio = to_float(ratio_val)
     if ratio and abs(ratio) < 2: ratio *= 100
     if ratio is None and consumo_val and compra_val:
-        c, p = to_float(consumo_val), to_float(compra_val)
+        c, p = to_float(consumo_val), abs(to_float(compra_val) or 0)  # compra puede ser negativa
         if c and p and p > 0: ratio = (c / p) * 100
 
     sem = "green"

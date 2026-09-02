@@ -14,6 +14,11 @@
     "Venta Total": null
   },
   "compras": {
+    "Ratio": null,
+    "Cant Compra": null,
+    "Cant Consumo": null,
+    "Eficiencia": null,
+    "Eficiencia Costo": null,
     "Valor Compras": null
   },
   "inventario": {

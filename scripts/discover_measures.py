@@ -97,7 +97,7 @@ for ds_key, ds_id in DATASETS.items():
         print("  ⚠ Schema vacío (Live Connection) — probando medidas por nombre...")
         CANDIDATOS_DS = {
             "margen":       ["Venta Total","Margen Variable","% Margen Variable","MV","% MV","MARGEN VARIABLE","Venta Neta","Precio/kg"],
-            "compras":      ["Ratio","Ratio C/V","% Ratio","Consumo/Compra","Valor Compras","Total Compras","Monto Compras"],
+            "compras":      ["Ratio","Cant Compra","Cant Consumo","Eficiencia","Eficiencia Costo","Ratio C/V","% Ratio","Consumo/Compra","Valor Compras","Total Compras","Monto Compras"],
             "inventario":   ["Stock Total","Dead Stock","% Dead Stock","Inventario Total","Working Stock","Rotacion","Dias Inventario"],
             "mermas":       ["% Merma Total","% Merma","Merma Total","Merma %","% Merma Ate","% Merma Pachacamac"],
             "consumo":      ["Consumo","Compras","Total Consumo","Ratio","% Ratio"],
