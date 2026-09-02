@@ -515,7 +515,8 @@ def build_compras(found):
     ratio_val  = (found.get("Ratio") or found.get("Ratio C/V") or found.get("Ratio Compras") or
                   found.get("Ratio Consumo/Compra") or found.get("% Ratio") or found.get("Consumo/Compra"))
     consumo_val = found.get("Consumo") or found.get("Total Consumo") or found.get("Importe Consumo")
-    compra_val  = found.get("Compras") or found.get("Total Compras") or found.get("Importe Compras") or found.get("Valor Compras")
+    # Preferir "Valor Compras" (SUM filtrado al mes) sobre "Compras" del dataset consumo (acumulado)
+    compra_val  = found.get("Valor Compras") or found.get("Compras") or found.get("Total Compras") or found.get("Importe Compras")
 
     ratio = to_float(ratio_val)
     if ratio and abs(ratio) < 2: ratio *= 100
@@ -780,9 +781,9 @@ ROW("Total",
         if "consumo" in scanned and "compras" in scanned:
             scanned["compras"].update(scanned.get("consumo", {}))
 
-        # Combinamos planificacion con inventario
-        if "planificacion" in scanned and "inventario" in scanned:
-            scanned["inventario"].update(scanned.get("planificacion", {}))
+        # Combinamos planificacion con inventario (avance vs ppto)
+        if scanned.get("planificacion"):
+            scanned.setdefault("inventario", {}).update(scanned["planificacion"])
 
         # ── CxC
         if scanned.get("cxc"):

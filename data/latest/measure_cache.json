@@ -31,14 +31,12 @@
     "% FILLRATE": null,
     "ORDEN DE VENTA": null,
     "FACTURACION": null,
-    "VENTA PERDIDA": null,
-    "% Fill Rate": null,
-    "% FillRate": null,
-    "Orden de Venta": null,
-    "Facturacion": null,
-    "Venta Perdida": null
+    "VENTA PERDIDA": null
   },
   "mermas": {
     "% Merma Total": null
+  },
+  "planificacion": {
+    "% Avance": null
   }
 }
