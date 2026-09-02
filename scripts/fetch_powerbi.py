@@ -692,12 +692,29 @@ def main():
         ids = DATASET_IDS.get(empresa, {})
         empresa_data = {"reportes": {}}
 
+        # Cargar medidas descubiertas (fuente de verdad del discover workflow)
+        discovered_path = OUTPUT_DIR / "discovered_measures.json"
+        discovered = {}
+        if discovered_path.exists():
+            try:
+                discovered = json.loads(discovered_path.read_text()).get("datasets", {})
+                print(f"  Usando discovered_measures.json ({len(discovered)} datasets)")
+            except: pass
+
         # Escanear medidas reales de cada dataset
         measure_cache = load_measure_cache()
         scanned = {}
         for ds_key, did in ids.items():
             print(f"  Escaneando {ds_key}...")
             scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
+            # Completar con valores del discover (si el scan no encontró algo)
+            disc_ds = discovered.get(ds_key, {})
+            for m_name, m_vals in disc_ds.items():
+                if m_name not in scanned.get(ds_key, {}):
+                    val = m_vals.get("dated") if m_vals.get("dated") is not None else m_vals.get("plain")
+                    if val is not None:
+                        scanned.setdefault(ds_key, {})[m_name] = val
+                        print(f"    [{m_name}] = {val} (discovered)")
 
         # ── Compras: filtrar via TREATAS sobre tabla Calendario (correcto para Live Connection)
         if "compras" in ids:
