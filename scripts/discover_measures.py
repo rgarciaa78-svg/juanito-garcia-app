@@ -91,19 +91,19 @@ print(f"=== DISCOVERY COMPLETO — {PREV_YEAR}-{PREV_MONTH:02d} (mes anterior) =
 for ds_key, ds_id in DATASETS.items():
     print(f"\n{'='*60}")
     print(f"DATASET: {ds_key} ({ds_id[:8]}...)")
+    date_ctx = DATE_CTX.get(ds_key)
     schema = get_schema(ds_id)
     if not schema:
         print("  ⚠ Schema vacío (Live Connection) — probando medidas por nombre...")
-        # Probar TODAS las medidas candidatas conocidas para este dataset
         CANDIDATOS_DS = {
-            "margen":      ["Venta Total","Margen Variable","% Margen Variable","MV","% MV","MARGEN VARIABLE","VENTA MES","Venta Neta","Precio/kg"],
-            "compras":     ["Ratio","Ratio C/V","% Ratio","Consumo/Compra","Valor Compras","Total Compras","Monto Compras"],
-            "inventario":  ["Stock Total","Dead Stock","% Dead Stock","Inventario Total","Working Stock","Rotacion","Dias Inventario"],
-            "mermas":      ["% Merma Total","% Merma","Merma Total","Merma %","% Merma Ate","% Merma Pachacamac"],
-            "consumo":     ["Consumo","Compras","Total Consumo","Ratio","% Ratio"],
+            "margen":       ["Venta Total","Margen Variable","% Margen Variable","MV","% MV","MARGEN VARIABLE","Venta Neta","Precio/kg"],
+            "compras":      ["Ratio","Ratio C/V","% Ratio","Consumo/Compra","Valor Compras","Total Compras","Monto Compras"],
+            "inventario":   ["Stock Total","Dead Stock","% Dead Stock","Inventario Total","Working Stock","Rotacion","Dias Inventario"],
+            "mermas":       ["% Merma Total","% Merma","Merma Total","Merma %","% Merma Ate","% Merma Pachacamac"],
+            "consumo":      ["Consumo","Compras","Total Consumo","Ratio","% Ratio"],
             "planificacion":["% Avance","Avance","Ventas Real","Fill Rate","% Fill Rate"],
-            "cxc":         ["% Morosidad","Morosidad","Por Vencer","CxC Total","Vencido"],
-            "cxp":         ["Cuentas x Pagar","CUENTAS X PAGAR","Refinanciamiento","Proveedores"],
+            "cxc":          ["% Morosidad","Morosidad","Por Vencer","CxC Total","Vencido"],
+            "cxp":          ["Cuentas x Pagar","CUENTAS X PAGAR","Refinanciamiento","Proveedores"],
         }
         for m in CANDIDATOS_DS.get(ds_key, []):
             v = try_measure_plain(ds_id, m)
@@ -114,8 +114,6 @@ for ds_key, ds_id in DATASETS.items():
                 else:
                     print(f"  [{m}] = {v}")
         continue
-
-    date_ctx = DATE_CTX.get(ds_key)
     for tbl_name, tbl_info in schema.items():
         cols = tbl_info["columns"]
         meds = tbl_info["measures"]

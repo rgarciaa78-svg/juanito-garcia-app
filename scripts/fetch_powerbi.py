@@ -35,12 +35,10 @@ PREV_YEAR  = _today.year  if _today.month > 1 else _today.year - 1
 
 # Tabla/columna de fecha por dataset (descubierta con discover_measures.py #8)
 DATE_CONTEXT = {
-    "margen":        ("Calendario", "Date"),
-    "mermas":        ("Calendario", "Date"),
-    "compras":       ("Calendario", "Fecha"),
-    "fill_rate":     ("Calendario", "Date"),
-    "planificacion": ("Calendario", "Date"),
-    "consumo":       ("Calendario", "Date"),
+    "margen":    ("Calendario", "Date"),
+    "mermas":    ("Calendario", "Date"),
+    "compras":   ("Calendario", "Fecha"),
+    "fill_rate": ("Calendario", "Date"),
 }
 
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
@@ -771,12 +769,12 @@ ROW("Total",
                                     scanned.setdefault("productividad_ds", {})[lbl] = sv
                                     print(f"    Prod SUM '{tbl_name}'[{col_name}] = {sv}")
 
-        # Guardar caché de medidas confirmadas
-        new_cache = {}
+        # Guardar caché de medidas confirmadas — merge con caché anterior (no borrar)
+        existing_cache = load_measure_cache()
         for ds_key, found in scanned.items():
-            if found:
-                new_cache[ds_key] = {k: None for k in found.keys()}  # guardar nombres, no valores
-        save_measure_cache(new_cache)
+            if found:  # solo actualizar si encontramos algo — preservar entradas de runs previos
+                existing_cache[ds_key] = {k: None for k in found.keys()}
+        save_measure_cache(existing_cache)
 
         # Combinamos consumo en compras si aplica
         if "consumo" in scanned and "compras" in scanned:
