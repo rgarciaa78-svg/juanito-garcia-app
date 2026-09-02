@@ -13,8 +13,8 @@
   "margen": {
     "Venta Total": null
   },
-  "mermas": {
-    "% Merma Total": null
+  "compras": {
+    "Valor Compras": null
   },
   "inventario": {
     "Stock Total": null

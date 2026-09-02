@@ -76,22 +76,15 @@
             }
           ]
         },
-        "mermas": {
-          "estado": "red",
-          "alerta": "Merma 4.87% — sobre meta 2%",
-          "kpis": [
-            {
-              "label": "Merma Total",
-              "valor": "4.87%",
-              "meta": "2%",
-              "estado": "red"
-            }
-          ]
-        },
         "compras": {
           "estado": "green",
           "alerta": null,
-          "kpis": []
+          "kpis": [
+            {
+              "label": "Compras",
+              "valor": "S/77.54M"
+            }
+          ]
         },
         "sop_inventario": {
           "estado": "green",
