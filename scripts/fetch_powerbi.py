@@ -612,11 +612,11 @@ def build_fill_rate(found):
     if fill_pct is not None:
         kpis.append({"label": "Fill Rate", "valor": f"{fill_pct:.1f}%", "meta": "98%", "estado": sem})
     if ov:
-        kpis.append({"label": "Orden de Venta", "valor": fmt_money(ov)})
+        kpis.append({"label": "Orden de Venta", "valor": fmt_soles(ov)})
     if fact:
-        kpis.append({"label": "Facturación", "valor": fmt_money(fact)})
+        kpis.append({"label": "Facturación", "valor": fmt_soles(fact)})
     if vp:
-        kpis.append({"label": "Venta Perdida", "valor": fmt_money(vp), "estado": "red" if vp > 0 else "green"})
+        kpis.append({"label": "Venta Perdida", "valor": fmt_soles(vp), "estado": "red" if vp > 0 else "green"})
 
     alerta = f"Fill Rate {fmt_pct(fill_pct)} — bajo meta 98%" if sem != "green" and fill_pct else None
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
@@ -885,7 +885,10 @@ ROW("Total",
             if fr["kpis"]:
                 empresa_data["reportes"]["fill_rate"] = fr
                 print(f"  Fill Rate {fr['kpis'][0]['valor'] if fr['kpis'] else '—'}")
-            av, avance_pct = build_avance(inv_sc)
+
+        # ── Avance vs Presupuesto (planificacion mergeado en inventario)
+        if scanned.get("inventario"):
+            av, avance_pct = build_avance(scanned["inventario"])
             if av["kpis"]:
                 empresa_data["reportes"]["margen_variable_pag2"] = av
                 print(f"  Avance PPTO {fmt_pct(avance_pct)} sem={av['estado']}")
