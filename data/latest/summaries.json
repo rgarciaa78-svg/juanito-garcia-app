@@ -6,15 +6,15 @@
     "PAUNO": "red"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 20.3% — crítica"
+    "PAUNO": "Morosidad 21.7% — crítica"
   },
   "holding_ventas": "S/6.42M",
-  "holding_mora": "20.3%",
+  "holding_mora": "21.7%",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 20.3% — vencido S/3.05M. Activar cobranza.",
+        "texto": "Mora 21.7% — vencido S/3.04M. Activar cobranza.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -26,23 +26,23 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "red",
-          "alerta": "Morosidad 20.3% — crítica",
+          "alerta": "Morosidad 21.7% — crítica",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "20.3%",
+              "valor": "21.7%",
               "meta": "15%",
               "estado": "red"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.05M"
+              "valor": "S/3.04M"
             }
           ],
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/3.05M",
+              "valor": "S/3.04M",
               "estado": "green"
             }
           ]
@@ -146,11 +146,11 @@
         },
         "margen_variable_pag2": {
           "estado": "red",
-          "alerta": "Avance 33.4% vs presupuesto",
+          "alerta": "Avance 29.0% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "33.4%",
+              "valor": "29.0%",
               "meta": "100%",
               "estado": "red"
             }
