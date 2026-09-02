@@ -696,27 +696,54 @@ def main():
             print(f"  Escaneando {ds_key}...")
             scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
 
-        # ── Compras: SUM directo filtrado al mes anterior
+        # ── Compras: intentar varias estrategias para obtener ratio agosto
         if "compras" in ids:
-            print(f"  Compras: sumando monto_total_linea ({PREV_YEAR}-{PREV_MONTH:02d})...")
-            q_compras = f"""EVALUATE
-ROW("Total",
+            ds_c = ids["compras"]
+            print(f"  Compras: buscando ratio agosto {PREV_YEAR}-{PREV_MONTH:02d}...")
+            compras_val = None
+            # Estrategia 1: filtrar por columna fecha de la tabla Compras directamente
+            for fecha_col in ["data.fecha", "fecha", "Fecha", "data.date", "Date", "data.periodo"]:
+                q = f"""EVALUATE ROW("v",
   CALCULATE(
     SUM('Compras'[data.monto_total_linea]),
-    FILTER(ALL('Calendario'), YEAR('Calendario'[Date]) = {PREV_YEAR} && MONTH('Calendario'[Date]) = {PREV_MONTH})
-  )
-)"""
-            rows_sum = dax(token, ws_id, ids["compras"], q_compras, "compras_sum_dated")
-            if not rows_sum:
-                # Fallback sin filtro
-                rows_sum = dax(token, ws_id, ids["compras"],
+    FILTER(ALL('Compras'), YEAR('Compras'[{fecha_col}]) = {PREV_YEAR} && MONTH('Compras'[{fecha_col}]) = {PREV_MONTH})
+  ))"""
+                rows = dax(token, ws_id, ds_c, q, f"compras_fecha_{fecha_col[:10]}")
+                if rows:
+                    v = rows[0].get("[v]") or rows[0].get("v")
+                    if v is not None and abs(float(v or 0)) < 50_000_000:  # descartar acumulados >50M
+                        compras_val = v
+                        print(f"    Compras filtrado por '{fecha_col}': {v}")
+                        break
+            # Estrategia 2: Consumo filtrado por columna fecha de tabla Consumo (para ratio)
+            consumo_agosto = None
+            for fecha_col in ["data.fecha", "fecha", "Fecha", "data.date", "Date"]:
+                q = f"""EVALUATE ROW("v",
+  CALCULATE(
+    SUM('Consumo'[data.monto_total_linea]),
+    FILTER(ALL('Consumo'), YEAR('Consumo'[{fecha_col}]) = {PREV_YEAR} && MONTH('Consumo'[{fecha_col}]) = {PREV_MONTH})
+  ))"""
+                rows = dax(token, ws_id, ds_c, q, f"consumo_fecha_{fecha_col[:10]}")
+                if rows:
+                    v = rows[0].get("[v]") or rows[0].get("v")
+                    if v is not None and abs(float(v or 0)) < 50_000_000:
+                        consumo_agosto = v
+                        print(f"    Consumo filtrado por '{fecha_col}': {v}")
+                        break
+            if compras_val is not None:
+                scanned.setdefault("compras", {})["Valor Compras"] = compras_val
+            if consumo_agosto is not None:
+                scanned.setdefault("compras", {})["Consumo"] = consumo_agosto
+            # Estrategia 3: fallback — SUM total sin filtro (solo si no encontramos nada)
+            if compras_val is None:
+                rows_sum = dax(token, ws_id, ds_c,
                                "EVALUATE ROW(\"Total\", SUM('Compras'[data.monto_total_linea]))",
-                               "compras_sum")
-            if rows_sum:
-                v = rows_sum[0].get("[Total]") or rows_sum[0].get("Total")
-                if v is not None:
-                    scanned.setdefault("compras", {})["Valor Compras"] = v
-                    print(f"    Valor Compras SUM: {v}")
+                               "compras_sum_total")
+                if rows_sum:
+                    v = rows_sum[0].get("[Total]") or rows_sum[0].get("Total")
+                    if v is not None:
+                        scanned.setdefault("compras", {})["Valor Compras"] = v
+                        print(f"    Compras SUM total (sin filtro): {v}")
 
         # ── Consumo: SUM directo desde tablas del dataset consumo
         if "consumo" in ids:
