@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Descubre tabla de fechas en cada dataset y prueba medidas con filtro de mes actual."""
-import os, requests
-from datetime import date
+"""
+Descubre TODAS las medidas reales de cada dataset via schema REST + executeQueries.
+Prueba cada medida con y sin filtro de mes anterior para ver cuáles responden.
+"""
+import os, requests, datetime
 
 TENANT_ID     = os.environ["AZURE_TENANT_ID"]
 CLIENT_ID     = os.environ["AZURE_CLIENT_ID"]
@@ -19,136 +21,104 @@ r = requests.post(TOKEN_URL, data={
     "password": PASSWORD, "scope": "https://analysis.windows.net/powerbi/api/.default",
 })
 token = r.json()["access_token"]
-H  = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+H = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-today = date.today()
-YEAR  = today.year
-MONTH = today.month
+today = datetime.date.today()
+PREV_MONTH = today.month - 1 if today.month > 1 else 12
+PREV_YEAR  = today.year  if today.month > 1 else today.year - 1
 
-def dax_raw(ds_id, query):
+DATASETS = {
+    "margen":     "38076daa-d2cd-4a93-858a-82c0a4cf8cb6",
+    "compras":    "06408938-8202-424e-80c0-b42c178dabde",
+    "inventario": "0e27d784-41a4-48f0-9208-60210119f0a7",
+    "mermas":     "35866214-f4da-45a3-a5a2-aa0c8caffe78",
+    "consumo":    "c972c8cb-e5fc-4b60-8f5e-265a78e1e796",
+    "planificacion": "30074d92-7ec1-4762-82f2-1cb29c15dcfe",
+    "cxc":        "2eec70cd-0820-408f-b938-a2cd547b0c18",
+    "cxp":        "45a8ab8d-e162-4398-a260-3a9a5f90829f",
+}
+
+DATE_CTX = {
+    "margen":    ("Calendario", "Date"),
+    "mermas":    ("Calendario", "Date"),
+    "compras":   ("Calendario", "Fecha"),
+    "inventario":("Calendario", "Date"),
+    "consumo":   ("Calendario", "Date"),
+    "planificacion": ("Calendario", "Date"),
+}
+
+def dax(ds_id, query):
     url = f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/executeQueries"
     resp = requests.post(url, headers=H,
                          json={"queries": [{"query": query}],
                                "serializerSettings": {"includeNulls": True}},
                          timeout=20)
     if not resp.ok:
-        return None, resp.text[:200]
+        return None, resp.text[:120]
     rows = resp.json().get("results",[{}])[0].get("tables",[{}])[0].get("rows",[])
     return rows, None
 
-# Datasets clave a probar
-DATASETS = {
-    "margen":    "38076daa-d2cd-4a93-858a-82c0a4cf8cb6",
-    "fill_rate": "7f4ebe22-5e90-4e35-973b-4af3c58497e5",
-    "compras":   "06408938-8202-424e-80c0-b42c178dabde",
-    "cxc":       "2eec70cd-0820-408f-b938-a2cd547b0c18",
-    "mermas":    "35866214-f4da-45a3-a5a2-aa0c8caffe78",
-}
+def get_schema(ds_id):
+    url = f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/tables"
+    r = requests.get(url, headers={"Authorization": f"Bearer {token}"}, timeout=20)
+    if not r.ok:
+        return {}
+    schema = {}
+    for tbl in r.json().get("value", []):
+        name = tbl.get("name","")
+        schema[name] = {
+            "columns":  [c["name"] for c in tbl.get("columns",[])],
+            "measures": [m["name"] for m in tbl.get("measures",[])],
+        }
+    return schema
 
-# Medidas a probar por dataset
-MEASURES = {
-    "margen":    "Venta Total",
-    "fill_rate": "% FILLRATE",
-    "compras":   None,  # usa SUM de columna
-    "cxc":       "% Morosidad",
-    "mermas":    "% Merma Total",
-}
-
-# Patrones de tablas de fecha comunes en Power BI peruano
-DATE_TABLES = [
-    ("Calendario", "Fecha"),
-    ("Calendario", "Date"),
-    ("Calendar",   "Date"),
-    ("Calendar",   "Fecha"),
-    ("Fechas",     "Fecha"),
-    ("Fechas",     "Date"),
-    ("DimFecha",   "Fecha"),
-    ("DimDate",    "Date"),
-    ("Tiempo",     "Fecha"),
-    ("Dim_Fecha",  "Fecha"),
-    ("Date",       "Date"),
-    ("Fecha",      "Fecha"),
-]
-
-def probe_date_table(ds_id, tbl, col):
-    """Prueba si la tabla/columna de fecha existe y tiene datos del mes actual."""
-    q = f"""EVALUATE
-CALCULATETABLE(
-  ROW("n", COUNTROWS('{tbl}')),
-  FILTER(ALL('{tbl}'), YEAR('{tbl}'[{col}]) = {YEAR} && MONTH('{tbl}'[{col}]) = {MONTH})
-)"""
-    rows, err = dax_raw(ds_id, q)
-    if rows and rows[0]:
-        v = list(rows[0].values())[0]
-        return v
-    return None
-
-def measure_with_date(ds_id, measure_name, tbl, col):
-    """Ejecuta medida con filtro de mes actual."""
-    q = f"""EVALUATE
-ROW("v",
-  CALCULATE(
-    [{measure_name}],
-    FILTER(ALL('{tbl}'), YEAR('{tbl}'[{col}]) = {YEAR} && MONTH('{tbl}'[{col}]) = {MONTH})
-  )
-)"""
-    rows, err = dax_raw(ds_id, q)
+def try_measure_plain(ds_id, m):
+    rows, _ = dax(ds_id, f'EVALUATE ROW("v", [{m}])')
     if rows and rows[0]:
         return list(rows[0].values())[0]
-    return None
+    return "ERR"
 
-def measure_no_filter(ds_id, measure_name):
-    """Medida sin filtro (valor actual)."""
-    rows, err = dax_raw(ds_id, f'EVALUATE ROW("v", [{measure_name}])')
+def try_measure_dated(ds_id, m, tbl, col):
+    q = f"""EVALUATE ROW("v", CALCULATE([{m}],
+  FILTER(ALL('{tbl}'), YEAR('{tbl}'[{col}]) = {PREV_YEAR} && MONTH('{tbl}'[{col}]) = {PREV_MONTH})))"""
+    rows, _ = dax(ds_id, q)
     if rows and rows[0]:
         return list(rows[0].values())[0]
-    return None
+    return "ERR"
 
-print(f"=== DESCUBRIMIENTO TABLA FECHA — {YEAR}-{MONTH:02d} ===\n")
+print(f"=== DISCOVERY COMPLETO — {PREV_YEAR}-{PREV_MONTH:02d} (mes anterior) ===\n")
 
 for ds_key, ds_id in DATASETS.items():
-    measure = MEASURES.get(ds_key)
-    print(f"\n--- {ds_key.upper()} ({ds_id[:8]}) ---")
+    print(f"\n{'='*60}")
+    print(f"DATASET: {ds_key} ({ds_id[:8]}...)")
+    schema = get_schema(ds_id)
+    if not schema:
+        print("  ⚠ Schema vacío (dataset Live Connection o sin permiso)")
+        # Intentar probar medidas comunes de todas formas
+        for m in ["Venta Total","% Margen Variable","Margen Variable","Stock Total","Consumo","Ratio","% Ratio"]:
+            v = try_measure_plain(ds_id, m)
+            if v != "ERR":
+                print(f"  MEDIDA [{m}] = {v}")
+        continue
 
-    # Sin filtro (valor actual — erróneo)
-    if measure:
-        v_total = measure_no_filter(ds_id, measure)
-        print(f"  Sin filtro [{measure}] = {v_total}")
-
-    # Buscar tabla de fecha
-    found_tbl, found_col, found_rows = None, None, None
-    for tbl, col in DATE_TABLES:
-        n = probe_date_table(ds_id, tbl, col)
-        if n is not None:
-            print(f"  ✓ Tabla fecha: '{tbl}'[{col}] — {n} filas en {YEAR}-{MONTH:02d}")
-            found_tbl, found_col, found_rows = tbl, col, n
-            break
-        else:
-            print(f"    ✗ '{tbl}'[{col}]")
-
-    # Aplicar filtro de mes si encontramos la tabla
-    if found_tbl and measure:
-        v_mes = measure_with_date(ds_id, measure, found_tbl, found_col)
-        print(f"  Con filtro mes [{measure}] = {v_mes}")
-
-        # También probar mes anterior
-        prev_month = MONTH - 1 if MONTH > 1 else 12
-        prev_year  = YEAR if MONTH > 1 else YEAR - 1
-        q_prev = f"""EVALUATE
-ROW("v",
-  CALCULATE(
-    [{measure}],
-    FILTER(ALL('{found_tbl}'), YEAR('{found_tbl}'[{found_col}]) = {prev_year} && MONTH('{found_tbl}'[{found_col}]) = {prev_month})
-  )
-)"""
-        rows, _ = dax_raw(ds_id, q_prev)
-        v_prev = list(rows[0].values())[0] if rows and rows[0] else None
-        print(f"  Mes anterior [{measure}] = {v_prev}")
-
-    # Para fill_rate, probar también las otras medidas
-    if ds_key == "fill_rate" and found_tbl:
-        for m in ["ORDEN DE VENTA", "FACTURACION", "VENTA PERDIDA"]:
-            v = measure_with_date(ds_id, m, found_tbl, found_col)
-            print(f"  Con filtro mes [{m}] = {v}")
+    date_ctx = DATE_CTX.get(ds_key)
+    for tbl_name, tbl_info in schema.items():
+        cols = tbl_info["columns"]
+        meds = tbl_info["measures"]
+        print(f"\n  Tabla: '{tbl_name}'")
+        if cols: print(f"    Columnas: {cols[:8]}")
+        if meds:
+            print(f"    Medidas ({len(meds)}): {meds}")
+            print(f"    --- Probando medidas ---")
+            for m in meds:
+                v_plain = try_measure_plain(ds_id, m)
+                if v_plain == "ERR":
+                    print(f"      [{m}] = no accesible")
+                    continue
+                if date_ctx:
+                    v_dated = try_measure_dated(ds_id, m, date_ctx[0], date_ctx[1])
+                    print(f"      [{m}] sin filtro={v_plain}  |  {PREV_YEAR}-{PREV_MONTH:02d}={v_dated}")
+                else:
+                    print(f"      [{m}] = {v_plain}")
 
 print("\n=== FIN ===")

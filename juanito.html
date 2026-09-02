@@ -238,6 +238,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
    KPI GRID
    ============================ */
 .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.quick-kpi-card { background: var(--bg2); border-radius: 10px; padding: 10px 8px; text-align: center; cursor: pointer; border: 1.5px solid var(--border); transition: transform .1s; }
+.quick-kpi-card:active { transform: scale(0.97); }
+.quick-kpi-card.sem-red    { border-color: var(--red-border);    background: var(--red-bg); }
+.quick-kpi-card.sem-yellow { border-color: var(--yellow-border); background: var(--yellow-bg); }
+.quick-kpi-card.sem-green  { border-color: var(--green-border);  background: var(--green-bg); }
+.quick-kpi-val   { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.quick-kpi-card.sem-red    .quick-kpi-val { color: var(--red); }
+.quick-kpi-card.sem-yellow .quick-kpi-val { color: var(--yellow); }
+.quick-kpi-card.sem-green  .quick-kpi-val { color: var(--green); }
+.quick-kpi-label { font-size: 10px; color: var(--text2); margin-top: 3px; }
+.quick-kpi-meta  { font-size: 9px; color: var(--text3); margin-top: 1px; }
 .kpi-card {
   background: var(--card);
   border: 1.5px solid #cbd5e1;
@@ -1011,6 +1022,37 @@ function renderEmpresa(empresa, containerId) {
         <div class="empresa-razon">${razon}</div>
       </div>
     </div>
+
+    ${(() => {
+      // Dashboard rápido: KPIs definidos siempre, con o sin datos
+      const rp = reportesData;
+      const fmt = (v,fb) => v || fb || '—';
+      const quickKpis = [
+        { label:'Ventas mes',   valor: fmt(rp.margen_variable?.kpis?.find(k=>k.label==='Ventas mes')?.valor), meta:'', estado: rp.margen_variable?.estado||'neutral', tipo:'margen_variable' },
+        { label:'Mora CxC',     valor: fmt(rp.cuentas_por_cobrar?.kpis?.find(k=>k.label==='Morosidad')?.valor), meta:'15%', estado: rp.cuentas_por_cobrar?.estado||'neutral', tipo:'cuentas_por_cobrar' },
+        { label:'Mermas',       valor: fmt(rp.mermas?.kpis?.find(k=>k.label==='Merma Total')?.valor), meta:'2%', estado: rp.mermas?.estado||'neutral', tipo:'mermas' },
+        { label:'Fill Rate',    valor: fmt(rp.fill_rate?.kpis?.find(k=>k.label==='Fill Rate')?.valor), meta:'98%', estado: rp.fill_rate?.estado||'neutral', tipo:'fill_rate' },
+        { label:'CxP Total',    valor: fmt(rp.cuentas_por_pagar?.kpis?.find(k=>k.label==='CxP Total')?.valor), meta:'', estado: rp.cuentas_por_pagar?.estado||'neutral', tipo:'cuentas_por_pagar' },
+        { label:'Margen var.',  valor: fmt(rp.margen_variable?.kpis?.find(k=>k.label==='Margen variable')?.valor), meta:'52%', estado: rp.margen_variable?.kpis?.find(k=>k.label==='Margen variable')?.estado||'neutral', tipo:'margen_variable' },
+      ];
+      const sc2 = s => s==='red'?'sem-red':s==='yellow'?'sem-yellow':s==='green'?'sem-green':'sem-neutral';
+      return `<div class="section-header" style="margin-top:0">
+        <div class="section-header-title">Dashboard Rápido</div>
+        <div class="section-header-line"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+        ${quickKpis.map(k => {
+          const rr = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===k.tipo);
+          const arch = rr?.archivo||''; const lbl = rr?.label||k.label; const desc = (rr?.desc||'').replace(/'/g,"\\'");
+          const click = arch ? `onclick="showDetail('${empresa}','${k.tipo}','${lbl}','${arch}','${desc}')"` : '';
+          return `<div class="quick-kpi-card ${sc2(k.estado)}" ${click}>
+            <div class="quick-kpi-val">${k.valor}</div>
+            <div class="quick-kpi-label">${k.label}</div>
+            ${k.meta ? `<div class="quick-kpi-meta">meta ${k.meta}</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>`;
+    })()}
 
     ${allKpis.length ? `
     <div class="section-header">

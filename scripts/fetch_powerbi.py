@@ -105,12 +105,19 @@ SCAN_CANDIDATES = {
         "Deuda Total", "Total Deuda", "Monto CxP",
     ],
     "margen": [
-        "Margen Variable", "% Margen Variable", "MV", "Margen Bruto",
-        "% MV", "MV%", "Margen", "% Margen",
+        # Margen
+        "Margen Variable", "% Margen Variable", "MV", "% MV", "MV%", "Margen Bruto",
+        "Margen", "% Margen", "Costo Variable", "% Costo Variable",
+        # Ventas
         "Ventas Mes Actual", "Ventas Actuales", "Ventas", "Venta Total", "Venta Neta",
         "Ventas Mes Anterior", "Ventas Anterior",
+        # Precio
         "Precio/kg", "Precio kg", "Precio Promedio kg",
-        "Costo Variable", "% Costo Variable",
+        # Nombres con mayúsculas/abrev peruanas
+        "MARGEN VARIABLE", "% MARGEN", "MARGEN", "MV TOTAL",
+        "VENTA NETA", "VENTAS NETAS", "VENTA MES",
+        "Ing. Ventas", "Ingresos", "Ingresos Ventas",
+        "Resultado Bruto", "Utilidad Bruta", "% Utilidad Bruta",
     ],
     "mermas": [
         "% Merma", "Merma %", "Tasa Merma", "Merma Total", "% Merma Total",
@@ -724,6 +731,46 @@ ROW("Total",
                                 break
                 if scanned.get("consumo", {}).get("Total Consumo"):
                     break
+
+        # ── Margen: schema REST si scan no encontró margen %
+        if "margen" in ids and not any(k for k in scanned.get("margen",{}) if "margen" in k.lower() or "mv" in k.lower()):
+            print("  Margen: leyendo schema REST para buscar medida de margen %...")
+            schema_margen = get_dataset_schema(token, ws_id, ids["margen"])
+            if schema_margen:
+                date_ctx_m = DATE_CONTEXT.get("margen")
+                for tbl_name, tbl_info in schema_margen.items():
+                    for m_name in tbl_info["measures"]:
+                        if m_name in scanned.get("margen", {}):
+                            continue
+                        if date_ctx_m:
+                            v = dax_prev_month(token, ws_id, ids["margen"], m_name, date_ctx_m[0], date_ctx_m[1], f"margen_{m_name[:15]}")
+                            if v is not None:
+                                scanned.setdefault("margen", {})[m_name] = v
+                                print(f"      ✓ Margen [{m_name}] = {v}")
+                        else:
+                            v, ok = try_measure(token, ws_id, ids["margen"], m_name)
+                            if ok:
+                                scanned.setdefault("margen", {})[m_name] = v
+                                print(f"      ✓ Margen [{m_name}] = {v}")
+
+        # ── Compras: schema REST si compras kpis aún vacío
+        if "compras" in ids and not scanned.get("compras"):
+            print("  Compras: leyendo schema REST...")
+            schema_comp = get_dataset_schema(token, ws_id, ids["compras"])
+            if schema_comp:
+                date_ctx_c = DATE_CONTEXT.get("compras")
+                for tbl_name, tbl_info in schema_comp.items():
+                    for m_name in tbl_info["measures"]:
+                        if date_ctx_c:
+                            v = dax_prev_month(token, ws_id, ids["compras"], m_name, date_ctx_c[0], date_ctx_c[1], f"comp_{m_name[:15]}")
+                            if v is not None:
+                                scanned.setdefault("compras", {})[m_name] = v
+                                print(f"      ✓ Compras [{m_name}] = {v}")
+                        else:
+                            v, ok = try_measure(token, ws_id, ids["compras"], m_name)
+                            if ok:
+                                scanned.setdefault("compras", {})[m_name] = v
+                                print(f"      ✓ Compras [{m_name}] = {v}")
 
         # ── CxP: schema REST + probe medidas reales por nombre
         if "cxp" in ids and not scanned.get("cxp"):
