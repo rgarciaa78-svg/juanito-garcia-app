@@ -30,13 +30,13 @@
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "21.7%",
-              "meta": "15%",
+              "valor": "21.1%",
+              "meta": "<5%",
               "estado": "red"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.04M"
+              "valor": "S/3.15M"
             }
           ],
           "tramos": [
@@ -53,12 +53,11 @@
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/17.53M"
+              "valor": "S/17.81M"
             },
             {
               "label": "Refinanciado",
-              "valor": "S/6.71M",
-              "estado": "yellow"
+              "valor": "S/6.71M"
             },
             {
               "label": "# Proveedores",
@@ -83,7 +82,7 @@
             {
               "label": "Merma Total",
               "valor": "4.87%",
-              "meta": "2%",
+              "meta": "<3%",
               "estado": "red"
             }
           ]
@@ -104,14 +103,14 @@
           ]
         },
         "fill_rate": {
-          "estado": "red",
+          "estado": "yellow",
           "alerta": "Fill Rate 74.6% — bajo meta 98%",
           "kpis": [
             {
               "label": "Fill Rate",
-              "valor": "74.6%",
+              "valor": "81.7%",
               "meta": "98%",
-              "estado": "red"
+              "estado": "yellow"
             },
             {
               "label": "Orden de Venta",
