@@ -131,18 +131,6 @@
               "estado": "red"
             }
           ]
-        },
-        "margen_variable_pag2": {
-          "estado": "red",
-          "alerta": "Avance 33.4% vs presupuesto",
-          "kpis": [
-            {
-              "label": "Avance vs Ppto",
-              "valor": "33.4%",
-              "meta": "100%",
-              "estado": "red"
-            }
-          ]
         }
       }
     }
