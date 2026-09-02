@@ -1,20 +1,20 @@
 {
-  "fecha": "01/09/2026",
-  "fecha_actualizacion": "2026-09-01",
+  "fecha": "02/09/2026",
+  "fecha_actualizacion": "2026-09-02",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "red"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 20.4% — crítica"
+    "PAUNO": "Morosidad 20.3% — crítica"
   },
-  "holding_ventas": "S/251.52M",
-  "holding_mora": "20.4%",
+  "holding_ventas": "S/6.42M",
+  "holding_mora": "20.3%",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 20.4% — vencido S/3.02M. Activar cobranza.",
+        "texto": "Mora 20.3% — vencido S/3.05M. Activar cobranza.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -26,43 +26,43 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "red",
-          "alerta": "Morosidad 20.4% — crítica",
+          "alerta": "Morosidad 20.3% — crítica",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "20.4%",
+              "valor": "20.3%",
               "meta": "15%",
               "estado": "red"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.02M"
+              "valor": "S/3.05M"
             }
           ],
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/3.02M",
+              "valor": "S/3.05M",
               "estado": "green"
             }
           ]
         },
         "cuentas_por_pagar": {
           "estado": "yellow",
-          "alerta": "Refinanciado S/6.79M — gestionar",
+          "alerta": "Refinanciado S/6.71M — gestionar",
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/17.56M"
+              "valor": "S/17.53M"
             },
             {
               "label": "Refinanciado",
-              "valor": "S/6.79M",
+              "valor": "S/6.71M",
               "estado": "yellow"
             },
             {
               "label": "# Proveedores",
-              "valor": "143"
+              "valor": "144"
             }
           ]
         },
@@ -72,17 +72,17 @@
           "kpis": [
             {
               "label": "Ventas mes",
-              "valor": "S/251.52M"
+              "valor": "S/6.42M"
             }
           ]
         },
         "mermas": {
           "estado": "red",
-          "alerta": "Merma 4.79% — sobre meta 2%",
+          "alerta": "Merma 4.87% — sobre meta 2%",
           "kpis": [
             {
               "label": "Merma Total",
-              "valor": "4.79%",
+              "valor": "4.87%",
               "meta": "2%",
               "estado": "red"
             }
@@ -91,12 +91,7 @@
         "compras": {
           "estado": "green",
           "alerta": null,
-          "kpis": [
-            {
-              "label": "Compras",
-              "valor": "S/77.55M"
-            }
-          ]
+          "kpis": []
         },
         "sop_inventario": {
           "estado": "green",
@@ -119,13 +114,38 @@
             }
           ]
         },
+        "fill_rate": {
+          "estado": "red",
+          "alerta": "Fill Rate 74.6% — bajo meta 98%",
+          "kpis": [
+            {
+              "label": "Fill Rate",
+              "valor": "74.6%",
+              "meta": "98%",
+              "estado": "red"
+            },
+            {
+              "label": "Orden de Venta",
+              "valor": "S/124.89M"
+            },
+            {
+              "label": "Facturación",
+              "valor": "S/93.22M"
+            },
+            {
+              "label": "Venta Perdida",
+              "valor": "S/31.66M",
+              "estado": "red"
+            }
+          ]
+        },
         "margen_variable_pag2": {
           "estado": "red",
-          "alerta": "Avance 19.2% vs presupuesto",
+          "alerta": "Avance 33.4% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "19.2%",
+              "valor": "33.4%",
               "meta": "100%",
               "estado": "red"
             }

@@ -16,9 +16,6 @@
   "mermas": {
     "% Merma Total": null
   },
-  "compras": {
-    "Valor Compras": null
-  },
   "inventario": {
     "Stock Total": null
   },
@@ -37,6 +34,11 @@
     "% FILLRATE": null,
     "ORDEN DE VENTA": null,
     "FACTURACION": null,
-    "VENTA PERDIDA": null
+    "VENTA PERDIDA": null,
+    "% Fill Rate": null,
+    "% FillRate": null,
+    "Orden de Venta": null,
+    "Facturacion": null,
+    "Venta Perdida": null
   }
 }
