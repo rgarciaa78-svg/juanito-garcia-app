@@ -108,17 +108,6 @@
             }
           ]
         },
-        "control_interno": {
-          "estado": "green",
-          "alerta": null,
-          "kpis": [
-            {
-              "label": "Satisfactorio",
-              "valor": "141",
-              "estado": "green"
-            }
-          ]
-        },
         "fill_rate": {
           "estado": "red",
           "alerta": "Fill Rate 74.6% — bajo meta 98%",
@@ -145,14 +134,14 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "red",
-          "alerta": "Avance 29.0% vs presupuesto",
+          "estado": "yellow",
+          "alerta": "Avance 63.0% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "29.0%",
+              "valor": "63.0%",
               "meta": "100%",
-              "estado": "red"
+              "estado": "yellow"
             }
           ]
         }
