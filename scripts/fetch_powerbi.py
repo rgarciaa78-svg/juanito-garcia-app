@@ -1041,7 +1041,7 @@ def main():
                 })
 
             # ── Margen por UEN (B&D, MAQUILA, TIGO) via DAX filtro TIPO DE NEGOCIO N1
-            margen_ds_id = DATASETS.get(empresa, {}).get("margen")
+            margen_ds_id = DATASET_IDS.get(empresa, {}).get("margen")
             margen_m = None
             for m_name in ["% Margen", "Margen Variable", "% MV", "R. MARGEN"]:
                 if scanned.get("margen", {}).get(m_name) is not None:
