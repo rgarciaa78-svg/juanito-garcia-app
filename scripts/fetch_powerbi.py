@@ -696,62 +696,43 @@ def main():
             print(f"  Escaneando {ds_key}...")
             scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
 
-        # ── Compras: descubrir tablas reales y filtrar por fecha
+        # ── Compras: filtrar via TREATAS sobre tabla Calendario (correcto para Live Connection)
         if "compras" in ids:
             ds_c = ids["compras"]
-            print(f"  Compras: descubriendo estructura del dataset...")
+            print(f"  Compras: buscando valor agosto {PREV_YEAR}-{PREV_MONTH:02d} via TREATAS...")
             compras_val = None
-            # Paso 0: descubrir qué tablas existen
-            tbl_candidates = ["Compras", "compras", "OC", "Ordenes de Compra", "Detalle Compras",
-                              "Tabla Compras", "Consumo", "Materiales", "Inventario", "Medidas",
-                              "fCompras", "dCompras", "Reporte Compras", "Reporte de Compras"]
-            found_tables = {}
-            for tbl in tbl_candidates:
-                r = dax(token, ws_id, ds_c, f"EVALUATE TOPN(1, '{tbl}')", f"probe_{tbl[:12]}")
-                if r is not None and isinstance(r, list):
-                    found_tables[tbl] = list(r[0].keys()) if r else []
-                    print(f"    Tabla '{tbl}' existe, cols: {list(r[0].keys())[:5] if r else '(vacía)'}")
-            compras_val = None
-            # Paso 1: filtrar por columna fecha de cualquier tabla encontrada
-            for tbl_name, cols in found_tables.items():
-                fecha_cols = [c for c in cols if any(k in c.lower() for k in ["fecha", "date", "periodo", "mes", "año", "year", "month"])]
-                monto_cols = [c for c in cols if any(k in c.lower() for k in ["monto", "importe", "valor", "total", "cantidad", "compra"])]
-                if not fecha_cols or not monto_cols:
-                    continue
-                col_f = fecha_cols[0].split("[")[-1].rstrip("]")
-                col_m = monto_cols[0].split("[")[-1].rstrip("]")
-                q = f"""EVALUATE ROW("v",
+            # TREATAS inyecta un rango de fechas como filtro via la relación con Calendario
+            # Probamos las variantes de nombre de columna en la tabla Calendario
+            for cal_col in ["Date", "Fecha", "fecha", "date", "CalendarDate", "DateKey"]:
+                for cal_tbl in ["Calendario", "Calendar", "dCalendario", "Fechas", "Dim_Fecha"]:
+                    q = f"""EVALUATE ROW("v",
   CALCULATE(
-    SUM('{tbl_name}'[{col_m}]),
-    FILTER(ALL('{tbl_name}'), YEAR('{tbl_name}'[{col_f}]) = {PREV_YEAR} && MONTH('{tbl_name}'[{col_f}]) = {PREV_MONTH})
+    SUM('Compras'[data.monto_total_linea]),
+    TREATAS(
+      FILTER(
+        GENERATESERIES(DATE({PREV_YEAR},{PREV_MONTH},1), DATE({PREV_YEAR},{PREV_MONTH},31), 1),
+        [Value] <= DATE({PREV_YEAR},{PREV_MONTH},31)
+      ),
+      '{cal_tbl}'[{cal_col}]
+    )
   ))"""
-                rows = dax(token, ws_id, ds_c, q, f"cmp_flt_{tbl_name[:10]}")
-                if rows:
-                    v = rows[0].get("[v]") or rows[0].get("v")
-                    if v is not None and abs(float(v or 0)) < 50_000_000:
-                        compras_val = v
-                        print(f"    Compras agosto '{tbl_name}'[{col_m}] filtrado por [{col_f}]: {v}")
+                    rows = dax(token, ws_id, ds_c, q, f"treatas_{cal_tbl[:6]}_{cal_col[:4]}")
+                    if rows:
+                        v = rows[0].get("[v]") or rows[0].get("v")
+                        if v is not None:
+                            fv = float(v or 0)
+                            print(f"    TREATAS '{cal_tbl}'[{cal_col}] → {v}")
+                            if 0 < abs(fv) < 50_000_000:
+                                compras_val = v
+                                print(f"    ✓ Compras agosto: {v}")
+                                break
+                    if compras_val is not None:
                         break
-            # Estrategia 2: Consumo filtrado por columna fecha de tabla Consumo (para ratio)
-            consumo_agosto = None
-            for fecha_col in ["data.fecha", "fecha", "Fecha", "data.date", "Date"]:
-                q = f"""EVALUATE ROW("v",
-  CALCULATE(
-    SUM('Consumo'[data.monto_total_linea]),
-    FILTER(ALL('Consumo'), YEAR('Consumo'[{fecha_col}]) = {PREV_YEAR} && MONTH('Consumo'[{fecha_col}]) = {PREV_MONTH})
-  ))"""
-                rows = dax(token, ws_id, ds_c, q, f"consumo_fecha_{fecha_col[:10]}")
-                if rows:
-                    v = rows[0].get("[v]") or rows[0].get("v")
-                    if v is not None and abs(float(v or 0)) < 50_000_000:
-                        consumo_agosto = v
-                        print(f"    Consumo filtrado por '{fecha_col}': {v}")
-                        break
+                if compras_val is not None:
+                    break
             if compras_val is not None:
                 scanned.setdefault("compras", {})["Valor Compras"] = compras_val
-            if consumo_agosto is not None:
-                scanned.setdefault("compras", {})["Consumo"] = consumo_agosto
-            # Estrategia 3: fallback — SUM total sin filtro (solo si no encontramos nada)
+            # Estrategia fallback — SUM total sin filtro (solo si no encontramos nada)
             if compras_val is None:
                 rows_sum = dax(token, ws_id, ds_c,
                                "EVALUATE ROW(\"Total\", SUM('Compras'[data.monto_total_linea]))",
