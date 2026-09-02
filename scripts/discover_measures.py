@@ -57,8 +57,11 @@ DATE_CTX = {
 }
 
 CANDIDATOS = {
-    "margen":   ["Venta Total","Ventas","Margen Variable","% Margen Variable","MV","% MV",
-                 "MARGEN VARIABLE","Venta Neta","Precio/kg","Margen Bruto","% Margen"],
+    "margen":   ["Venta Total","Ventas","Margen Variable","% Margen Variable","MV","% MV","MV%",
+                 "R. MARGEN","R. Margen","R MARGEN","R. COSTO UNIT","R. Costo Unit",
+                 "Margen Variable %","Pct MV","% MV PAUNO","MV PAUNO",
+                 "MARGEN VARIABLE","Venta Neta","Precio/kg","Precio x Kilo","Precio Kilo",
+                 "Costo/kg","Costo x Kilo","Costo Kilo","Margen Bruto","% Margen"],
     "compras":  ["Ratio","Cant Compra","Cant Consumo","Eficiencia","Eficiencia Costo",
                  "Ratio C/V","% Ratio","Consumo/Compra","Valor Compras","Total Compras",
                  "Monto Compras","Compras","Importe Compras","Compra Mes","Consumo Mes",
@@ -85,7 +88,7 @@ CANDIDATOS = {
 
 # Medidas clave a consultar para YoY (solo las confirmadas que responden a filtro fecha)
 KPI_YOY = {
-    "margen":        ["Venta Total"],
+    "margen":        ["Venta Total", "R. MARGEN", "Margen Variable", "% Margen Variable", "MV", "% MV"],
     "mermas":        ["% Merma Total"],
     "planificacion": ["% Avance"],
     "fill_rate":     ["% Fill Rate", "ORDEN DE VENTA", "FACTURACION", "VENTA PERDIDA"],

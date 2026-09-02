@@ -105,14 +105,21 @@ SCAN_CANDIDATES = {
         "Deuda Total", "Total Deuda", "Monto CxP",
     ],
     "margen": [
-        # Margen
+        # Columnas exactas visibles en tabla "DETALLE ANALISIS DE COSTOS" (Power BI PAUNO)
+        "% Margen", "Costo Total", "P.Unit", "P.Unit NC", "C.Unit",
+        # Nombres de tabs visibles en Power BI PAUNO
+        "R. MARGEN", "R. Margen", "R MARGEN",
+        "R. COSTO UNIT", "R. Costo Unit", "Costo Unitario", "Costo Unit",
+        # Margen variable
         "Margen Variable", "% Margen Variable", "MV", "% MV", "MV%", "Margen Bruto",
-        "Margen", "% Margen", "Costo Variable", "% Costo Variable",
+        "Margen", "Costo Variable", "% Costo Variable",
+        "% MV PAUNO", "MV PAUNO", "Margen Variable %", "Pct MV",
         # Ventas
         "Ventas Mes Actual", "Ventas Actuales", "Ventas", "Venta Total", "Venta Neta",
         "Ventas Mes Anterior", "Ventas Anterior",
-        # Precio
-        "Precio/kg", "Precio kg", "Precio Promedio kg",
+        # Precio / Costo por kg
+        "Precio/kg", "Precio kg", "Precio Promedio kg", "Precio x Kilo", "Precio Kilo",
+        "Costo/kg", "Costo kg", "Costo x Kilo", "Costo Kilo",
         # Nombres con mayúsculas/abrev peruanas
         "MARGEN VARIABLE", "% MARGEN", "MARGEN", "MV TOTAL",
         "VENTA NETA", "VENTAS NETAS", "VENTA MES",
@@ -463,11 +470,18 @@ def build_cxp(found):
     return {"estado": sem, "alerta": alerta, "kpis": kpis}, dias
 
 def build_margen(found):
-    margen_val = (found.get("Margen Variable") or found.get("% Margen Variable") or
-                  found.get("MV") or found.get("% MV") or found.get("Margen") or found.get("% Margen"))
+    margen_val = (found.get("% Margen") or found.get("R. MARGEN") or found.get("R. Margen") or
+                  found.get("Margen Variable") or found.get("% Margen Variable") or
+                  found.get("MV") or found.get("% MV") or found.get("MV%") or
+                  found.get("Margen Variable %") or found.get("Margen") or
+                  found.get("% MV PAUNO") or found.get("Pct MV"))
+    costo_total_val = found.get("Costo Total")
     ventas_val = (found.get("Ventas Mes Actual") or found.get("Ventas Actuales") or
                   found.get("Ventas") or found.get("Venta Total") or found.get("Venta Neta"))
-    precio_val = found.get("Precio/kg") or found.get("Precio kg") or found.get("Precio Promedio kg")
+    precio_val = (found.get("Precio/kg") or found.get("Precio kg") or found.get("Precio Promedio kg") or
+                  found.get("Precio x Kilo") or found.get("Precio Kilo"))
+    costo_val  = (found.get("Costo/kg") or found.get("Costo kg") or
+                  found.get("R. COSTO UNIT") or found.get("Costo x Kilo") or found.get("Costo Kilo"))
 
     margen_pct = to_float(margen_val)
     if margen_pct and abs(margen_pct) < 1: margen_pct *= 100
@@ -480,6 +494,10 @@ def build_margen(found):
         kpis.append({"label": "Margen variable", "valor": f"{margen_pct:.1f}%", "meta": "52%", "estado": sem})
     if precio_val is not None:
         kpis.append({"label": "Precio/kg", "valor": f"S/{to_float(precio_val):.2f}"})
+    if costo_val is not None:
+        kpis.append({"label": "Costo/kg", "valor": f"S/{to_float(costo_val):.2f}"})
+    if costo_total_val is not None:
+        kpis.append({"label": "Costo Total", "valor": fmt_soles(costo_total_val)})
 
     alerta = f"Margen {fmt_pct(margen_pct)} — bajo meta 52%" if sem != "green" and margen_pct else None
     return {"estado": sem, "alerta": alerta, "kpis": kpis}, ventas_val, margen_pct
@@ -883,6 +901,35 @@ def main():
                 summary["agenda_ceo"]["escalar_semana"].append({
                     "empresa": empresa, "texto": f"Margen {fmt_pct(margen)} bajo meta 52%.", "responsable": "Comercial"
                 })
+
+            # ── Margen por UEN (B&D, MAQUILA, TIGO) via DAX filtro TIPO DE NEGOCIO N1
+            margen_ds_id = DATASETS.get(empresa, {}).get("margen")
+            margen_m = None
+            for m_name in ["% Margen", "Margen Variable", "% MV", "R. MARGEN"]:
+                if scanned.get("margen", {}).get(m_name) is not None:
+                    margen_m = m_name
+                    break
+            if margen_ds_id and margen_m:
+                uens = ["B&D", "MAQUILA", "TIGO"]
+                uen_data = []
+                for uen in uens:
+                    # Intenta filtrar por columna TIPO DE NEGOCIO N1 o N2
+                    for tbl_col in [("Maestro Productos", "TIPO DE NEGOCIO N1"),
+                                    ("Maestro Productos", "TIPO DE NEGOCIO N2"),
+                                    ("Productos", "TIPO DE NEGOCIO N1"),
+                                    ("DimProducto", "TIPO DE NEGOCIO N1")]:
+                        q = (f'EVALUATE ROW("v", CALCULATE([{margen_m}],'
+                             f'FILTER(ALL(\'{tbl_col[0]}\'), \'{tbl_col[0]}\'[{tbl_col[1]}] = "{uen}")))')
+                        rows = dax(token, WS_ID, margen_ds_id, q, label=f"margen-uen-{uen}")
+                        if rows and list(rows[0].values())[0] is not None:
+                            val = list(rows[0].values())[0]
+                            pct = to_float(val)
+                            if pct and abs(pct) < 1: pct *= 100
+                            uen_data.append({"uen": uen, "margen": f"{pct:.1f}%", "estado": "green" if (pct or 0)>=52 else ("yellow" if (pct or 0)>=46 else "red")})
+                            break
+                if uen_data:
+                    empresa_data["reportes"]["margen_variable"]["por_uen"] = uen_data
+                    print(f"  Margen UEN: {uen_data}")
 
         # ── Mermas
         if scanned.get("mermas"):

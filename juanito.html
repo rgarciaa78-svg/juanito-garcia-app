@@ -1894,23 +1894,28 @@ function renderVentasMcKinsey(empresa) {
   const rp = (DATA.empresas || {})[empresa]?.reportes || {};
   const kv = (tipo, lbl) => rp[tipo]?.kpis?.find(k => k.label === lbl)?.valor;
 
-  const ventaV  = kv('margen_variable', 'Ventas mes');
-  const avanceV = kv('margen_variable_pag2', 'Avance vs Ppto');
-  const frV     = kv('fill_rate', 'Fill Rate');
-  const vpV     = kv('fill_rate', 'Venta Perdida');
-  const ovV     = kv('fill_rate', 'Orden de Venta');
+  const ventaV   = kv('margen_variable', 'Ventas mes');
+  const margenV  = kv('margen_variable', 'Margen variable');
+  const precioV  = kv('margen_variable', 'Precio/kg');
+  const costoV   = kv('margen_variable', 'Costo/kg');
+  const avanceV  = kv('margen_variable_pag2', 'Avance vs Ppto');
+  const frV      = kv('fill_rate', 'Fill Rate');
+  const vpV      = kv('fill_rate', 'Venta Perdida');
+  const ovV      = kv('fill_rate', 'Orden de Venta');
 
-  const venta  = parseVal(ventaV);
-  const avance = parseVal(avanceV);   // % e.g. 63
-  const vp     = parseVal(vpV);
-  const ov     = parseVal(ovV);
+  const venta   = parseVal(ventaV);
+  const margen  = parseVal(margenV);   // % e.g. 43.94
+  const avance  = parseVal(avanceV);   // % e.g. 63
+  const vp      = parseVal(vpV);
+  const ov      = parseVal(ovV);
 
   // Derivados
   const ppto   = (venta && avance) ? venta / (avance / 100) : null;
   const gap    = (ppto && venta)   ? ppto - venta            : null;
   const recFR  = (ov && vp)        ? ov * 0.98 - (ov - vp)  : null; // ventas adicionales si FR=98%
 
-  const col = (avance||0) >= 90 ? 'var(--green)' : (avance||0) >= 70 ? 'var(--yellow)' : 'var(--red)';
+  const col       = (avance||0) >= 90 ? 'var(--green)' : (avance||0) >= 70 ? 'var(--yellow)' : 'var(--red)';
+  const colMargen = (margen||0) >= 52 ? 'var(--green)' : (margen||0) >= 46 ? 'var(--yellow)' : 'var(--red)';
 
   // Proyección fin de año: asume agosto es mes 8, mensual promedio = venta actual
   const proySepDic = venta ? venta * 4 : null;
@@ -1931,37 +1936,48 @@ function renderVentasMcKinsey(empresa) {
     </div>`;
 
   let html = `
-  <!-- HEADLINE KPI -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+  <!-- HEADLINE KPI — 4 tarjetas: Ventas / Margen / Avance / Brecha -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
     <div style="padding:14px;background:var(--accent);border-radius:10px;text-align:center">
       <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.7);text-transform:uppercase">Ventas Agosto 2026</div>
-      <div style="font-size:24px;font-weight:900;color:#fff;margin-top:4px">${ventaV || '—'}</div>
+      <div style="font-size:26px;font-weight:900;color:#fff;margin-top:4px">${ventaV || '—'}</div>
       <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">Dato real — Power BI</div>
+    </div>
+    <div style="padding:14px;background:${colMargen}22;border:1px solid ${colMargen}44;border-radius:10px;text-align:center">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:${colMargen};text-transform:uppercase">Margen Variable</div>
+      <div style="font-size:26px;font-weight:900;color:${colMargen};margin-top:4px">${margenV || '—'}</div>
+      <div style="font-size:10px;color:var(--sub);margin-top:2px">meta ≥52%${margenV ? '' : ' · requiere workflow'}</div>
     </div>
     <div style="padding:14px;background:${col}22;border:1px solid ${col}44;border-radius:10px;text-align:center">
       <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:${col};text-transform:uppercase">Avance vs Ppto</div>
-      <div style="font-size:24px;font-weight:900;color:${col};margin-top:4px">${avanceV || '—'}</div>
+      <div style="font-size:26px;font-weight:900;color:${col};margin-top:4px">${avanceV || '—'}</div>
       <div style="font-size:10px;color:var(--sub);margin-top:2px">meta 100%</div>
     </div>
     <div style="padding:14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;text-align:center">
       <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--red);text-transform:uppercase">Brecha vs Plan</div>
-      <div style="font-size:24px;font-weight:900;color:var(--red);margin-top:4px">${gap ? fmtM(gap) : '—'}</div>
+      <div style="font-size:26px;font-weight:900;color:var(--red);margin-top:4px">${gap ? fmtM(gap) : '—'}</div>
       <div style="font-size:10px;color:var(--sub);margin-top:2px">${avance ? (100-avance).toFixed(1)+'pp' : ''} por cerrar</div>
     </div>
   </div>
 
   <!-- SECCIÓN I: DIAGNÓSTICO -->
   ${mcSection('I','Diagnóstico — ¿Dónde estamos?',`
-    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-      ${avance ? svgGauge(avance, 'Avance agosto', col, '100%') : ''}
-      <div style="flex:1;min-width:140px">
+    <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+        ${avance ? svgGauge(avance, 'Avance Ppto', col, '100%') : ''}
+        ${margen ? svgGauge(margen, 'Margen Var.', colMargen, '52%') : ''}
+      </div>
+      <div style="flex:1;min-width:160px">
         ${row2('Ventas reales agosto 2026', ventaV||'—', '', 'var(--fg)')}
-        ${row2('Presupuesto implícito mensual', ppto ? fmtM(ppto) : '—', '(= real ÷ 63%)', 'var(--sub)')}
+        ${margenV ? row2('Margen Variable', margenV, 'meta ≥52%', colMargen) : row2('Margen Variable', '— sin dato', 'ejecutar workflow', 'var(--sub)')}
+        ${precioV ? row2('Precio/kg', precioV, '', 'var(--fg)') : ''}
+        ${costoV  ? row2('Costo/kg',  costoV,  '', 'var(--sub)') : ''}
+        ${row2('Avance vs Presupuesto', avanceV||'—', 'meta 100%', col)}
+        ${row2('Presupuesto implícito mensual', ppto ? fmtM(ppto) : '—', '(= real ÷ avance)', 'var(--sub)')}
         ${row2('Brecha absoluta', gap ? fmtM(gap) : '—', 'faltante vs plan', 'var(--red)')}
-        ${row2('Avance porcentual', avanceV||'—', 'vs meta 100%', col)}
-        <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
-          ⚠️ Presupuesto implícito derivado de ${avanceV} avance. Para análisis exacto se requiere el presupuesto absoluto de agosto.
-        </div>
+        ${!margenV ? `<div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(234,179,8,.06);border-radius:6px">
+          ⚠️ Margen Variable no disponible aún — el scraper encontró solo Venta Total. Ejecutar workflow con candidatos actualizados para descubrir "R. MARGEN" o "% Margen Variable".
+        </div>` : ''}
       </div>
     </div>
   `)}
@@ -2024,28 +2040,56 @@ function renderVentasMcKinsey(empresa) {
     </div>
   `)}
 
+  <!-- SECCIÓN III BIS: DESGLOSE UEN (B&D / MAQUILA / TIGO) -->
+  ${(() => {
+    const rp2 = (DATA.empresas || {})[empresa]?.reportes || {};
+    const uenData = rp2.margen_variable?.por_uen || [];
+    if (!uenData.length) return mcSection('III.b','Margen por Unidad de Negocio (B&D / MAQUILA / TIGO)',`
+      <div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
+        Desglose por UEN (B&D, MAQUILA, TIGO) requiere que el workflow descubra la medida "% Margen" con filtro por "TIPO DE NEGOCIO N1". Activar en próxima corrida de discover_measures + fetch_powerbi.
+      </div>`);
+    const colU = (p) => parseFloat(p||0) >= 52 ? 'var(--green)' : parseFloat(p||0) >= 46 ? 'var(--yellow)' : 'var(--red)';
+    return mcSection('III.b','Margen por Unidad de Negocio',`
+      <div style="display:grid;grid-template-columns:repeat(${uenData.length},1fr);gap:10px">
+        ${uenData.map(u => `<div style="padding:12px;background:${colU(parseFloat(u.margen))}11;border:1px solid ${colU(parseFloat(u.margen))}33;border-radius:8px;text-align:center">
+          <div style="font-size:10px;font-weight:700;color:${colU(parseFloat(u.margen))};text-transform:uppercase;margin-bottom:4px">${u.uen}</div>
+          <div style="font-size:22px;font-weight:800;color:${colU(parseFloat(u.margen))}">${u.margen}</div>
+          <div style="font-size:9px;color:var(--sub);margin-top:2px">meta ≥52%</div>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--sub);margin-top:10px;padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+        UEN con margen bajo indica presión en mezcla de productos o estructura de costos. Priorizar mejora en la UEN de menor margen.
+      </div>`);
+  })()}
+
   <!-- SECCIÓN IV: PALANCAS DE CRECIMIENTO -->
   ${mcSection('IV','Palancas de Crecimiento — So What?',`
     ${[
       {
         palanca: 'Recuperar Venta Perdida (Fill Rate)',
         impacto: vp ? `+${fmtM(vp)} potencial (YTD)` : 'alto',
-        accion: `Fill Rate actual 81.7% vs meta 98%. Mejorar disponibilidad de producto recuperaría venta perdida.`,
+        accion: `Fill Rate actual ${kv('fill_rate','Fill Rate')||'—'} vs meta 98%. Mejorar disponibilidad de producto recuperaría venta perdida inmediata.`,
         prioridad: 'ALTA', col: 'var(--red)'
       },
       {
         palanca: 'Cerrar brecha vs presupuesto',
-        impacto: gap ? `+${fmtM(gap)} en agosto` : 'alto',
-        accion: 'Revisar pipeline comercial por canal. Identificar si la brecha es volumen (menos pedidos) o precio (descuentos excesivos).',
+        impacto: gap ? `+${fmtM(gap)} para cerrar agosto` : 'alto',
+        accion: 'Revisar pipeline comercial por canal. ¿La brecha es volumen (menos pedidos) o precio (descuentos excesivos)? Decomposición necesaria.',
         prioridad: 'ALTA', col: 'var(--red)'
       },
+      margen && margen < 52 ? {
+        palanca: 'Mejorar Margen Variable',
+        impacto: `Margen actual ${margenV} — cada +1pp = ${venta ? fmtM(venta * 0.01) : '~S/64K'} adicional`,
+        accion: 'Revisar mezcla de productos: reducir participación de SKUs con bajo margen. Negociar mejora en costo de MP con proveedores clave.',
+        prioridad: 'ALTA', col: 'var(--red)'
+      } : null,
       {
         palanca: 'Aceleración últimos 4 meses 2026',
-        impacto: 'Cierre del año fiscal',
-        accion: 'Con Sep-Dic = 4 meses restantes, definir si el plan anual es alcanzable o requiere revisión de presupuesto.',
+        impacto: proySepDic ? `Proyección Sep-Dic: ${fmtM(proySepDic)}` : 'Cierre del año fiscal',
+        accion: 'Sep-Dic = 4 meses restantes. Definir si el plan anual es alcanzable o requiere revisión de presupuesto con Directorio.',
         prioridad: 'MEDIA', col: 'var(--yellow)'
       },
-    ].map((p, i) => `<div style="display:flex;gap:10px;padding:10px;${i>0?'border-top:1px solid var(--border)':''}">
+    ].filter(Boolean).map((p, i) => `<div style="display:flex;gap:10px;padding:10px;${i>0?'border-top:1px solid var(--border)':''}">
       <span style="padding:2px 7px;border-radius:10px;background:${p.col}22;color:${p.col};font-size:9px;font-weight:800;height:fit-content;white-space:nowrap;flex-shrink:0">${p.prioridad}</span>
       <div>
         <div style="font-weight:700;font-size:12px">${p.palanca}</div>
@@ -2059,17 +2103,18 @@ function renderVentasMcKinsey(empresa) {
   ${mcSection('V','Datos Necesarios para Análisis Completo',`
     <div style="font-size:11px;color:var(--sub)">
       ${[
+        margenV ? null : '% Margen Variable agosto — ejecutar workflow con candidatos "% Margen", "R. MARGEN"',
         'Ventas mensuales 2025 (12 meses) — comparativo YoY',
         'Ventas YTD 2026 acumulado (enero–agosto)',
         'Presupuesto absoluto por mes (no solo el %)',
-        'Breakdown por canal de venta / UEN / gerente',
-        'Precio promedio vs volumen (decomposición de brecha)',
+        'Margen por UEN: B&D / MAQUILA / TIGO — workflow discover_measures con filtro TIPO DE NEGOCIO',
+        'Precio/kg vs Costo/kg histórico mensual',
         'Pipeline comercial: pedidos en proceso y probabilidad de cierre',
-      ].map(d => `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)">
+      ].filter(Boolean).map(d => `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)">
         <span style="color:var(--yellow)">○</span> ${d}
       </div>`).join('')}
       <div style="margin-top:8px;font-size:10px;padding:6px;background:rgba(234,179,8,.08);border-radius:4px">
-        Estos datos están en Power BI — requieren habilitarlos en el scraper con medidas filtradas por período.
+        Datos en Power BI — requieren activar medidas en el scraper con filtros de período y dimensión UEN.
       </div>
     </div>
   `)}`;
