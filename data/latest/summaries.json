@@ -18,7 +18,13 @@
         "responsable": "Gerencia Financiera"
       }
     ],
-    "escalar_semana": [],
+    "escalar_semana": [
+      {
+        "empresa": "PAUNO",
+        "texto": "Margen 42.6% bajo meta 52%.",
+        "responsable": "Comercial"
+      }
+    ],
     "monitorear": []
   },
   "empresas": {
@@ -67,12 +73,18 @@
           ]
         },
         "margen_variable": {
-          "estado": "green",
-          "alerta": null,
+          "estado": "red",
+          "alerta": "Margen 42.6% — bajo meta 52%",
           "kpis": [
             {
               "label": "Ventas mes",
               "valor": "S/6.90M"
+            },
+            {
+              "label": "Margen variable",
+              "valor": "42.6%",
+              "meta": "52%",
+              "estado": "red"
             },
             {
               "label": "Precio/kg",
