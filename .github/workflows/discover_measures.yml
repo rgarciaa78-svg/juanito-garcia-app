@@ -20,3 +20,10 @@ jobs:
           PBI_USERNAME:        ${{ secrets.PBI_USERNAME }}
           PBI_PASSWORD:        ${{ secrets.PBI_PASSWORD }}
         run: python scripts/discover_measures.py
+      - name: Commit discovered measures
+        run: |
+          git config user.name "JUANITO Bot"
+          git config user.email "juanito@pauno.pe"
+          git add data/latest/discovered_measures.json
+          git diff --staged --quiet || git commit -m "discover: medidas encontradas $(date +'%Y-%m-%d')"
+          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/rgarciaa78-svg/juanito-garcia-app.git HEAD:main
