@@ -732,16 +732,9 @@ def main():
                     break
             if compras_val is not None:
                 scanned.setdefault("compras", {})["Valor Compras"] = compras_val
-            # Estrategia fallback — SUM total sin filtro (solo si no encontramos nada)
+            # No usar fallback total — el SUM acumulado es incorrecto para mostrar como "Compras mes"
             if compras_val is None:
-                rows_sum = dax(token, ws_id, ds_c,
-                               "EVALUATE ROW(\"Total\", SUM('Compras'[data.monto_total_linea]))",
-                               "compras_sum_total")
-                if rows_sum:
-                    v = rows_sum[0].get("[Total]") or rows_sum[0].get("Total")
-                    if v is not None:
-                        scanned.setdefault("compras", {})["Valor Compras"] = v
-                        print(f"    Compras SUM total (sin filtro): {v}")
+                print(f"    Compras: ratio agosto no accesible via API (Live Connection)")
 
         # ── Consumo: SUM directo desde tablas del dataset consumo
         if "consumo" in ids:

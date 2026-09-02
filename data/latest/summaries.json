@@ -91,12 +91,7 @@
         "compras": {
           "estado": "green",
           "alerta": null,
-          "kpis": [
-            {
-              "label": "Compras",
-              "valor": "S/77.57M"
-            }
-          ]
+          "kpis": []
         },
         "sop_inventario": {
           "estado": "green",
