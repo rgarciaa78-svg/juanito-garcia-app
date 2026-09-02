@@ -1595,6 +1595,300 @@ function renderTablaEjecutiva(empresa) {
   </div>`;
 }
 
+// ── Marco McKinsey genérico para cualquier área ──────────────────────────────
+function renderMcKinseyArea(empresa, tipo) {
+  const rp = (DATA.empresas || {})[empresa]?.reportes || {};
+  const rd = rp[tipo] || {};
+  const kv = (t, lbl) => rp[t]?.kpis?.find(k => k.label === lbl)?.valor;
+  const yoy = DATA.yoy || {};
+  const periodoYoY = DATA.yoy_periodo || '2025-08';
+  const yearYoY = periodoYoY.split('-')[0];
+
+  const mcSection = (n, title, content) => `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${n}</div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)">${title}</div>
+      </div>
+      <div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">${content}</div>
+    </div>`;
+
+  const rowKpi = (lbl, val, meta, col) => `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--sub)">${lbl}</span>
+      <span style="font-size:13px;font-weight:700;color:${col||'var(--fg)'};">${val}${meta?` <span style="font-size:10px;font-weight:400;color:var(--sub)">meta ${meta}</span>`:''}</span>
+    </div>`;
+
+  const yoyBlock = (valorActual, valorYoY, labelMetrica, fmt) => {
+    if (valorYoY === null || valorYoY === undefined) {
+      return `<div style="padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px;font-size:11px;color:var(--sub)">
+        Comparativo ${yearYoY} vs 2026 pendiente — ejecutar workflow <code>discover_measures</code> en GitHub Actions.
+      </div>`;
+    }
+    const delta = valorActual !== null ? ((valorActual - valorYoY) / Math.abs(valorYoY || 1)) * 100 : null;
+    const col = delta !== null ? (delta >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--sub)';
+    const sign = delta !== null ? (delta > 0 ? '+' : '') : '';
+    return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div style="padding:10px;background:rgba(0,0,0,.04);border-radius:8px;text-align:center">
+        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:4px">Agosto ${yearYoY}</div>
+        <div style="font-size:20px;font-weight:700;color:var(--sub)">${fmt(valorYoY)}</div>
+      </div>
+      <div style="padding:10px;background:var(--accent)11;border:1px solid var(--accent)33;border-radius:8px;text-align:center">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:4px">Agosto 2026</div>
+        <div style="font-size:20px;font-weight:700;color:var(--accent)">${valorActual !== null ? fmt(valorActual) : '—'}</div>
+      </div>
+    </div>
+    ${delta !== null ? `<div style="padding:8px;background:${delta>=0?'rgba(34,197,94,.08)':'rgba(239,68,68,.08)'};border-left:3px solid ${col};border-radius:4px;font-size:11px">
+      <span style="font-weight:700;color:${col}">${sign}${delta.toFixed(1)}% YoY</span>
+      <span style="color:var(--sub);margin-left:8px">${labelMetrica} vs mismo período año anterior</span>
+    </div>` : ''}`;
+  };
+
+  // ── Configuración por tipo ──────────────────────────────────────────────────
+  const cfg = {
+    fill_rate: () => {
+      const fr   = parseVal(kv('fill_rate','Fill Rate'));
+      const ov   = parseVal(kv('fill_rate','Orden de Venta'));
+      const fac  = parseVal(kv('fill_rate','Facturación'));
+      const vp   = parseVal(kv('fill_rate','Venta Perdida'));
+      const col  = (fr||0) >= 98 ? 'var(--green)' : (fr||0) >= 85 ? 'var(--yellow)' : 'var(--red)';
+      const rec  = ov ? fmtM(ov * 0.98 - (fac||0)) : '—';
+      return {
+        titulo: 'Fill Rate — Nivel de Servicio',
+        I: `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+          ${fr ? svgGauge(fr, 'Fill Rate', col, '98%') : ''}
+          <div style="flex:1;min-width:140px">
+            ${rowKpi('Fill Rate agosto 2026', kv('fill_rate','Fill Rate')||'—', '98%', col)}
+            ${rowKpi('Orden de Venta (YTD)', kv('fill_rate','Orden de Venta')||'—', null, 'var(--fg)')}
+            ${rowKpi('Facturación (YTD)',     kv('fill_rate','Facturación')||'—',    null, 'var(--green)')}
+            ${rowKpi('Venta Perdida (YTD)',   kv('fill_rate','Venta Perdida')||'—',  null, 'var(--red)')}
+            <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">⚠️ OV/Facturación/VP son acumulados YTD, no solo agosto.</div>
+          </div>
+        </div>`,
+        II: yoyBlock(fr, yoy.fill_rate ?? null, 'Fill Rate', v => v.toFixed(1)+'%'),
+        III: ov ? svgWaterfall([
+          {label:'Orden Venta', valSoles: ov,  color:'var(--accent)'},
+          {label:'Facturado',   valSoles: fac, color:'var(--green)'},
+          {label:'Venta Perdida', valSoles: vp, color:'var(--red)'},
+        ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Acumulado YTD. Meta: facturar 98% de OV.</div>` : 'Sin datos de OV.',
+        IV: [
+          {palanca:'Reducir Venta Perdida', impacto: vp ? `Recuperar hasta ${fmtM(vp)} en ventas YTD` : 'Alto impacto en ingresos', accion:'Identificar los SKUs con mayor stockout. Priorizar reposición y revisar política de inventario de seguridad.', prioridad:fr<85?'ALTA':'MEDIA', col:fr<85?'var(--red)':'var(--yellow)'},
+          {palanca:'Mejorar OTD logístico', impacto:'Reducir pedidos incompletos', accion:'Medir tiempo promedio de despacho. Pedidos no entregados a tiempo son venta perdida aunque el producto esté disponible.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Revisión semanal de SKUs críticos', impacto:'Prevención proactiva', accion:'Lista de top 10 SKUs con mayor contribución a venta perdida — reunión lunes con Supply Chain.', prioridad:'MEDIA', col:'var(--yellow)'},
+        ],
+        V: ['Detalle de Fill Rate por SKU / cliente / canal', 'Causa raíz de venta perdida (stockout vs OTD vs calidad)', 'Fill Rate histórico mensual 2025 (12 meses)', 'Días de cobertura por SKU crítico'],
+        chatMsg: `Analiza el Fill Rate de ${empresa} agosto 2026: ${kv('fill_rate','Fill Rate')||'—'} vs meta 98%. Venta perdida YTD: ${kv('fill_rate','Venta Perdida')||'—'}. Dame diagnóstico ejecutivo y plan de acción.`
+      };
+    },
+
+    cuentas_por_cobrar: () => {
+      const mora  = parseVal(kv('cuentas_por_cobrar','Morosidad'));
+      const pvenc = parseVal(kv('cuentas_por_cobrar','CxC por vencer'));
+      const col   = (mora||0) >= 15 ? 'var(--red)' : (mora||0) >= 8 ? 'var(--yellow)' : 'var(--green)';
+      return {
+        titulo: 'Cuentas por Cobrar — Cobranzas',
+        I: `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+          ${mora ? svgGauge(mora, 'Morosidad', col, '5%') : ''}
+          <div style="flex:1;min-width:140px">
+            ${rowKpi('Morosidad agosto 2026', kv('cuentas_por_cobrar','Morosidad')||'—', '<5%', col)}
+            ${rowKpi('CxC por vencer', kv('cuentas_por_cobrar','CxC por vencer')||'—', null, 'var(--yellow)')}
+            ${mora ? rowKpi('Brecha vs meta 5%', '+'+(mora-5).toFixed(1)+'pp', null, 'var(--red)') : ''}
+            <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(239,68,68,.06);border-radius:6px">🚨 Morosidad crítica — activa cobranza inmediata para clientes >60 días.</div>
+          </div>
+        </div>`,
+        II: yoyBlock(mora, yoy.morosidad ?? null, 'Morosidad CxC', v => v.toFixed(1)+'%'),
+        III: pvenc ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:4px">Vencido actual</div>
+            <div style="font-size:22px;font-weight:800;color:var(--red)">${fmtM(pvenc)}</div>
+          </div>
+          <div style="padding:12px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);border-radius:8px;text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;margin-bottom:4px">Riesgo 30 días</div>
+            <div style="font-size:22px;font-weight:800;color:var(--yellow)">${fmtM(pvenc * 1.15)}</div>
+            <div style="font-size:10px;color:var(--sub);margin-top:2px">estimado si no se actúa</div>
+          </div>
+        </div>` : 'Sin desglose de tramos disponible.',
+        IV: [
+          {palanca:'Cobranza activa clientes >60 días', impacto: pvenc ? `Recuperar ${fmtM(pvenc)} en cartera vencida` : 'Reducir mora a <5%', accion:'Identificar top 5 clientes por monto vencido. Gerencia Comercial llama esta semana con acuerdo de pago.', prioridad:'ALTA', col:'var(--red)'},
+          {palanca:'Bloqueo de crédito clientes morosos', impacto:'Detener acumulación de deuda', accion:'Clientes con >60 días vencidos no reciben despacho hasta regularizar situación.', prioridad:'ALTA', col:'var(--red)'},
+          {palanca:'Revisión de política de crédito', impacto:'Prevención estructural', accion:'Revisar límites de crédito y plazos por segmento de cliente. Ajustar scoring.', prioridad:'MEDIA', col:'var(--yellow)'},
+        ],
+        V: ['Desglose por cliente: monto vencido y días', 'Tramos 0-30 / 31-60 / 61-90 / >90 días', 'Histórico de morosidad mensual 2025', 'Pipeline de cobranza: acuerdos y probabilidad de recuperación'],
+        chatMsg: `Analiza la situación de Cuentas por Cobrar de ${empresa}: Morosidad ${kv('cuentas_por_cobrar','Morosidad')||'—'} (meta <5%), CxC por vencer ${kv('cuentas_por_cobrar','CxC por vencer')||'—'}. ¿Qué acciones de cobranza recomiendas?`
+      };
+    },
+
+    cuentas_por_pagar: () => {
+      const cxp = parseVal(kv('cuentas_por_pagar','CxP Total'));
+      const ref = parseVal(kv('cuentas_por_pagar','Refinanciado'));
+      const nProv = kv('cuentas_por_pagar','# Proveedores');
+      const pctRef = (cxp && ref) ? (ref / cxp * 100) : null;
+      const col = pctRef !== null ? (pctRef > 50 ? 'var(--red)' : pctRef > 30 ? 'var(--yellow)' : 'var(--green)') : 'var(--sub)';
+      return {
+        titulo: 'Cuentas por Pagar — Proveedores',
+        I: `<div style="flex:1">
+          ${rowKpi('CxP Total', kv('cuentas_por_pagar','CxP Total')||'—', null, 'var(--fg)')}
+          ${rowKpi('Refinanciado', kv('cuentas_por_pagar','Refinanciado')||'—', null, col)}
+          ${pctRef !== null ? rowKpi('% Refinanciado / Total', pctRef.toFixed(1)+'%', '<30%', col) : ''}
+          ${nProv ? rowKpi('# Proveedores activos', nProv, null, 'var(--fg)') : ''}
+          ${ref && cxp ? `<div style="margin-top:10px">
+            <div style="height:10px;border-radius:5px;background:var(--border);overflow:hidden">
+              <div style="height:100%;width:${Math.min(100,pctRef||0).toFixed(0)}%;background:${col};border-radius:5px"></div>
+            </div>
+            <div style="font-size:10px;color:var(--sub);margin-top:4px">${(pctRef||0).toFixed(1)}% refinanciado del total CxP</div>
+          </div>` : ''}
+        </div>`,
+        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+          Comparativo YoY de CxP requiere habilitar la medida en el dataset de Power BI para filtro por fecha.
+        </div>`,
+        III: (cxp && ref) ? svgWaterfall([
+          {label:'CxP Total', valSoles: cxp, color:'var(--accent)'},
+          {label:'Refinanciado', valSoles: ref, color:'var(--yellow)'},
+          {label:'Deuda directa', valSoles: cxp - ref, color:'var(--red)'},
+        ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Refinanciado = deuda renegociada con proveedores (riesgo de relación comercial).</div>` : 'Sin datos de CxP.',
+        IV: [
+          {palanca:'Reducir deuda refinanciada', impacto: ref ? `Normalizar ${fmtM(ref)} refinanciado` : 'Mejorar relación con proveedores', accion:'Negociar plan de pago estructurado con top 5 proveedores por monto refinanciado. Priorizar los de mayor criticidad en abastecimiento.', prioridad: pctRef&&pctRef>50?'ALTA':'MEDIA', col: pctRef&&pctRef>50?'var(--red)':'var(--yellow)'},
+          {palanca:'Optimizar días de pago', impacto:'Mejor posición de caja', accion:'Alinear plazos de pago a proveedores con ciclo de cobro a clientes. Negociar descuento por pronto pago donde sea posible.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Monitoreo de proveedores críticos', impacto:'Continuidad operativa', accion:'Identificar proveedores únicos cuya interrupción impacta producción — tienen prioridad de pago.', prioridad:'MEDIA', col:'var(--yellow)'},
+        ],
+        V: ['Desglose CxP por proveedor y días vencidos', 'Histórico de deuda refinanciada 2025', 'Mapa de proveedores críticos por categoría', 'Cronograma de vencimientos próximos 30/60/90 días'],
+        chatMsg: `Analiza las Cuentas por Pagar de ${empresa}: Total ${kv('cuentas_por_pagar','CxP Total')||'—'}, Refinanciado ${kv('cuentas_por_pagar','Refinanciado')||'—'}, ${nProv||'—'} proveedores. ¿Qué estrategia de pago recomiendas?`
+      };
+    },
+
+    mermas: () => {
+      const m = parseVal(kv('mermas','Merma Total'));
+      const col = (m||0) >= 5 ? 'var(--red)' : (m||0) >= 3 ? 'var(--yellow)' : 'var(--green)';
+      const brecha = m ? (m - 3).toFixed(2) : null;
+      return {
+        titulo: 'Mermas — Pérdidas Operativas',
+        I: `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+          ${m ? svgGauge(m, 'Merma Total', col, '3%') : ''}
+          <div style="flex:1;min-width:140px">
+            ${rowKpi('% Merma agosto 2026', kv('mermas','Merma Total')||'—', '<3%', col)}
+            ${brecha ? rowKpi('Exceso sobre meta', '+'+brecha+'pp', null, 'var(--red)') : ''}
+            <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(239,68,68,.06);border-radius:6px">Cada punto porcentual de merma = ~1% de ventas convertido en pérdida.</div>
+          </div>
+        </div>`,
+        II: yoyBlock(m, yoy.mermas ?? null, 'Merma', v => v.toFixed(2)+'%'),
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px">Impacto por brecha vs meta 3%</div>
+          ${m && brecha ? `
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+            <div><div style="font-size:10px;color:var(--sub)">Meta 3%</div><div style="font-size:18px;font-weight:800;color:var(--green)">3.00%</div></div>
+            <div><div style="font-size:10px;color:var(--sub)">Real agosto</div><div style="font-size:18px;font-weight:800;color:${col}">${m.toFixed(2)}%</div></div>
+            <div><div style="font-size:10px;color:var(--sub)">Exceso</div><div style="font-size:18px;font-weight:800;color:var(--red)">+${brecha}pp</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--sub);margin-top:10px">Auditar plantas Ate y Pachacamac. Foco en temperatura, manipulación y vencimientos.</div>
+          ` : 'Sin datos suficientes para desglose.'}
+        </div>`,
+        IV: [
+          {palanca:'Auditoría de línea por turno', impacto:'Identificar fuente primaria de merma', accion:'Medir merma por turno/línea esta semana. La dispersión entre turnos revelará si es proceso, equipamiento o personal.', prioridad:'ALTA', col:'var(--red)'},
+          {palanca:'Control de temperatura en cámara', impacto:'Reducir merma por deterioro', accion:'Instalar monitoreo continuo de temperatura. El 40% de mermas en alimentos es por ruptura de cadena de frío.', prioridad:'ALTA', col:'var(--red)'},
+          {palanca:'FIFO estricto en despacho', impacto:'Reducir vencimientos', accion:'Capacitación y control de FIFO en almacén. Rotar producto más antiguo primero en picking.', prioridad:'MEDIA', col:'var(--yellow)'},
+        ],
+        V: ['Merma por planta (Ate, Pachacamac, Terceros)', 'Merma por turno y línea de producción', 'Histórico mensual de merma 2025', 'Top SKUs con mayor tasa de merma'],
+        chatMsg: `Analiza las Mermas de ${empresa} agosto 2026: ${kv('mermas','Merma Total')||'—'} vs meta <3%. Brecha de ${brecha||'?'}pp. Dame diagnóstico ejecutivo y plan de reducción de mermas.`
+      };
+    },
+
+    sop_inventario: () => {
+      const stock = kv('sop_inventario','Inventario Total');
+      const stockN = parseVal(stock);
+      return {
+        titulo: 'S&OP — Inventario y Abastecimiento',
+        I: `<div style="flex:1">
+          ${rowKpi('Stock Total agosto 2026', stock||'—', null, 'var(--accent)')}
+          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">Stock como referencia de capital inmovilizado y capacidad de atención.</div>
+        </div>`,
+        II: yoyBlock(stockN, yoy.stock ?? null, 'Stock Total', v => fmtM(v)),
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--sub)">Para análisis de rotación, días de cobertura y dead stock se requiere activar medidas adicionales en el scraper: "Días Inventario", "Dead Stock", "% Dead Stock".</div>
+        </div>`,
+        IV: [
+          {palanca:'Reducir dead stock', impacto:'Liberar capital inmovilizado', accion:'Identificar SKUs sin movimiento >30 días. Plan de liquidación o traslado entre plantas.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Alinear stock a demanda prevista', impacto:'Mejorar Fill Rate sin sobrestockear', accion:'S&OP semanal cruzando forecast de ventas con inventario disponible. Detectar gaps antes de que generen venta perdida.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Reducir días de inventario', impacto:'Mejora de capital de trabajo', accion:'Benchmark: industria alimentaria target 7-12 días. Medir días actuales y fijar meta.', prioridad:'BAJA', col:'var(--sub)'},
+        ],
+        V: ['Días de cobertura por SKU', '% Dead Stock (sin movimiento >30 días)', 'Stock por planta / almacén', 'Histórico de inventario mensual 2025'],
+        chatMsg: `Analiza el Inventario de ${empresa}: Stock Total ${stock||'—'}. ¿Cuál es la lectura del nivel de inventario y qué optimizaciones recomiendas?`
+      };
+    },
+
+    compras: () => {
+      return {
+        titulo: 'Compras — Ratio Consumo/Compra',
+        I: `<div style="font-size:11px;color:var(--sub);padding:10px;background:rgba(0,0,0,.04);border-radius:8px">
+          <strong>Lógica:</strong> Ratio = Consumo ÷ Compra.<br>
+          <span style="color:var(--green)">▶ >100%</span> = jala inventario previo (compra menor al consumo)<br>
+          <span style="color:var(--red)">▶ &lt;100%</span> = sobre-compra (acumula stock)<br>
+          Los datos de compras están en el dataset "compras" — activar medidas en el scraper para obtener valores agosto.
+        </div>`,
+        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+          Comparativo YoY de compras requiere activar medidas de ratio en el scraper. Actualmente el dataset de compras tiene ${Object.keys((DATA.empresas||{})[empresa]?.reportes?.compras?.kpis||{}).length||0} KPIs disponibles.
+        </div>`,
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
+          Acumulado de compras vs consumo YTD requiere datos históricos por mes. Activar en scraper: "Monto Compra", "Monto Consumo", "Ratio" con filtro de fecha agosto.
+        </div>`,
+        IV: [
+          {palanca:'Alinear compras a consumo real', impacto:'Reducir sobre-stock y capital inmovilizado', accion:'Si ratio <100%: revisar qué materias primas se compran en exceso. Ajustar frecuencia de pedido.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Activar datos de compras en Power BI', impacto:'Visibilidad completa del ratio', accion:'Habilitar en scraper las medidas: Monto Compra, Monto Consumo, Ratio — con filtro agosto 2026.', prioridad:'ALTA', col:'var(--red)'},
+          {palanca:'Negociación con proveedores clave', impacto:'Reducir costo unitario de compra', accion:'Concentrar volumen en proveedores estratégicos para ganar poder de negociación. Meta: -3% costo de compra.', prioridad:'BAJA', col:'var(--sub)'},
+        ],
+        V: ['Ratio Consumo/Compra por categoría de materia prima', 'Monto total compras agosto vs consumo', 'Histórico mensual ratio 2025', 'Top 10 materias primas por volumen de compra'],
+        chatMsg: `Analiza la gestión de Compras de ${empresa}. El ratio Consumo÷Compra mide eficiencia: >100% jala inventario, <100% sobre-compra. ¿Qué recomendaciones tienes para optimizar el proceso de compras?`
+      };
+    },
+  };
+
+  // Fallback para tipos sin configuración específica
+  const areaConfig = (cfg[tipo] || cfg['sop_inventario'])?.();
+  if (!areaConfig) return '<div style="padding:20px;color:var(--sub)">Sin análisis disponible para este reporte.</div>';
+
+  const { titulo, I, II, III, IV, V, chatMsg } = areaConfig;
+
+  const prioColors = {'ALTA':'var(--red)','MEDIA':'var(--yellow)','BAJA':'var(--sub)'};
+  const ivHtml = (Array.isArray(IV) ? IV : []).map((p, i) => `
+    <div style="display:flex;gap:10px;padding:10px;${i>0?'border-top:1px solid var(--border)':''}">
+      <span style="padding:2px 7px;border-radius:10px;background:${p.col}22;color:${p.col};font-size:9px;font-weight:800;height:fit-content;white-space:nowrap;flex-shrink:0">${p.prioridad}</span>
+      <div>
+        <div style="font-weight:700;font-size:12px">${p.palanca}</div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-top:2px">${p.impacto}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:4px">${p.accion}</div>
+      </div>
+    </div>`).join('');
+
+  const vHtml = (Array.isArray(V) ? V : []).map(d => `
+    <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--yellow)">○</span>
+      <span style="font-size:11px;color:var(--sub)">${d}</span>
+    </div>`).join('');
+
+  return `
+    <!-- HEADLINE KPI badge -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px;background:var(--accent)11;border-radius:10px;border:1px solid var(--accent)33">
+      <div style="flex:1">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--accent);text-transform:uppercase">${titulo}</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:2px">Análisis ejecutivo — Agosto 2026 · Fuente: Power BI</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:${rd.estado==='red'?'var(--red)':rd.estado==='yellow'?'var(--yellow)':'var(--green)'}">
+        ${rd.estado==='red'?'🚨 CRÍTICO':rd.estado==='yellow'?'⚡ ALERTA':'✓ OK'}
+      </div>
+    </div>
+
+    ${mcSection('I', 'Diagnóstico — ¿Dónde estamos?', I)}
+    ${mcSection('II', `Comparativo YoY — Agosto ${yearYoY} vs 2026`, II)}
+    ${mcSection('III', 'Análisis Acumulado y Waterfall', III)}
+    ${mcSection('IV', 'Palancas de Gestión — So What?', ivHtml)}
+    ${mcSection('V', 'Datos Necesarios para Análisis Completo', `<div>${vHtml}</div><div style="margin-top:8px;font-size:10px;padding:6px;background:rgba(234,179,8,.08);border-radius:4px;color:var(--sub)">Estos datos están en Power BI — requieren habilitarlos en el scraper con medidas filtradas por período.</div>`)}
+
+    <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <button data-msg="${(chatMsg||'').replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">
+        💬 Analizar con Juanito (IA)
+      </button>
+    </div>`;
+}
+
 // ── Análisis McKinsey de Ventas ───────────────────────────────────────────────
 function renderVentasMcKinsey(empresa) {
   const rp = (DATA.empresas || {})[empresa]?.reportes || {};
@@ -1784,195 +2078,52 @@ function renderVentasMcKinsey(empresa) {
 }
 
 function showDetail(empresa, tipo, label, archivo, desc) {
-  navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab });
+  const screenEl = document.getElementById('screen-' + currentTab);
+  navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab, savedHtml: screenEl ? screenEl.innerHTML : '' });
   const empData = (DATA.empresas || {})[empresa] || {};
   const rd = (empData.reportes || {})[tipo] || {};
 
-  // Para ventas: mostrar análisis McKinsey completo
-  if (tipo === 'margen_variable' || tipo === 'margen_variable_pag2') {
-    const mcHtml = renderVentasMcKinsey(empresa);
-    const cfg = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===tipo);
-    const safeDesc = (cfg?.desc||'').replace(/'/g,"\\'");
-    document.getElementById('screen-' + currentTab).innerHTML =
-      `<div style="display:flex;align-items:center;gap:10px;padding:12px 0 16px;cursor:pointer" onclick="goBack()">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--accent);stroke-width:2.5;fill:none"><polyline points="15 18 9 12 15 6"/></svg>
-        <span style="font-size:13px;font-weight:700;color:var(--accent)">← ${empresa}</span>
-      </div>
-      <div style="font-size:20px;font-weight:800;margin-bottom:4px">Análisis de Ventas</div>
-      <div style="font-size:11px;color:var(--sub);margin-bottom:16px">Marco analítico — Agosto 2026 · Fuente: Power BI</div>
-      ${mcHtml}
-      <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-        <button onclick="openChatWithMsg('Analiza las ventas de ${empresa} en agosto 2026. Ventas: ${rp=>(DATA.empresas||{})[empresa]?.reportes?.margen_variable?.kpis?.[0]?.valor||''}, Avance vs ppto: ${(DATA.empresas||{})[empresa]?.reportes?.margen_variable_pag2?.kpis?.[0]?.valor||''}. Dame un diagnóstico ejecutivo y recomendaciones.')" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">
-          💬 Analizar con Juanito (IA)
-        </button>
-      </div>`;
-    return;
+  // TODOS los reportes usan marco McKinsey estandarizado
+  const VENTAS_TIPOS = ['margen_variable', 'margen_variable_pag2'];
+  const AREA_TIPOS = ['fill_rate','cuentas_por_cobrar','cuentas_por_pagar','mermas','sop_inventario','compras'];
+
+  const renderTituloArea = {
+    margen_variable: 'Análisis de Ventas',
+    margen_variable_pag2: 'Avance vs Presupuesto',
+    fill_rate: 'Fill Rate — Nivel de Servicio',
+    cuentas_por_cobrar: 'Cuentas por Cobrar',
+    cuentas_por_pagar: 'Cuentas por Pagar',
+    mermas: 'Mermas Operativas',
+    sop_inventario: 'S&OP — Inventario',
+    compras: 'Gestión de Compras',
+  };
+
+  const tituloDetalle = renderTituloArea[tipo] || label;
+  let mcHtml = '';
+  if (VENTAS_TIPOS.includes(tipo)) {
+    mcHtml = renderVentasMcKinsey(empresa);
+  } else {
+    mcHtml = renderMcKinseyArea(empresa, tipo);
   }
 
-  let html = '';
-
-  // CONTEXTO: qué reporte es y qué mide
-  html += `<div class="detail-reporte-context">
-    <div class="detail-reporte-empresa">${empresa}</div>
-    <div class="detail-reporte-titulo">${label}</div>
-    ${desc ? `<div class="detail-reporte-desc">${desc}</div>` : ''}
-  </div>`;
-
-  // Alerta principal
-  if (rd.alerta) {
-    const ac = rd.estado === 'red' ? 'red' : 'yellow';
-    html += `<div class="alert-banner ${ac}">
-      <div class="alert-icon">${ac === 'red' ? '🚨' : '⚡'}</div>
-      <div class="alert-text">${rd.alerta}</div>
-    </div>`;
-  }
-
-  // KPIs — clickeables para abrir chat con análisis de ese KPI
-  if (rd.kpis?.length) {
-    html += `<div class="section-header"><div class="section-header-title">Indicadores clave <span style="font-weight:400;opacity:.6;font-size:9px;text-transform:none;letter-spacing:0">— toca para profundizar</span></div><div class="section-header-line"></div></div>
-    <div class="kpi-grid">${rd.kpis.map(k => renderKpiCardDetail(k, empresa, label, desc)).join('')}</div>`;
-  }
-
-  // Gráficas del reporte
-  const chartHtml = renderChartForReporte(tipo, rd);
-  if (chartHtml) {
-    html += `<div class="section-header"><div class="section-header-title">Visualización</div><div class="section-header-line"></div></div>${chartHtml}`;
-  }
-
-  // Tramos de cartera
-  if (rd.tramos?.length) {
-    html += `<div class="section-header"><div class="section-header-title">Distribución de cartera</div><div class="section-header-line"></div></div>
-    <div class="tramos">${rd.tramos.map(t => `
-      <div class="tramo ${t.estado}">
-        <div class="tramo-label">${t.label}</div>
-        <div class="tramo-val">${t.valor}</div>
-        <div class="tramo-sub">${t.pct || ''}</div>
-      </div>`).join('')}</div>`;
-  }
-
-  // Mayor riesgo (clientes/proveedores)
-  const risks = rd.riesgos || rd.proveedores_criticos || [];
-  if (risks.length) {
-    const isProveedores = !!rd.proveedores_criticos;
-    html += `<div class="section-header"><div class="section-header-title">${isProveedores ? 'Proveedores críticos' : 'Clientes en riesgo'}</div><div class="section-header-line"></div></div>
-    <div class="riesgo-list">${risks.slice(0,5).map((r,i) => `
-      <div class="riesgo-row">
-        <div class="riesgo-rank">#${i+1}</div>
-        <div class="riesgo-info">
-          <div class="riesgo-name">${r.nombre || r.name || ''}</div>
-          <div class="riesgo-sub">${r.canal || r.categoria || ''}</div>
-        </div>
-        <div>
-          <div class="riesgo-val ${sc(r.estado)}">${r.vencido30 || r.monto || r.pct || ''}</div>
-          <div class="riesgo-sub-right">${r.total ? 'total ' + r.total : ''}</div>
-        </div>
-      </div>`).join('')}</div>`;
-  }
-
-  // Cumplimiento por gerente
-  const gerentes = rd.por_gerente || [];
-  if (gerentes.length) {
-    html += `<div class="section-header"><div class="section-header-title">Cumplimiento por gerente</div><div class="section-header-line"></div></div>
-    <div class="riesgo-list">${gerentes.map(g => {
-      const pctN = parseFloat((g.pct || '0').replace('%',''));
-      const color = pctN >= 85 ? 'var(--green)' : pctN >= 70 ? 'var(--yellow)' : 'var(--red)';
-      return `<div class="gerente-row">
-        <div class="gerente-info">
-          <div class="gerente-name">${g.nombre || ''}</div>
-          <div class="gerente-bar-track">
-            <div class="gerente-bar-fill" style="width:${Math.min(100,pctN)}%;background:${color}"></div>
-          </div>
-        </div>
-        <div class="gerente-pct" style="color:${color}">${g.pct || ''}</div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-
-  // Desglose (por UEN, canal, marca, etc.)
-  const breakdown = rd.por_uen || rd.por_canal || rd.por_marca || rd.por_categoria || rd.clasificacion || [];
-  if (breakdown.length) {
-    const bKey = Object.keys(breakdown[0]).find(k => !['estado','monto','pct','avance','real','ratio','interpretacion','margen'].includes(k));
-    html += `<div class="section-header"><div class="section-header-title">Desglose</div><div class="section-header-line"></div></div>
-    <div class="breakdown-grid">${breakdown.map(b => {
-      const val  = b.margen || b.avance || b.ratio || b.pct || '';
-      const lbl2 = b[bKey] || '';
-      const sub  = b.monto || b.real || b.interpretacion || '';
-      return `<div class="breakdown-item">
-        <div class="breakdown-label">${lbl2}</div>
-        <div class="breakdown-val ${sc(b.estado)}">${val}</div>
-        <div class="breakdown-sub">${sub}</div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-
-  // Tendencia
-  const tendData = rd.tendencia_mora || rd.tendencia || rd.tendencia_ate || rd.tendencia_dias || rd.tendencia_margen || rd.tendencia_ratio || [];
-  if (tendData.length > 1) {
-    const vals = tendData.map(t => parseFloat(t.pct || t.val || t.dias || t.ratio || 0));
-    const maxV = Math.max(...vals) || 1;
-    const minV = Math.min(...vals) * 0.6;
-    const lastV = vals[vals.length - 1];
-    const prevV = vals[vals.length - 2];
-    // Detectar si en este KPI "sube = malo"
-    const lbl0 = (rd.kpis?.[0]?.label || tipo).toLowerCase();
-    const subeBad = lbl0.includes('mora') || lbl0.includes('dias') || lbl0.includes('merma') || lbl0.includes('dead');
-    const going = lastV > prevV ? (subeBad ? 'bad' : 'good') : lastV < prevV ? (subeBad ? 'good' : 'bad') : 'flat';
-    const goingText = lastV > prevV ? '↑ Sube' : lastV < prevV ? '↓ Baja' : '→ Estable';
-    const suffix = vals[0] !== undefined && typeof vals[0] === 'number' && tendData[0]?.pct !== undefined ? '%' : '';
-
-    html += `<div class="section-header"><div class="section-header-title">Tendencia histórica</div><div class="section-header-line"></div></div>
-    <div class="tend-chart">
-      <div class="tend-header">
-        <div class="tend-chart-label">${tendData.length} periodos</div>
-        <div class="tend-trend-text ${going}">${goingText}</div>
-      </div>
-      <div class="tend-scroll"><div class="tend-bars">${tendData.map((t,i) => {
-        const v = vals[i];
-        const h = Math.max(6, Math.round(((v - minV) / (maxV - minV || 1)) * 66));
-        const isLast = i === tendData.length - 1;
-        // Color de barra: si subeBad, alto = rojo
-        const barCls = subeBad
-          ? (v >= maxV * 0.85 ? 'red' : v >= maxV * 0.65 ? 'yellow' : 'green')
-          : (v >= maxV * 0.85 ? 'green' : v >= maxV * 0.65 ? 'yellow' : 'red');
-        const displayV = typeof v === 'number' ? (v % 1 !== 0 ? v.toFixed(1) : v) : v;
-        return `<div class="tend-col">
-          <div class="tend-val${isLast ? ' current' : ''}">${displayV}${suffix}</div>
-          <div class="tend-bar ${barCls}${isLast ? ' current' : ''}" style="height:${h}px"></div>
-          <div class="tend-mes">${t.mes || ''}</div>
-        </div>`;
-      }).join('')}</div></div>
-      ${rd.kpis?.[0]?.meta ? `<div class="tend-meta-line"><div class="tend-meta-dot"></div><div class="tend-meta-text">Meta: ${esc(rd.kpis[0].meta)}</div></div>` : ''}
-    </div>`;
-  }
-
-  // Acciones recomendadas
-  if (rd.acciones?.length) {
-    html += `<div class="decision-box">
-      <div class="decision-title">💡 Qué hacer</div>
-      ${rd.acciones.map(a => `<div class="decision-item">${a}</div>`).join('')}
-    </div>`;
-  }
-
-  html += `<button class="png-btn" onclick="openPng('data/latest/${empresa}/${archivo}','${label}')">
-    <svg viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--text2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-    Ver reporte Power BI original
-  </button>
-  <button class="ask-btn" onclick="openChatWith('${empresa}','${tipo}','${label}')">
-    💬 Preguntarle a Juanito sobre esto
-  </button>`;
-
-  document.getElementById('detail-content').innerHTML = html;
-  document.getElementById('top-title').textContent  = label;
-  document.getElementById('top-badge').textContent  = empresa;
-  document.getElementById('back-btn').classList.add('visible');
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-detail').classList.add('active');
-  document.getElementById('screens-container').scrollTop = 0;
+  document.getElementById('screen-' + currentTab).innerHTML =
+    `<div style="display:flex;align-items:center;gap:10px;padding:12px 0 16px;cursor:pointer" onclick="goBack()">
+      <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--accent);stroke-width:2.5;fill:none"><polyline points="15 18 9 12 15 6"/></svg>
+      <span style="font-size:13px;font-weight:700;color:var(--accent)">← ${empresa}</span>
+    </div>
+    <div style="font-size:20px;font-weight:800;margin-bottom:4px">${tituloDetalle}</div>
+    <div style="font-size:11px;color:var(--sub);margin-bottom:16px">Marco McKinsey — Agosto 2026 · Fuente: Power BI</div>
+    ${mcHtml}`;
+  return;
 }
 
 function goBack() {
   if (!navHistory.length) { showTab(currentTab); return; }
   const prev = navHistory.pop();
+  if (prev.savedHtml !== undefined) {
+    const el = document.getElementById(prev.screen);
+    if (el) el.innerHTML = prev.savedHtml;
+  }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(prev.screen).classList.add('active');
   document.getElementById('top-title').textContent = prev.tab === 'home' ? 'Juanito Garcia' : prev.tab.toUpperCase();
