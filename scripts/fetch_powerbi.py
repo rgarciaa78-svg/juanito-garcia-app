@@ -176,9 +176,12 @@ SCAN_CANDIDATES = {
         "Ventas Real", "Real vs Ppto", "% Real vs Ppto",
     ],
     "consumo": [
-        "Consumo", "Total Consumo", "Importe Consumo",
-        "Compras", "Total Compras",
-        "Ratio", "Ratio Consumo", "% Ratio",
+        "Consumo", "Total Consumo", "Importe Consumo", "Monto Consumo",
+        "Compras", "Total Compras", "Importe Compras", "Monto Compras",
+        "Ratio", "Ratio Consumo", "% Ratio", "Eficiencia", "% Eficiencia",
+        "Ratio C/C", "Ratio Compras", "Consumo vs Compras",
+        "Cant Compra", "Cant Consumo",
+        "Compra Periodo", "Consumo Periodo",
     ],
     "fill_rate": [
         "% FILLRATE", "% Fill Rate", "% FillRate",
@@ -796,11 +799,26 @@ def main():
                 existing_cache[ds_key] = {k: None for k in found.keys()}
         save_measure_cache(existing_cache)
 
-        # Merge consumo→compras: solo "Consumo" (para ratio), NO "Compras" del consumo (acumulada, incorrecta)
-        if scanned.get("consumo") and scanned.get("compras"):
-            consumo_v = scanned["consumo"].get("Consumo")
+        # Merge consumo→compras: tomar medidas del dataset consumo para calcular ratio
+        if scanned.get("consumo"):
+            cons = scanned["consumo"]
+            # Consumo mensual
+            consumo_v = cons.get("Consumo")
             if consumo_v is not None:
-                scanned["compras"]["Consumo"] = consumo_v
+                scanned.setdefault("compras", {})["Consumo"] = consumo_v
+            # Compras mensual desde dataset consumo (si es razonable < S/20M)
+            compras_v = cons.get("Compras") or cons.get("Total Compras")
+            if compras_v is not None:
+                try:
+                    if abs(float(compras_v)) < 20_000_000:
+                        scanned.setdefault("compras", {})["Valor Compras"] = compras_v
+                        print(f"    Compras desde consumo dataset: {compras_v}")
+                except: pass
+            # Ratio directo desde dataset consumo
+            ratio_v = cons.get("Ratio") or cons.get("% Ratio")
+            if ratio_v is not None:
+                scanned.setdefault("compras", {})["Ratio"] = ratio_v
+                print(f"    Ratio desde consumo dataset: {ratio_v}")
 
         # Combinamos planificacion con inventario (avance vs ppto)
         if scanned.get("planificacion"):

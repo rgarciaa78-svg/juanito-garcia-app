@@ -25,7 +25,12 @@
   },
   "consumo": {
     "Consumo": null,
-    "Compras": null
+    "Compras": null,
+    "Ratio": null,
+    "% Ratio": null,
+    "Eficiencia": null,
+    "Cant Compra": null,
+    "Cant Consumo": null
   },
   "fill_rate": {
     "% FILLRATE": null,
