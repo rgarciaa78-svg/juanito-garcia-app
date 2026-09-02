@@ -37,7 +37,7 @@ PREV_YEAR  = _today.year  if _today.month > 1 else _today.year - 1
 DATE_CONTEXT = {
     "margen":    ("Calendario", "Date"),
     "mermas":    ("Calendario", "Date"),
-    "compras":   ("Calendario", "Fecha"),
+    "compras":   ("Calendario", "Date"),
     "fill_rate": ("Calendario", "Date"),
 }
 
@@ -703,7 +703,7 @@ def main():
 ROW("Total",
   CALCULATE(
     SUM('Compras'[data.monto_total_linea]),
-    FILTER(ALL('Calendario'), YEAR('Calendario'[Fecha]) = {PREV_YEAR} && MONTH('Calendario'[Fecha]) = {PREV_MONTH})
+    FILTER(ALL('Calendario'), YEAR('Calendario'[Date]) = {PREV_YEAR} && MONTH('Calendario'[Date]) = {PREV_MONTH})
   )
 )"""
             rows_sum = dax(token, ws_id, ids["compras"], q_compras, "compras_sum_dated")
