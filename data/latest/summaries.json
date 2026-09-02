@@ -6,15 +6,15 @@
     "PAUNO": "red"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 21.7% — crítica"
+    "PAUNO": "Morosidad 21.1% — crítica"
   },
   "holding_ventas": "S/6.42M",
-  "holding_mora": "21.7%",
+  "holding_mora": "21.1%",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 21.7% — vencido S/3.04M. Activar cobranza.",
+        "texto": "Mora 21.1% — vencido S/3.15M. Activar cobranza.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -26,7 +26,7 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "red",
-          "alerta": "Morosidad 21.7% — crítica",
+          "alerta": "Morosidad 21.1% — crítica",
           "kpis": [
             {
               "label": "Morosidad",
@@ -104,7 +104,7 @@
         },
         "fill_rate": {
           "estado": "yellow",
-          "alerta": "Fill Rate 74.6% — bajo meta 98%",
+          "alerta": "Fill Rate 81.7% — bajo meta 98%",
           "kpis": [
             {
               "label": "Fill Rate",

@@ -987,6 +987,101 @@ function generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, allK
     </div>`;
 }
 
+// ── helpers de gestión ───────────────────────────────────────────────────────
+function gapBar(val, meta, inverso) {
+  // val y meta como números. inverso=true si menor es mejor (mora, mermas)
+  if (!val || !meta) return '';
+  const pct = Math.min(100, Math.round((val / meta) * 100));
+  const ok   = inverso ? val <= meta : val >= meta;
+  const warn  = inverso ? val <= meta * 1.5 : val >= meta * 0.7;
+  const color = ok ? 'var(--green)' : warn ? 'var(--yellow)' : 'var(--red)';
+  const fill  = inverso ? Math.min(100, Math.round((val / (meta * 2)) * 100)) : pct;
+  return `<div style="height:4px;background:var(--border);border-radius:2px;margin-top:4px">
+    <div style="height:4px;border-radius:2px;background:${color};width:${fill}%"></div>
+  </div>`;
+}
+
+function fmtNum(s) {
+  // Returns raw number from string like "S/6.42M", "21.1%", "81.7%"
+  if (!s) return null;
+  const m = s.replace(/[^0-9.]/g,'');
+  return parseFloat(m) || null;
+}
+
+function buildDecisionMatrix(empresa, reportesData) {
+  // Returns array of {prioridad, area, indicador, valor, meta, brecha, impacto, accion, tipo, estado}
+  // ordered by severity / $ impact
+  const rp = reportesData;
+  const kv = (tipo, lbl) => rp[tipo]?.kpis?.find(k=>k.label===lbl)?.valor;
+  const items = [];
+
+  // Fill Rate — impacto directo en venta perdida (el más alto en $)
+  const fr = fmtNum(kv('fill_rate','Fill Rate'));
+  const vp = kv('fill_rate','Venta Perdida');
+  if (fr !== null) items.push({
+    area:'Supply Chain', indicador:'Fill Rate', valor: kv('fill_rate','Fill Rate')||'—',
+    meta:'98%', brecha: fr ? `${(98-fr).toFixed(1)}pp` : '—',
+    impacto: vp ? `Venta perdida ${vp}` : `${(98-fr).toFixed(1)}pp bajo meta`,
+    accion:'Revisar cobertura de inventario y SKUs sin stock. ¿Qué productos fallan más?',
+    tipo:'fill_rate', estado: rp.fill_rate?.estado||'neutral',
+    peso: (100 - (fr||0)) * 3   // mayor brecha = mayor peso
+  });
+
+  // Morosidad CxC — impacto en caja
+  const mora = fmtNum(kv('cuentas_por_cobrar','Morosidad'));
+  const pvencer = kv('cuentas_por_cobrar','CxC por vencer');
+  if (mora !== null) items.push({
+    area:'Cobranzas', indicador:'Morosidad CxC', valor: kv('cuentas_por_cobrar','Morosidad')||'—',
+    meta:'5%', brecha: mora ? `${(mora-5).toFixed(1)}pp` : '—',
+    impacto: pvencer ? `${pvencer} en riesgo de vencer` : `${mora.toFixed(1)}% sobre meta`,
+    accion:'Activar cobranza activa. Evaluar bloqueo de crédito a clientes con >60 días.',
+    tipo:'cuentas_por_cobrar', estado: rp.cuentas_por_cobrar?.estado||'neutral',
+    peso: (mora||0) * 2
+  });
+
+  // Mermas — impacto en costo
+  const merma = fmtNum(kv('mermas','Merma Total'));
+  if (merma !== null) items.push({
+    area:'Operaciones', indicador:'Mermas', valor: kv('mermas','Merma Total')||'—',
+    meta:'3%', brecha: merma ? `${(merma-3).toFixed(2)}pp` : '—',
+    impacto: `${merma.toFixed(2)}% merma — encima del límite operativo`,
+    accion:'Auditar proceso en planta. Identificar turno/línea con mayor pérdida.',
+    tipo:'mermas', estado: rp.mermas?.estado||'neutral',
+    peso: (merma||0) * 10
+  });
+
+  // Avance vs Ppto — riesgo de no cumplir plan
+  const av = fmtNum(kv('margen_variable_pag2','Avance vs Ppto'));
+  if (av !== null && av < 90) items.push({
+    area:'Ventas', indicador:'Avance vs Presupuesto', valor: kv('margen_variable_pag2','Avance vs Ppto')||'—',
+    meta:'100%', brecha: av ? `${(100-av).toFixed(0)}pp` : '—',
+    impacto: `Riesgo de no alcanzar el presupuesto del mes`,
+    accion:'Revisar pipeline con equipo comercial. ¿Dónde está la brecha: volumen o precio?',
+    tipo:'margen_variable_pag2', estado: rp.margen_variable_pag2?.estado||'neutral',
+    peso: (100 - (av||0)) * 1.5
+  });
+
+  // CxP Refinanciado — riesgo financiero
+  const cxpV = kv('cuentas_por_pagar','CxP Total');
+  const refV = kv('cuentas_por_pagar','Refinanciado');
+  const cxpN = parseVal(cxpV), refN = parseVal(refV);
+  if (cxpN && refN) {
+    const pctRef = Math.round((refN/cxpN)*100);
+    if (pctRef > 30) items.push({
+      area:'Finanzas', indicador:'CxP Refinanciado', valor: `${pctRef}% refinanciado`,
+      meta:'<20%', brecha: `${pctRef-20}pp`,
+      impacto: `${fmtM(refN)} en deuda refinanciada de ${fmtM(cxpN)} total`,
+      accion:'Negociar plan de pago con proveedores clave. Priorizar vencimientos más próximos.',
+      tipo:'cuentas_por_pagar', estado: rp.cuentas_por_pagar?.estado||'neutral',
+      peso: pctRef
+    });
+  }
+
+  // ordenar por peso descendente
+  items.sort((a,b) => (b.peso||0) - (a.peso||0));
+  return items;
+}
+
 function renderEmpresa(empresa, containerId) {
   const el = document.getElementById(containerId);
   const empData    = (DATA.empresas || {})[empresa] || {};
@@ -994,100 +1089,227 @@ function renderEmpresa(empresa, containerId) {
   const razon      = (DATA.semaforo_razon || {})[empresa] || '';
   const reportes   = REPORTES_CONFIG[empresa] || [];
   const reportesData = empData.reportes || {};
+  const rp = reportesData;
 
-  const statusLabel = semaforo === 'red' ? 'CRÍTICO — ACCIÓN INMEDIATA' : semaforo === 'yellow' ? 'ATENCIÓN — REVISAR' : 'OPERANDO NORMAL';
+  const kv = (tipo, lbl) => rp[tipo]?.kpis?.find(k=>k.label===lbl)?.valor || '—';
+  const matrix = buildDecisionMatrix(empresa, reportesData);
 
-  // Top KPIs del primer reporte con estado no-green
-  const allKpis = [];
-  reportes.forEach(r => {
-    const rd = reportesData[r.tipo] || {};
-    if (rd.estado && rd.estado !== 'green') {
-      (rd.kpis || []).slice(0,1).forEach(k => allKpis.push({ ...k, _reporte: r.label, _tipo: r.tipo, _archivo: r.archivo, _desc: r.desc || '' }));
-    }
-  });
-  // Si no hay alertas, mostrar los primeros KPIs igual
-  if (!allKpis.length) {
-    reportes.forEach(r => {
-      const rd = reportesData[r.tipo] || {};
-      (rd.kpis || []).slice(0,1).forEach(k => allKpis.push({ ...k, _reporte: r.label, _tipo: r.tipo, _archivo: r.archivo, _desc: r.desc || '' }));
-    });
-  }
+  // ── colores de estado ────────────────────────────────────────────────────
+  const stateColor = s => s==='red'?'var(--red)':s==='yellow'?'var(--yellow)':s==='green'?'var(--green)':'var(--sub)';
+  const stateBg    = s => s==='red'?'rgba(239,68,68,.08)':s==='yellow'?'rgba(234,179,8,.08)':s==='green'?'rgba(34,197,94,.08)':'var(--surface)';
+  const stateLabel = s => s==='red'?'CRÍTICO':s==='yellow'?'ALERTA':s==='green'?'OK':'—';
+
+  // ── mini gauge inline SVG ────────────────────────────────────────────────
+  const miniGauge = (pct, color) => {
+    const r=18, cx=22, cy=22;
+    const clamped = Math.max(0, Math.min(100, pct));
+    const large = clamped > 50 ? 1 : 0;
+    const rad = a => ({ x: cx + r*Math.cos((a-90)*Math.PI/180), y: cy + r*Math.sin((a-90)*Math.PI/180) });
+    const end = rad(clamped * 3.6);
+    const start = rad(0);
+    return `<svg viewBox="0 0 44 44" style="width:36px;height:36px;flex-shrink:0">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="5"/>
+      <path d="M${start.x},${start.y} A${r},${r} 0 ${large},1 ${end.x},${end.y}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
+      <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="8" font-weight="700" fill="${color}">${pct.toFixed(0)}%</text>
+    </svg>`;
+  };
+
+  // ── fill rate waterfall inline ───────────────────────────────────────────
+  const frWaterfall = () => {
+    const ov  = parseVal(kv('fill_rate','Orden de Venta'));
+    const fac = parseVal(kv('fill_rate','Facturación'));
+    const vp  = parseVal(kv('fill_rate','Venta Perdida'));
+    if (!ov) return '';
+    return svgWaterfall([
+      {label:'Orden Venta', valSoles: ov,  color:'var(--accent)'},
+      {label:'Facturado',   valSoles: fac, color:'var(--green)'},
+      {label:'Venta Perdida', valSoles: vp, color:'var(--red)'},
+    ]);
+  };
+
+  // ── CxP bar chart inline ─────────────────────────────────────────────────
+  const cxpBars = () => {
+    const total = parseVal(kv('cuentas_por_pagar','CxP Total'));
+    const ref   = parseVal(kv('cuentas_por_pagar','Refinanciado'));
+    if (!total) return '';
+    const neto = total - (ref||0);
+    const items = [{l:'Total CxP', v:total, c:'var(--accent)'},{l:'Refinanciado', v:ref||0, c:'var(--yellow)'},{l:'Neto a pagar', v:neto, c:'var(--red)'}];
+    return `<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+      ${items.map(it => `<div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px">
+          <span style="color:var(--sub)">${it.l}</span>
+          <span style="font-weight:700;color:${it.c}">${fmtM(it.v)}</span>
+        </div>
+        <div style="height:7px;background:var(--border);border-radius:4px">
+          <div style="height:7px;border-radius:4px;background:${it.c};width:${Math.round((it.v/total)*100)}%"></div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  };
 
   el.innerHTML = `
-    <div class="empresa-header-card ${semaforo}">
-      <div class="empresa-emoji">${semEmoji(semaforo)}</div>
-      <div class="empresa-header-info">
-        <div class="empresa-nombre ${semaforo}">${empresa}</div>
-        <div class="empresa-status ${semaforo}">${statusLabel}</div>
-        <div class="empresa-razon">${razon}</div>
-      </div>
+  <!-- CABECERA EMPRESA -->
+  <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:${stateBg(semaforo)};border-left:3px solid ${stateColor(semaforo)};border-radius:8px;margin-bottom:16px">
+    <div style="font-size:28px">${semEmoji(semaforo)}</div>
+    <div style="flex:1">
+      <div style="font-size:20px;font-weight:800;color:${stateColor(semaforo)}">${empresa}</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:${stateColor(semaforo)};opacity:.8">${semaforo==='red'?'CRÍTICO — ACCIÓN INMEDIATA':semaforo==='yellow'?'ATENCIÓN — REVISAR':'OPERANDO NORMAL'}</div>
+      ${razon ? `<div style="font-size:11px;color:var(--sub);margin-top:2px">${razon}</div>` : ''}
     </div>
+    <div style="text-align:right;font-size:10px;color:var(--sub)">Agosto 2026</div>
+  </div>
 
-    ${(() => {
-      // Dashboard rápido: KPIs definidos siempre, con o sin datos
-      const rp = reportesData;
-      const fmt = (v,fb) => v || fb || '—';
-      const quickKpis = [
-        { label:'Ventas mes',   valor: fmt(rp.margen_variable?.kpis?.find(k=>k.label==='Ventas mes')?.valor), meta:'', estado: rp.margen_variable?.estado||'neutral', tipo:'margen_variable' },
-        { label:'Mora CxC',     valor: fmt(rp.cuentas_por_cobrar?.kpis?.find(k=>k.label==='Morosidad')?.valor), meta:'15%', estado: rp.cuentas_por_cobrar?.estado||'neutral', tipo:'cuentas_por_cobrar' },
-        { label:'Mermas',       valor: fmt(rp.mermas?.kpis?.find(k=>k.label==='Merma Total')?.valor), meta:'2%', estado: rp.mermas?.estado||'neutral', tipo:'mermas' },
-        { label:'Fill Rate',    valor: fmt(rp.fill_rate?.kpis?.find(k=>k.label==='Fill Rate')?.valor), meta:'98%', estado: rp.fill_rate?.estado||'neutral', tipo:'fill_rate' },
-        { label:'CxP Total',    valor: fmt(rp.cuentas_por_pagar?.kpis?.find(k=>k.label==='CxP Total')?.valor), meta:'', estado: rp.cuentas_por_pagar?.estado||'neutral', tipo:'cuentas_por_pagar' },
-        { label:'Margen var.',  valor: fmt(rp.margen_variable?.kpis?.find(k=>k.label==='Margen variable')?.valor), meta:'52%', estado: rp.margen_variable?.kpis?.find(k=>k.label==='Margen variable')?.estado||'neutral', tipo:'margen_variable' },
-      ];
-      const sc2 = s => s==='red'?'sem-red':s==='yellow'?'sem-yellow':s==='green'?'sem-green':'sem-neutral';
-      return `<div class="section-header" style="margin-top:0">
-        <div class="section-header-title">Dashboard Rápido</div>
-        <div class="section-header-line"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
-        ${quickKpis.map(k => {
-          const rr = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===k.tipo);
-          const arch = rr?.archivo||''; const lbl = rr?.label||k.label; const desc = (rr?.desc||'').replace(/'/g,"\\'");
-          const click = arch ? `onclick="showDetail('${empresa}','${k.tipo}','${lbl}','${arch}','${desc}')"` : '';
-          return `<div class="quick-kpi-card ${sc2(k.estado)}" ${click}>
-            <div class="quick-kpi-val">${k.valor}</div>
-            <div class="quick-kpi-label">${k.label}</div>
-            ${k.meta ? `<div class="quick-kpi-meta">meta ${k.meta}</div>` : ''}
-          </div>`;
-        }).join('')}
+  <!-- ZONA DE DECISIÓN: qué priorizar HOY -->
+  ${matrix.length ? `
+  <div style="margin-bottom:20px">
+    <div style="font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-transform:uppercase;margin-bottom:8px">¿Qué gestionar primero?</div>
+    ${matrix.map((item, i) => {
+      const cfg = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===item.tipo);
+      const clickFn = cfg ? `onclick="showDetail('${empresa}','${item.tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')"` : '';
+      return `<div ${clickFn} style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;border-radius:8px;background:${stateBg(item.estado)};border:1px solid ${stateColor(item.estado)}22;cursor:pointer;transition:opacity .15s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
+        <div style="width:24px;height:24px;border-radius:50%;background:${stateColor(item.estado)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-weight:700;font-size:13px">${item.indicador}</span>
+            <span style="font-size:11px;color:${stateColor(item.estado)};font-weight:600">${item.valor}</span>
+            <span style="font-size:10px;color:var(--sub)">meta ${item.meta}</span>
+            <span style="font-size:10px;background:${stateColor(item.estado)}22;color:${stateColor(item.estado)};padding:1px 6px;border-radius:10px;font-weight:700">${item.brecha} brecha</span>
+          </div>
+          <div style="font-size:11px;color:var(--sub);margin-top:3px">📊 ${item.impacto}</div>
+          <div style="font-size:11px;color:var(--fg);margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">→ ${item.accion}</div>
+        </div>
+        <div style="font-size:10px;color:${stateColor(item.estado)};font-weight:700;flex-shrink:0">${item.area}</div>
       </div>`;
-    })()}
+    }).join('')}
+  </div>` : ''}
 
-    ${allKpis.length ? `
-    <div class="section-header">
-      <div class="section-header-title">KPIs Clave <span style="font-weight:400;opacity:.6;font-size:9px;text-transform:none;letter-spacing:0">— toca para ver detalle</span></div>
-      <div class="section-header-line"></div>
-    </div>
-    <div class="kpi-grid">
-      ${allKpis.slice(0,6).map(k => renderKpiCard(k, k._reporte, empresa, k._tipo, k._archivo, k._desc)).join('')}
-    </div>` : ''}
-
-    <div class="section-header">
-      <div class="section-header-title">Reportes</div>
-      <div class="section-header-line"></div>
-    </div>
-    <div class="reportes-list">
-      ${reportes.map(r => {
-        const rd = reportesData[r.tipo] || {};
-        const estado = rd.estado || 'neutral';
-        const subtext = rd.alerta || (estado === 'green' ? 'Sin alertas' : rd.kpis?.[0] ? rd.kpis[0].label + ': ' + rd.kpis[0].valor : 'Ver análisis');
-        const chipLabel = estado === 'red' ? 'Crítico' : estado === 'yellow' ? 'Alerta' : estado === 'green' ? 'OK' : 'Ver';
-        const safeDesc = (r.desc||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}','${safeDesc}')">
-          <div class="reporte-icon icon-${estado === 'neutral' ? 'neutral' : estado}">
-            <svg viewBox="0 0 24 24">${ICON_SVG[r.icon] || ICON_SVG.check}</svg>
-          </div>
-          <div class="reporte-info">
-            <div class="reporte-name">${r.label}</div>
-            <div class="reporte-sub">${subtext}</div>
-          </div>
-          <span class="estado-chip ${estado}">${chipLabel}</span>
-        </div>`;
+  <!-- MATRIX KPIs: valor / meta / brecha / tendencia -->
+  <div style="font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-transform:uppercase;margin-bottom:8px">Panel de Control — Agosto 2026</div>
+  <div style="overflow-x:auto;margin-bottom:20px">
+  <table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--sub)">ÁREA / KPI</th>
+        <th style="text-align:right;padding:6px 8px;font-size:10px;font-weight:700;color:var(--sub)">VALOR</th>
+        <th style="text-align:right;padding:6px 8px;font-size:10px;font-weight:700;color:var(--sub)">META</th>
+        <th style="text-align:center;padding:6px 8px;font-size:10px;font-weight:700;color:var(--sub)">ESTADO</th>
+        <th style="padding:6px 8px;font-size:10px;font-weight:700;color:var(--sub)">PROGRESO</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${[
+        { grupo:'Ventas', kpi:'Ventas mes',         val: kv('margen_variable','Ventas mes'),     meta:null, tipo:'margen_variable', inv:false },
+        { grupo:'Ventas', kpi:'Avance vs Ppto',      val: kv('margen_variable_pag2','Avance vs Ppto'), meta:100, tipo:'margen_variable_pag2', inv:false },
+        { grupo:'Ventas', kpi:'Margen variable',     val: kv('margen_variable','Margen variable'),meta:null, tipo:'margen_variable', inv:false },
+        { grupo:'Supply', kpi:'Fill Rate',           val: kv('fill_rate','Fill Rate'),            meta:98,  tipo:'fill_rate', inv:false },
+        { grupo:'Supply', kpi:'Venta Perdida',       val: kv('fill_rate','Venta Perdida'),        meta:null, tipo:'fill_rate', inv:true },
+        { grupo:'Supply', kpi:'Stock',               val: kv('sop_inventario','Inventario Total'),meta:null, tipo:'sop_inventario', inv:false },
+        { grupo:'Cobranzas', kpi:'Morosidad CxC',   val: kv('cuentas_por_cobrar','Morosidad'),   meta:5,   tipo:'cuentas_por_cobrar', inv:true },
+        { grupo:'Cobranzas', kpi:'CxC por vencer',  val: kv('cuentas_por_cobrar','CxC por vencer'), meta:null, tipo:'cuentas_por_cobrar', inv:true },
+        { grupo:'Finanzas', kpi:'CxP Total',         val: kv('cuentas_por_pagar','CxP Total'),   meta:null, tipo:'cuentas_por_pagar', inv:true },
+        { grupo:'Finanzas', kpi:'Refinanciado',      val: kv('cuentas_por_pagar','Refinanciado'),meta:null, tipo:'cuentas_por_pagar', inv:true },
+        { grupo:'Operaciones', kpi:'Mermas',         val: kv('mermas','Merma Total'),             meta:3,   tipo:'mermas', inv:true },
+      ].filter(r => r.val && r.val !== '—').map((row, i) => {
+        const valN = fmtNum(row.val);
+        const est  = rp[row.tipo]?.estado || 'neutral';
+        const bg   = i%2 ? 'var(--surface)' : 'transparent';
+        const cfg  = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===row.tipo);
+        const clickFn = cfg ? `onclick="showDetail('${empresa}','${row.tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')"` : '';
+        // brecha bar
+        let barHtml = '';
+        if (valN !== null && row.meta) {
+          const pctFill = row.inv
+            ? Math.min(100, Math.round((row.meta / valN) * 100))
+            : Math.min(100, Math.round((valN / row.meta) * 100));
+          const barColor = stateColor(est);
+          barHtml = `<div style="display:flex;align-items:center;gap:6px">
+            <div style="flex:1;height:5px;background:var(--border);border-radius:3px">
+              <div style="height:5px;border-radius:3px;background:${barColor};width:${pctFill}%"></div>
+            </div>
+            <span style="font-size:9px;color:var(--sub);width:28px;text-align:right">${pctFill}%</span>
+          </div>`;
+        }
+        return `<tr style="border-bottom:1px solid var(--border);background:${bg};cursor:${cfg?'pointer':'default'}" ${clickFn}>
+          <td style="padding:8px">
+            <div style="font-size:9px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.04em">${row.grupo}</div>
+            <div style="font-weight:600;font-size:12px">${row.kpi}</div>
+          </td>
+          <td style="padding:8px;text-align:right;font-weight:800;font-family:monospace;font-size:13px;color:${stateColor(est)}">${row.val}</td>
+          <td style="padding:8px;text-align:right;color:var(--sub);font-size:11px">${row.meta ? (row.inv?'<':'>=')+row.meta+'%' : '—'}</td>
+          <td style="padding:8px;text-align:center">
+            <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:${stateColor(est)}22;color:${stateColor(est)}">${stateLabel(est)}</span>
+          </td>
+          <td style="padding:8px;min-width:90px">${barHtml}</td>
+        </tr>`;
       }).join('')}
-    </div>
+    </tbody>
+  </table>
+  </div>
 
-    ${generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, allKpis)}
+  <!-- GRÁFICAS INLINE -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+    <!-- Fill Rate -->
+    ${rp.fill_rate ? `<div style="padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border)" onclick="showDetail('${empresa}','fill_rate','Fill Rate','','')">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--sub);text-transform:uppercase;margin-bottom:8px">Fill Rate — Desglose</div>
+      ${frWaterfall()}
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        ${miniGauge(parseVal(kv('fill_rate','Fill Rate'))||0, (parseVal(kv('fill_rate','Fill Rate'))||0)>=98?'var(--green)':'var(--red)')}
+        <div>
+          <div style="font-size:18px;font-weight:800;color:${(parseVal(kv('fill_rate','Fill Rate'))||0)>=98?'var(--green)':'var(--red)'}">${kv('fill_rate','Fill Rate')}</div>
+          <div style="font-size:10px;color:var(--sub)">meta 98%</div>
+        </div>
+      </div>
+    </div>` : '<div></div>'}
+    <!-- CxP -->
+    ${rp.cuentas_por_pagar ? `<div style="padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border)" onclick="showDetail('${empresa}','cuentas_por_pagar','CxP','','')">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--sub);text-transform:uppercase;margin-bottom:4px">Cuentas por Pagar</div>
+      ${cxpBars()}
+      <div style="font-size:10px;color:var(--sub);margin-top:6px">Proveedores: ${kv('cuentas_por_pagar','# Proveedores')}</div>
+    </div>` : '<div></div>'}
+  </div>
+
+  <!-- GAUGE ROW: indicadores % -->
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;justify-content:space-around">
+    ${[
+      {tipo:'cuentas_por_cobrar', lbl:'Morosidad', kpiLbl:'Morosidad', meta:5, inv:true},
+      {tipo:'mermas',             lbl:'Mermas',    kpiLbl:'Merma Total', meta:3, inv:true},
+      {tipo:'margen_variable_pag2', lbl:'Avance Ppto', kpiLbl:'Avance vs Ppto', meta:100, inv:false},
+    ].filter(g => rp[g.tipo]).map(g => {
+      const val = parseVal(kv(g.tipo, g.kpiLbl)) || 0;
+      const ok  = g.inv ? val <= g.meta : val >= g.meta*0.9;
+      const warn= g.inv ? val <= g.meta*1.5 : val >= g.meta*0.7;
+      const color = ok ? 'var(--green)' : warn ? 'var(--yellow)' : 'var(--red)';
+      const cfg  = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===g.tipo);
+      const click = cfg ? `onclick="showDetail('${empresa}','${g.tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')"` : '';
+      return `<div ${click} style="text-align:center;cursor:pointer;padding:10px;background:var(--surface);border-radius:10px;border:1px solid var(--border);min-width:90px;flex:1">
+        ${svgGauge(val, g.lbl, color, g.meta+'%')}
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- REPORTES: acceso detalle -->
+  <div style="font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-transform:uppercase;margin-bottom:8px">Reportes Detallados</div>
+  <div class="reportes-list">
+    ${reportes.map(r => {
+      const rd2 = reportesData[r.tipo] || {};
+      const estado = rd2.estado || 'neutral';
+      const subtext = rd2.alerta || (estado==='green' ? 'Sin alertas' : rd2.kpis?.[0] ? rd2.kpis[0].label+': '+rd2.kpis[0].valor : 'Ver análisis');
+      const chipLabel = estado==='red'?'Crítico':estado==='yellow'?'Alerta':estado==='green'?'OK':'Ver';
+      const safeDesc = (r.desc||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}','${safeDesc}')">
+        <div class="reporte-icon icon-${estado==='neutral'?'neutral':estado}">
+          <svg viewBox="0 0 24 24">${ICON_SVG[r.icon]||ICON_SVG.check}</svg>
+        </div>
+        <div class="reporte-info">
+          <div class="reporte-name">${r.label}</div>
+          <div class="reporte-sub">${subtext}</div>
+        </div>
+        <span class="estado-chip ${estado}">${chipLabel}</span>
+      </div>`;
+    }).join('')}
+  </div>
+
+  ${generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, [])}
   `;
 }
 
@@ -1166,6 +1388,206 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
   </div>`;
 }
 
+// ── Gráficas SVG inline ──────────────────────────────────────────────────────
+
+// Parsea "S/124.89M" → 124890000, "81.7%" → 81.7, "S/3.15M" → 3150000
+function parseVal(s) {
+  if (!s) return null;
+  s = String(s).trim();
+  const mM = s.match(/([\d,]+\.?\d*)\s*M/i);
+  if (mM) return parseFloat(mM[1].replace(/,/g,'')) * 1e6;
+  const mK = s.match(/([\d,]+\.?\d*)\s*K/i);
+  if (mK) return parseFloat(mK[1].replace(/,/g,'')) * 1e3;
+  return parseFloat(s.replace(/[^0-9.\-]/g,'')) || null;
+}
+
+function fmtM(n) { // format soles as "S/X.XXM"
+  if (n === null || n === undefined) return '—';
+  if (Math.abs(n) >= 1e6) return 'S/' + (n/1e6).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1e3) return 'S/' + (n/1e3).toFixed(0) + 'K';
+  return 'S/' + n.toFixed(0);
+}
+
+// Semicircle gauge (180°): left=0%, right=100%
+function svgGauge(pct, label, color, meta) {
+  const clamped = Math.max(0, Math.min(100, pct));
+  const R = 52, cx = 64, cy = 64;
+  // angle in radians: 0% = π (left), 100% = 0 (right), sweep left→right through top
+  const ang = Math.PI * (1 - clamped / 100);
+  const ex = cx + R * Math.cos(ang);
+  const ey = cy - R * Math.sin(ang);
+  // track: full semicircle from right (0) to left (π)
+  return `<svg viewBox="0 0 128 78" style="width:150px;height:88px;display:block;margin:0 auto">
+    <path d="M${cx-R},${cy} A${R},${R} 0 0,1 ${cx+R},${cy}" fill="none" stroke="var(--border)" stroke-width="11" stroke-linecap="round"/>
+    <path d="M${cx+R},${cy} A${R},${R} 0 0,0 ${ex.toFixed(1)},${ey.toFixed(1)}" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round"/>
+    <text x="${cx}" y="${cy+2}" text-anchor="middle" font-size="20" font-weight="800" fill="${color}">${pct.toFixed(1)}%</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="9" fill="var(--sub)">${label}</text>
+    ${meta ? `<text x="${cx}" y="${cy+27}" text-anchor="middle" font-size="8" fill="var(--sub)">meta ${meta}</text>` : ''}
+    <text x="${cx-R+2}" y="${cy+14}" font-size="8" fill="var(--sub)">0%</text>
+    <text x="${cx+R-14}" y="${cy+14}" font-size="8" fill="var(--sub)">100%</text>
+  </svg>`;
+}
+
+// Waterfall: items = [{label, valSoles, color}]
+function svgWaterfall(items) {
+  const maxVal = Math.max(...items.map(i => Math.abs(i.valSoles)));
+  if (!maxVal) return '';
+  const W = 280, H = 110, padL = 8, bw = 72, gap = 12, padB = 22;
+  const scale = (H - padB - 8) / maxVal;
+  let bars = '';
+  items.forEach((item, i) => {
+    const bh = Math.max(4, Math.round(Math.abs(item.valSoles) * scale));
+    const x = padL + i * (bw + gap);
+    const y = H - padB - bh;
+    const lbl = fmtM(item.valSoles);
+    bars += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="4" fill="${item.color}" opacity="0.9"/>
+      <text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="10" font-weight="700" fill="${item.color}">${lbl}</text>
+      <text x="${x+bw/2}" y="${H-4}" text-anchor="middle" font-size="9" fill="var(--sub)">${item.label}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:300px;display:block;margin:0 auto">${bars}</svg>`;
+}
+
+function renderChartForReporte(tipo, rd) {
+  const kpis = rd.kpis || [];
+  const get  = (lbl) => kpis.find(k => k.label === lbl)?.valor;
+  const num  = (lbl) => parseVal(get(lbl));
+
+  if (tipo === 'fill_rate') {
+    const fr  = num('Fill Rate');
+    const ov  = num('Orden de Venta');
+    const fac = num('Facturación');
+    const vp  = num('Venta Perdida');
+    if (!fr && !ov) return '';
+    const col = (fr||0) >= 98 ? 'var(--green)' : (fr||0) >= 85 ? 'var(--yellow)' : 'var(--red)';
+    return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
+      ${fr ? svgGauge(fr, 'Fill Rate', col, '98%') : ''}
+      ${ov ? svgWaterfall([
+        {label:'Orden Venta', valSoles: ov,  color:'var(--accent)'},
+        {label:'Facturado',   valSoles: fac, color:'var(--green)'},
+        {label:'Venta Perdida', valSoles: vp, color:'var(--red)'},
+      ]) : ''}
+    </div>
+    ${vp ? `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px;font-size:12px;margin-top:4px">
+      <strong style="color:var(--red)">Impacto económico:</strong> ${fmtM(vp)} en venta perdida — pedidos que no se atendieron completos.<br>
+      <span style="color:var(--sub)">Si Fill Rate sube a 98%, se recuperarían ≈ ${fmtM((ov||0)*0.98 - (fac||0))} adicionales.</span>
+    </div>` : ''}`;
+  }
+
+  if (tipo === 'cuentas_por_cobrar') {
+    const mora  = num('Morosidad');
+    const pvenc = num('CxC por vencer');
+    if (!mora) return '';
+    const col = mora >= 15 ? 'var(--red)' : mora >= 8 ? 'var(--yellow)' : 'var(--green)';
+    return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
+      ${svgGauge(mora, 'Morosidad', col, '5%')}
+      ${pvenc ? `<div style="flex:1;min-width:120px">
+        <div style="font-size:11px;color:var(--sub);margin-bottom:4px">Por vencer próximos 30 días</div>
+        <div style="font-size:24px;font-weight:800;color:var(--yellow)">${fmtM(pvenc)}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:8px">Brecha vs meta 5%: <strong style="color:${col}">${(mora-5).toFixed(1)}pp</strong></div>
+        <div style="font-size:11px;color:var(--sub)">Acción: Activar cobranza activa y bloquear crédito a clientes >60 días.</div>
+      </div>` : ''}
+    </div>`;
+  }
+
+  if (tipo === 'mermas') {
+    const m = num('Merma Total');
+    if (!m) return '';
+    const col = m >= 5 ? 'var(--red)' : m >= 3 ? 'var(--yellow)' : 'var(--green)';
+    const brecha = (m - 3).toFixed(2);
+    return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
+      ${svgGauge(m, 'Merma Total', col, '3%')}
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:13px;font-weight:700;color:${col}">+${brecha}pp sobre meta</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">Merma de <strong>${m.toFixed(2)}%</strong> vs límite operativo de <strong>3%</strong>.</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">Acción: Auditar línea/turno con mayor pérdida. Revisar temperatura, manipulación y vencimientos.</div>
+      </div>
+    </div>`;
+  }
+
+  if (tipo === 'margen_variable_pag2') {
+    const av    = num('Avance vs Ppto');
+    const venta = parseVal(rd.kpis?.find?.(k => k.label==='Ventas mes')?.valor);
+    if (!av) return '';
+    const col     = av >= 90 ? 'var(--green)' : av >= 70 ? 'var(--yellow)' : 'var(--red)';
+    // Derivar ppto implícito si tenemos ventas
+    const pptoHtml = '';
+    return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
+      ${svgGauge(av, 'Avance vs Ppto', col, '100%')}
+      <div style="flex:1;min-width:130px">
+        <div style="font-size:13px;font-weight:700;color:${col}">${av.toFixed(1)}% del presupuesto</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">Brecha para cerrar el mes: <strong style="color:var(--red)">${(100-av).toFixed(1)}pp restantes</strong></div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">Acción: Revisar pipeline comercial. Identificar dónde está la brecha: volumen, precio o canal.</div>
+      </div>
+    </div>`;
+  }
+
+  if (tipo === 'cuentas_por_pagar') {
+    const cxp = toNum(get('CxP Total'));
+    const ref = toNum(get('Refinanciado'));
+    const neto = cxp - ref;
+    if (!cxp) return '';
+    return `<div style="margin:12px 0">
+      ${svgBars([
+        {label:'CxP Total',    val: cxp, max: cxp, color:'var(--accent)'},
+        {label:'Refinanciado', val: ref, max: cxp, color:'var(--yellow)'},
+        {label:'Neto por pagar', val: neto, max: cxp, color:'var(--red)'},
+      ], 'CxP')}
+    </div>`;
+  }
+
+  return '';
+}
+
+// ── Tabla ejecutiva resumen de todas las áreas ────────────────────────────────
+function renderTablaEjecutiva(empresa) {
+  const empData = (DATA.empresas || {})[empresa] || {};
+  const rd = empData.reportes || {};
+  const get = (tipo, lbl) => rd[tipo]?.kpis?.find(k => k.label === lbl)?.valor || '—';
+  const sem = (tipo) => rd[tipo]?.estado || 'neutral';
+  const dot = (s) => `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s==='red'?'var(--red)':s==='yellow'?'var(--yellow)':s==='green'?'var(--green)':'var(--sub)'};margin-right:4px"></span>`;
+
+  const rows = [
+    { area:'Ventas (mes)',     valor: get('margen_variable','Ventas mes'),         meta:'—',    tipo:'margen_variable' },
+    { area:'Avance vs Ppto',  valor: get('margen_variable_pag2','Avance vs Ppto'), meta:'100%', tipo:'margen_variable_pag2' },
+    { area:'Fill Rate',       valor: get('fill_rate','Fill Rate'),                 meta:'98%',  tipo:'fill_rate' },
+    { area:'Venta Perdida',   valor: get('fill_rate','Venta Perdida'),             meta:'S/0',  tipo:'fill_rate' },
+    { area:'Morosidad CxC',   valor: get('cuentas_por_cobrar','Morosidad'),        meta:'<5%',  tipo:'cuentas_por_cobrar' },
+    { area:'CxC por vencer',  valor: get('cuentas_por_cobrar','CxC por vencer'),   meta:'—',    tipo:'cuentas_por_cobrar' },
+    { area:'CxP Total',       valor: get('cuentas_por_pagar','CxP Total'),         meta:'—',    tipo:'cuentas_por_pagar' },
+    { area:'Refinanciado',    valor: get('cuentas_por_pagar','Refinanciado'),      meta:'—',    tipo:'cuentas_por_pagar' },
+    { area:'Mermas',          valor: get('mermas','Merma Total'),                  meta:'<3%',  tipo:'mermas' },
+    { area:'Stock',           valor: get('sop_inventario','Inventario Total'),     meta:'—',    tipo:'sop_inventario' },
+  ].filter(r => r.valor !== '—');
+
+  if (!rows.length) return '';
+
+  return `<div class="section-header" style="margin-top:20px">
+    <div class="section-header-title">Tabla Ejecutiva — Agosto 2026</div>
+    <div class="section-header-line"></div>
+  </div>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead>
+      <tr style="border-bottom:1px solid var(--border)">
+        <th style="text-align:left;padding:6px 8px;color:var(--sub);font-weight:600;font-size:10px">ÁREA</th>
+        <th style="text-align:right;padding:6px 8px;color:var(--sub);font-weight:600;font-size:10px">VALOR</th>
+        <th style="text-align:right;padding:6px 8px;color:var(--sub);font-weight:600;font-size:10px">META</th>
+        <th style="text-align:center;padding:6px 8px;color:var(--sub);font-weight:600;font-size:10px">ESTADO</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map((r,i) => `<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--surface)':'transparent'}"
+          onclick="showDetail('${empresa}','${r.tipo}','${r.area}','','${r.area}')" style="cursor:pointer">
+        <td style="padding:8px;font-weight:500">${r.area}</td>
+        <td style="padding:8px;text-align:right;font-weight:700;font-family:monospace">${r.valor}</td>
+        <td style="padding:8px;text-align:right;color:var(--sub)">${r.meta}</td>
+        <td style="padding:8px;text-align:center">${dot(sem(r.tipo))}${sem(r.tipo) === 'red' ? 'Crítico' : sem(r.tipo) === 'yellow' ? 'Alerta' : sem(r.tipo) === 'green' ? 'OK' : '—'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+  </div>`;
+}
+
 function showDetail(empresa, tipo, label, archivo, desc) {
   navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab });
   const empData = (DATA.empresas || {})[empresa] || {};
@@ -1193,6 +1615,12 @@ function showDetail(empresa, tipo, label, archivo, desc) {
   if (rd.kpis?.length) {
     html += `<div class="section-header"><div class="section-header-title">Indicadores clave <span style="font-weight:400;opacity:.6;font-size:9px;text-transform:none;letter-spacing:0">— toca para profundizar</span></div><div class="section-header-line"></div></div>
     <div class="kpi-grid">${rd.kpis.map(k => renderKpiCardDetail(k, empresa, label, desc)).join('')}</div>`;
+  }
+
+  // Gráficas del reporte
+  const chartHtml = renderChartForReporte(tipo, rd);
+  if (chartHtml) {
+    html += `<div class="section-header"><div class="section-header-title">Visualización</div><div class="section-header-line"></div></div>${chartHtml}`;
   }
 
   // Tramos de cartera
