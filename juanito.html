@@ -1878,7 +1878,6 @@ function renderMcKinseyArea(empresa, tipo) {
         chatMsg: `Analiza la gestión de Compras de ${empresa}. El ratio Consumo÷Compra mide eficiencia: >100% jala inventario, <100% sobre-compra. ¿Qué recomendaciones tienes para optimizar el proceso de compras?`
       };
     },
-  };
 
     consumo_materiales: () => {
       const cecoV  = rd.kpis?.find(k => k.label === 'CECO Ajustado Total')?.valor;
@@ -1886,6 +1885,7 @@ function renderMcKinseyArea(empresa, tipo) {
       const tnV    = rd.kpis?.find(k => k.label === 'TN Producidas')?.valor;
       const ateV   = rd.kpis?.find(k => k.label === 'Consumo Planta Ate')?.valor;
       const pachV  = rd.kpis?.find(k => k.label === 'Consumo Planta Pachacamac')?.valor;
+      const isLC   = rd.live_connection === true;
       return {
         titulo: 'Consumo de Materiales — Producción',
         I: `<div style="flex:1">
@@ -1894,9 +1894,14 @@ function renderMcKinseyArea(empresa, tipo) {
           ${tnV   ? rowKpi('TN Producidas agosto 2026', tnV, null, 'var(--fg)') : ''}
           ${ateV  ? rowKpi('Consumo Planta Ate', ateV, null, 'var(--fg)') : ''}
           ${pachV ? rowKpi('Consumo Planta Pachacamac', pachV, null, 'var(--fg)') : ''}
-          ${!cecoV && !mipV ? `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
-            Medidas del dataset aún no descubiertas. El workflow intentará "CECO AJUSTADO", "MIP", "TN PRODUCIDA". Ver logs de discover_measures para confirmar nombres exactos.
-          </div>` : ''}
+          ${isLC ? `<div style="font-size:11px;color:var(--sub);padding:10px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
+            <strong>⚠️ Live Connection detectada</strong><br>
+            El dataset de Consumo de Materiales usa conexión directa a la fuente — la API de Power BI no puede ejecutar queries DAX sobre él.<br><br>
+            <strong>Datos visibles en Power BI:</strong> CECO AJUSTADO por centro de costo, MIP (S/.) / TN Producida, Consumo por COD-PROD (2025-2026).<br><br>
+            Para habilitarlo en Juanito, el dataset debe cambiarse a Import Mode en Power BI Service, o publicar las métricas clave como medidas en un dataset secundario.
+          </div>` : (!cecoV && !mipV ? `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
+            Medidas del dataset aún no descubiertas. Ejecutar workflow discover_measures para confirmar nombres exactos.
+          </div>` : '')}
           <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
             Plantas: ATE ([924001]) · PACHACAMAC ([923001]) · Centros: Planta, Mantenimiento, Calidad.
           </div>

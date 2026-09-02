@@ -518,6 +518,11 @@ def build_margen(found):
 
     margen_pct = to_float(margen_val)
     if margen_pct and abs(margen_pct) < 1: margen_pct *= 100
+    # Si no hay medida directa de margen, calcular desde Precio/kg y Costo/kg
+    if margen_pct is None and precio_val is not None and costo_val is not None:
+        p, c = to_float(precio_val), to_float(costo_val)
+        if p and c and p > 0:
+            margen_pct = (p - c) / p * 100
     sem = sem_thresh(margen_pct, red_below=46, yellow_below=52)
 
     kpis = []
@@ -1043,7 +1048,7 @@ def main():
             # ── Margen por UEN (B&D, MAQUILA, TIGO) via DAX filtro TIPO DE NEGOCIO N1
             margen_ds_id = DATASET_IDS.get(empresa, {}).get("margen")
             margen_m = None
-            for m_name in ["% Margen", "Margen Variable", "% MV", "R. MARGEN"]:
+            for m_name in ["% Margen", "Margen Variable", "% MV", "R. MARGEN", "Venta Total"]:
                 if scanned.get("margen", {}).get(m_name) is not None:
                     margen_m = m_name
                     break
@@ -1051,14 +1056,14 @@ def main():
                 uens = ["B&D", "MAQUILA", "TIGO"]
                 uen_data = []
                 for uen in uens:
-                    # Intenta filtrar por columna TIPO DE NEGOCIO N1 o N2
                     for tbl_col in [("Maestro Productos", "TIPO DE NEGOCIO N1"),
                                     ("Maestro Productos", "TIPO DE NEGOCIO N2"),
                                     ("Productos", "TIPO DE NEGOCIO N1"),
-                                    ("DimProducto", "TIPO DE NEGOCIO N1")]:
+                                    ("DimProducto", "TIPO DE NEGOCIO N1"),
+                                    ("data", "TIPO DE NEGOCIO N1")]:
                         q = (f'EVALUATE ROW("v", CALCULATE([{margen_m}],'
                              f'FILTER(ALL(\'{tbl_col[0]}\'), \'{tbl_col[0]}\'[{tbl_col[1]}] = "{uen}")))')
-                        rows = dax(token, WS_ID, margen_ds_id, q, label=f"margen-uen-{uen}")
+                        rows = dax(token, ws_id, margen_ds_id, q, label=f"margen-uen-{uen}")
                         if rows and list(rows[0].values())[0] is not None:
                             val = list(rows[0].values())[0]
                             pct = to_float(val)
@@ -1075,12 +1080,65 @@ def main():
             if rc:
                 empresa_data["reportes"]["consumo_materiales"] = rc
                 print(f"  Consumo Materiales {len(rc['kpis'])} KPIs sem={rc['estado']}")
+            else:
+                # Live Connection: guardar marcador para que el frontend muestre mensaje correcto
+                empresa_data["reportes"]["consumo_materiales"] = {
+                    "estado": "grey", "alerta": None, "kpis": [],
+                    "live_connection": True
+                }
+                print("  Consumo Materiales: sin medidas DAX — Live Connection")
 
         # ── Mermas
         if scanned.get("mermas"):
             r = build_mermas(scanned["mermas"])
             empresa_data["reportes"]["mermas"] = r
             print(f"  Mermas {len(r['kpis'])} KPIs sem={r['estado']}")
+
+            # ── Mermas por UEN y por Planta via DAX CALCULATE+FILTER
+            mermas_ds_id = DATASET_IDS.get(empresa, {}).get("mermas")
+            merma_m = None
+            for m_name in ["% Merma Total", "% Merma", "% MERMAS", "Merma Total"]:
+                if scanned.get("mermas", {}).get(m_name) is not None:
+                    merma_m = m_name; break
+            if mermas_ds_id and merma_m:
+                # Por UEN (B&D / TIGO / MAQUILA)
+                uen_merma = []
+                for uen in ["B&D", "TIGO", "MAQUILA"]:
+                    for tbl_col in [("Maestro Productos", "TIPO DE NEGOCIO N1"),
+                                    ("Productos", "TIPO DE NEGOCIO N1"),
+                                    ("DimProducto", "TIPO DE NEGOCIO N1"),
+                                    ("Mermas", "TIPO DE NEGOCIO N1"),
+                                    ("data", "TIPO DE NEGOCIO N1")]:
+                        q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
+                             f'FILTER(ALL(\'{tbl_col[0]}\'), \'{tbl_col[0]}\'[{tbl_col[1]}] = "{uen}")))')
+                        rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-uen-{uen}")
+                        if rows and list(rows[0].values())[0] is not None:
+                            v = to_float(list(rows[0].values())[0])
+                            if v and abs(v) < 1: v *= 100
+                            s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
+                            uen_merma.append({"uen": uen, "merma": f"{v:.2f}%", "estado": s})
+                            break
+                if uen_merma:
+                    empresa_data["reportes"]["mermas"]["por_uen"] = uen_merma
+                    print(f"  Mermas UEN: {uen_merma}")
+
+                # Por Planta (ATE / PACHACAMAC / TERCEROS)
+                planta_merma = []
+                for planta in ["ATE", "PACHACAMAC", "TERCEROS"]:
+                    for tbl_col in [("Detalle Mermas", "PLANTA"), ("Mermas", "PLANTA"),
+                                    ("Control Produccion", "PLANTA"), ("data", "PLANTA")]:
+                        q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
+                             f'FILTER(ALL(\'{tbl_col[0]}\'), \'{tbl_col[0]}\'[{tbl_col[1]}] = "{planta}")))')
+                        rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-planta-{planta}")
+                        if rows and list(rows[0].values())[0] is not None:
+                            v = to_float(list(rows[0].values())[0])
+                            if v and abs(v) < 1: v *= 100
+                            s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
+                            planta_merma.append({"planta": planta, "merma": f"{v:.2f}%", "estado": s})
+                            break
+                if planta_merma:
+                    empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
+                    print(f"  Mermas Planta: {planta_merma}")
 
         # ── Compras
         if scanned.get("compras"):
