@@ -942,6 +942,41 @@ def main():
     if holding_mora_vals:
         summary["holding_mora"] = f"{sum(holding_mora_vals)/len(holding_mora_vals):.1f}%"
 
+    # Inyectar datos YoY del discover si existen
+    discovered_path = OUTPUT_DIR / "discovered_measures.json"
+    if discovered_path.exists():
+        try:
+            disc = json.loads(discovered_path.read_text())
+            yoy  = disc.get("yoy", {})
+            comp = disc.get("comp_filtro", "")
+            if yoy:
+                summary["yoy_periodo"] = comp
+                summary["yoy"] = {}
+                # Ventas año anterior
+                ventas_yoy = (yoy.get("margen", {}) or {}).get("Venta Total")
+                if ventas_yoy is not None:
+                    summary["yoy"]["ventas"] = ventas_yoy
+                # Fill Rate año anterior
+                fr_yoy = (yoy.get("fill_rate", {}) or {}).get("% Fill Rate")
+                if fr_yoy is not None:
+                    summary["yoy"]["fill_rate"] = fr_yoy
+                # Mermas año anterior
+                mermas_yoy = (yoy.get("mermas", {}) or {}).get("% Merma Total")
+                if mermas_yoy is not None:
+                    summary["yoy"]["mermas"] = mermas_yoy
+                # Avance año anterior
+                avance_yoy = (yoy.get("planificacion", {}) or {}).get("% Avance")
+                if avance_yoy is not None:
+                    summary["yoy"]["avance"] = avance_yoy
+                # Morosidad año anterior
+                mora_yoy = (yoy.get("cxc", {}) or {}).get("% Morosidad") or \
+                           (yoy.get("cxc", {}) or {}).get("Morosidad")
+                if mora_yoy is not None:
+                    summary["yoy"]["morosidad"] = mora_yoy
+                print(f"  YoY {comp}: ventas={ventas_yoy} fr={fr_yoy} mermas={mermas_yoy}")
+        except Exception as e:
+            print(f"  YoY no disponible: {e}")
+
     out = OUTPUT_DIR / "summaries.json"
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2))
     print(f"\n✓ summaries.json guardado ({out})")

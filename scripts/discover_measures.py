@@ -3,6 +3,7 @@
 Descubre TODAS las medidas reales de cada dataset via schema REST + executeQueries.
 Guarda resultados en data/latest/discovered_measures.json para que fetch_powerbi.py
 use los nombres exactos sin adivinar.
+Incluye comparativo YoY: mes actual vs mismo mes del año anterior.
 """
 import os, json, requests, datetime
 from pathlib import Path
@@ -29,6 +30,10 @@ today = datetime.date.today()
 PREV_MONTH = today.month - 1 if today.month > 1 else 12
 PREV_YEAR  = today.year  if today.month > 1 else today.year - 1
 
+# Año anterior mismo mes (comparativo YoY)
+COMP_YEAR  = PREV_YEAR - 1
+COMP_MONTH = PREV_MONTH
+
 DATASETS = {
     "margen":        "38076daa-d2cd-4a93-858a-82c0a4cf8cb6",
     "compras":       "06408938-8202-424e-80c0-b42c178dabde",
@@ -51,7 +56,6 @@ DATE_CTX = {
     "fill_rate":     ("Calendario", "Date"),
 }
 
-# Candidatos ampliados — todos los nombres posibles por dataset
 CANDIDATOS = {
     "margen":   ["Venta Total","Ventas","Margen Variable","% Margen Variable","MV","% MV",
                  "MARGEN VARIABLE","Venta Neta","Precio/kg","Margen Bruto","% Margen"],
@@ -77,6 +81,16 @@ CANDIDATOS = {
     "fill_rate":["% FILLRATE","% Fill Rate","ORDEN DE VENTA","FACTURACION","VENTA PERDIDA",
                  "Fill Rate","Orden de Venta","Facturacion","Venta Perdida",
                  "% Cumplimiento","Pedidos","Atendidos","No Atendidos"],
+}
+
+# Medidas clave a consultar para YoY (solo las confirmadas que responden a filtro fecha)
+KPI_YOY = {
+    "margen":        ["Venta Total"],
+    "mermas":        ["% Merma Total"],
+    "planificacion": ["% Avance"],
+    "fill_rate":     ["% Fill Rate", "ORDEN DE VENTA", "FACTURACION", "VENTA PERDIDA"],
+    "cxc":           ["% Morosidad", "Morosidad"],
+    "inventario":    ["Stock Total"],
 }
 
 def dax(ds_id, query):
@@ -111,11 +125,9 @@ def get_schema(ds_id):
     return schema
 
 def get_all_measures_dmv(ds_id):
-    """Usa INFO.MEASURES() para obtener TODAS las medidas del modelo."""
     rows = dax(ds_id, "EVALUATE INFO.MEASURES()")
     if not rows:
         return []
-    # Columna de nombre es [Name] o [MEASURE_NAME]
     measures = []
     for row in rows:
         name = (row.get("[Name]") or row.get("[MEASURE_NAME]") or
@@ -125,7 +137,6 @@ def get_all_measures_dmv(ds_id):
     return measures
 
 def get_all_tables_dmv(ds_id):
-    """Usa INFO.TABLES() para listar todas las tablas."""
     rows = dax(ds_id, "EVALUATE INFO.TABLES()")
     if not rows:
         return []
@@ -136,37 +147,26 @@ def get_all_tables_dmv(ds_id):
             tables.append(name)
     return tables
 
-def get_all_columns_dmv(ds_id):
-    """Usa INFO.COLUMNS() para listar columnas con nombre de tabla."""
-    rows = dax(ds_id, "EVALUATE INFO.COLUMNS()")
-    if not rows:
-        return []
-    cols = []
-    for row in rows:
-        tbl  = row.get("[TableID]") or row.get("TableID") or ""
-        name = row.get("[ExplicitName]") or row.get("[Name]") or row.get("Name") or ""
-        if name:
-            cols.append({"table": tbl, "name": name})
-    return cols
-
 def try_plain(ds_id, m):
     rows = dax(ds_id, f'EVALUATE ROW("v", [{m}])')
     if rows and rows[0]:
-        v = list(rows[0].values())[0]
-        return v
+        return list(rows[0].values())[0]
     return None
 
-def try_dated(ds_id, m, tbl, col):
-    q = f"""EVALUATE ROW("v", CALCULATE([{m}],
-  FILTER(ALL('{tbl}'), YEAR('{tbl}'[{col}]) = {PREV_YEAR} && MONTH('{tbl}'[{col}]) = {PREV_MONTH})))"""
+def try_dated(ds_id, m, tbl, col, year=None, month=None):
+    y  = year  or PREV_YEAR
+    mo = month or PREV_MONTH
+    q = (f'EVALUATE ROW("v", CALCULATE([{m}],'
+         f'FILTER(ALL(\'{tbl}\'), YEAR(\'{tbl}\'[{col}]) = {y} && MONTH(\'{tbl}\'[{col}]) = {mo})))')
     rows = dax(ds_id, q)
     if rows and rows[0]:
         return list(rows[0].values())[0]
     return None
 
-print(f"=== DISCOVERY COMPLETO — {PREV_YEAR}-{PREV_MONTH:02d} ===\n")
+print(f"=== DISCOVERY COMPLETO === {PREV_YEAR}-{PREV_MONTH:02d} vs YoY {COMP_YEAR}-{COMP_MONTH:02d}\n")
 
-results = {}  # {ds_key: {measure_name: {plain: val, dated: val}}}
+results     = {}  # {ds_key: {measure: {plain, dated}}}
+results_yoy = {}  # {ds_key: {measure: valor_año_anterior}}
 
 for ds_key, ds_id in DATASETS.items():
     print(f"\n{'='*60}")
@@ -174,14 +174,13 @@ for ds_key, ds_id in DATASETS.items():
     date_ctx = DATE_CTX.get(ds_key)
     results[ds_key] = {}
 
-    # PASO 1: INFO.MEASURES() — lista TODAS las medidas del modelo
+    # 1. Descubrir medidas via INFO.MEASURES()
     all_measures = get_all_measures_dmv(ds_id)
     if all_measures:
-        print(f"  INFO.MEASURES() → {len(all_measures)} medidas: {all_measures[:20]}")
+        print(f"  INFO.MEASURES() -> {len(all_measures)} medidas: {all_measures[:20]}")
         if len(all_measures) > 20:
-            print(f"    ... y {len(all_measures)-20} más")
+            print(f"    ... y {len(all_measures)-20} mas")
     else:
-        # PASO 2: schema REST (datasets no-Live-Connection)
         schema = get_schema(ds_id)
         if schema:
             for tbl_name, tbl_info in schema.items():
@@ -193,13 +192,12 @@ for ds_key, ds_id in DATASETS.items():
             print("  Sin medidas por DMV ni schema — usando candidatos")
             all_measures = CANDIDATOS.get(ds_key, [])
 
-    # PASO 3: INFO.TABLES() para diagnóstico
     tables = get_all_tables_dmv(ds_id)
     if tables:
-        print(f"  INFO.TABLES() → {tables}")
+        print(f"  INFO.TABLES() -> {tables}")
 
-    # PASO 4: probar cada medida con y sin filtro de fecha
-    print(f"  Probando {len(all_measures)} medidas...")
+    # 2. Probar cada medida (mes actual)
+    print(f"  Probando {len(all_measures)} medidas (mes actual {PREV_YEAR}-{PREV_MONTH:02d})...")
     for m in all_measures:
         v_plain = try_plain(ds_id, m)
         if v_plain is None:
@@ -208,18 +206,34 @@ for ds_key, ds_id in DATASETS.items():
         if date_ctx:
             v_dated = try_dated(ds_id, m, date_ctx[0], date_ctx[1])
             entry["dated"] = v_dated
-            print(f"  ✓ [{m}]  sin_filtro={v_plain}  |  agosto={v_dated}")
+            print(f"  OK [{m}]  sin_filtro={v_plain}  |  {PREV_YEAR}-{PREV_MONTH:02d}={v_dated}")
         else:
-            print(f"  ✓ [{m}] = {v_plain}")
+            print(f"  OK [{m}] = {v_plain}")
         results[ds_key][m] = entry
 
-# Guardar en JSON para que fetch_powerbi.py lo use directamente
+    # 3. YoY: mismo mes año anterior para medidas clave
+    yoy_measures = KPI_YOY.get(ds_key, [])
+    if yoy_measures and date_ctx:
+        results_yoy[ds_key] = {}
+        print(f"  YoY {COMP_YEAR}-{COMP_MONTH:02d}: consultando {yoy_measures}...")
+        for m in yoy_measures:
+            v_yoy = try_dated(ds_id, m, date_ctx[0], date_ctx[1],
+                              year=COMP_YEAR, month=COMP_MONTH)
+            if v_yoy is not None:
+                results_yoy[ds_key][m] = v_yoy
+                print(f"  OK YoY [{m}] {COMP_YEAR}-{COMP_MONTH:02d} = {v_yoy}")
+            else:
+                print(f"  NO YoY [{m}] sin datos para {COMP_YEAR}-{COMP_MONTH:02d}")
+
 out_path = Path("data/latest/discovered_measures.json")
 out_path.parent.mkdir(parents=True, exist_ok=True)
 out_path.write_text(json.dumps({
-    "generado": str(today),
-    "mes_filtro": f"{PREV_YEAR}-{PREV_MONTH:02d}",
-    "datasets": results
+    "generado":    str(today),
+    "mes_filtro":  f"{PREV_YEAR}-{PREV_MONTH:02d}",
+    "comp_filtro": f"{COMP_YEAR}-{COMP_MONTH:02d}",
+    "datasets":    results,
+    "yoy":         results_yoy,
 }, ensure_ascii=False, indent=2))
-print(f"\n✓ Guardado en {out_path}")
+print(f"\nGuardado en {out_path}")
+print(f"YoY {COMP_YEAR}-{COMP_MONTH:02d} incluido para: {list(results_yoy.keys())}")
 print("\n=== FIN ===")
