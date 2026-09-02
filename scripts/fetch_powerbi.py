@@ -28,6 +28,33 @@ HIST_DIR.mkdir(parents=True, exist_ok=True)
 
 HOY = datetime.date.today().strftime("%Y-%m-%d")
 
+# Mes anterior completo (para filtros DAX — septiembre sin datos completos)
+_today = datetime.date.today()
+PREV_MONTH = _today.month - 1 if _today.month > 1 else 12
+PREV_YEAR  = _today.year  if _today.month > 1 else _today.year - 1
+
+# Tabla/columna de fecha por dataset (descubierta con discover_measures.py #8)
+DATE_CONTEXT = {
+    "margen":    ("Calendario", "Date"),
+    "mermas":    ("Calendario", "Date"),
+    "compras":   ("Calendario", "Fecha"),
+    "fill_rate": ("Calendario", "Date"),
+}
+
+def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
+    """Ejecuta medida filtrada al mes anterior completo."""
+    q = f"""EVALUATE
+ROW("v",
+  CALCULATE(
+    [{measure_name}],
+    FILTER(ALL('{date_tbl}'), YEAR('{date_tbl}'[{date_col}]) = {PREV_YEAR} && MONTH('{date_tbl}'[{date_col}]) = {PREV_MONTH})
+  )
+)"""
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return rows[0].get("[v]") or rows[0].get("v")
+    return None
+
 WORKSPACES = {
     "PAUNO": "461932ad-b5ec-4fd6-aa97-f1fc7bdc5169",
 }
@@ -226,25 +253,31 @@ def save_measure_cache(cache):
     except: pass
 
 def scan_dataset(token, ws_id, dataset_id, ds_key, cache=None):
-    """Escanea medidas reales. Usa caché para omitir candidatos ya descartados."""
+    """Escanea medidas reales. Aplica filtro de mes anterior si hay tabla de fecha conocida."""
     candidates = SCAN_CANDIDATES.get(ds_key, [])
+    date_ctx = DATE_CONTEXT.get(ds_key)  # (tabla, columna) o None
     found = {}
-    # Medidas ya confirmadas en caché
+
+    def get_val(name):
+        if date_ctx:
+            v = dax_prev_month(token, ws_id, dataset_id, name, date_ctx[0], date_ctx[1], f"{ds_key}_{name[:15]}")
+            if v is not None:
+                return v, True
+        return try_measure(token, ws_id, dataset_id, name)
+
     cached_found = (cache or {}).get(ds_key, {})
     if cached_found:
-        # Verificar que las medidas cacheadas siguen funcionando
         print(f"    Verificando {len(cached_found)} medidas en caché...")
         for name in list(cached_found.keys()):
-            v, exists = try_measure(token, ws_id, dataset_id, name)
+            v, exists = get_val(name)
             if exists:
                 found[name] = v
                 print(f"      ✓ [{name}] = {v} (caché)")
-        # Solo scan nuevos candidatos no cacheados
         scanned_before = set(cached_found.keys())
         candidates = [c for c in candidates if c not in scanned_before]
     print(f"    Escaneando {len(candidates)} candidatos nuevos...")
     for name in candidates:
-        v, exists = try_measure(token, ws_id, dataset_id, name)
+        v, exists = get_val(name)
         if exists:
             found[name] = v
             print(f"      ✓ [{name}] = {v}")
@@ -645,12 +678,22 @@ def main():
             print(f"  Escaneando {ds_key}...")
             scanned[ds_key] = scan_dataset(token, ws_id, did, ds_key, measure_cache)
 
-        # ── Compras: SUM directo desde tabla Compras
+        # ── Compras: SUM directo filtrado al mes anterior
         if "compras" in ids:
-            print("  Compras: sumando monto_total_linea...")
-            rows_sum = dax(token, ws_id, ids["compras"],
-                           "EVALUATE ROW(\"Total\", SUM('Compras'[data.monto_total_linea]))",
-                           "compras_sum")
+            print(f"  Compras: sumando monto_total_linea ({PREV_YEAR}-{PREV_MONTH:02d})...")
+            q_compras = f"""EVALUATE
+ROW("Total",
+  CALCULATE(
+    SUM('Compras'[data.monto_total_linea]),
+    FILTER(ALL('Calendario'), YEAR('Calendario'[Fecha]) = {PREV_YEAR} && MONTH('Calendario'[Fecha]) = {PREV_MONTH})
+  )
+)"""
+            rows_sum = dax(token, ws_id, ids["compras"], q_compras, "compras_sum_dated")
+            if not rows_sum:
+                # Fallback sin filtro
+                rows_sum = dax(token, ws_id, ids["compras"],
+                               "EVALUATE ROW(\"Total\", SUM('Compras'[data.monto_total_linea]))",
+                               "compras_sum")
             if rows_sum:
                 v = rows_sum[0].get("[Total]") or rows_sum[0].get("Total")
                 if v is not None:
