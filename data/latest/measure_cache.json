@@ -1,0 +1,51 @@
+{
+  "cxc": {
+    "% Morosidad": null,
+    "Morosidad": null,
+    "Por Vencer": null
+  },
+  "cxp": {
+    "Cuentas x Pagar": null,
+    "Refinanciamiento": null,
+    "Proveedores": null,
+    "CUENTAS X PAGAR": null
+  },
+  "margen": {
+    "Venta Total": null
+  },
+  "compras": {
+    "Ratio": null,
+    "Cant Compra": null,
+    "Cant Consumo": null,
+    "Eficiencia": null,
+    "Valor Compras": null
+  },
+  "inventario": {
+    "Stock Total": null
+  },
+  "control_ds": {
+    "% Cumplimiento": null,
+    "Satisfactorio": null
+  },
+  "consumo": {
+    "Consumo": null,
+    "Compras": null
+  },
+  "fill_rate": {
+    "% FILLRATE": null,
+    "ORDEN DE VENTA": null,
+    "FACTURACION": null,
+    "VENTA PERDIDA": null,
+    "% Fill Rate": null,
+    "% FillRate": null,
+    "Orden de Venta": null,
+    "Facturacion": null,
+    "Venta Perdida": null
+  },
+  "mermas": {
+    "% Merma Total": null
+  },
+  "planificacion": {
+    "% Avance": null
+  }
+}
