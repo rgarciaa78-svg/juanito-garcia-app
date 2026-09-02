@@ -93,12 +93,26 @@ for ds_key, ds_id in DATASETS.items():
     print(f"DATASET: {ds_key} ({ds_id[:8]}...)")
     schema = get_schema(ds_id)
     if not schema:
-        print("  ⚠ Schema vacío (dataset Live Connection o sin permiso)")
-        # Intentar probar medidas comunes de todas formas
-        for m in ["Venta Total","% Margen Variable","Margen Variable","Stock Total","Consumo","Ratio","% Ratio"]:
+        print("  ⚠ Schema vacío (Live Connection) — probando medidas por nombre...")
+        # Probar TODAS las medidas candidatas conocidas para este dataset
+        CANDIDATOS_DS = {
+            "margen":      ["Venta Total","Margen Variable","% Margen Variable","MV","% MV","MARGEN VARIABLE","VENTA MES","Venta Neta","Precio/kg"],
+            "compras":     ["Ratio","Ratio C/V","% Ratio","Consumo/Compra","Valor Compras","Total Compras","Monto Compras"],
+            "inventario":  ["Stock Total","Dead Stock","% Dead Stock","Inventario Total","Working Stock","Rotacion","Dias Inventario"],
+            "mermas":      ["% Merma Total","% Merma","Merma Total","Merma %","% Merma Ate","% Merma Pachacamac"],
+            "consumo":     ["Consumo","Compras","Total Consumo","Ratio","% Ratio"],
+            "planificacion":["% Avance","Avance","Ventas Real","Fill Rate","% Fill Rate"],
+            "cxc":         ["% Morosidad","Morosidad","Por Vencer","CxC Total","Vencido"],
+            "cxp":         ["Cuentas x Pagar","CUENTAS X PAGAR","Refinanciamiento","Proveedores"],
+        }
+        for m in CANDIDATOS_DS.get(ds_key, []):
             v = try_measure_plain(ds_id, m)
             if v != "ERR":
-                print(f"  MEDIDA [{m}] = {v}")
+                if date_ctx:
+                    v_d = try_measure_dated(ds_id, m, date_ctx[0], date_ctx[1])
+                    print(f"  [{m}] sin filtro={v}  |  {PREV_YEAR}-{PREV_MONTH:02d}={v_d}")
+                else:
+                    print(f"  [{m}] = {v}")
         continue
 
     date_ctx = DATE_CTX.get(ds_key)
