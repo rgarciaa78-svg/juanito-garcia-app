@@ -108,6 +108,17 @@
             }
           ]
         },
+        "control_interno": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": [
+            {
+              "label": "Satisfactorio",
+              "valor": "141",
+              "estado": "green"
+            }
+          ]
+        },
         "fill_rate": {
           "estado": "red",
           "alerta": "Fill Rate 74.6% — bajo meta 98%",
@@ -129,6 +140,18 @@
             {
               "label": "Venta Perdida",
               "valor": "S/31.66M",
+              "estado": "red"
+            }
+          ]
+        },
+        "margen_variable_pag2": {
+          "estado": "red",
+          "alerta": "Avance 33.4% vs presupuesto",
+          "kpis": [
+            {
+              "label": "Avance vs Ppto",
+              "valor": "33.4%",
+              "meta": "100%",
               "estado": "red"
             }
           ]
