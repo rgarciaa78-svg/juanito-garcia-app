@@ -651,16 +651,22 @@ def build_compras(found):
     ratio_val  = (found.get("Ratio") or found.get("Eficiencia") or found.get("Eficiencia Costo") or
                   found.get("Ratio C/V") or found.get("Ratio Compras") or
                   found.get("Ratio Consumo/Compra") or found.get("% Ratio") or found.get("Consumo/Compra"))
-    # Cant Consumo y Cant Compra son los nombres exactos visibles en el reporte Power BI
     consumo_val = (found.get("Cant Consumo") or found.get("Consumo") or
                    found.get("Total Consumo") or found.get("Importe Consumo"))
     compra_val  = (found.get("Cant Compra") or found.get("Valor Compras") or
                    found.get("Compras") or found.get("Total Compras") or found.get("Importe Compras"))
+    # Medidas del Reporte Compras — ANALISIS DE MATERIALES (PLANIFICACION Y COMPRA)
+    stock_pp_val    = found.get("Stock PP")
+    stock_val_val   = found.get("Stock Valorizado")
+    cons_3m_val     = found.get("Consumo Prom 3M")
+    cons_6m_val     = found.get("Consumo Prom 6M")
+    faltantes_val   = found.get("Faltantes")
+    lead_time_val   = found.get("Lead Time")
 
     ratio = to_float(ratio_val)
     if ratio and abs(ratio) < 2: ratio *= 100
     if ratio is None and consumo_val and compra_val:
-        c, p = to_float(consumo_val), abs(to_float(compra_val) or 0)  # compra puede ser negativa
+        c, p = to_float(consumo_val), abs(to_float(compra_val) or 0)
         if c and p and p > 0: ratio = (c / p) * 100
 
     sem = "green"
@@ -678,8 +684,29 @@ def build_compras(found):
         kpis.append({"label": "Consumo", "valor": fmt_soles(consumo_val)})
     if compra_val is not None:
         kpis.append({"label": "Compras", "valor": fmt_soles(compra_val)})
+    # Métricas de planificación de compras
+    if stock_pp_val is not None:
+        kpis.append({"label": "Stock PP (Punto de Pedido)", "valor": str(int(to_float(stock_pp_val) or 0))})
+    if stock_val_val is not None:
+        kpis.append({"label": "Stock Valorizado", "valor": fmt_soles(stock_val_val)})
+    if cons_3m_val is not None:
+        kpis.append({"label": "Consumo Prom 3M", "valor": str(int(to_float(cons_3m_val) or 0))})
+    if cons_6m_val is not None:
+        kpis.append({"label": "Consumo Prom 6M", "valor": str(int(to_float(cons_6m_val) or 0))})
+    if faltantes_val is not None:
+        n = to_float(faltantes_val)
+        s = "red" if (n or 0) > 0 else "green"
+        kpis.append({"label": "Faltantes", "valor": str(int(n or 0)), "estado": s})
+    if lead_time_val is not None:
+        kpis.append({"label": "Lead Time Prom (días)", "valor": f"{to_float(lead_time_val):.0f}d"})
 
-    alerta = f"Ratio {ratio:.1f}% — {interp}" if sem != "green" and ratio else None
+    # Semáforo: si hay faltantes o sin ratio, usar faltantes
+    if not ratio and faltantes_val is not None:
+        n = to_float(faltantes_val)
+        sem = "red" if (n or 0) > 10 else ("yellow" if (n or 0) > 0 else "green")
+
+    alerta = f"Ratio {ratio:.1f}% — {interp}" if sem != "green" and ratio else (
+             f"Faltantes: {int(to_float(faltantes_val) or 0)} ítems" if faltantes_val and to_float(faltantes_val) else None)
     return {"estado": sem, "alerta": alerta, "kpis": kpis}, ratio
 
 def build_inventario(found):
@@ -1101,41 +1128,51 @@ def main():
                 if scanned.get("mermas", {}).get(m_name) is not None:
                     merma_m = m_name; break
             if mermas_ds_id and merma_m:
-                # Por UEN (B&D / TIGO / MAQUILA)
+                # Descubrir tablas reales del dataset mermas para usar nombres correctos
+                merma_tables = discover_tables_in_dataset(token, ws_id, mermas_ds_id)
+                all_merma_tbls = list(merma_tables.keys()) if merma_tables else []
+                print(f"  Tablas mermas: {all_merma_tbls}")
+
+                # Por UEN — buscar tabla con columna de tipo negocio
                 uen_merma = []
+                uen_cols = ["TIPO DE NEGOCIO N1", "TIPO DE NEGOCIO N2", "UEN", "Unidad Negocio",
+                            "Negocio", "Tipo Negocio", "TipoNegocio"]
                 for uen in ["B&D", "TIGO", "MAQUILA"]:
-                    for tbl_col in [("Maestro Productos", "TIPO DE NEGOCIO N1"),
-                                    ("Productos", "TIPO DE NEGOCIO N1"),
-                                    ("DimProducto", "TIPO DE NEGOCIO N1"),
-                                    ("Mermas", "TIPO DE NEGOCIO N1"),
-                                    ("data", "TIPO DE NEGOCIO N1")]:
-                        q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
-                             f'FILTER(ALL(\'{tbl_col[0]}\'), \'{tbl_col[0]}\'[{tbl_col[1]}] = "{uen}")))')
-                        rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-uen-{uen}")
-                        if rows and list(rows[0].values())[0] is not None:
-                            v = to_float(list(rows[0].values())[0])
-                            if v and abs(v) < 1: v *= 100
-                            s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
-                            uen_merma.append({"uen": uen, "merma": f"{v:.2f}%", "estado": s})
-                            break
+                    found_uen = False
+                    # Probar con tablas reales descubiertas primero
+                    for tbl in all_merma_tbls + ["Maestro Productos", "Productos", "DimProducto", "data"]:
+                        if found_uen: break
+                        for col in uen_cols:
+                            q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
+                                 f'FILTER(ALL(\'{tbl}\'), \'{tbl}\'[{col}] = "{uen}")))')
+                            rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-uen-{uen}")
+                            if rows and list(rows[0].values())[0] is not None:
+                                v = to_float(list(rows[0].values())[0])
+                                if v and abs(v) < 1: v *= 100
+                                s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
+                                uen_merma.append({"uen": uen, "merma": f"{v:.2f}%", "estado": s})
+                                found_uen = True; break
                 if uen_merma:
                     empresa_data["reportes"]["mermas"]["por_uen"] = uen_merma
                     print(f"  Mermas UEN: {uen_merma}")
 
                 # Por Planta (ATE / PACHACAMAC / TERCEROS)
                 planta_merma = []
+                planta_cols = ["PLANTA", "Planta", "planta", "CENTRO", "Centro"]
                 for planta in ["ATE", "PACHACAMAC", "TERCEROS"]:
-                    for tbl_col in [("Detalle Mermas", "PLANTA"), ("Mermas", "PLANTA"),
-                                    ("Control Produccion", "PLANTA"), ("data", "PLANTA")]:
-                        q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
-                             f'FILTER(ALL(\'{tbl_col[0]}\'), \'{tbl_col[0]}\'[{tbl_col[1]}] = "{planta}")))')
-                        rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-planta-{planta}")
-                        if rows and list(rows[0].values())[0] is not None:
-                            v = to_float(list(rows[0].values())[0])
-                            if v and abs(v) < 1: v *= 100
-                            s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
-                            planta_merma.append({"planta": planta, "merma": f"{v:.2f}%", "estado": s})
-                            break
+                    found_plt = False
+                    for tbl in all_merma_tbls + ["Detalle Mermas", "Mermas", "Control Produccion", "data"]:
+                        if found_plt: break
+                        for col in planta_cols:
+                            q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
+                                 f'FILTER(ALL(\'{tbl}\'), \'{tbl}\'[{col}] = "{planta}")))')
+                            rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-plt-{planta}")
+                            if rows and list(rows[0].values())[0] is not None:
+                                v = to_float(list(rows[0].values())[0])
+                                if v and abs(v) < 1: v *= 100
+                                s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
+                                planta_merma.append({"planta": planta, "merma": f"{v:.2f}%", "estado": s})
+                                found_plt = True; break
                 if planta_merma:
                     empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
                     print(f"  Mermas Planta: {planta_merma}")
