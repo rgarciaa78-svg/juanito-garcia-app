@@ -30,21 +30,21 @@
     },
     "cxc": {
       "% Morosidad": {
-        "plain": 0.21673338861272787
+        "plain": 0.21084078782521948
       },
       "Morosidad": {
         "plain": "13.78%"
       },
       "Por Vencer": {
-        "plain": 3043976.6399999997
+        "plain": 3152752.0299999984
       }
     },
     "cxp": {
       "Cuentas x Pagar": {
-        "plain": 17527244.31999999
+        "plain": 17806597.16999999
       },
       "CUENTAS X PAGAR": {
-        "plain": 17527244.31999999
+        "plain": 17806597.16999999
       },
       "Refinanciamiento": {
         "plain": 6713881.120000003
