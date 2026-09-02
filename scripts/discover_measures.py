@@ -110,6 +110,45 @@ def get_schema(ds_id):
         }
     return schema
 
+def get_all_measures_dmv(ds_id):
+    """Usa INFO.MEASURES() para obtener TODAS las medidas del modelo."""
+    rows = dax(ds_id, "EVALUATE INFO.MEASURES()")
+    if not rows:
+        return []
+    # Columna de nombre es [Name] o [MEASURE_NAME]
+    measures = []
+    for row in rows:
+        name = (row.get("[Name]") or row.get("[MEASURE_NAME]") or
+                row.get("Name") or row.get("MEASURE_NAME") or "")
+        if name:
+            measures.append(name)
+    return measures
+
+def get_all_tables_dmv(ds_id):
+    """Usa INFO.TABLES() para listar todas las tablas."""
+    rows = dax(ds_id, "EVALUATE INFO.TABLES()")
+    if not rows:
+        return []
+    tables = []
+    for row in rows:
+        name = row.get("[Name]") or row.get("Name") or ""
+        if name:
+            tables.append(name)
+    return tables
+
+def get_all_columns_dmv(ds_id):
+    """Usa INFO.COLUMNS() para listar columnas con nombre de tabla."""
+    rows = dax(ds_id, "EVALUATE INFO.COLUMNS()")
+    if not rows:
+        return []
+    cols = []
+    for row in rows:
+        tbl  = row.get("[TableID]") or row.get("TableID") or ""
+        name = row.get("[ExplicitName]") or row.get("[Name]") or row.get("Name") or ""
+        if name:
+            cols.append({"table": tbl, "name": name})
+    return cols
+
 def try_plain(ds_id, m):
     rows = dax(ds_id, f'EVALUATE ROW("v", [{m}])')
     if rows and rows[0]:
@@ -135,19 +174,31 @@ for ds_key, ds_id in DATASETS.items():
     date_ctx = DATE_CTX.get(ds_key)
     results[ds_key] = {}
 
-    # Intentar schema REST primero (funciona solo en datasets no-Live-Connection)
-    schema = get_schema(ds_id)
-    all_measures = []
-    if schema:
-        for tbl_name, tbl_info in schema.items():
-            meds = tbl_info.get("measures", [])
-            if meds:
-                print(f"  Tabla '{tbl_name}': {len(meds)} medidas → {meds}")
-                all_measures.extend(meds)
+    # PASO 1: INFO.MEASURES() — lista TODAS las medidas del modelo
+    all_measures = get_all_measures_dmv(ds_id)
+    if all_measures:
+        print(f"  INFO.MEASURES() → {len(all_measures)} medidas: {all_measures[:20]}")
+        if len(all_measures) > 20:
+            print(f"    ... y {len(all_measures)-20} más")
     else:
-        print("  Schema vacío (Live Connection) — usando candidatos conocidos")
-        all_measures = CANDIDATOS.get(ds_key, [])
+        # PASO 2: schema REST (datasets no-Live-Connection)
+        schema = get_schema(ds_id)
+        if schema:
+            for tbl_name, tbl_info in schema.items():
+                meds = tbl_info.get("measures", [])
+                if meds:
+                    print(f"  Schema '{tbl_name}': {meds}")
+                    all_measures.extend(meds)
+        if not all_measures:
+            print("  Sin medidas por DMV ni schema — usando candidatos")
+            all_measures = CANDIDATOS.get(ds_key, [])
 
+    # PASO 3: INFO.TABLES() para diagnóstico
+    tables = get_all_tables_dmv(ds_id)
+    if tables:
+        print(f"  INFO.TABLES() → {tables}")
+
+    # PASO 4: probar cada medida con y sin filtro de fecha
     print(f"  Probando {len(all_measures)} medidas...")
     for m in all_measures:
         v_plain = try_plain(ds_id, m)
