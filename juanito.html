@@ -168,6 +168,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .holding-val { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
 .holding-val.danger { color: var(--red); }
+.holding-val.warn   { color: var(--yellow); }
 .holding-label { font-size: 10px; color: var(--text3); margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
 
 /* ============================
@@ -608,11 +609,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           <div class="holding-strip" id="holding-strip">
             <div class="holding-stat">
               <div class="holding-val" id="h-ventas">—</div>
-              <div class="holding-label">Ventas holding</div>
+              <div class="holding-label">Ventas mes</div>
             </div>
             <div class="holding-stat">
               <div class="holding-val danger" id="h-mora">—</div>
-              <div class="holding-label">Mora consolidada</div>
+              <div class="holding-label">Mora CxC</div>
+            </div>
+            <div class="holding-stat">
+              <div class="holding-val" id="h-fill">—</div>
+              <div class="holding-label">Fill Rate</div>
+            </div>
+            <div class="holding-stat">
+              <div class="holding-val" id="h-merma">—</div>
+              <div class="holding-label">Mermas</div>
             </div>
           </div>
           <div id="agenda-decidir-section"></div>
@@ -841,6 +850,16 @@ function renderHome() {
 
   document.getElementById('h-ventas').textContent = DATA.holding_ventas || '—';
   document.getElementById('h-mora').textContent   = DATA.holding_mora   || '—';
+  // Fill Rate y Mermas en strip
+  const pauno_rpts = (DATA.empresas?.PAUNO?.reportes) || {};
+  const fillVal = pauno_rpts.fill_rate?.kpis?.find(k=>k.label==='Fill Rate')?.valor || '—';
+  const mermaVal = pauno_rpts.mermas?.kpis?.find(k=>k.label==='Merma Total')?.valor || '—';
+  const mermaEst = pauno_rpts.mermas?.estado || 'green';
+  const fillEst  = pauno_rpts.fill_rate?.estado || 'green';
+  const hFill  = document.getElementById('h-fill');
+  const hMerma = document.getElementById('h-merma');
+  if (hFill)  { hFill.textContent  = fillVal;  hFill.className  = 'holding-val' + (fillEst==='red'?' danger':fillEst==='yellow'?' warn':''); }
+  if (hMerma) { hMerma.textContent = mermaVal; hMerma.className = 'holding-val' + (mermaEst==='red'?' danger':mermaEst==='yellow'?' warn':''); }
 
   const agenda = DATA.agenda_ceo || {};
   renderAgendaSection('agenda-decidir-section',    '🔴 Decidir hoy',          'red',    agenda.decidir_hoy   || []);
@@ -1303,20 +1322,35 @@ const REPORTES_PBI = {
   ],
 };
 
-const JUANITO_SYSTEM_PROMPT = `Eres JUANITO, un agente de análisis financiero, operativo y BI para el holding peruano (PAUNO es la empresa principal activa).
+function buildSystemPrompt() {
+  if (!DATA) return `Eres JUANITO, agente BI para el holding peruano PAUNO. Responde en español.`;
+  const d = DATA;
+  const pauno = (d.empresas?.PAUNO?.reportes) || {};
+  const mora   = pauno.cuentas_por_cobrar?.kpis?.find(k=>k.label==='Morosidad')?.valor || d.holding_mora || '—';
+  const cxp    = pauno.cuentas_por_pagar?.kpis?.find(k=>k.label==='CxP Total')?.valor || '—';
+  const ventas = pauno.margen_variable?.kpis?.find(k=>k.label==='Ventas mes')?.valor || d.holding_ventas || '—';
+  const margen = pauno.margen_variable?.kpis?.find(k=>k.label==='Margen variable')?.valor || '—';
+  const mermas = pauno.mermas?.kpis?.find(k=>k.label==='Merma Total')?.valor || '—';
+  const fillPct= pauno.fill_rate?.kpis?.find(k=>k.label==='Fill Rate')?.valor || '—';
+  const ov     = pauno.fill_rate?.kpis?.find(k=>k.label==='Orden de Venta')?.valor || '—';
+  const fact   = pauno.fill_rate?.kpis?.find(k=>k.label==='Facturación')?.valor || '—';
+  const vp     = pauno.fill_rate?.kpis?.find(k=>k.label==='Venta Perdida')?.valor || '—';
+  const sop    = pauno.sop_inventario?.kpis?.map(k=>`${k.label}: ${k.valor}`).join(' · ') || '—';
+  const alertas = (d.agenda_ceo?.decidir_hoy||[]).map(i=>i.texto).join(' | ') || 'Sin acciones críticas';
+
+  return `Eres JUANITO, un agente de análisis financiero, operativo y BI para el holding peruano (PAUNO es la empresa principal activa).
 
 Tu función: convertir datos del dashboard en decisiones claras para el CEO. Formato: QUÉ PASA → POR QUÉ IMPORTA → CUÁNTO IMPACTA → QUÉ HACER.
 
-DATOS ACTUALES PAUNO (31/08/2026):
-• Mora CxC: 22.9% (meta 15%) — vencido S/2,689,144 · tendencia alcista
-• CxP: 54 días (meta <90d) — VERDE · CxP total S/17,035,259
-• Margen variable: 43.00% agosto · caída desde 52.85% en enero
-• Mermas: 2.35% (meta 2%) · Planta Ate 1.97% OK
-• Compras ratio: 199.72% — consumo duplica compras, jalando inventario
-• S&OP Dead Stock: 98.27% · Envases 47.46% dead · MP 31.06% dead
-• Ventas vs PPTO: 88% total · Canal Tradicional SOLO 2% · HORECA 110%
-• Productividad: planilla/kg S/0.53 (mejora vs S/0.57 en 2025)
-• Ventas agosto parcial: S/2.7M · julio S/7.3M
+DATOS ACTUALES PAUNO (${d.fecha||'hoy'}) — FUENTE: Power BI API:
+• Ventas mes (agosto): ${ventas}
+• Mora CxC: ${mora} (meta 15%)
+• CxP Total: ${cxp}
+• Margen variable: ${margen} (meta 52%)
+• Mermas: ${mermas} (meta 2%)
+• Fill Rate: ${fillPct} (meta 98%) · Orden de Venta: ${ov} · Facturado: ${fact} · Venta perdida: ${vp}
+• S&OP / Inventario: ${sop}
+• Alertas CEO hoy: ${alertas}
 
 METODOLOGÍA:
 - Para KPIs: valor actual, meta, desviación en puntos/soles
@@ -1330,6 +1364,8 @@ FORMATO para análisis extenso:
 ## ACCIONES INMEDIATAS (numeradas, con responsable)
 
 Para preguntas directas: 2-3 párrafos sin headers. Responde en español. CEO decide en menos de 2 minutos.`;
+}
+const JUANITO_SYSTEM_PROMPT = null; // reemplazado por buildSystemPrompt()
 
 function initReportes() {
   ['PAUNO','AMAUTA','NEOPACK'].forEach(emp => {
@@ -1391,7 +1427,7 @@ function initJuanitoChat() {
       '¿Qué debo decidir hoy?',
       '¿Cómo está la mora?',
       '¿Cómo van las compras?',
-      'Avance vs presupuesto',
+      'Fill Rate',
       '¿Cómo está el inventario?',
       '¿Cómo está el margen?',
     ];
@@ -1440,6 +1476,9 @@ function chipsFollowUp(pregunta) {
   }
   if (p.includes('merma') || p.includes('productividad') || p.includes('planilla')) {
     return ['¿Cómo está el margen?', '¿Cómo van las compras?', '¿Qué debo decidir hoy?'];
+  }
+  if (p.includes('fill') || p.includes('venta perdida') || p.includes('facturaci')) {
+    return ['¿Cómo están las ventas?', '¿Cómo está el margen?', 'Avance vs presupuesto'];
   }
   if (p.includes('pauno')) {
     return ['¿Cómo está la mora?', '¿Cómo van las compras?', 'Avance vs presupuesto'];
@@ -1769,10 +1808,26 @@ function analizarConJuanito(pregunta) {
     return html;
   }
 
-  // 6d. AVANCE PRESUPUESTO / CANAL / FILL RATE
-  if (p.includes('presupuesto') || p.includes('avance') || p.includes('canal') || p.includes('tradicional') || p.includes('moderno') || p.includes('horeca') || p.includes('fill') || p.includes('ppto')) {
-    const rd2 = ((d.empresas||{}).PAUNO?.reportes||{}).margen_variable_pag2 || {};
+  // 6d. FILL RATE
+  if (p.includes('fill') || p.includes('fillrate') || p.includes('venta perdida') || p.includes('facturaci')) {
     const rd3 = ((d.empresas||{}).PAUNO?.reportes||{}).fill_rate || {};
+    let html = `<strong>📦 FILL RATE — ${d.fecha||'hoy'}</strong><br><br>`;
+    if (rd3.alerta) html += `${rd3.estado==='red'?'🔴':'🟡'} <strong>${rd3.alerta}</strong><br><br>`;
+    if (rd3.kpis?.length) {
+      rd3.kpis.forEach(k => {
+        const ic = k.estado==='red'?'🔴':k.estado==='yellow'?'🟡':'🟢';
+        html += `${ic} ${k.label}: <strong>${k.valor}</strong>${k.meta ? ` (meta ${k.meta})` : ''}<br>`;
+      });
+    } else {
+      html += 'No hay datos de Fill Rate disponibles.';
+    }
+    html += `<br><strong>¿Qué es el Fill Rate?</strong><br>Porcentaje de órdenes de venta que se facturaron completas. Bajo 95% indica pedidos no atendidos que generan venta perdida.`;
+    return html;
+  }
+
+  // 6e. AVANCE PRESUPUESTO / CANAL
+  if (p.includes('presupuesto') || p.includes('avance') || p.includes('canal') || p.includes('tradicional') || p.includes('moderno') || p.includes('horeca') || p.includes('ppto')) {
+    const rd2 = ((d.empresas||{}).PAUNO?.reportes||{}).margen_variable_pag2 || {};
     let html = `<strong>🎯 AVANCE VENTAS VS PRESUPUESTO — ${d.fecha||'hoy'}</strong><br><br>`;
     if (rd2.alerta) html += `${rd2.estado==='red'?'🔴':'🟡'} <strong>${rd2.alerta}</strong><br><br>`;
     if (rd2.contexto) html += `${rd2.contexto}<br><br>`;
