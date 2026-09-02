@@ -183,6 +183,13 @@ SCAN_CANDIDATES = {
         "Ventas Real", "Real vs Ppto", "% Real vs Ppto",
     ],
     "consumo": [
+        # Medidas del reporte "Consumo de Materiales" (PRODUCCIÓN)
+        "CECO AJUSTADO", "Ceco Ajustado", "CECO", "Costo CECO",
+        "MIP", "MIP (S/.)", "MIP Total", "Costo x TN", "Costo por TN",
+        "TN PRODUCIDA", "TN Producida", "Toneladas Producidas", "Ton Producida",
+        "Consumo Ate", "Consumo Pachacamac", "Consumo Planta",
+        "Costo Consumo", "Costo Material", "Costo MP",
+        # Medidas ratio consumo/compra
         "Consumo", "Total Consumo", "Importe Consumo", "Monto Consumo",
         "Compras", "Total Compras", "Importe Compras", "Monto Compras",
         "Ratio", "Ratio Consumo", "% Ratio", "Eficiencia", "% Eficiencia",
@@ -528,6 +535,44 @@ def build_mermas(found):
             kpis.append({"label": label, "valor": f"{val:.2f}%", "meta": "2%", "estado": s})
 
     alerta = f"Merma {worst:.2f}% — sobre meta 2%" if sem != "green" and worst else None
+    return {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+def build_consumo_materiales(found):
+    """Reporte PRODUCCIÓN: Consumo de Materiales — CECO Ajustado y MIP (S/.) / TN Producida."""
+    ceco_val  = (found.get("CECO AJUSTADO") or found.get("Ceco Ajustado") or
+                 found.get("CECO") or found.get("Costo CECO") or found.get("Costo Consumo"))
+    mip_val   = (found.get("MIP") or found.get("MIP (S/.)") or found.get("MIP Total") or
+                 found.get("Costo x TN") or found.get("Costo por TN"))
+    tn_val    = (found.get("TN PRODUCIDA") or found.get("TN Producida") or
+                 found.get("Toneladas Producidas") or found.get("Ton Producida"))
+    ate_val   = found.get("Consumo Ate") or found.get("Consumo Planta")
+    pach_val  = found.get("Consumo Pachacamac")
+
+    ceco  = to_float(ceco_val)
+    mip   = to_float(mip_val)
+    tn    = to_float(tn_val)
+
+    # Semáforo: si MIP sube = peor (mayor costo por tonelada)
+    sem = "green"
+    if mip is not None:
+        # Benchmark: sin meta definida, por ahora verde = referencia
+        sem = "yellow" if mip and mip > 10 else "green"
+
+    kpis = []
+    if ceco is not None:
+        kpis.append({"label": "CECO Ajustado Total", "valor": fmt_soles(abs(ceco))})
+    if mip is not None:
+        kpis.append({"label": "MIP (S/.) / TN", "valor": f"S/{mip:.2f}", "estado": sem})
+    if tn is not None:
+        kpis.append({"label": "TN Producidas", "valor": f"{tn:,.1f} TN"})
+    if ate_val is not None:
+        kpis.append({"label": "Consumo Planta Ate", "valor": fmt_soles(abs(to_float(ate_val)))})
+    if pach_val is not None:
+        kpis.append({"label": "Consumo Planta Pachacamac", "valor": fmt_soles(abs(to_float(pach_val)))})
+
+    alerta = None
+    if not kpis:
+        return None  # No hay datos — no agregar el reporte
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
 
 def build_compras(found):
@@ -930,6 +975,13 @@ def main():
                 if uen_data:
                     empresa_data["reportes"]["margen_variable"]["por_uen"] = uen_data
                     print(f"  Margen UEN: {uen_data}")
+
+        # ── Consumo de Materiales (PRODUCCIÓN: CECO Ajustado + MIP/TN)
+        if scanned.get("consumo"):
+            rc = build_consumo_materiales(scanned["consumo"])
+            if rc:
+                empresa_data["reportes"]["consumo_materiales"] = rc
+                print(f"  Consumo Materiales {len(rc['kpis'])} KPIs sem={rc['estado']}")
 
         # ── Mermas
         if scanned.get("mermas"):

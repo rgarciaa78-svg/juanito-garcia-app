@@ -714,6 +714,7 @@ const REPORTES_CONFIG = {
     { tipo: 'cuentas_por_pagar',    label: 'Cuentas por pagar (CxP)',        archivo: '02_cuentas_por_pagar.png',    icon: 'cxp',      desc: 'Días de pago a proveedores y deuda vigente' },
     { tipo: 'margen_variable',      label: 'Margen variable',                archivo: '03_margen_variable.png',      icon: 'trend',    desc: 'Margen de contribución por UEN (B&D, MAQUILA, TIGO)' },
     { tipo: 'mermas',               label: 'Mermas por planta',              archivo: '04_mermas.png',               icon: 'activity', desc: 'Pérdida de producto en planta Ate, Pachacamac y Terceros' },
+    { tipo: 'consumo_materiales',   label: 'Consumo de Materiales',          archivo: '06_consumo_materiales.png',   icon: 'box',      desc: 'CECO Ajustado y MIP (S/.) / TN Producida por planta Ate y Pachacamac' },
     { tipo: 'compras',              label: 'Compras — Ratio Consumo/Compra', archivo: '05_compras.png',              icon: 'shopping', desc: 'Ratio = Consumo ÷ Compra. >100% jala inventario, <100% sobre-compra' },
     { tipo: 'control_interno',      label: 'Control interno',                archivo: '07_control_interno.png',      icon: 'check',    desc: 'Cumplimiento de controles por gerente (meta 85%)' },
     { tipo: 'sop_inventario',       label: 'S&OP — Inventario',              archivo: '10_sop_inventario.png',       icon: 'box',      desc: 'Nivel de inventario, dead stock y días de cobertura' },
@@ -1841,6 +1842,54 @@ function renderMcKinseyArea(empresa, tipo) {
     },
   };
 
+    consumo_materiales: () => {
+      const cecoV  = rd.kpis?.find(k => k.label === 'CECO Ajustado Total')?.valor;
+      const mipV   = rd.kpis?.find(k => k.label === 'MIP (S/.) / TN')?.valor;
+      const tnV    = rd.kpis?.find(k => k.label === 'TN Producidas')?.valor;
+      const ateV   = rd.kpis?.find(k => k.label === 'Consumo Planta Ate')?.valor;
+      const pachV  = rd.kpis?.find(k => k.label === 'Consumo Planta Pachacamac')?.valor;
+      return {
+        titulo: 'Consumo de Materiales — Producción',
+        I: `<div style="flex:1">
+          ${cecoV ? rowKpi('CECO Ajustado Total', cecoV, null, 'var(--fg)') : ''}
+          ${mipV  ? rowKpi('MIP (S/.) / TN Producida', mipV, null, 'var(--accent)') : ''}
+          ${tnV   ? rowKpi('TN Producidas agosto 2026', tnV, null, 'var(--fg)') : ''}
+          ${ateV  ? rowKpi('Consumo Planta Ate', ateV, null, 'var(--fg)') : ''}
+          ${pachV ? rowKpi('Consumo Planta Pachacamac', pachV, null, 'var(--fg)') : ''}
+          ${!cecoV && !mipV ? `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
+            Medidas del dataset aún no descubiertas. El workflow intentará "CECO AJUSTADO", "MIP", "TN PRODUCIDA". Ver logs de discover_measures para confirmar nombres exactos.
+          </div>` : ''}
+          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
+            Plantas: ATE ([924001]) · PACHACAMAC ([923001]) · Centros: Planta, Mantenimiento, Calidad.
+          </div>
+        </div>`,
+        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+          Comparativo YoY del CECO Ajustado y MIP requiere activar medidas con filtro de fecha en el dataset de Consumo. La estructura mensual 2025-2026 está visible en Power BI — se puede activar cuando se habilite el scraper completo.
+        </div>`,
+        III: (ateV || pachV) ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="padding:12px;background:var(--accent)11;border:1px solid var(--accent)33;border-radius:8px;text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:4px">Planta ATE</div>
+            <div style="font-size:20px;font-weight:800;color:var(--accent)">${ateV || '—'}</div>
+          </div>
+          <div style="padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:4px">Planta PACHACAMAC</div>
+            <div style="font-size:20px;font-weight:800;color:var(--fg)">${pachV || '—'}</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--sub);margin-top:10px;padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+          MIP (Materiales, Insumos, Packaging) S/. por TN producida = indicador clave de eficiencia productiva. Menor = mejor.
+        </div>` : `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">Desglose por planta disponible cuando el scraper descubra medidas filtradas por centro de costo.</div>`,
+        IV: [
+          {palanca:'Reducir MIP por TN producida', impacto:'Mejorar eficiencia de materiales', accion:'Analizar variación de MIP entre plantas ATE vs PACHACAMAC. La planta con mayor MIP tiene oportunidad de mejora en rendimiento de MP.', prioridad:'ALTA', col:'var(--red)'},
+          {palanca:'Optimizar CECO Ajustado por centro', impacto:'Reducción de costo de producción', accion:'Foco en centros de Mantenimiento ([922003]/[922004]) — si crecen más que producción, indica sobrecosto. Revisar eficiencia de mantenimiento preventivo vs correctivo.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Benchmark MIP entre plantas', impacto:'Identificar mejores prácticas internas', accion:'Si ATE y PACHACAMAC tienen MIP diferente, transferir prácticas de la planta más eficiente. La dispersión interna es la palanca más rápida.', prioridad:'MEDIA', col:'var(--yellow)'},
+        ],
+        V: ['MIP (S/.) / TN Producida por planta y mes (2025-2026)', 'CECO Ajustado por centro de costo ([924001], [923001], [922003], etc.)', 'TN Producidas por planta mensual', 'Variación MIP vs presupuesto', 'Desglose de consumo: MP, insumos, packaging por separado'],
+        chatMsg: `Analiza el Consumo de Materiales de ${empresa}: CECO Ajustado ${cecoV||'—'}, MIP por TN ${mipV||'—'}, TN Producidas ${tnV||'—'}. ¿Cómo interpretas la eficiencia productiva y qué acciones recomiendas?`
+      };
+    },
+  };
+
   // Fallback para tipos sin configuración específica
   const areaConfig = (cfg[tipo] || cfg['sop_inventario'])?.();
   if (!areaConfig) return '<div style="padding:20px;color:var(--sub)">Sin análisis disponible para este reporte.</div>';
@@ -2139,6 +2188,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
     cuentas_por_cobrar: 'Cuentas por Cobrar',
     cuentas_por_pagar: 'Cuentas por Pagar',
     mermas: 'Mermas Operativas',
+    consumo_materiales: 'Consumo de Materiales',
     sop_inventario: 'S&OP — Inventario',
     compras: 'Gestión de Compras',
   };
