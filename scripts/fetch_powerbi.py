@@ -35,10 +35,12 @@ PREV_YEAR  = _today.year  if _today.month > 1 else _today.year - 1
 
 # Tabla/columna de fecha por dataset (descubierta con discover_measures.py #8)
 DATE_CONTEXT = {
-    "margen":    ("Calendario", "Date"),
-    "mermas":    ("Calendario", "Date"),
-    "compras":   ("Calendario", "Fecha"),
-    "fill_rate": ("Calendario", "Date"),
+    "margen":        ("Calendario", "Date"),
+    "mermas":        ("Calendario", "Date"),
+    "compras":       ("Calendario", "Fecha"),
+    "fill_rate":     ("Calendario", "Date"),
+    "planificacion": ("Calendario", "Date"),
+    "consumo":       ("Calendario", "Date"),
 }
 
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
@@ -732,77 +734,7 @@ ROW("Total",
                 if scanned.get("consumo", {}).get("Total Consumo"):
                     break
 
-        # ── Margen: schema REST si scan no encontró margen %
-        if "margen" in ids and not any(k for k in scanned.get("margen",{}) if "margen" in k.lower() or "mv" in k.lower()):
-            print("  Margen: leyendo schema REST para buscar medida de margen %...")
-            schema_margen = get_dataset_schema(token, ws_id, ids["margen"])
-            if schema_margen:
-                date_ctx_m = DATE_CONTEXT.get("margen")
-                for tbl_name, tbl_info in schema_margen.items():
-                    for m_name in tbl_info["measures"]:
-                        if m_name in scanned.get("margen", {}):
-                            continue
-                        if date_ctx_m:
-                            v = dax_prev_month(token, ws_id, ids["margen"], m_name, date_ctx_m[0], date_ctx_m[1], f"margen_{m_name[:15]}")
-                            if v is not None:
-                                scanned.setdefault("margen", {})[m_name] = v
-                                print(f"      ✓ Margen [{m_name}] = {v}")
-                        else:
-                            v, ok = try_measure(token, ws_id, ids["margen"], m_name)
-                            if ok:
-                                scanned.setdefault("margen", {})[m_name] = v
-                                print(f"      ✓ Margen [{m_name}] = {v}")
-
-        # ── Compras: schema REST si compras kpis aún vacío
-        if "compras" in ids and not scanned.get("compras"):
-            print("  Compras: leyendo schema REST...")
-            schema_comp = get_dataset_schema(token, ws_id, ids["compras"])
-            if schema_comp:
-                date_ctx_c = DATE_CONTEXT.get("compras")
-                for tbl_name, tbl_info in schema_comp.items():
-                    for m_name in tbl_info["measures"]:
-                        if date_ctx_c:
-                            v = dax_prev_month(token, ws_id, ids["compras"], m_name, date_ctx_c[0], date_ctx_c[1], f"comp_{m_name[:15]}")
-                            if v is not None:
-                                scanned.setdefault("compras", {})[m_name] = v
-                                print(f"      ✓ Compras [{m_name}] = {v}")
-                        else:
-                            v, ok = try_measure(token, ws_id, ids["compras"], m_name)
-                            if ok:
-                                scanned.setdefault("compras", {})[m_name] = v
-                                print(f"      ✓ Compras [{m_name}] = {v}")
-
-        # ── CxP: schema REST + probe medidas reales por nombre
-        if "cxp" in ids and not scanned.get("cxp"):
-            print("  CxP: leyendo schema REST...")
-            schema_cxp = get_dataset_schema(token, ws_id, ids["cxp"])
-            if schema_cxp:
-                print(f"    Tablas/medidas CxP: { {t: s['measures'][:5] for t,s in schema_cxp.items()} }")
-                # Probar cada medida real del schema
-                for tbl_name, tbl_info in schema_cxp.items():
-                    for m_name in tbl_info["measures"]:
-                        v, exists = try_measure(token, ws_id, ids["cxp"], m_name)
-                        if exists:
-                            scanned.setdefault("cxp", {})[m_name] = v
-                            print(f"      ✓ CxP [{m_name}] = {v}")
-                # SUM sobre columnas numéricas de tablas de datos (no Calendario)
-                for tbl_name, tbl_info in schema_cxp.items():
-                    if tbl_name.lower() in ["calendario", "calendar", "fecha"]:
-                        continue
-                    for col_name in tbl_info["columns"]:
-                        col_lower = col_name.lower()
-                        if any(kw in col_lower for kw in ["monto", "saldo", "importe", "total", "deuda", "pagar"]):
-                            rows_s = dax(token, ws_id, ids["cxp"],
-                                         f"EVALUATE ROW(\"v\", SUM('{tbl_name}'[{col_name}]))",
-                                         f"cxp_sum")
-                            if rows_s:
-                                sv = rows_s[0].get("[v]") or rows_s[0].get("v")
-                                if sv is not None and float(sv or 0) != 0:
-                                    scanned.setdefault("cxp", {})["CxP Total"] = sv
-                                    print(f"    CxP SUM '{tbl_name}'[{col_name}] = {sv}")
-                                    break
-
-        # ── Productividad: schema REST + probe medidas reales
+        # ── Productividad: schema REST + probe medidas reales (único que no es Live Connection)
         if "productividad_ds" in ids and not scanned.get("productividad_ds"):
             print("  Productividad: leyendo schema REST...")
             schema_prod = get_dataset_schema(token, ws_id, ids["productividad_ds"])
