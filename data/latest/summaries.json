@@ -96,6 +96,12 @@
             }
           ]
         },
+        "consumo_materiales": {
+          "estado": "grey",
+          "alerta": null,
+          "kpis": [],
+          "live_connection": true
+        },
         "mermas": {
           "estado": "red",
           "alerta": "Merma 4.87% — sobre meta 2%",
@@ -111,7 +117,24 @@
         "compras": {
           "estado": "green",
           "alerta": null,
-          "kpis": []
+          "kpis": [
+            {
+              "label": "Stock PP (Punto de Pedido)",
+              "valor": "1919275"
+            },
+            {
+              "label": "Stock Valorizado",
+              "valor": "S/6.28M"
+            },
+            {
+              "label": "Consumo Prom 3M",
+              "valor": "10776059"
+            },
+            {
+              "label": "Consumo Prom 6M",
+              "valor": "10446769"
+            }
+          ]
         },
         "sop_inventario": {
           "estado": "green",
