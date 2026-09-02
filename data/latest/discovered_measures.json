@@ -1,0 +1,91 @@
+{
+  "generado": "2026-09-02",
+  "mes_filtro": "2026-08",
+  "datasets": {
+    "margen": {
+      "Venta Total": {
+        "plain": 251735063.85152462,
+        "dated": 6419734.03
+      }
+    },
+    "compras": {},
+    "inventario": {
+      "Stock Total": {
+        "plain": 151279.00866599998,
+        "dated": 151279.00866599998
+      }
+    },
+    "mermas": {
+      "% Merma Total": {
+        "plain": 0.04780727331800626,
+        "dated": 0.04871540016815056
+      }
+    },
+    "consumo": {},
+    "planificacion": {
+      "% Avance": {
+        "plain": 0.6295519287006067,
+        "dated": 0.6295514554211854
+      }
+    },
+    "cxc": {
+      "% Morosidad": {
+        "plain": 0.21673338861272787
+      },
+      "Morosidad": {
+        "plain": "13.78%"
+      },
+      "Por Vencer": {
+        "plain": 3043976.6399999997
+      }
+    },
+    "cxp": {
+      "Cuentas x Pagar": {
+        "plain": 17527244.31999999
+      },
+      "CUENTAS X PAGAR": {
+        "plain": 17527244.31999999
+      },
+      "Refinanciamiento": {
+        "plain": 6713881.120000003
+      },
+      "Proveedores": {
+        "plain": 144
+      }
+    },
+    "fill_rate": {
+      "% FILLRATE": {
+        "plain": 0.7464572706843424,
+        "dated": 0.7464572706843424
+      },
+      "% Fill Rate": {
+        "plain": 0.8183366188661797,
+        "dated": 0.816714847238828
+      },
+      "ORDEN DE VENTA": {
+        "plain": 124885305.39,
+        "dated": 124885305.39
+      },
+      "FACTURACION": {
+        "plain": 93221544.21,
+        "dated": 93221544.21
+      },
+      "VENTA PERDIDA": {
+        "plain": 31663761.180000007,
+        "dated": 31663761.180000007
+      },
+      "Orden de Venta": {
+        "plain": 124885305.39,
+        "dated": 124885305.39
+      },
+      "Facturacion": {
+        "plain": 93221544.21,
+        "dated": 93221544.21
+      },
+      "Venta Perdida": {
+        "plain": 31663761.180000007,
+        "dated": 31663761.180000007
+      }
+    }
+  }
+}
