@@ -274,6 +274,56 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .epill.amber { background: rgba(245,158,11,0.25); color: #fcd34d; }
 .epill.muted { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.42); }
 
+/* Diagnóstico ejecutivo */
+.diag-head { display: flex; align-items: center; gap: 8px; margin: 2px 0 10px; }
+.diag-head-t {
+  font-size: 10px; font-weight: 800; color: var(--navy);
+  text-transform: uppercase; letter-spacing: 1.1px;
+}
+.diag-head-n {
+  font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 20px;
+  background: var(--accent-bg); color: var(--accent);
+}
+.diag-head-line { flex: 1; height: 1px; background: var(--border); }
+.diag-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.diag-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 13px 15px 12px 17px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.diag-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; }
+.diag-card.red::before   { background: var(--red); }
+.diag-card.green::before { background: #16a34a; }
+.diag-top { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 8px; }
+.diag-num {
+  font-size: 9px; font-weight: 800; color: var(--text3);
+  font-variant-numeric: tabular-nums; padding-top: 3px;
+}
+.diag-titulo {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  line-height: 1.35; flex: 1; letter-spacing: -0.1px;
+}
+.diag-cifra {
+  font-size: 19px; font-weight: 800; line-height: 1;
+  font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;
+}
+.diag-cifra.red { color: var(--red); } .diag-cifra.green { color: var(--green); }
+.diag-cifra em {
+  display: block; font-style: normal; font-size: 9px;
+  font-weight: 500; color: var(--text3); margin-top: 3px;
+}
+.diag-cuerpo { font-size: 11.5px; line-height: 1.6; color: var(--text2); margin-bottom: 7px; }
+.diag-cuerpo strong { color: var(--text); font-weight: 700; }
+.diag-impacto {
+  font-size: 11.5px; line-height: 1.55; color: var(--text);
+  background: var(--surface); border-radius: 6px;
+  padding: 7px 10px; margin-bottom: 8px;
+}
+.diag-impacto strong { font-weight: 800; }
+.diag-pie { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.diag-palanca { font-size: 10.5px; color: var(--text2); flex: 1; min-width: 180px; line-height: 1.45; }
+
 /* Tarjeta de área */
 .area-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 10px;
@@ -893,6 +943,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <!-- HOME -->
       <div id="screen-home" class="screen active">
         <div id="exec-header-row"></div>
+        <div id="diagnostico-row"></div>
         <div id="kpi-exec-grid"></div>
         <div id="agenda-dividir"></div>
         <div id="agenda-decidir-section"></div>
@@ -1504,6 +1555,171 @@ function cerrarKPI() {
 }
 
 // ── Dashboard principal ────────────────────────────────────
+// ============================================================
+//  DIAGNÓSTICO EJECUTIVO — se recalcula solo con cada corrida
+// ============================================================
+
+/** Meses en que dos años tienen dato comparable, para no comparar tramos distintos. */
+function mesesComparables(vals, ps, anioA, anioB) {
+  const mesesA = new Set(), mesesB = new Set();
+  ps.forEach((p, i) => {
+    if (vals[i] == null) return;
+    if (p.startsWith(anioA)) mesesA.add(p.slice(5,7));
+    if (p.startsWith(anioB)) mesesB.add(p.slice(5,7));
+  });
+  return [...mesesA].filter(m => mesesB.has(m)).sort();
+}
+
+function promEn(vals, ps, anio, meses) {
+  const v = meses.map(m => vals[ps.indexOf(`${anio}-${m}`)]).filter(x => x != null);
+  return v.length ? v.reduce((a,b)=>a+b,0) / v.length : null;
+}
+function sumaEn(vals, ps, anio, meses) {
+  const v = meses.map(m => vals[ps.indexOf(`${anio}-${m}`)]).filter(x => x != null);
+  return v.length ? v.reduce((a,b)=>a+b,0) : null;
+}
+
+/**
+ * Construye los hallazgos del período: qué cambió, cuánto pesa en soles
+ * y qué palanca lo mueve. Solo con datos de Power BI.
+ */
+function diagnosticoCompleto() {
+  if (!SERIES || !SERIES.datasets) return null;
+  const ps = SERIES.periodos;
+  const DS = SERIES.datasets;
+  const M = DS.margen;
+  if (!M) return null;
+
+  const anioAct = ps[ps.length-1].slice(0,4);
+  const anioAnt = String(parseInt(anioAct) - 1);
+  const hallazgos = [];
+
+  // ── 1. Puente de margen: volumen vs precio vs costo ──
+  const vt = M['Venta Total'], pk = M['Precio x Kilo'], ck = M['Costo x Kilo'];
+  if (vt && pk && ck) {
+    const mg = pk.map((p,i) => (p==null||ck[i]==null||p===0) ? null : (p-ck[i])/p);
+    const comp = mesesComparables(mg, ps, anioAnt, anioAct);
+    if (comp.length) {
+      const vA = sumaEn(vt,ps,anioAnt,comp), vB = sumaEn(vt,ps,anioAct,comp);
+      const mA = promEn(mg,ps,anioAnt,comp), mB = promEn(mg,ps,anioAct,comp);
+      const pA = promEn(pk,ps,anioAnt,comp), pB = promEn(pk,ps,anioAct,comp);
+      const cA = promEn(ck,ps,anioAnt,comp), cB = promEn(ck,ps,anioAct,comp);
+      const kgA = comp.map(m=>{const i=ps.indexOf(`${anioAnt}-${m}`);return vt[i]/pk[i];}).reduce((a,b)=>a+b,0);
+      const kgB = comp.map(m=>{const i=ps.indexOf(`${anioAct}-${m}`);return vt[i]/pk[i];}).reduce((a,b)=>a+b,0);
+
+      const efVol = (vB - vA) * mA;
+      const efMg  = vB * (mB - mA);
+      const porMes = efMg / comp.length;
+
+      hallazgos.push({
+        sev: efMg < 0 ? 'red' : 'green',
+        titulo: 'El margen se comprime pese a que el volumen crece',
+        cifra: `${(mB*100).toFixed(1)}%`,
+        sub: `desde ${(mA*100).toFixed(1)}% (${(mB-mA)*100>=0?'+':''}${((mB-mA)*100).toFixed(1)}pp)`,
+        cuerpo: `Comparando los mismos meses (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}): el volumen subió <strong>${((kgB-kgA)/kgA*100).toFixed(1)}%</strong> y las ventas <strong>${((vB-vA)/vA*100).toFixed(1)}%</strong>, pero el precio/kg bajó <strong>${((pB-pA)/pA*100).toFixed(1)}%</strong> mientras el costo/kg subió <strong>${((cB-cA)/cA*100).toFixed(1)}%</strong>.`,
+        impacto: `Vender más aportó <strong>${fmtValor(efVol,'money')}</strong>, pero la caída de margen restó <strong>${fmtValor(Math.abs(efMg),'money')}</strong> en ${comp.length} ${comp.length===1?'mes':'meses'} — cerca de <strong>${fmtValor(Math.abs(porMes)*12,'money')} al año</strong> si se mantiene.`,
+        palanca: 'Recuperar 1pp de margen vale ' + fmtValor(vB/comp.length*0.01*12,'money') + ' al año. Atacar el costo/kg tiene más recorrido que subir precio.',
+        area: 'Comercial + Operaciones',
+      });
+    }
+
+    // ── 2. Deterioro sostenido del margen mes a mes ──
+    const conMg = mg.map((v,i)=>({v,i})).filter(x=>x.v!=null);
+    if (conMg.length >= 6) {
+      const ult = conMg.slice(-6);
+      const pend = (ult[ult.length-1].v - ult[0].v) * 100;
+      if (Math.abs(pend) >= 1) {
+        hallazgos.push({
+          sev: pend < 0 ? 'red' : 'green',
+          titulo: pend < 0 ? 'La caída de margen es tendencia, no un mes malo' : 'El margen viene recuperándose',
+          cifra: `${pend>=0?'+':''}${pend.toFixed(1)}pp`,
+          sub: `en los últimos ${ult.length} meses`,
+          cuerpo: `Recorrido: ${ult.map(x=>`${fmtPeriodo(ps[x.i])} ${(x.v*100).toFixed(1)}%`).join(' → ')}.`,
+          impacto: pend < 0 ? 'No es estacional: el deterioro se repite mes tras mes.' : 'La corrección se sostiene.',
+          palanca: pend < 0 ? 'Revisar contratos de materia prima y política de descuentos por cliente.' : 'Mantener lo que se está haciendo y documentarlo.',
+          area: 'Comercial + Compras',
+        });
+      }
+    }
+  }
+
+  // ── 3. Ventas: acumulado del año ──
+  if (vt) {
+    const comp = mesesComparables(vt, ps, anioAnt, anioAct);
+    if (comp.length) {
+      const a = sumaEn(vt,ps,anioAnt,comp), b = sumaEn(vt,ps,anioAct,comp);
+      hallazgos.push({
+        sev: b >= a ? 'green' : 'red',
+        titulo: b >= a ? 'Las ventas crecen sobre el año anterior' : 'Las ventas caen frente al año anterior',
+        cifra: `${((b-a)/a*100>=0?'+':'')}${((b-a)/a*100).toFixed(1)}%`,
+        sub: `${fmtValor(b,'money')} vs ${fmtValor(a,'money')}`,
+        cuerpo: `Acumulado de ${comp.length} meses comparables: ${fmtValor(b-a,'money')} de diferencia.`,
+        impacto: b >= a ? 'La demanda no es el problema del negocio hoy.' : 'La caída de ingresos exige revisar canal y cartera de clientes.',
+        palanca: b >= a ? 'Sostener volumen mientras se recupera margen.' : 'Identificar qué canal o cliente se perdió.',
+        area: 'Comercial',
+      });
+    }
+  }
+
+  // ── 4. Mermas contra meta ──
+  const mm = DS.mermas && DS.mermas['% Merma Total'];
+  if (mm) {
+    const comp = mesesComparables(mm, ps, anioAnt, anioAct);
+    const promAct = promEn(mm, ps, anioAct, comp.length?comp:null) ??
+                    (()=>{const v=mm.filter((x,i)=>ps[i].startsWith(anioAct)&&x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;})();
+    const META = 0.02;
+    if (promAct != null && vt) {
+      const ventasAnio = vt.filter((x,i)=>ps[i].startsWith(anioAct)&&x!=null).reduce((a,b)=>a+b,0);
+      const exceso = (promAct - META) * ventasAnio;
+      const cmp = comp.length ? { a: promEn(mm,ps,anioAnt,comp), b: promEn(mm,ps,anioAct,comp) } : null;
+      hallazgos.push({
+        sev: promAct > META ? 'red' : 'green',
+        titulo: 'La merma duplica la meta y no cede',
+        cifra: `${(promAct*100).toFixed(2)}%`,
+        sub: `meta 2.00% · promedio ${anioAct}`,
+        cuerpo: cmp && cmp.a != null
+          ? `En los mismos meses del año anterior fue ${(cmp.a*100).toFixed(2)}%; hoy ${(cmp.b*100).toFixed(2)}% (${((cmp.b-cmp.a)*100>=0?'+':'')}${((cmp.b-cmp.a)*100).toFixed(2)}pp). El problema es estructural, no puntual.`
+          : `Promedio del año en ${(promAct*100).toFixed(2)}%, muy por encima del 2% objetivo.`,
+        impacto: `Cada punto sobre la meta cuesta aprox. ${fmtValor(ventasAnio*0.01,'money')} al año. El exceso actual vale <strong>${fmtValor(Math.abs(exceso),'money')}</strong>.`,
+        palanca: 'Falta el desglose por planta (Ate / Pachacámac / Terceros) y por UEN para saber dónde atacar — esas medidas no están publicadas en el modelo.',
+        area: 'Producción',
+      });
+    }
+  }
+
+  return { anioAct, anioAnt, hallazgos };
+}
+
+function renderDiagnostico() {
+  const el = document.getElementById('diagnostico-row');
+  if (!el) return;
+  const d = diagnosticoCompleto();
+  if (!d || !d.hallazgos.length) { el.innerHTML = ''; return; }
+
+  el.innerHTML = `
+    <div class="diag-head">
+      <span class="diag-head-t">Diagnóstico ${d.anioAct} vs ${d.anioAnt}</span>
+      <span class="diag-head-n">${d.hallazgos.length} hallazgos</span>
+      <div class="diag-head-line"></div>
+    </div>
+    <div class="diag-list">
+      ${d.hallazgos.map((h,i) => `
+        <div class="diag-card ${h.sev}">
+          <div class="diag-top">
+            <span class="diag-num">${String(i+1).padStart(2,'0')}</span>
+            <span class="diag-titulo">${h.titulo}</span>
+            <span class="diag-cifra ${h.sev}">${h.cifra}<em>${h.sub}</em></span>
+          </div>
+          <div class="diag-cuerpo">${h.cuerpo}</div>
+          <div class="diag-impacto">${h.impacto}</div>
+          <div class="diag-pie">
+            <span class="diag-palanca">${h.palanca}</span>
+            <span class="mc-tag accent">${h.area}</span>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
 function renderHome() {
   const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
   const fechaStr = DATA.fecha || '—';
@@ -1589,6 +1805,7 @@ function renderHome() {
   });
 
   document.getElementById('kpi-exec-grid').innerHTML = html;
+  renderDiagnostico();
 
   const agenda = DATA.agenda_ceo || {};
   const dv = document.getElementById('agenda-dividir');
