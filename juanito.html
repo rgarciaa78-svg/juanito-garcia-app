@@ -300,18 +300,31 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   font-size: 9px; font-weight: 800; color: var(--text3);
   font-variant-numeric: tabular-nums; padding-top: 3px;
 }
+.diag-tit-wrap { flex: 1; min-width: 0; }
 .diag-titulo {
   font-size: 13px; font-weight: 700; color: var(--text);
-  line-height: 1.35; flex: 1; letter-spacing: -0.1px;
+  line-height: 1.35; letter-spacing: -0.1px;
+}
+.diag-periodo {
+  display: inline-block; margin-top: 4px;
+  font-size: 9px; font-weight: 700; letter-spacing: .5px;
+  text-transform: uppercase; color: var(--accent);
+  background: var(--accent-bg); padding: 2px 7px; border-radius: 3px;
 }
 .diag-cifra {
   font-size: 19px; font-weight: 800; line-height: 1;
   font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;
 }
 .diag-cifra.red { color: var(--red); } .diag-cifra.green { color: var(--green); }
+.diag-cifra i {
+  display: block; font-style: normal; font-size: 9px;
+  font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .6px; margin-top: 3px;
+}
 .diag-cifra em {
   display: block; font-style: normal; font-size: 9px;
-  font-weight: 500; color: var(--text3); margin-top: 3px;
+  font-weight: 500; color: var(--text3); margin-top: 2px;
+  max-width: 190px; white-space: normal; line-height: 1.4;
 }
 .diag-cuerpo { font-size: 11.5px; line-height: 1.6; color: var(--text2); margin-bottom: 7px; }
 .diag-cuerpo strong { color: var(--text); font-weight: 700; }
@@ -1611,14 +1624,18 @@ function diagnosticoCompleto() {
       const efMg  = vB * (mB - mA);
       const porMes = efMg / comp.length;
 
+      const perLbl = comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(' + ');
+      const perLblAnt = comp.map(m=>fmtPeriodo(anioAnt+'-'+m)).join(' + ');
       hallazgos.push({
         sev: efMg < 0 ? 'red' : 'green',
         titulo: 'El margen se comprime pese a que el volumen crece',
+        periodo: `${perLbl} vs ${perLblAnt} · ${comp.length} ${comp.length===1?'mes':'meses'}`,
         cifra: `${(mB*100).toFixed(1)}%`,
-        sub: `desde ${(mA*100).toFixed(1)}% (${(mB-mA)*100>=0?'+':''}${((mB-mA)*100).toFixed(1)}pp)`,
-        cuerpo: `Comparando los mismos meses (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}): el volumen subió <strong>${((kgB-kgA)/kgA*100).toFixed(1)}%</strong> y las ventas <strong>${((vB-vA)/vA*100).toFixed(1)}%</strong>, pero el precio/kg bajó <strong>${((pB-pA)/pA*100).toFixed(1)}%</strong> mientras el costo/kg subió <strong>${((cB-cA)/cA*100).toFixed(1)}%</strong>.`,
-        impacto: `Sobre los ${comp.length} ${comp.length===1?'mes medido':'meses medidos'}: vender más aportó <strong>${fmtValor(efVol,'money')}</strong> y la caída de margen restó <strong>${fmtValor(Math.abs(efMg),'money')}</strong>. El margen en soles pasó de ${fmtValor(vA*mA,'money')} a ${fmtValor(vB*mB,'money')}.`,
-        palanca: `Con la venta de esos meses, cada punto de margen equivale a ${fmtValor(vB*0.01,'money')}. El costo/kg subió ${((cB-cA)/cA*100).toFixed(1)}% mientras el precio bajó ${Math.abs((pB-pA)/pA*100).toFixed(1)}%: el recorrido está en el costo.`,
+        unidad: 'margen variable',
+        sub: `${perLbl} · antes ${(mA*100).toFixed(1)}% (${(mB-mA)*100>=0?'+':''}${((mB-mA)*100).toFixed(1)}pp)`,
+        cuerpo: `Solo se comparan los meses que ambos años tienen medidos: <strong>${perLbl}</strong> contra <strong>${perLblAnt}</strong>. En ese tramo el volumen subió <strong>${((kgB-kgA)/kgA*100).toFixed(1)}%</strong> (${(kgA/1e6).toFixed(2)}M → ${(kgB/1e6).toFixed(2)}M kg) y la venta <strong>${((vB-vA)/vA*100).toFixed(1)}%</strong> (${fmtValor(vA,'money')} → ${fmtValor(vB,'money')}), pero el precio/kg bajó <strong>${Math.abs((pB-pA)/pA*100).toFixed(1)}%</strong> (S/${pA.toFixed(2)} → S/${pB.toFixed(2)}) mientras el costo/kg subió <strong>${((cB-cA)/cA*100).toFixed(1)}%</strong> (S/${cA.toFixed(2)} → S/${cB.toFixed(2)}).`,
+        impacto: `Margen en soles de esos ${comp.length} meses: <strong>${fmtValor(vA*mA,'money')} → ${fmtValor(vB*mB,'money')}</strong>. Vender más aportó ${fmtValor(efVol,'money')}; la caída del porcentaje restó ${fmtValor(Math.abs(efMg),'money')}.`,
+        palanca: `Sobre la venta de esos ${comp.length} meses, cada punto de margen equivale a ${fmtValor(vB*0.01,'money')}. El costo subió ${((cB-cA)/cA*100).toFixed(1)}% y el precio bajó ${Math.abs((pB-pA)/pA*100).toFixed(1)}%: el recorrido está en el costo.`,
         area: 'Comercial + Operaciones',
       });
     }
@@ -1632,10 +1649,12 @@ function diagnosticoCompleto() {
         hallazgos.push({
           sev: pend < 0 ? 'red' : 'green',
           titulo: pend < 0 ? 'La caída de margen es tendencia, no un mes malo' : 'El margen viene recuperándose',
+          periodo: `${fmtPeriodo(ps[ult[0].i])} → ${fmtPeriodo(ps[ult[ult.length-1].i])} · ${ult.length} meses`,
           cifra: `${pend>=0?'+':''}${pend.toFixed(1)}pp`,
-          sub: `en los últimos ${ult.length} meses`,
-          cuerpo: `Recorrido: ${ult.map(x=>`${fmtPeriodo(ps[x.i])} ${(x.v*100).toFixed(1)}%`).join(' → ')}.`,
-          impacto: pend < 0 ? 'No es estacional: el deterioro se repite mes tras mes.' : 'La corrección se sostiene.',
+          unidad: 'margen variable',
+          sub: `entre ${fmtPeriodo(ps[ult[0].i])} y ${fmtPeriodo(ps[ult[ult.length-1].i])}`,
+          cuerpo: `Margen variable mes a mes: ${ult.map(x=>`<strong>${fmtPeriodo(ps[x.i])}</strong> ${(x.v*100).toFixed(1)}%`).join(' → ')}.`,
+          impacto: pend < 0 ? `De ${(ult[0].v*100).toFixed(1)}% a ${(ult[ult.length-1].v*100).toFixed(1)}%. No es un mes aislado: el deterioro se repite.` : 'La corrección se sostiene mes a mes.',
           palanca: pend < 0 ? 'Revisar contratos de materia prima y política de descuentos por cliente.' : 'Mantener lo que se está haciendo y documentarlo.',
           area: 'Comercial + Compras',
         });
@@ -1648,13 +1667,19 @@ function diagnosticoCompleto() {
     const comp = mesesComparables(vt, ps, anioAnt, anioAct);
     if (comp.length) {
       const a = sumaEn(vt,ps,anioAnt,comp), b = sumaEn(vt,ps,anioAct,comp);
+      const promA = a / comp.length, promB = b / comp.length;
+      const mesesB = comp.map(m => vt[ps.indexOf(`${anioAct}-${m}`)]);
+      const rangoB = `S/${(Math.min(...mesesB)/1e6).toFixed(2)}M – S/${(Math.max(...mesesB)/1e6).toFixed(2)}M`;
+      const desde = fmtPeriodo(`${anioAct}-${comp[0]}`), hasta = fmtPeriodo(`${anioAct}-${comp[comp.length-1]}`);
       hallazgos.push({
         sev: b >= a ? 'green' : 'red',
         titulo: b >= a ? 'Las ventas crecen sobre el año anterior' : 'Las ventas caen frente al año anterior',
+        periodo: `${desde} – ${hasta} · acumulado de ${comp.length} meses`,
         cifra: `${((b-a)/a*100>=0?'+':'')}${((b-a)/a*100).toFixed(1)}%`,
-        sub: `${fmtValor(b,'money')} vs ${fmtValor(a,'money')}`,
-        cuerpo: `Acumulado de ${comp.length} meses comparables: ${fmtValor(b-a,'money')} de diferencia.`,
-        impacto: b >= a ? 'La demanda no es el problema del negocio hoy.' : 'La caída de ingresos exige revisar canal y cartera de clientes.',
+        unidad: 'venta acumulada',
+        sub: `${desde}–${hasta}: ${fmtValor(b,'money')} vs ${fmtValor(a,'money')} en ${anioAnt}`,
+        cuerpo: `<strong>Acumulado de ${comp.length} meses</strong> (${desde} a ${hasta}): ${fmtValor(b,'money')} en ${anioAct} contra ${fmtValor(a,'money')} en ${anioAnt} — ${fmtValor(b-a,'money')} de diferencia. <strong>Promedio mensual: ${fmtValor(promB,'money')}</strong> en ${anioAct} contra ${fmtValor(promA,'money')} en ${anioAnt}.`,
+        impacto: `Rango mensual ${anioAct}: ${rangoB}. ${b >= a ? 'La demanda no es el problema del negocio hoy.' : 'La caída de ingresos exige revisar canal y cartera de clientes.'}`,
         palanca: b >= a ? 'Sostener volumen mientras se recupera margen.' : 'Identificar qué canal o cliente se perdió.',
         area: 'Comercial',
       });
@@ -1675,9 +1700,11 @@ function diagnosticoCompleto() {
       hallazgos.push({
         sev: promAnio < META ? 'red' : 'green',
         titulo: 'El nivel de servicio está lejos de la meta',
+        periodo: `Promedio ${fmtPeriodo(anioAct+'-'+mesesAnio[0])} – ${fmtPeriodo(anioAct+'-'+mesesAnio[mesesAnio.length-1])} · ${mesesAnio.length} meses`,
         cifra: `${(promAnio*100).toFixed(1)}%`,
-        sub: `promedio ${anioAct} (${mesesAnio.length} meses) · meta 98%`,
-        cuerpo: `En los meses comparables con ${anioAnt} (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}) pasó de <strong>${(a*100).toFixed(1)}%</strong> a <strong>${(b*100).toFixed(1)}%</strong> (${((b-a)*100>=0?'+':'')}${((b-a)*100).toFixed(1)}pp).`,
+        unidad: 'fill rate',
+        sub: `promedio ${fmtPeriodo(anioAct+'-'+mesesAnio[0])}–${fmtPeriodo(anioAct+'-'+mesesAnio[mesesAnio.length-1])} · meta 98%`,
+        cuerpo: `Fill rate mes a mes: ${mesesAnio.map(m=>`<strong>${fmtPeriodo(anioAct+'-'+m)}</strong> ${(fr[ps.indexOf(anioAct+'-'+m)]*100).toFixed(1)}%`).join(' · ')}. En los meses que ${anioAnt} también tiene medidos (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}) pasó de <strong>${(a*100).toFixed(1)}%</strong> a <strong>${(b*100).toFixed(1)}%</strong> (${((b-a)*100>=0?'+':'')}${((b-a)*100).toFixed(1)}pp).`,
         impacto: `Rango del año: entre ${(peor*100).toFixed(1)}% y ${(mejor*100).toFixed(1)}%. Ningún mes alcanzó la meta de 98%; la brecha promedio es de ${((META-promAnio)*100).toFixed(1)} puntos.`,
         palanca: 'El monto de venta perdida por mes no es legible desde el modelo (la medida devuelve el acumulado histórico). Corregirla permitiría cuantificar la brecha en soles.',
         area: 'Planeamiento + Producción',
@@ -1698,8 +1725,10 @@ function diagnosticoCompleto() {
       hallazgos.push({
         sev: promAnio > META ? 'red' : 'green',
         titulo: 'La merma más que duplica la meta',
+        periodo: `Promedio ${fmtPeriodo(anioAct+'-'+mesesAnio[0])} – ${fmtPeriodo(anioAct+'-'+mesesAnio[mesesAnio.length-1])} · ${mesesAnio.length} meses`,
         cifra: `${(promAnio*100).toFixed(2)}%`,
-        sub: `promedio ${anioAct} (${mesesAnio.length} meses) · meta 2.00%`,
+        unidad: '% merma',
+        sub: `promedio ${fmtPeriodo(anioAct+'-'+mesesAnio[0])}–${fmtPeriodo(anioAct+'-'+mesesAnio[mesesAnio.length-1])} · meta 2.00%`,
         cuerpo: cmp && cmp.a != null
           ? `Mes a mes del año: ${mesesAnio.map(m=>`${fmtPeriodo(anioAct+'-'+m)} ${(mm[ps.indexOf(anioAct+'-'+m)]*100).toFixed(2)}%`).join(' · ')}. En los meses comparables con ${anioAnt} (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}) pasó de ${(cmp.a*100).toFixed(2)}% a ${(cmp.b*100).toFixed(2)}%.`
           : `Promedio del año en ${(promAnio*100).toFixed(2)}%, sobre el 2% objetivo en todos los meses medidos.`,
@@ -1730,8 +1759,11 @@ function renderDiagnostico() {
         <div class="diag-card ${h.sev}">
           <div class="diag-top">
             <span class="diag-num">${String(i+1).padStart(2,'0')}</span>
-            <span class="diag-titulo">${h.titulo}</span>
-            <span class="diag-cifra ${h.sev}">${h.cifra}<em>${h.sub}</em></span>
+            <div class="diag-tit-wrap">
+              <div class="diag-titulo">${h.titulo}</div>
+              ${h.periodo ? `<div class="diag-periodo">${h.periodo}</div>` : ''}
+            </div>
+            <span class="diag-cifra ${h.sev}">${h.cifra}${h.unidad?`<i>${h.unidad}</i>`:''}<em>${h.sub}</em></span>
           </div>
           <div class="diag-cuerpo">${h.cuerpo}</div>
           <div class="diag-impacto">${h.impacto}</div>
