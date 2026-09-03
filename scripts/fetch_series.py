@@ -263,6 +263,7 @@ def main():
 
     resultado = {}
     fechas_usadas = {}
+    sin_serie = {}
 
     for ds_key, medidas_dict in cache.items():
         ds_id = DATASET_IDS.get(ds_key)
@@ -275,7 +276,29 @@ def main():
         print(f"── {ds_key} ({len(medidas)} medidas)")
         tbl, col = detectar_fecha(token, ds_id, medidas[0])
         if not tbl:
-            print(f"    Sin tabla de fecha reconocible — se omite la serie\n")
+            # Deja constancia de QUÉ contiene el modelo, para no volver a adivinar
+            print("    Sin tabla de fecha que filtre las medidas — diagnosticando el modelo...")
+            diag = {"medidas": medidas, "tablas": [], "columnas_fecha": []}
+            t_rows = dax(token, ds_id, "EVALUATE INFO.TABLES()", "diag-tables", retries=1)
+            if t_rows:
+                diag["tablas"] = sorted({(r.get("[Name]") or r.get("Name") or "") for r in t_rows} - {""})
+            diag["columnas_fecha"] = [f"{t}[{c}]" for t, c in columnas_fecha_reales(token, ds_id)]
+            if not t_rows:
+                # DMV bloqueada: cae al esquema REST
+                r = requests.get(f"{PBI_BASE}/groups/{WS_ID}/datasets/{ds_id}/tables",
+                                 headers={"Authorization": f"Bearer {token}"}, timeout=25)
+                if r.ok:
+                    diag["tablas"] = [t.get("name") for t in r.json().get("value", [])]
+                    diag["esquema_rest"] = {
+                        t.get("name"): [c.get("name") for c in t.get("columns", [])]
+                        for t in r.json().get("value", [])
+                    }
+                else:
+                    diag["esquema_rest_error"] = f"HTTP {r.status_code}"
+            sin_serie[ds_key] = diag
+            print(f"    Tablas del modelo: {diag['tablas'][:15]}")
+            print(f"    Columnas de fecha: {diag['columnas_fecha'][:15]}")
+            print(f"    → estas medidas no admiten corte mensual con el modelo actual\n")
             continue
         fechas_usadas[ds_key] = f"{tbl}[{col}]"
 
@@ -297,6 +320,7 @@ def main():
         "fuente": "Power BI REST API executeQueries",
         "periodos": periodos_str,
         "tablas_fecha": fechas_usadas,
+        "sin_serie": sin_serie,
         "datasets": resultado,
     }
     path = OUTPUT_DIR / "series.json"
