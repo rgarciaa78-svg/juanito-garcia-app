@@ -1,20 +1,20 @@
 {
-  "fecha": "02/09/2026",
-  "fecha_actualizacion": "2026-09-02",
+  "fecha": "03/09/2026",
+  "fecha_actualizacion": "2026-09-03",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "red"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 21.1% — crítica"
+    "PAUNO": "Morosidad 21.3% — crítica"
   },
-  "holding_ventas": "S/6.90M",
-  "holding_mora": "21.1%",
+  "holding_ventas": "S/7.22M",
+  "holding_mora": "21.3%",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 21.1% — vencido S/3.15M. Activar cobranza.",
+        "texto": "Mora 21.3% — vencido S/3.06M. Activar cobranza.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -32,23 +32,23 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "red",
-          "alerta": "Morosidad 21.1% — crítica",
+          "alerta": "Morosidad 21.3% — crítica",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "21.1%",
+              "valor": "21.3%",
               "meta": "15%",
               "estado": "red"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.15M"
+              "valor": "S/3.06M"
             }
           ],
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/3.15M",
+              "valor": "S/3.06M",
               "estado": "green"
             }
           ]
@@ -78,7 +78,7 @@
           "kpis": [
             {
               "label": "Ventas mes",
-              "valor": "S/6.90M"
+              "valor": "S/7.22M"
             },
             {
               "label": "Margen variable",
@@ -128,11 +128,11 @@
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10776059"
+              "valor": "10759607"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10446769"
+              "valor": "10479376"
             }
           ]
         },
@@ -159,36 +159,36 @@
         },
         "fill_rate": {
           "estado": "red",
-          "alerta": "Fill Rate 74.8% — bajo meta 98%",
+          "alerta": "Fill Rate 74.6% — bajo meta 98%",
           "kpis": [
             {
               "label": "Fill Rate",
-              "valor": "74.8%",
+              "valor": "74.6%",
               "meta": "98%",
               "estado": "red"
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/125.09M"
+              "valor": "S/125.41M"
             },
             {
               "label": "Facturación",
-              "valor": "S/93.57M"
+              "valor": "S/93.58M"
             },
             {
               "label": "Venta Perdida",
-              "valor": "S/31.51M",
+              "valor": "S/31.83M",
               "estado": "red"
             }
           ]
         },
         "margen_variable_pag2": {
           "estado": "yellow",
-          "alerta": "Avance 63.0% vs presupuesto",
+          "alerta": "Avance 78.6% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "63.0%",
+              "valor": "78.6%",
               "meta": "100%",
               "estado": "yellow"
             }
