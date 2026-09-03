@@ -3,25 +3,19 @@
   "fecha_actualizacion": "2026-09-03",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
-    "PAUNO": "red"
+    "PAUNO": "yellow"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 21.3% — crítica"
+    "PAUNO": "Morosidad 18.7% — sobre meta"
   },
-  "holding_ventas": "S/7.22M",
-  "holding_mora": "21.3%",
+  "holding_ventas": "S/7.51M",
+  "holding_mora": "18.7%",
   "agenda_ceo": {
-    "decidir_hoy": [
-      {
-        "empresa": "PAUNO",
-        "texto": "Mora 21.3% — vencido S/3.06M. Activar cobranza.",
-        "responsable": "Gerencia Financiera"
-      }
-    ],
+    "decidir_hoy": [],
     "escalar_semana": [
       {
         "empresa": "PAUNO",
-        "texto": "Margen 42.6% bajo meta 52%.",
+        "texto": "Margen 43.1% bajo meta 52%.",
         "responsable": "Comercial"
       }
     ],
@@ -31,24 +25,24 @@
     "PAUNO": {
       "reportes": {
         "cuentas_por_cobrar": {
-          "estado": "red",
-          "alerta": "Morosidad 21.3% — crítica",
+          "estado": "yellow",
+          "alerta": "Morosidad 18.7% — sobre meta",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "21.3%",
+              "valor": "18.7%",
               "meta": "15%",
-              "estado": "red"
+              "estado": "yellow"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.06M"
+              "valor": "S/4.16M"
             }
           ],
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/3.06M",
+              "valor": "S/4.16M",
               "estado": "green"
             }
           ]
@@ -59,7 +53,7 @@
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/17.81M"
+              "valor": "S/17.73M"
             },
             {
               "label": "Refinanciado",
@@ -68,33 +62,39 @@
             },
             {
               "label": "# Proveedores",
-              "valor": "144"
+              "valor": "143"
             }
           ]
         },
         "margen_variable": {
           "estado": "red",
-          "alerta": "Margen 42.6% — bajo meta 52%",
+          "alerta": "Margen 43.1% — bajo meta 52%",
           "kpis": [
             {
               "label": "Ventas mes",
-              "valor": "S/7.22M"
+              "valor": "S/7.51M"
             },
             {
               "label": "Margen variable",
-              "valor": "42.6%",
+              "valor": "43.1%",
               "meta": "52%",
               "estado": "red"
             },
             {
               "label": "Precio/kg",
-              "valor": "S/5.79"
+              "valor": "S/5.74"
             },
             {
               "label": "Costo/kg",
-              "valor": "S/3.32"
+              "valor": "S/3.27"
             }
           ]
+        },
+        "consumo_materiales": {
+          "estado": "grey",
+          "alerta": null,
+          "kpis": [],
+          "live_connection": true
         },
         "mermas": {
           "estado": "red",
@@ -114,19 +114,19 @@
           "kpis": [
             {
               "label": "Stock PP (Punto de Pedido)",
-              "valor": "1919275"
+              "valor": "1987909"
             },
             {
               "label": "Stock Valorizado",
-              "valor": "S/6.28M"
+              "valor": "S/5.73M"
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10759607"
+              "valor": "10795713"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10479376"
+              "valor": "10497429"
             }
           ]
         },
@@ -136,7 +136,7 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/151,279"
+              "valor": "S/145,463"
             }
           ]
         },
@@ -153,38 +153,38 @@
         },
         "fill_rate": {
           "estado": "red",
-          "alerta": "Fill Rate 74.6% — bajo meta 98%",
+          "alerta": "Fill Rate 83.5% — bajo meta 98%",
           "kpis": [
             {
               "label": "Fill Rate",
-              "valor": "74.6%",
+              "valor": "83.5%",
               "meta": "98%",
               "estado": "red"
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/125.41M"
+              "valor": "S/125.54M"
             },
             {
               "label": "Facturación",
-              "valor": "S/93.58M"
+              "valor": "S/94.52M"
             },
             {
               "label": "Venta Perdida",
-              "valor": "S/31.83M",
+              "valor": "S/31.02M",
               "estado": "red"
             }
           ]
         },
         "margen_variable_pag2": {
-          "estado": "yellow",
-          "alerta": "Avance 63.0% vs presupuesto",
+          "estado": "green",
+          "alerta": null,
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "63.0%",
+              "valor": "82.8%",
               "meta": "100%",
-              "estado": "yellow"
+              "estado": "green"
             }
           ]
         }
