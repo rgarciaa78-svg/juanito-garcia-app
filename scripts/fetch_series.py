@@ -114,13 +114,60 @@ def build_periodos():
     return out
 
 
+def _probar_par(token, dataset_id, medida, tbl, col):
+    q = (f'EVALUATE ROW("v", CALCULATE([{medida}], '
+         f"FILTER(ALL('{tbl}'), YEAR('{tbl}'[{col}]) = 2025 && MONTH('{tbl}'[{col}]) = 6)))")
+    rows = dax(token, dataset_id, q, f"probe {tbl}[{col}]", retries=1)
+    return rows is not None and len(rows) > 0
+
+
+def columnas_fecha_reales(token, dataset_id):
+    """Descubre columnas de tipo fecha del modelo vía DMV INFO.COLUMNS()/INFO.TABLES()."""
+    tablas = {}
+    rows = dax(token, dataset_id, "EVALUATE INFO.TABLES()", "info-tables", retries=1)
+    if rows:
+        for r in rows:
+            tid = r.get("[ID]", r.get("ID"))
+            nm  = r.get("[Name]", r.get("Name"))
+            if tid is not None and nm:
+                tablas[tid] = nm
+
+    cols = dax(token, dataset_id, "EVALUATE INFO.COLUMNS()", "info-columns", retries=1)
+    pares = []
+    if cols:
+        for c in cols:
+            nm = c.get("[ExplicitName]", c.get("ExplicitName")) or c.get("[Name]", c.get("Name"))
+            dt = str(c.get("[ExplicitDataType]", c.get("ExplicitDataType", "")) or "")
+            tid = c.get("[TableID]", c.get("TableID"))
+            tname = tablas.get(tid)
+            if not nm or not tname:
+                continue
+            # 9 = DateTime en el modelo tabular; además acepta nombres típicos
+            es_fecha = dt == "9" or any(k in nm.lower() for k in ("fecha", "date", "dia", "día"))
+            if es_fecha:
+                pares.append((tname, nm))
+    return pares
+
+
 def detectar_fecha(token, dataset_id, medida):
-    """Prueba pares (tabla, columna) hasta que uno responda con un filtro de mes."""
+    """Encuentra la tabla/columna de fecha que sí filtra la medida."""
+    # 1) Nombres frecuentes (rápido)
     for tbl, col in DATE_CANDIDATES:
-        q = (f'EVALUATE ROW("v", CALCULATE([{medida}], '
-             f"FILTER(ALL('{tbl}'), YEAR('{tbl}'[{col}]) = 2025 && MONTH('{tbl}'[{col}]) = 6)))")
-        rows = dax(token, dataset_id, q, f"probe {tbl}[{col}]", retries=1)
-        if rows is not None and len(rows) > 0:
+        if _probar_par(token, dataset_id, medida, tbl, col):
+            print(f"    Tabla de fecha: '{tbl}'[{col}]")
+            return tbl, col
+
+    # 2) Descubrimiento real del modelo
+    print("    Candidatos comunes fallaron — leyendo esquema del modelo...")
+    pares = columnas_fecha_reales(token, dataset_id)
+    if pares:
+        print(f"    Columnas de fecha halladas: {pares[:12]}")
+    vistos = set(DATE_CANDIDATES)
+    for tbl, col in pares:
+        if (tbl, col) in vistos:
+            continue
+        vistos.add((tbl, col))
+        if _probar_par(token, dataset_id, medida, tbl, col):
             print(f"    Tabla de fecha: '{tbl}'[{col}]")
             return tbl, col
     return None, None
