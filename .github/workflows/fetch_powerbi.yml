@@ -31,10 +31,20 @@ jobs:
           PBI_WORKSPACE_ID:    ${{ secrets.PBI_WORKSPACE_ID }}
         run: python scripts/fetch_powerbi.py
 
+      - name: Fetch serie histórica mensual (desde Ene-2025)
+        env:
+          AZURE_TENANT_ID:     ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID:     ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          PBI_USERNAME:        ${{ secrets.PBI_USERNAME }}
+          PBI_PASSWORD:        ${{ secrets.PBI_PASSWORD }}
+        run: python scripts/fetch_series.py
+        continue-on-error: true
+
       - name: Commit & push JSON files
         run: |
           git config user.name  "JUANITO Bot"
           git config user.email "juanito@pauno.pe"
-          git add data/latest/summaries.json data/latest/measure_cache.json data/historico/historico.json || true
+          git add data/latest/summaries.json data/latest/measure_cache.json data/latest/series.json data/historico/historico.json || true
           git diff --staged --quiet || git commit -m "data: auto-update Power BI $(date +'%Y-%m-%d %H:%M')"
           git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/rgarciaa78-svg/juanito-garcia-app.git HEAD:main

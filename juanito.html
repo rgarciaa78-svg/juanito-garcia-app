@@ -64,17 +64,42 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .nav-item.active svg { stroke: #ffffff; }
 .nav-item.active span { color: #ffffff; }
 
-/* iPad */
+/* Escritorio / iPad: navegación en CABECERA horizontal, área de trabajo blanca */
 @media (min-width: 768px) {
-  #app { flex-direction: row; }
-  #nav-bar { flex-direction: column; width: 80px; min-height: unset; border-top: none; border-right: 1px solid var(--border); }
-  .nav-item { padding: 18px 8px; }
+  #app { flex-direction: column; }
   #top-bar { display: none; }
-  #ipad-sidebar-header { display: flex; flex-direction: column; align-items: center; padding: 24px 8px 16px; border-bottom: 1px solid var(--border); }
-  #ipad-sidebar-header .logo-text { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); margin-bottom: 8px; }
+  #main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+  #nav-bar {
+    order: -1;
+    flex-direction: row; align-items: center;
+    width: 100%; min-height: 52px; height: 52px;
+    padding: 0 20px; gap: 3px;
+    border-top: none; border-bottom: none;
+    background: var(--navy);
+  }
+  #ipad-sidebar-header {
+    display: flex; flex-direction: row; align-items: center; gap: 10px;
+    padding: 0 14px 0 0; margin-right: 8px;
+    border-bottom: none; border-right: 1px solid rgba(255,255,255,0.15);
+    align-self: stretch;
+  }
+  #ipad-sidebar-header .logo-text {
+    font-size: 11px; font-weight: 800; letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    writing-mode: horizontal-tb; transform: none; margin: 0;
+  }
+  .nav-item {
+    flex: 0 0 auto; flex-direction: row; gap: 6px;
+    padding: 6px 12px; border-radius: 8px;
+  }
+  .nav-item svg { width: 16px; height: 16px; stroke-width: 2; }
+  .nav-item span { font-size: 11px; font-weight: 600; }
+  .nav-item.active { background: rgba(255,255,255,0.12); }
+
+  #screens-container { background: var(--bg); }
   #left-panel { display: flex; flex-direction: column; }
   #right-panel { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  #main { display: flex; flex: 1; overflow: hidden; }
   .mobile-header { display: none !important; }
 }
 @media (max-width: 767px) {
@@ -88,7 +113,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .screen.active { display: block; }
 @media (min-width: 768px) {
   .screen { padding: 24px 32px 32px; }
-  #screen-home.active { display: block; max-width: 800px; }
+  #screen-home.active { display: block; }
+  #kpi-exec-grid, #agenda-decidir-section, #agenda-semana-section { max-width: 960px; }
 }
 
 /* ============================
@@ -218,82 +244,208 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .agenda-tag.resp { background: var(--accent-bg); color: var(--accent); }
 
 /* ============================
-   EXEC DASHBOARD (McKinsey)
+   DASHBOARD GERENCIAL PAUNO
    ============================ */
-.exec-header {
-  background: #1e3a5f;
-  border-radius: var(--radius);
-  padding: 18px 20px 16px;
-  margin-bottom: 14px;
-}
-.exec-header-date {
-  font-size: 10px; font-weight: 600;
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase; letter-spacing: 1px;
-  margin-bottom: 6px;
-}
-.exec-header-title {
-  font-size: 18px; font-weight: 700;
-  color: #fff; letter-spacing: -0.3px; line-height: 1.2;
-  margin-bottom: 4px;
-}
-.exec-header-subtitle {
-  font-size: 11px; color: rgba(255,255,255,0.55);
+:root {
+  --navy:   #1e3a5f;
+  --navy2:  #16304f;
+  --amber:  #b45309;
+  --amb-bg: #fffbeb;
+  --amb-b:  rgba(180,83,9,0.18);
+  --grn-bg: #f0fdf4;
+  --grn-b:  rgba(22,101,52,0.18);
+  --surface:#f8f9fb;
 }
 
-.exec-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 18px;
+/* Cabecera ejecutiva */
+.exec-header { background: var(--navy2); padding: 13px 18px 12px; margin: -16px -14px 14px; }
+@media (min-width: 768px) { .exec-header { margin: -24px -32px 16px; padding: 15px 32px 14px; } }
+.exec-eyebrow {
+  font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
+  text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 5px;
 }
-@media (min-width: 768px) {
-  .exec-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+.exec-title { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.2px; margin-bottom: 8px; }
+.exec-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+.epill {
+  font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.4px;
 }
-.exec-kpi-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 14px 16px;
-  box-shadow: var(--shadow);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.12s;
+.epill.red   { background: rgba(198,40,40,0.3);   color: #fca5a5; }
+.epill.amber { background: rgba(245,158,11,0.25); color: #fcd34d; }
+.epill.muted { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.42); }
+
+/* Tarjeta de área */
+.area-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; cursor: pointer; margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: box-shadow .12s;
 }
-.exec-kpi-card:active { transform: scale(0.97); }
-.exec-kpi-card::after {
-  content: ''; position: absolute;
-  bottom: 0; left: 0; right: 0; height: 3px;
+.area-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.09); }
+.area-inner { display: flex; }
+.area-bar { width: 4px; flex-shrink: 0; }
+.area-bar.red   { background: var(--red); }
+.area-bar.amber { background: #d97706; }
+.area-bar.green { background: #16a34a; }
+.area-bar.grey  { background: #d1d5db; }
+.area-body { flex: 1; padding: 11px 14px 12px; min-width: 0; }
+.area-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.area-name {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text); flex: 1;
 }
-.exec-kpi-card.state-red::after    { background: var(--red); }
-.exec-kpi-card.state-yellow::after { background: var(--yellow-light); }
-.exec-kpi-card.state-green::after  { background: var(--green); }
-.exec-kpi-card.state-grey::after   { background: #aaa; }
-.exec-kpi-label {
-  font-size: 9px; font-weight: 700;
-  color: var(--text2);
-  text-transform: uppercase; letter-spacing: 0.7px;
-  margin-bottom: 8px;
+.badge {
+  font-size: 8px; font-weight: 800; padding: 2px 7px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.4px;
 }
-.exec-kpi-value {
-  font-size: 26px; font-weight: 700;
-  letter-spacing: -1px; line-height: 1;
-  margin-bottom: 6px; color: var(--text);
+.badge.red   { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-border); }
+.badge.amber { background: var(--amb-bg);    color: var(--amber);  border: 1px solid var(--amb-b); }
+.badge.green { background: var(--grn-bg);    color: var(--green);  border: 1px solid var(--grn-b); }
+.badge.grey  { background: var(--surface);   color: var(--text3);  border: 1px solid var(--border); }
+.area-caret { font-size: 13px; color: var(--text3); }
+.area-alrt { font-size: 10px; font-weight: 600; padding: 4px 8px; border-radius: 5px; margin-bottom: 8px; }
+.area-alrt.red   { color: var(--red);   background: var(--red-bg); }
+.area-alrt.amber { color: var(--amber); background: var(--amb-bg); }
+.area-nota { font-size: 10px; color: var(--text3); line-height: 1.5; font-style: italic; }
+
+/* Filas de KPI */
+.krows { display: flex; flex-direction: column; }
+.krow {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 4px; border-radius: 6px; flex-wrap: wrap;
 }
-.exec-kpi-value.state-red    { color: var(--red); }
-.exec-kpi-value.state-yellow { color: var(--yellow); }
-.exec-kpi-value.state-green  { color: var(--green); }
-.exec-kpi-meta {
-  font-size: 10px; color: var(--text3); line-height: 1.4;
+.krow.has-detail { cursor: pointer; }
+.krow.has-detail:hover { background: var(--surface); }
+.kdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--border); }
+.kdot.red    { background: var(--red); }
+.kdot.yellow { background: #d97706; }
+.kdot.green  { background: #16a34a; }
+.klabel { font-size: 11px; color: var(--text2); flex: 1; min-width: 100px; }
+.kspark { width: 96px; height: 26px; flex-shrink: 0; display: none; }
+@media (min-width: 620px) { .kspark { display: block; } }
+.spark { width: 100%; height: 100%; display: block; }
+.kval {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.exec-kpi-meta .meta-bad { color: var(--red); font-weight: 600; }
-.exec-kpi-meta .meta-ok  { color: var(--green); font-weight: 600; }
-.exec-kpi-yoy {
-  font-size: 10px; color: var(--text3); margin-top: 3px;
+.kval.red { color: var(--red); } .kval.yellow { color: var(--amber); } .kval.green { color: var(--green); }
+.kchip { font-size: 9px; font-weight: 600; padding: 1px 6px; border-radius: 10px; white-space: nowrap; }
+.kchip.meta { background: var(--surface); color: var(--text3); }
+.kchips { display: flex; gap: 3px; flex-wrap: wrap; }
+.vchip {
+  font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
 }
-.exec-kpi-yoy .yoy-up   { color: var(--green); font-weight: 600; }
-.exec-kpi-yoy .yoy-down { color: var(--red); font-weight: 600; }
+.vchip em { font-style: normal; font-weight: 500; opacity: .65; }
+.vchip.good { background: var(--grn-bg); color: var(--green); }
+.vchip.bad  { background: var(--red-bg); color: var(--red); }
+.vchip.flat { background: var(--surface); color: var(--text3); }
+.kmore { font-size: 13px; color: var(--text3); }
+
+/* Modal de detalle */
+#kpi-modal {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(15,23,42,0.5); backdrop-filter: blur(3px);
+  display: none; align-items: flex-end; justify-content: center;
+}
+#kpi-modal.open { display: flex; }
+@media (min-width: 768px) { #kpi-modal.open { align-items: center; } }
+.kpi-modal-panel {
+  background: var(--card); width: 100%; max-width: 640px;
+  max-height: 92vh; overflow-y: auto;
+  border-radius: 16px 16px 0 0; padding: 18px 18px 28px;
+  -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 768px) { .kpi-modal-panel { border-radius: 14px; max-height: 88vh; } }
+
+.dhead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.dhead-label {
+  font-size: 10px; font-weight: 800; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 4px;
+}
+.dhead-val { font-size: 30px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--text); }
+.dhead-per { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.dclose {
+  margin-left: auto; background: var(--surface); border: 1px solid var(--border);
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  color: var(--text2); font-size: 13px; flex-shrink: 0;
+}
+.dchart { margin-bottom: 16px; }
+.dchart .spark { height: 130px; }
+.dchart-x { display: flex; justify-content: space-between; font-size: 9px; color: var(--text3); margin-top: 3px; }
+
+.dsec-t {
+  font-size: 9px; font-weight: 800; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin: 16px 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--border);
+}
+.dtiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.dtile { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; }
+.dtile-t { font-size: 8px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; line-height: 1.3; margin-bottom: 5px; }
+.dtile-v { font-size: 14px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.dtile-p { font-size: 9px; color: var(--text3); margin-top: 1px; }
+.dtile-d { font-size: 11px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.dtile-d.good { color: var(--green); } .dtile-d.bad { color: var(--red); } .dtile-d.flat { color: var(--text3); }
+
+.dacum {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; margin-top: 8px;
+}
+.dacum-l { font-size: 10px; font-weight: 600; color: var(--text2); }
+.dacum-v { font-size: 16px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.dacum-c { font-size: 10px; color: var(--text3); }
+
+.dorigen {
+  font-size: 12px; line-height: 1.6; color: var(--text);
+  background: var(--accent-bg); border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0; padding: 10px 12px;
+}
+.ddec {
+  border: 1px solid var(--border); border-left: 3px solid var(--text3);
+  border-radius: 0 8px 8px 0; padding: 10px 12px; background: var(--surface);
+}
+.ddec.urgente { border-left-color: var(--red); background: var(--red-bg); }
+.ddec-q { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.5; }
+.ddec-a { font-size: 10px; color: var(--text2); margin-top: 5px; }
+
+.dtable-wrap { overflow-x: auto; }
+.dtable { width: 100%; border-collapse: collapse; font-size: 11px; }
+.dtable th {
+  text-align: left; font-size: 9px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .5px;
+  padding: 6px 8px; border-bottom: 1px solid var(--border);
+}
+.dtable td { padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+.dtable .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.dtable td.good { color: var(--green); } .dtable td.bad { color: var(--red); }
+
+/* Agenda */
+.mc-agenda { margin-bottom: 12px; }
+.mc-agenda-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.mc-agenda-line { flex: 1; height: 1px; background: var(--border); }
+.mc-agenda-label { font-size: 8px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+.mc-agenda-label.red    { color: var(--red); }
+.mc-agenda-label.yellow { color: var(--amber); }
+.mc-agenda-count { font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 20px; }
+.mc-agenda-count.red    { background: var(--red-bg); color: var(--red);   border: 1px solid var(--red-border); }
+.mc-agenda-count.yellow { background: var(--amb-bg); color: var(--amber); border: 1px solid var(--amb-b); }
+.mc-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px 10px 16px; margin-bottom: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04); position: relative; overflow: hidden;
+}
+.mc-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.mc-item.red::before    { background: var(--red); }
+.mc-item.yellow::before { background: #d97706; }
+.mc-item-text { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.45; }
+.mc-item-tags { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+.mc-tag {
+  font-size: 9px; font-weight: 600; padding: 1px 7px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: .3px;
+  background: var(--surface); color: var(--text3);
+}
+.mc-tag.accent { background: var(--accent-bg); color: var(--accent); }
+
 
 /* McKinsey Agenda */
 .mc-agenda { margin-bottom: 14px; }
@@ -792,6 +944,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <div id="png-viewer-img"><img id="png-img" src="" alt="Reporte"></div>
 </div>
 
+<!-- DETALLE DE KPI -->
+<div id="kpi-modal" onclick="if(event.target===this)cerrarKPI()">
+  <div class="kpi-modal-panel" id="kpi-modal-body"></div>
+</div>
+
 
 <script>
 let DATA = null;
@@ -800,6 +957,7 @@ let RISK_REGISTER = null;
 let HITOS = null;
 let CASHFLOW = null;
 let HISTORICO = null;
+let SERIES = null;
 let currentTab = 'home';
 let navHistory = [];
 const _E=[25,30,76,15,7,0,66,83,64,91,6,84,76,34,39,36,4,95,28,24,40,47,45,25,66,8,101,66,81,51,31,52,6,59,58,34,0,60,10,18,86,31,4,90,70,63,89,40,60,37,4,19,27,76,88,13,13,36,7,91,119,113,4,25,22,38,40,53,88,68,24,95,1,36,88,91,1,101,66,6,48,11,4,24,15,18,63,22,37,3,33,45,87,127,125,96,16,44,51,78,81,43,50,6,22,47,40,53];
@@ -910,6 +1068,10 @@ async function loadData() {
     if (rh && rh.ok) HITOS = await rh.json();
     if (rc && rc.ok) CASHFLOW = await rc.json();
     if (rhi && rhi.ok) HISTORICO = await rhi.json();
+    try {
+      const rs = await fetch('data/latest/series.json?t=' + t);
+      if (rs && rs.ok) SERIES = await rs.json();
+    } catch(e) {}
     renderAll();
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
@@ -923,105 +1085,466 @@ function renderAll() {
   renderEmpresa('PAUNO', 'pauno-content');
   document.getElementById('top-sub').textContent = DATA.fecha || '';
 }
+// ============================================================
+//  MOTOR DE ANÁLISIS GERENCIAL
+//  Toda cifra proviene de Power BI (summaries.json / series.json)
+// ============================================================
 
+const REPORTE_LABEL = {
+  margen_variable:      'Ventas & Margen',
+  margen_variable_pag2: 'Planificación vs Presupuesto',
+  fill_rate:            'Fill Rate & Nivel de Servicio',
+  cuentas_por_cobrar:   'CxC — Cobranzas',
+  cuentas_por_pagar:    'CxP — Proveedores',
+  mermas:               'Control de Mermas',
+  compras:              'Compras & Stock',
+  sop_inventario:       'Inventario',
+  consumo_materiales:   'Consumo de Materiales',
+  productividad:        'Productividad de Planta',
+  control_interno:      'Control Interno',
+};
+
+// Mapa KPI → (dataset de series.json, medida, tipo de dato, dirección deseada)
+// dir: 'up' = subir es bueno · 'down' = bajar es bueno
+const KPI_SOURCE = {
+  'Ventas mes':                 { ds:'margen',        m:'Venta Total',       fmt:'money', dir:'up'   },
+  'Precio/kg':                  { ds:'margen',        m:'Precio x Kilo',     fmt:'money2',dir:'up'   },
+  'Costo/kg':                   { ds:'margen',        m:'Costo x Kilo',      fmt:'money2',dir:'down' },
+  'Margen variable':            { ds:'margen',        m:'__margen_calc__',   fmt:'pct',   dir:'up'   },
+  'Morosidad':                  { ds:'cxc',           m:'% Morosidad',       fmt:'pct',   dir:'down' },
+  'CxC por vencer':             { ds:'cxc',           m:'Por Vencer',        fmt:'money', dir:'up'   },
+  'CxP Total':                  { ds:'cxp',           m:'Cuentas x Pagar',   fmt:'money', dir:'down' },
+  'Refinanciado':               { ds:'cxp',           m:'Refinanciamiento',  fmt:'money', dir:'down' },
+  '# Proveedores':              { ds:'cxp',           m:'Proveedores',       fmt:'num',   dir:'flat' },
+  'Fill Rate':                  { ds:'fill_rate',     m:'% FILLRATE',        fmt:'pct',   dir:'up'   },
+  'Orden de Venta':             { ds:'fill_rate',     m:'ORDEN DE VENTA',    fmt:'money', dir:'up'   },
+  'Facturación':                { ds:'fill_rate',     m:'FACTURACION',       fmt:'money', dir:'up'   },
+  'Venta Perdida':              { ds:'fill_rate',     m:'VENTA PERDIDA',     fmt:'money', dir:'down' },
+  'Merma Total':                { ds:'mermas',        m:'% Merma Total',     fmt:'pct',   dir:'down' },
+  'Stock PP (Punto de Pedido)': { ds:'compras',       m:'Stock PP',          fmt:'num',   dir:'flat' },
+  'Stock Valorizado':           { ds:'compras',       m:'Stock Valorizado',  fmt:'money', dir:'down' },
+  'Consumo Prom 3M':            { ds:'compras',       m:'Consumo Prom 3M',   fmt:'num',   dir:'flat' },
+  'Consumo Prom 6M':            { ds:'compras',       m:'Consumo Prom 6M',   fmt:'num',   dir:'flat' },
+  'Inventario Total':           { ds:'inventario',    m:'Stock Total',       fmt:'money', dir:'down' },
+  'Avance vs Ppto':             { ds:'planificacion', m:'% Avance',          fmt:'pct',   dir:'up'   },
+  'Satisfactorio':              { ds:'control_ds',    m:'Satisfactorio',     fmt:'num',   dir:'up'   },
+};
+
+// Palanca de decisión por KPI cuando hay brecha adversa
+const KPI_DECISION = {
+  'Morosidad':       { pregunta:'¿Activar cobranza judicial o renegociar plazos?', area:'Gerencia Financiera' },
+  'Margen variable': { pregunta:'¿Ajustar lista de precios o atacar el costo unitario?', area:'Comercial / Operaciones' },
+  'Costo/kg':        { pregunta:'¿Renegociar con proveedores o cambiar mix de materia prima?', area:'Compras' },
+  'Fill Rate':       { pregunta:'¿Reforzar planificación de producción o ampliar stock de seguridad?', area:'Planeamiento' },
+  'Venta Perdida':   { pregunta:'¿Qué SKUs concentran el quiebre? Priorizar reposición.', area:'Planeamiento / Comercial' },
+  'Merma Total':     { pregunta:'¿Qué planta y qué UEN generan la desviación? Auditar proceso.', area:'Producción' },
+  'Refinanciado':    { pregunta:'¿Refinanciar de nuevo o liquidar con flujo de cobranza?', area:'Gerencia Financiera' },
+  'Avance vs Ppto':  { pregunta:'¿El presupuesto es alcanzable o se replantea la meta del cierre?', area:'Gerencia General' },
+  'Stock Valorizado':{ pregunta:'¿Hay stock inmovilizado? Liberar capital de trabajo.', area:'Logística' },
+  'Inventario Total':{ pregunta:'¿Rotación adecuada o exceso de inventario?', area:'Logística' },
+  'Ventas mes':      { pregunta:'¿Qué canal o cliente explica la caída?', area:'Comercial' },
+};
+
+// ── Utilidades de serie ─────────────────────────────────────
+function serieDe(dsKey, medida) {
+  if (!SERIES || !SERIES.datasets) return null;
+  const ds = SERIES.datasets[dsKey];
+  if (!ds) return null;
+
+  // Margen variable se deriva de Precio y Costo por kilo
+  if (medida === '__margen_calc__') {
+    const p = ds['Precio x Kilo'], c = ds['Costo x Kilo'];
+    if (!p || !c) return null;
+    return p.map((pv, i) => {
+      const cv = c[i];
+      if (pv == null || cv == null || pv === 0) return null;
+      return (pv - cv) / pv;
+    });
+  }
+  return ds[medida] || null;
+}
+
+function periodos() { return (SERIES && SERIES.periodos) || []; }
+
+function idxUltimoConDato(vals) {
+  for (let i = vals.length - 1; i >= 0; i--) if (vals[i] != null) return i;
+  return -1;
+}
+
+// Acumulado del año hasta el índice dado (inclusive)
+function acumHasta(vals, ps, idx, anio) {
+  let s = 0, n = 0;
+  for (let i = 0; i <= idx; i++) {
+    if (ps[i] && ps[i].startsWith(anio) && vals[i] != null) { s += vals[i]; n++; }
+  }
+  return n ? { suma: s, prom: s / n, meses: n } : null;
+}
+
+/**
+ * Analiza un KPI: último valor, MoM, YoY, acumulado YTD vs año anterior.
+ * Devuelve null si no hay serie.
+ */
+function analizar(label) {
+  const src = KPI_SOURCE[label];
+  if (!src) return null;
+  const vals = serieDe(src.ds, src.m);
+  const ps = periodos();
+  if (!vals || !ps.length) return null;
+
+  const i = idxUltimoConDato(vals);
+  if (i < 0) return null;
+  const actual = vals[i];
+  const per = ps[i];
+  const anio = per.slice(0, 4), mes = per.slice(5, 7);
+
+  // Mes anterior
+  let mom = null;
+  for (let j = i - 1; j >= 0; j--) {
+    if (vals[j] != null) { mom = { valor: vals[j], periodo: ps[j] }; break; }
+  }
+
+  // Mismo mes del año anterior
+  const perYoY = (parseInt(anio) - 1) + '-' + mes;
+  const jY = ps.indexOf(perYoY);
+  const yoy = (jY >= 0 && vals[jY] != null) ? { valor: vals[jY], periodo: perYoY } : null;
+
+  // Acumulado del año vs mismo tramo del año anterior
+  const ytd = acumHasta(vals, ps, i, anio);
+  let idxPrevFin = -1;
+  for (let k = 0; k < ps.length; k++) {
+    if (ps[k] === perYoY) { idxPrevFin = k; break; }
+  }
+  const ytdPrev = idxPrevFin >= 0 ? acumHasta(vals, ps, idxPrevFin, String(parseInt(anio) - 1)) : null;
+
+  // Es porcentaje → se compara el promedio; si es monto → se compara la suma
+  const esPct = src.fmt === 'pct';
+  const acumAct  = ytd     ? (esPct ? ytd.prom     : ytd.suma)     : null;
+  const acumPrev = ytdPrev ? (esPct ? ytdPrev.prom : ytdPrev.suma) : null;
+
+  const delta = (a, b) => (a == null || b == null || b === 0) ? null : (a - b) / Math.abs(b) * 100;
+  const deltaPP = (a, b) => (a == null || b == null) ? null : (a - b) * 100;
+
+  return {
+    src, vals, ps, idx: i, actual, periodo: per,
+    mom:  mom  ? { ...mom,  var: esPct ? deltaPP(actual, mom.valor)  : delta(actual, mom.valor),  unidad: esPct?'pp':'%' } : null,
+    yoy:  yoy  ? { ...yoy,  var: esPct ? deltaPP(actual, yoy.valor)  : delta(actual, yoy.valor),  unidad: esPct?'pp':'%' } : null,
+    ytd:  ytd,  ytdPrev: ytdPrev,
+    acumActual: acumAct, acumPrev: acumPrev,
+    acumVar: esPct ? deltaPP(acumAct, acumPrev) : delta(acumAct, acumPrev),
+    acumUnidad: esPct ? 'pp' : '%',
+    esPct,
+  };
+}
+
+// ── Formato ────────────────────────────────────────────────
+function fmtValor(v, fmt) {
+  if (v == null) return '—';
+  if (fmt === 'pct')    return (v * 100).toFixed(1) + '%';
+  if (fmt === 'money')  return v >= 1e6 ? 'S/' + (v/1e6).toFixed(2) + 'M'
+                             : v >= 1e3 ? 'S/' + (v/1e3).toFixed(0) + 'K'
+                             : 'S/' + v.toFixed(0);
+  if (fmt === 'money2') return 'S/' + v.toFixed(2);
+  if (fmt === 'num')    return Math.round(v).toLocaleString('es-PE');
+  return String(v);
+}
+
+function fmtPeriodo(p) {
+  if (!p) return '';
+  const M = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return M[parseInt(p.slice(5,7))] + ' ' + p.slice(2,4);
+}
+
+// ¿La variación es favorable dada la dirección deseada del KPI?
+function esFavorable(varr, dir) {
+  if (varr == null || dir === 'flat') return null;
+  return dir === 'up' ? varr >= 0 : varr <= 0;
+}
+
+function chipVar(varr, unidad, dir, etiqueta) {
+  if (varr == null) return '';
+  const fav = esFavorable(varr, dir);
+  const cls = fav === null ? 'flat' : fav ? 'good' : 'bad';
+  const sig = varr >= 0 ? '+' : '';
+  const arrow = Math.abs(varr) < 0.05 ? '→' : varr > 0 ? '↑' : '↓';
+  return `<span class="vchip ${cls}">${arrow} ${sig}${varr.toFixed(1)}${unidad} <em>${etiqueta}</em></span>`;
+}
+
+// ── Sparkline SVG ──────────────────────────────────────────
+function sparkline(vals, dir, w, h) {
+  w = w || 220; h = h || 44;
+  const pts = vals.map((v,i) => ({v, i})).filter(p => p.v != null);
+  if (pts.length < 2) return '';
+  const ys = pts.map(p => p.v);
+  let min = Math.min(...ys), max = Math.max(...ys);
+  if (max === min) { max = min + Math.abs(min || 1) * 0.1; min = min - Math.abs(min || 1) * 0.1; }
+  const pad = (max - min) * 0.12;
+  min -= pad; max += pad;
+  const n = vals.length - 1 || 1;
+  const X = i => (i / n) * (w - 4) + 2;
+  const Y = v => h - 4 - ((v - min) / (max - min)) * (h - 8);
+
+  const d = pts.map((p, k) => (k === 0 ? 'M' : 'L') + X(p.i).toFixed(1) + ' ' + Y(p.v).toFixed(1)).join(' ');
+  const area = d + ` L${X(pts[pts.length-1].i).toFixed(1)} ${h} L${X(pts[0].i).toFixed(1)} ${h} Z`;
+
+  const ini = pts[0].v, fin = pts[pts.length-1].v;
+  const fav = esFavorable(fin - ini, dir);
+  const color = fav === null ? '#64748b' : fav ? '#16a34a' : '#c62828';
+  const uid = 'sg' + Math.random().toString(36).slice(2,8);
+
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#${uid})"/>
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(pts[pts.length-1].i).toFixed(1)}" cy="${Y(fin).toFixed(1)}" r="2.8" fill="${color}"/>
+  </svg>`;
+}
+
+// ── Origen de la variación ─────────────────────────────────
+// Descompone la brecha usando otras medidas de la misma base
+function origenVariacion(label, an) {
+  if (!an) return null;
+  const f = (l) => analizar(l);
+
+  if (label === 'Margen variable') {
+    const p = f('Precio/kg'), c = f('Costo/kg');
+    if (p && c && p.yoy && c.yoy) {
+      const dP = p.yoy.var, dC = c.yoy.var;
+      const culpa = Math.abs(dC) > Math.abs(dP) ? 'costo' : 'precio';
+      return `El precio/kg varió ${dP>=0?'+':''}${dP.toFixed(1)}% y el costo/kg ${dC>=0?'+':''}${dC.toFixed(1)}% frente a ${fmtPeriodo(p.yoy.periodo)}. La brecha la explica principalmente el <strong>${culpa}</strong>.`;
+    }
+  }
+  if (label === 'Fill Rate') {
+    const ov = f('Orden de Venta'), fa = f('Facturación'), vp = f('Venta Perdida');
+    if (ov && fa && ov.yoy && fa.yoy) {
+      return `Orden de venta ${ov.yoy.var>=0?'+':''}${ov.yoy.var.toFixed(1)}% y facturación ${fa.yoy.var>=0?'+':''}${fa.yoy.var.toFixed(1)}% vs ${fmtPeriodo(ov.yoy.periodo)}.` +
+        (vp ? ` La venta perdida acumulada del año suma <strong>${fmtValor(vp.ytd?vp.ytd.suma:null,'money')}</strong>.` : '');
+    }
+  }
+  if (label === 'Ventas mes') {
+    const p = f('Precio/kg');
+    if (p && p.yoy && an.yoy) {
+      const efectoPrecio = p.yoy.var, efectoVol = an.yoy.var - p.yoy.var;
+      return `De la variación de ${an.yoy.var>=0?'+':''}${an.yoy.var.toFixed(1)}% en ventas, aprox. <strong>${efectoPrecio>=0?'+':''}${efectoPrecio.toFixed(1)}pp viene de precio</strong> y ${efectoVol>=0?'+':''}${efectoVol.toFixed(1)}pp de volumen.`;
+    }
+  }
+  if (label === 'Morosidad') {
+    const pv = f('CxC por vencer');
+    if (pv && pv.yoy) {
+      return `La cartera por vencer varió ${pv.yoy.var>=0?'+':''}${pv.yoy.var.toFixed(1)}% vs ${fmtPeriodo(pv.yoy.periodo)}. Revisar concentración por cliente en el reporte de CxC.`;
+    }
+  }
+  // Genérico
+  if (an.yoy && an.mom) {
+    const t = an.yoy.var, m = an.mom.var;
+    const persistente = (t > 0) === (m > 0);
+    return persistente
+      ? `La variación es <strong>persistente</strong>: se repite tanto contra el mes anterior (${m>=0?'+':''}${m.toFixed(1)}${an.mom.unidad}) como contra ${fmtPeriodo(an.yoy.periodo)} (${t>=0?'+':''}${t.toFixed(1)}${an.yoy.unidad}).`
+      : `La variación es <strong>puntual del mes</strong>: mes anterior ${m>=0?'+':''}${m.toFixed(1)}${an.mom.unidad}, pero contra ${fmtPeriodo(an.yoy.periodo)} ${t>=0?'+':''}${t.toFixed(1)}${an.yoy.unidad}.`;
+  }
+  return null;
+}
+
+// ── Render de una fila de KPI ──────────────────────────────
+function filaKPI(k) {
+  const label = k.label;
+  const est = k.estado || '';
+  const an = analizar(label);
+  const src = KPI_SOURCE[label];
+  const dir = src ? src.dir : 'flat';
+
+  const chips = an
+    ? [ chipVar(an.mom ? an.mom.var : null, an.mom ? an.mom.unidad : '', dir, 'MoM'),
+        chipVar(an.yoy ? an.yoy.var : null, an.yoy ? an.yoy.unidad : '', dir, 'YoY'),
+        chipVar(an.acumVar, an.acumUnidad, dir, 'Acum') ].join('')
+    : '';
+
+  const spark = an ? sparkline(an.vals, dir, 96, 26) : '';
+  const clickable = an ? `onclick="event.stopPropagation();abrirKPI('${label.replace(/'/g,"\\'")}')"` : '';
+
+  return `<div class="krow ${an?'has-detail':''}" ${clickable}>
+    <span class="kdot ${est}"></span>
+    <span class="klabel">${label}</span>
+    <span class="kspark">${spark}</span>
+    <span class="kval ${est}">${k.valor}</span>
+    ${k.meta ? `<span class="kchip meta">meta ${k.meta}</span>` : ''}
+    <span class="kchips">${chips}</span>
+    ${an ? '<span class="kmore">›</span>' : ''}
+  </div>`;
+}
+
+// ── Panel de detalle de un KPI ─────────────────────────────
+function abrirKPI(label) {
+  const an = analizar(label);
+  if (!an) return;
+  const src = an.src, dir = src.dir, fmt = src.fmt;
+
+  const tile = (titulo, valorRef, periodoRef, varr, unidad) => {
+    const fav = esFavorable(varr, dir);
+    const cls = fav === null ? 'flat' : fav ? 'good' : 'bad';
+    return `<div class="dtile">
+      <div class="dtile-t">${titulo}</div>
+      <div class="dtile-v">${fmtValor(valorRef, fmt)}</div>
+      <div class="dtile-p">${periodoRef}</div>
+      <div class="dtile-d ${cls}">${varr==null?'—':(varr>=0?'+':'')+varr.toFixed(1)+unidad}</div>
+    </div>`;
+  };
+
+  const origen = origenVariacion(label, an);
+  const dec = KPI_DECISION[label];
+  const fav = esFavorable(an.yoy ? an.yoy.var : null, dir);
+
+  // Tabla de los últimos 12 meses con dato
+  const filas = [];
+  for (let i = an.vals.length - 1; i >= 0 && filas.length < 12; i--) {
+    if (an.vals[i] == null) continue;
+    const prev = i > 0 ? an.vals[i-1] : null;
+    let d = null;
+    if (prev != null && prev !== 0) d = an.esPct ? (an.vals[i]-prev)*100 : (an.vals[i]-prev)/Math.abs(prev)*100;
+    const favd = esFavorable(d, dir);
+    filas.push(`<tr>
+      <td>${fmtPeriodo(an.ps[i])}</td>
+      <td class="num">${fmtValor(an.vals[i], fmt)}</td>
+      <td class="num ${d==null?'':favd?'good':'bad'}">${d==null?'—':(d>=0?'+':'')+d.toFixed(1)+(an.esPct?'pp':'%')}</td>
+    </tr>`);
+  }
+
+  document.getElementById('kpi-modal-body').innerHTML = `
+    <div class="dhead">
+      <div>
+        <div class="dhead-label">${label}</div>
+        <div class="dhead-val">${fmtValor(an.actual, fmt)}</div>
+        <div class="dhead-per">${fmtPeriodo(an.periodo)} · dato de Power BI</div>
+      </div>
+      <button class="dclose" onclick="cerrarKPI()">✕</button>
+    </div>
+
+    <div class="dchart">${sparkline(an.vals, dir, 560, 130)}
+      <div class="dchart-x"><span>${fmtPeriodo(an.ps[0])}</span><span>${fmtPeriodo(an.periodo)}</span></div>
+    </div>
+
+    <div class="dsec-t">Comparativos</div>
+    <div class="dtiles">
+      ${tile('Mes anterior', an.mom?an.mom.valor:null, an.mom?fmtPeriodo(an.mom.periodo):'sin dato', an.mom?an.mom.var:null, an.mom?an.mom.unidad:'')}
+      ${tile('Mismo mes año anterior', an.yoy?an.yoy.valor:null, an.yoy?fmtPeriodo(an.yoy.periodo):'sin dato', an.yoy?an.yoy.var:null, an.yoy?an.yoy.unidad:'')}
+      ${tile('Acumulado año anterior', an.acumPrev, an.ytdPrev?`${an.ytdPrev.meses} meses`:'sin dato', an.acumVar, an.acumUnidad)}
+    </div>
+
+    ${an.ytd ? `<div class="dacum">
+      <span class="dacum-l">Acumulado ${an.periodo.slice(0,4)} (${an.ytd.meses} meses)</span>
+      <span class="dacum-v">${fmtValor(an.esPct?an.ytd.prom:an.ytd.suma, fmt)}</span>
+      ${an.acumPrev!=null?`<span class="dacum-c">vs ${fmtValor(an.acumPrev,fmt)} en ${parseInt(an.periodo.slice(0,4))-1}</span>`:''}
+    </div>` : ''}
+
+    ${origen ? `<div class="dsec-t">Origen de la variación</div>
+      <div class="dorigen">${origen}</div>` : ''}
+
+    ${dec ? `<div class="dsec-t">Decisión</div>
+      <div class="ddec ${fav===false?'urgente':''}">
+        <div class="ddec-q">${dec.pregunta}</div>
+        <div class="ddec-a">Responsable: ${dec.area}</div>
+      </div>` : ''}
+
+    <div class="dsec-t">Serie mensual</div>
+    <div class="dtable-wrap">
+      <table class="dtable">
+        <thead><tr><th>Mes</th><th class="num">Valor</th><th class="num">Var. mes</th></tr></thead>
+        <tbody>${filas.join('')}</tbody>
+      </table>
+    </div>
+  `;
+  document.getElementById('kpi-modal').classList.add('open');
+}
+
+function cerrarKPI() {
+  document.getElementById('kpi-modal').classList.remove('open');
+}
+
+// ── Dashboard principal ────────────────────────────────────
 function renderHome() {
-  const sems = DATA.semaforos || {};
-  const pauno_rpts = (DATA.empresas?.PAUNO?.reportes) || {};
-  const yoy = DATA.yoy || {};
+  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
+  const fechaStr = DATA.fecha || '—';
 
-  // Executive Header
-  const criticos = Object.values(sems).filter(s => s === 'red').length;
-  const fechaStr = DATA.fecha || new Date().toLocaleDateString('es-PE', {day:'2-digit', month:'long', year:'numeric'});
-  const headline = criticos > 0
-    ? `${criticos} indicador${criticos>1?'es':''} crítico${criticos>1?'s':''} — acción requerida`
-    : 'Operación bajo control';
+  let nRed = 0, nYel = 0;
+  Object.values(rpts).forEach(r => {
+    if (r.estado === 'red') nRed++; else if (r.estado === 'yellow') nYel++;
+  });
+
+  const titular = nRed > 0
+    ? `${nRed} alerta${nRed>1?'s':''} crítica${nRed>1?'s':''} · ${nYel} en atención`
+    : nYel > 0 ? `${nYel} área${nYel>1?'s':''} en atención` : 'Operación bajo control';
+
+  const hayserie = !!(SERIES && SERIES.periodos && SERIES.periodos.length);
+  const rango = hayserie
+    ? `${fmtPeriodo(SERIES.periodos[0])} → ${fmtPeriodo(SERIES.periodos[SERIES.periodos.length-1])}`
+    : null;
 
   document.getElementById('exec-header-row').innerHTML = `
     <div class="exec-header">
-      <div class="exec-header-date">PAUNO · ${fechaStr}</div>
-      <div class="exec-header-title">${headline}</div>
-      <div class="exec-header-subtitle">Agosto 2026 vs mismo período 2025</div>
+      <div class="exec-eyebrow">PAUNO · Actualización diaria 7:00 AM · ${fechaStr}</div>
+      <div class="exec-title">${titular}</div>
+      <div class="exec-pills">
+        ${nRed?`<span class="epill red">${nRed} Crítico</span>`:''}
+        ${nYel?`<span class="epill amber">${nYel} Atención</span>`:''}
+        <span class="epill muted">${hayserie ? 'Serie '+rango : 'Serie histórica pendiente'}</span>
+        <span class="epill muted">Toca un KPI → análisis completo</span>
+      </div>
     </div>`;
 
-  // KPI values
-  const fillKpi  = pauno_rpts.fill_rate?.kpis?.find(k=>k.label==='Fill Rate');
-  const mermaKpi = pauno_rpts.mermas?.kpis?.find(k=>k.label==='Merma Total');
-  const fillVal  = fillKpi?.valor || '—';
-  const mermaVal = mermaKpi?.valor || '—';
-  const mermaEst = pauno_rpts.mermas?.estado || 'green';
-  const fillEst  = pauno_rpts.fill_rate?.estado || 'green';
-  const moraEst  = pauno_rpts.cuentas_por_cobrar?.estado || 'red';
-  const ventasEst = pauno_rpts.margen_variable?.estado || 'green';
+  const ORDEN = [
+    'margen_variable','margen_variable_pag2','fill_rate',
+    'cuentas_por_cobrar','cuentas_por_pagar',
+    'mermas','compras','sop_inventario',
+    'consumo_materiales','productividad','control_interno',
+  ];
 
-  // YoY Ventas
-  let ventasYoYHtml = '';
-  if (yoy.ventas) {
-    const ventasRaw = parseFloat((DATA.holding_ventas||'0').replace(/[^0-9.]/g,''));
-    if (ventasRaw) {
-      const delta = ((ventasRaw * 1e6 - yoy.ventas) / yoy.ventas * 100);
-      const cls = delta >= 0 ? 'yoy-up' : 'yoy-down';
-      ventasYoYHtml = `<div class="exec-kpi-yoy">YoY: <span class="${cls}">${delta>=0?'+':''}${delta.toFixed(1)}%</span> vs ago 2025</div>`;
+  let html = '';
+  ORDEN.forEach(tipo => {
+    const rd = rpts[tipo];
+    if (!rd) return;
+    const kpis = rd.kpis || [];
+    const est = rd.estado || 'grey';
+    if (!kpis.length && est === 'grey' && !rd.live_connection) return;
+
+    const nombre = REPORTE_LABEL[tipo] || tipo;
+    const bar = est === 'grey' ? 'grey' : est === 'yellow' ? 'amber' : est;
+    const badge = bar;
+
+    let cuerpo;
+    if (rd.live_connection) {
+      cuerpo = `<div class="area-nota">Este reporte usa conexión en vivo (DirectQuery). Las medidas DAX aún no están publicadas en el modelo — se requiere crearlas en Power BI Desktop para leerlas por API.</div>`;
+    } else if (!kpis.length) {
+      cuerpo = `<div class="area-nota">Sin medidas disponibles en el dataset.</div>`;
+    } else {
+      cuerpo = `<div class="krows">${kpis.map(filaKPI).join('')}</div>`;
     }
-  }
-  // YoY Fill Rate
-  let fillYoYHtml = '';
-  if (yoy.fill_rate && fillVal !== '—') {
-    const curr = parseFloat(fillVal) / 100;
-    const delta = (curr - yoy.fill_rate) * 100;
-    const cls = delta >= 0 ? 'yoy-up' : 'yoy-down';
-    fillYoYHtml = `<div class="exec-kpi-yoy">YoY: <span class="${cls}">${delta>=0?'+':''}${delta.toFixed(1)}pp</span> vs ago 2025</div>`;
-  }
-  // YoY Mermas
-  let mermaYoYHtml = '';
-  if (yoy.mermas && mermaVal !== '—') {
-    const curr = parseFloat(mermaVal) / 100;
-    const delta = (curr - yoy.mermas) * 100;
-    const cls = delta <= 0 ? 'yoy-up' : 'yoy-down';
-    mermaYoYHtml = `<div class="exec-kpi-yoy">YoY: <span class="${cls}">${delta>=0?'+':''}${delta.toFixed(2)}pp</span> vs ago 2025</div>`;
-  }
 
-  const margenKpi = pauno_rpts.margen_variable?.kpis?.find(k=>k.label==='Margen variable');
-  const margenVal = margenKpi?.valor || '42.6%';
-  const moraVenc = pauno_rpts.cuentas_por_cobrar?.kpis?.find(k=>k.label==='CxC por vencer')?.valor || '';
-  const perdidaKpi = pauno_rpts.fill_rate?.kpis?.find(k=>k.label==='Venta Perdida');
-  const perdidaVal = perdidaKpi?.valor || '';
+    html += `
+      <div class="area-card" onclick="showTab('pauno')">
+        <div class="area-inner">
+          <div class="area-bar ${bar}"></div>
+          <div class="area-body">
+            <div class="area-hdr">
+              <span class="area-name">${nombre}</span>
+              <span class="badge ${badge}">${semLabel(est)}</span>
+              <span class="area-caret">›</span>
+            </div>
+            ${rd.alerta ? `<div class="area-alrt ${bar}">${rd.alerta}</div>` : ''}
+            ${cuerpo}
+          </div>
+        </div>
+      </div>`;
+  });
 
-  document.getElementById('kpi-exec-grid').innerHTML = `
-    <div class="exec-kpi-grid">
-      <div class="exec-kpi-card state-${ventasEst}" onclick="showTab('pauno')">
-        <div class="exec-kpi-label">Ventas mes</div>
-        <div class="exec-kpi-value state-${ventasEst}">${DATA.holding_ventas || '—'}</div>
-        <div class="exec-kpi-meta">Margen: <span class="meta-bad">${margenVal}</span> · meta 52%</div>
-        ${ventasYoYHtml}
-      </div>
-      <div class="exec-kpi-card state-${moraEst}" onclick="showTab('pauno')">
-        <div class="exec-kpi-label">Mora CxC</div>
-        <div class="exec-kpi-value state-${moraEst}">${DATA.holding_mora || '—'}</div>
-        <div class="exec-kpi-meta">${moraVenc ? `Vencido: <span class="meta-bad">${moraVenc}</span> · ` : ''}meta 15%</div>
-      </div>
-      <div class="exec-kpi-card state-${fillEst}" onclick="showTab('pauno')">
-        <div class="exec-kpi-label">Fill Rate</div>
-        <div class="exec-kpi-value state-${fillEst}">${fillVal}</div>
-        <div class="exec-kpi-meta">${perdidaVal ? `Perdida: <span class="meta-bad">${perdidaVal}</span> · ` : ''}meta 98%</div>
-        ${fillYoYHtml}
-      </div>
-      <div class="exec-kpi-card state-${mermaEst}" onclick="showTab('pauno')">
-        <div class="exec-kpi-label">Mermas</div>
-        <div class="exec-kpi-value state-${mermaEst}">${mermaVal}</div>
-        <div class="exec-kpi-meta">Meta: <span class="meta-bad">2%</span></div>
-        ${mermaYoYHtml}
-      </div>
-    </div>`;
+  document.getElementById('kpi-exec-grid').innerHTML = html;
 
   const agenda = DATA.agenda_ceo || {};
-  const decidir = agenda.decidir_hoy || [];
-  const escalar = agenda.escalar_semana || [];
-
-  const divEl = document.getElementById('agenda-dividir');
-  if (divEl) divEl.innerHTML = `<div style="height:4px"></div>`;
-
-  renderAgendaSection('agenda-decidir-section', 'DECIDIR HOY', 'red', decidir);
-  renderAgendaSection('agenda-semana-section', 'ESCALAR ESTA SEMANA', 'yellow', escalar);
+  const dv = document.getElementById('agenda-dividir');
+  if (dv) dv.innerHTML = '';
+  renderAgendaSection('agenda-decidir-section', 'DECIDIR HOY', 'red', agenda.decidir_hoy || []);
+  renderAgendaSection('agenda-semana-section', 'ESCALAR ESTA SEMANA', 'yellow', agenda.escalar_semana || []);
 }
 
 function renderAgendaSection(id, title, color, items) {
