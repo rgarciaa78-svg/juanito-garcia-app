@@ -1617,8 +1617,8 @@ function diagnosticoCompleto() {
         cifra: `${(mB*100).toFixed(1)}%`,
         sub: `desde ${(mA*100).toFixed(1)}% (${(mB-mA)*100>=0?'+':''}${((mB-mA)*100).toFixed(1)}pp)`,
         cuerpo: `Comparando los mismos meses (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}): el volumen subió <strong>${((kgB-kgA)/kgA*100).toFixed(1)}%</strong> y las ventas <strong>${((vB-vA)/vA*100).toFixed(1)}%</strong>, pero el precio/kg bajó <strong>${((pB-pA)/pA*100).toFixed(1)}%</strong> mientras el costo/kg subió <strong>${((cB-cA)/cA*100).toFixed(1)}%</strong>.`,
-        impacto: `Vender más aportó <strong>${fmtValor(efVol,'money')}</strong>, pero la caída de margen restó <strong>${fmtValor(Math.abs(efMg),'money')}</strong> en ${comp.length} ${comp.length===1?'mes':'meses'} — cerca de <strong>${fmtValor(Math.abs(porMes)*12,'money')} al año</strong> si se mantiene.`,
-        palanca: 'Recuperar 1pp de margen vale ' + fmtValor(vB/comp.length*0.01*12,'money') + ' al año. Atacar el costo/kg tiene más recorrido que subir precio.',
+        impacto: `Sobre los ${comp.length} ${comp.length===1?'mes medido':'meses medidos'}: vender más aportó <strong>${fmtValor(efVol,'money')}</strong> y la caída de margen restó <strong>${fmtValor(Math.abs(efMg),'money')}</strong>. El margen en soles pasó de ${fmtValor(vA*mA,'money')} a ${fmtValor(vB*mB,'money')}.`,
+        palanca: `Con la venta de esos meses, cada punto de margen equivale a ${fmtValor(vB*0.01,'money')}. El costo/kg subió ${((cB-cA)/cA*100).toFixed(1)}% mientras el precio bajó ${Math.abs((pB-pA)/pA*100).toFixed(1)}%: el recorrido está en el costo.`,
         area: 'Comercial + Operaciones',
       });
     }
@@ -1668,18 +1668,18 @@ function diagnosticoCompleto() {
     if (comp.length) {
       const a = promEn(fr,ps,anioAnt,comp), b = promEn(fr,ps,anioAct,comp);
       const META = 0.98;
-      const brecha = META - b;
-      // Cuánto vale cerrar la brecha, medido sobre la venta del año
-      const ventasAnio = vt ? vt.filter((x,i)=>ps[i].startsWith(anioAct)&&x!=null).reduce((s,x)=>s+x,0) : null;
-      const perdido = ventasAnio ? ventasAnio / b * brecha : null;
+      const mesesAnio = ps.filter((p,i) => p.startsWith(anioAct) && fr[i] != null).map(p => p.slice(5,7));
+      const promAnio = promEn(fr, ps, anioAct, mesesAnio);
+      const peor = Math.min(...mesesAnio.map(m => fr[ps.indexOf(anioAct+'-'+m)]));
+      const mejor = Math.max(...mesesAnio.map(m => fr[ps.indexOf(anioAct+'-'+m)]));
       hallazgos.push({
-        sev: b < META ? 'red' : 'green',
-        titulo: 'El nivel de servicio está muy por debajo de la meta',
-        cifra: `${(b*100).toFixed(1)}%`,
-        sub: `meta 98% · brecha ${(brecha*100).toFixed(1)}pp`,
-        cuerpo: `En los mismos meses del año anterior fue ${(a*100).toFixed(1)}%; hoy ${(b*100).toFixed(1)}% (${((b-a)*100>=0?'+':'')}${((b-a)*100).toFixed(1)}pp). Casi 1 de cada 5 pedidos no se atiende completo.`,
-        impacto: perdido ? `Cerrar la brecha hasta la meta representa del orden de <strong>${fmtValor(perdido,'money')}</strong> de venta adicional al ritmo actual.` : `Brecha de ${(brecha*100).toFixed(1)} puntos contra la meta.`,
-        palanca: 'Cruzar quiebres con el plan de producción: definir si falta capacidad, planificación o stock de seguridad por SKU.',
+        sev: promAnio < META ? 'red' : 'green',
+        titulo: 'El nivel de servicio está lejos de la meta',
+        cifra: `${(promAnio*100).toFixed(1)}%`,
+        sub: `promedio ${anioAct} (${mesesAnio.length} meses) · meta 98%`,
+        cuerpo: `En los meses comparables con ${anioAnt} (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}) pasó de <strong>${(a*100).toFixed(1)}%</strong> a <strong>${(b*100).toFixed(1)}%</strong> (${((b-a)*100>=0?'+':'')}${((b-a)*100).toFixed(1)}pp).`,
+        impacto: `Rango del año: entre ${(peor*100).toFixed(1)}% y ${(mejor*100).toFixed(1)}%. Ningún mes alcanzó la meta de 98%; la brecha promedio es de ${((META-promAnio)*100).toFixed(1)} puntos.`,
+        palanca: 'El monto de venta perdida por mes no es legible desde el modelo (la medida devuelve el acumulado histórico). Corregirla permitiría cuantificar la brecha en soles.',
         area: 'Planeamiento + Producción',
       });
     }
@@ -1689,22 +1689,21 @@ function diagnosticoCompleto() {
   const mm = DS.mermas && DS.mermas['% Merma Total'];
   if (mm) {
     const comp = mesesComparables(mm, ps, anioAnt, anioAct);
-    const promAct = promEn(mm, ps, anioAct, comp.length?comp:null) ??
-                    (()=>{const v=mm.filter((x,i)=>ps[i].startsWith(anioAct)&&x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;})();
+    // Promedio del año en curso, con todos sus meses (no solo los comparables)
+    const mesesAnio = ps.filter((p,i) => p.startsWith(anioAct) && mm[i] != null).map(p => p.slice(5,7));
+    const promAnio = promEn(mm, ps, anioAct, mesesAnio);
     const META = 0.02;
-    if (promAct != null && vt) {
-      const ventasAnio = vt.filter((x,i)=>ps[i].startsWith(anioAct)&&x!=null).reduce((a,b)=>a+b,0);
-      const exceso = (promAct - META) * ventasAnio;
+    if (promAnio != null) {
       const cmp = comp.length ? { a: promEn(mm,ps,anioAnt,comp), b: promEn(mm,ps,anioAct,comp) } : null;
       hallazgos.push({
-        sev: promAct > META ? 'red' : 'green',
-        titulo: 'La merma duplica la meta y no cede',
-        cifra: `${(promAct*100).toFixed(2)}%`,
-        sub: `meta 2.00% · promedio ${anioAct}`,
+        sev: promAnio > META ? 'red' : 'green',
+        titulo: 'La merma más que duplica la meta',
+        cifra: `${(promAnio*100).toFixed(2)}%`,
+        sub: `promedio ${anioAct} (${mesesAnio.length} meses) · meta 2.00%`,
         cuerpo: cmp && cmp.a != null
-          ? `En los mismos meses del año anterior fue ${(cmp.a*100).toFixed(2)}%; hoy ${(cmp.b*100).toFixed(2)}% (${((cmp.b-cmp.a)*100>=0?'+':'')}${((cmp.b-cmp.a)*100).toFixed(2)}pp). El problema es estructural, no puntual.`
-          : `Promedio del año en ${(promAct*100).toFixed(2)}%, muy por encima del 2% objetivo.`,
-        impacto: `Cada punto sobre la meta cuesta aprox. ${fmtValor(ventasAnio*0.01,'money')} al año. El exceso actual vale <strong>${fmtValor(Math.abs(exceso),'money')}</strong>.`,
+          ? `Mes a mes del año: ${mesesAnio.map(m=>`${fmtPeriodo(anioAct+'-'+m)} ${(mm[ps.indexOf(anioAct+'-'+m)]*100).toFixed(2)}%`).join(' · ')}. En los meses comparables con ${anioAnt} (${comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', ')}) pasó de ${(cmp.a*100).toFixed(2)}% a ${(cmp.b*100).toFixed(2)}%.`
+          : `Promedio del año en ${(promAnio*100).toFixed(2)}%, sobre el 2% objetivo en todos los meses medidos.`,
+        impacto: `Ningún mes de ${anioAct} bajó de ${(Math.min(...mesesAnio.map(m=>mm[ps.indexOf(anioAct+'-'+m)]))*100).toFixed(2)}%. La brecha contra la meta es de ${((promAnio-META)*100).toFixed(2)} puntos.`,
         palanca: 'Falta el desglose por planta (Ate / Pachacámac / Terceros) y por UEN para saber dónde atacar — esas medidas no están publicadas en el modelo.',
         area: 'Producción',
       });
