@@ -96,12 +96,6 @@
             }
           ]
         },
-        "consumo_materiales": {
-          "estado": "grey",
-          "alerta": null,
-          "kpis": [],
-          "live_connection": true
-        },
         "mermas": {
           "estado": "red",
           "alerta": "Merma 4.87% — sobre meta 2%",
@@ -184,11 +178,11 @@
         },
         "margen_variable_pag2": {
           "estado": "yellow",
-          "alerta": "Avance 78.6% vs presupuesto",
+          "alerta": "Avance 63.0% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "78.6%",
+              "valor": "63.0%",
               "meta": "100%",
               "estado": "yellow"
             }
