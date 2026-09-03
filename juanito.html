@@ -468,6 +468,35 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--accent-bg); border-left: 3px solid var(--accent);
   border-radius: 0 8px 8px 0; padding: 10px 12px;
 }
+
+/* Análisis por niveles */
+.dniveles { display: flex; flex-direction: column; }
+.dnivel { display: flex; gap: 10px; position: relative; padding-bottom: 14px; }
+.dnivel:last-child { padding-bottom: 0; }
+.dnivel::before {
+  content: ''; position: absolute;
+  left: 9px; top: 20px; bottom: 0; width: 1px; background: var(--border);
+}
+.dnivel:last-child::before { display: none; }
+.dnivel-n {
+  width: 19px; height: 19px; flex-shrink: 0; z-index: 1;
+  border-radius: 50%; background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 700; line-height: 19px; text-align: center;
+}
+.dnivel-c { flex: 1; min-width: 0; padding-top: 1px; }
+.dnivel-t {
+  font-size: 10px; font-weight: 800; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px;
+}
+.dnivel-b { font-size: 12px; line-height: 1.6; color: var(--text); }
+.dnivel-b strong { font-weight: 700; }
+.dnivel-b code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; background: var(--surface);
+  padding: 1px 4px; border-radius: 3px;
+}
+/* Los niveles que solo dicen qué falta se ven atenuados */
+.dnivel:has(.dnivel-t:not(:empty)) .dnivel-b { color: var(--text); }
 .ddec {
   border: 1px solid var(--border); border-left: 3px solid var(--text3);
   border-radius: 0 8px 8px 0; padding: 10px 12px; background: var(--surface);
@@ -1339,9 +1368,12 @@ function analizar(label) {
 function fmtValor(v, fmt) {
   if (v == null) return '—';
   if (fmt === 'pct')    return (v * 100).toFixed(1) + '%';
-  if (fmt === 'money')  return v >= 1e6 ? 'S/' + (v/1e6).toFixed(2) + 'M'
-                             : v >= 1e3 ? 'S/' + (v/1e3).toFixed(0) + 'K'
-                             : 'S/' + v.toFixed(0);
+  if (fmt === 'money') {
+    const a = Math.abs(v), s = v < 0 ? '-' : '';
+    return a >= 1e6 ? `${s}S/${(a/1e6).toFixed(2)}M`
+         : a >= 1e3 ? `${s}S/${(a/1e3).toFixed(0)}K`
+         : `${s}S/${a.toFixed(0)}`;
+  }
   if (fmt === 'money2') return 'S/' + v.toFixed(2);
   if (fmt === 'num')    return Math.round(v).toLocaleString('es-PE');
   return String(v);
@@ -1405,48 +1437,177 @@ function sparkline(vals, dir, w, h) {
 }
 
 // ── Origen de la variación ─────────────────────────────────
-// Descompone la brecha usando otras medidas de la misma base
+/**
+ * Explica POR QUÉ se movió un KPI, bajando hasta el último componente que el
+ * modelo permite abrir. Devuelve bloques: cada uno es un nivel del análisis.
+ * Si un nivel no se puede abrir, dice qué medida falta para poder abrirlo.
+ */
 function origenVariacion(label, an) {
   if (!an || an.estatica) return null;
   const f = (l) => { const r = analizar(l); return (r && !r.estatica) ? r : null; };
+  const B = [];                                   // bloques del análisis
+  const add = (t, html) => B.push({ t, html });
+  const pct = (x, u) => `${x>=0?'+':''}${x.toFixed(1)}${u||'%'}`;
 
-  if (label === 'Margen variable') {
-    const p = f('Precio/kg'), c = f('Costo/kg');
-    if (p && c && p.yoy && c.yoy) {
-      const dP = p.yoy.var, dC = c.yoy.var;
-      const culpa = Math.abs(dC) > Math.abs(dP) ? 'costo' : 'precio';
-      return `El precio/kg varió ${dP>=0?'+':''}${dP.toFixed(1)}% y el costo/kg ${dC>=0?'+':''}${dC.toFixed(1)}% frente a ${fmtPeriodo(p.yoy.periodo)}. La brecha la explica principalmente el <strong>${culpa}</strong>.`;
+  const ps = an.ps, i = an.idx;
+  const serieDeM = (ds, m) => (SERIES.datasets[ds] || {})[m];
+  const pk = serieDeM('margen','Precio x Kilo'), ck = serieDeM('margen','Costo x Kilo');
+  const vt = serieDeM('margen','Venta Total');
+
+  // Índice del mismo mes del año anterior
+  const jY = an.yoy ? ps.indexOf(an.yoy.periodo) : -1;
+  const jM = an.mom ? ps.indexOf(an.mom.periodo) : -1;
+
+  // ── MARGEN VARIABLE ─────────────────────────────────────
+  if (label === 'Margen variable' && pk && ck) {
+    if (jY >= 0) {
+      const d = descomponerMargen(pk[jY], ck[jY], pk[i], ck[i]);
+      if (d) {
+        add(`Contra ${fmtPeriodo(ps[jY])}`,
+          `${frasePorQue(d, pk[jY], ck[jY], pk[i], ck[i])}`);
+      }
     }
+    if (jM >= 0) {
+      const d = descomponerMargen(pk[jM], ck[jM], pk[i], ck[i]);
+      if (d) {
+        add(`Contra el mes anterior (${fmtPeriodo(ps[jM])})`,
+          `El margen se movió ${pct(d.total,'pp')}: ` +
+          `<strong>${pct(d.efCosto,'pp')} por costo</strong> y ${pct(d.efPrecio,'pp')} por precio. ` +
+          `Costo/kg S/${ck[jM].toFixed(2)} → S/${ck[i].toFixed(2)} · Precio/kg S/${pk[jM].toFixed(2)} → S/${pk[i].toFixed(2)}.`);
+      }
+    }
+    // Nivel siguiente: ¿qué compone el costo?
+    add('Siguiente nivel — qué compone el costo/kg',
+      `El modelo entrega el costo unitario ya consolidado. Para saber si el alza viene de ` +
+      `<strong>materia prima, insumos, envases o mano de obra</strong>, el reporte de Margen debe ` +
+      `publicar el costo desagregado por componente. Hoy esa apertura no existe como medida.`);
+    add('Siguiente nivel — qué producto o cliente',
+      `Tampoco hay dimensión de producto ni de cliente filtrable por API, así que no se puede ` +
+      `identificar qué SKU o qué cuenta arrastra el margen. Se requiere exponer ` +
+      `<strong>TIPO DE NEGOCIO N1 (UEN)</strong> y la dimensión de cliente.`);
+    return B;
   }
+
+  // ── VENTAS ──────────────────────────────────────────────
+  if (label === 'Ventas mes' && pk && vt) {
+    const kg = (j) => (vt[j]!=null && pk[j]) ? vt[j]/pk[j] : null;
+    [[jY, 'Contra ' + (jY>=0?fmtPeriodo(ps[jY]):'')], [jM, 'Contra el mes anterior' + (jM>=0?` (${fmtPeriodo(ps[jM])})`:'')]]
+      .forEach(([j, tit]) => {
+        if (j < 0) return;
+        const kA = kg(j), kB = kg(i);
+        if (kA == null || kB == null) return;
+        // Venta = kg × precio.  Efecto volumen a precio viejo; efecto precio con kg nuevo.
+        const efVol = (kB - kA) * pk[j];
+        const efPre = kB * (pk[i] - pk[j]);
+        const tot = vt[i] - vt[j];
+        const domina = Math.abs(efVol) >= Math.abs(efPre) ? 'volumen' : 'precio';
+        add(tit,
+          `La venta se movió <strong>${fmtValor(tot,'money')}</strong> (${pct((vt[i]-vt[j])/vt[j]*100)}). ` +
+          `De eso, <strong>${fmtValor(efVol,'money')} es volumen</strong> ` +
+          `(${(kA/1e6).toFixed(2)}M → ${(kB/1e6).toFixed(2)}M kg, ${pct((kB-kA)/kA*100)}) y ` +
+          `<strong>${fmtValor(efPre,'money')} es precio</strong> ` +
+          `(S/${pk[j].toFixed(2)} → S/${pk[i].toFixed(2)}, ${pct((pk[i]-pk[j])/pk[j]*100)}). ` +
+          `Manda el <strong>${domina}</strong>.`);
+      });
+    add('Siguiente nivel — qué canal, cliente o producto',
+      `El modelo entrega la venta total consolidada. Para saber qué canal, cliente o SKU explica ` +
+      `el movimiento hace falta exponer esas dimensiones como tablas filtrables en el modelo de Margen.`);
+    return B;
+  }
+
+  // ── PRECIO / COSTO POR KILO ─────────────────────────────
+  if ((label === 'Precio/kg' || label === 'Costo/kg') && pk && ck) {
+    if (jY >= 0) {
+      const d = descomponerMargen(pk[jY], ck[jY], pk[i], ck[i]);
+      if (d) add(`Efecto sobre el margen`,
+        `Contra ${fmtPeriodo(ps[jY])}, este indicador aporta ` +
+        `<strong>${pct(label==='Precio/kg' ? d.efPrecio : d.efCosto,'pp')}</strong> ` +
+        `de los ${pct(d.total,'pp')} que se movió el margen variable ` +
+        `(${(label==='Precio/kg' ? d.pesoPrecio : d.pesoCosto).toFixed(0)}% del total).`);
+    }
+    add('Siguiente nivel — apertura del unitario',
+      label === 'Costo/kg'
+        ? `El costo llega consolidado. Falta publicarlo abierto en <strong>materia prima, insumos, envase y mano de obra</strong> para saber qué componente lo empuja.`
+        : `El precio llega como promedio ponderado. Falta abrirlo por <strong>lista, canal y descuentos</strong> para distinguir si baja por mix o por política comercial.`);
+    return B;
+  }
+
+  // ── FILL RATE ───────────────────────────────────────────
   if (label === 'Fill Rate') {
-    const ov = f('Orden de Venta'), fa = f('Facturación'), vp = f('Venta Perdida');
-    if (ov && fa && ov.yoy && fa.yoy) {
-      return `Orden de venta ${ov.yoy.var>=0?'+':''}${ov.yoy.var.toFixed(1)}% y facturación ${fa.yoy.var>=0?'+':''}${fa.yoy.var.toFixed(1)}% vs ${fmtPeriodo(ov.yoy.periodo)}.` +
-        (vp ? ` La venta perdida acumulada del año suma <strong>${fmtValor(vp.ytd?vp.ytd.suma:null,'money')}</strong>.` : '');
+    if (jY >= 0 || jM >= 0) {
+      const partes = [];
+      if (jY >= 0) partes.push(`contra ${fmtPeriodo(ps[jY])}: ${(an.vals[jY]*100).toFixed(1)}% → ${(an.actual*100).toFixed(1)}% (${pct(an.yoy.var,'pp')})`);
+      if (jM >= 0) partes.push(`contra ${fmtPeriodo(ps[jM])}: ${(an.vals[jM]*100).toFixed(1)}% → ${(an.actual*100).toFixed(1)}% (${pct(an.mom.var,'pp')})`);
+      add('Movimiento medido', partes.join(' · ') + '.');
     }
+    add('Por qué no se puede abrir',
+      `El fill rate es <strong>Facturación ÷ Orden de Venta</strong>. Para saber si la brecha creció ` +
+      `porque entró más pedido o porque se despachó menos, hacen falta esos dos montos por mes — y ` +
+      `ambas medidas (<code>ORDEN DE VENTA</code>, <code>FACTURACION</code>) devuelven hoy el acumulado ` +
+      `histórico igual en todos los meses.`);
+    add('Siguiente nivel — dónde está el quiebre',
+      `Tampoco hay apertura por <strong>SKU, cliente ni planta</strong>, que es lo que permitiría ` +
+      `decidir si falta capacidad, planificación o stock de seguridad.`);
+    return B;
   }
-  if (label === 'Ventas mes') {
-    const p = f('Precio/kg');
-    if (p && p.yoy && an.yoy) {
-      const efectoPrecio = p.yoy.var, efectoVol = an.yoy.var - p.yoy.var;
-      return `De la variación de ${an.yoy.var>=0?'+':''}${an.yoy.var.toFixed(1)}% en ventas, aprox. <strong>${efectoPrecio>=0?'+':''}${efectoPrecio.toFixed(1)}pp viene de precio</strong> y ${efectoVol>=0?'+':''}${efectoVol.toFixed(1)}pp de volumen.`;
+
+  // ── MERMA ───────────────────────────────────────────────
+  if (label === 'Merma Total') {
+    const mesesAnio = ps.filter((p,k) => p.slice(0,4)===an.periodo.slice(0,4) && an.vals[k]!=null);
+    if (mesesAnio.length) {
+      const vals = mesesAnio.map(p => an.vals[ps.indexOf(p)]);
+      const peorIdx = vals.indexOf(Math.max(...vals));
+      add('Dispersión del año',
+        `Rango ${(Math.min(...vals)*100).toFixed(2)}% – ${(Math.max(...vals)*100).toFixed(2)}%. ` +
+        `El peor mes fue <strong>${fmtPeriodo(mesesAnio[peorIdx])}</strong> con ${(vals[peorIdx]*100).toFixed(2)}%. ` +
+        `La variación entre meses es de ${((Math.max(...vals)-Math.min(...vals))*100).toFixed(2)} puntos, ` +
+        `lo que sugiere una causa operativa puntual y no un nivel estructural parejo.`);
     }
+    add('Por qué no se puede abrir',
+      `El reporte muestra en pantalla la merma por <strong>planta (Ate / Pachacámac / Terceros)</strong> ` +
+      `y por <strong>UEN (B&amp;D / TIGO / MAQUILA)</strong>, pero ninguno de esos cortes está publicado ` +
+      `como medida ni existe dimensión filtrable. Sin eso no se puede decir dónde intervenir.`);
+    add('Siguiente nivel — el detalle que ya existe en pantalla',
+      `Las columnas <code>REAL</code>, <code>STD</code>, <code>DESVIACION</code> e ` +
+      `<code>ITEM DESVIADO</code> permitirían identificar el ítem específico que se desvía del estándar. ` +
+      `Tampoco están publicadas.`);
+    return B;
   }
+
+  // ── MOROSIDAD ───────────────────────────────────────────
   if (label === 'Morosidad') {
     const pv = f('CxC por vencer');
-    if (pv && pv.yoy) {
-      return `La cartera por vencer varió ${pv.yoy.var>=0?'+':''}${pv.yoy.var.toFixed(1)}% vs ${fmtPeriodo(pv.yoy.periodo)}. Revisar concentración por cliente en el reporte de CxC.`;
-    }
+    if (pv && pv.yoy) add('Cartera relacionada',
+      `La cartera por vencer varió ${pct(pv.yoy.var)} contra ${fmtPeriodo(pv.yoy.periodo)}.`);
+    add('Siguiente nivel — quién debe',
+      `El modelo no expone los <strong>tramos de vencimiento</strong> (0-15, 16-30, +30 días) ni la ` +
+      `dimensión de cliente. Sin eso no se sabe si la mora se concentra en pocos clientes grandes ` +
+      `—negociable— o está dispersa en la cartera —problema de proceso de cobranza—.`);
+    return B;
   }
-  // Genérico
+
+  // ── CxP / REFINANCIADO ──────────────────────────────────
+  if (label === 'Refinanciado' || label === 'CxP Total') {
+    add('Siguiente nivel — composición de la deuda',
+      `Falta la apertura por <strong>tramo de vencimiento y proveedor</strong>, y los ` +
+      `<strong>días de pago (DPP)</strong>. Sin eso no se puede juzgar si el refinanciamiento es ` +
+      `manejable o si está desplazando presión de caja hacia adelante.`);
+  }
+
+  // ── GENÉRICO: persistencia + qué falta ──────────────────
   if (an.yoy && an.mom) {
     const t = an.yoy.var, m = an.mom.var;
     const persistente = (t > 0) === (m > 0);
-    return persistente
-      ? `La variación es <strong>persistente</strong>: se repite tanto contra el mes anterior (${m>=0?'+':''}${m.toFixed(1)}${an.mom.unidad}) como contra ${fmtPeriodo(an.yoy.periodo)} (${t>=0?'+':''}${t.toFixed(1)}${an.yoy.unidad}).`
-      : `La variación es <strong>puntual del mes</strong>: mes anterior ${m>=0?'+':''}${m.toFixed(1)}${an.mom.unidad}, pero contra ${fmtPeriodo(an.yoy.periodo)} ${t>=0?'+':''}${t.toFixed(1)}${an.yoy.unidad}.`;
+    add('Naturaleza de la variación',
+      persistente
+        ? `Es <strong>persistente</strong>: se repite contra el mes anterior (${pct(m, an.mom.unidad)}) y contra ${fmtPeriodo(an.yoy.periodo)} (${pct(t, an.yoy.unidad)}). Responde a una causa de fondo, no a un evento del mes.`
+        : `Es <strong>puntual del mes</strong>: mes anterior ${pct(m, an.mom.unidad)}, pero contra ${fmtPeriodo(an.yoy.periodo)} ${pct(t, an.yoy.unidad)}. Revisar qué ocurrió específicamente en ${fmtPeriodo(an.periodo)}.`);
   }
-  return null;
+  if (!B.length) return null;
+  add('Apertura disponible',
+    `Este indicador llega al tablero como un valor consolidado. Para explicar su variación se ` +
+    `requiere que el modelo publique sus componentes como medidas o dimensiones filtrables.`);
+  return B;
 }
 
 // ── Render de una fila de KPI ──────────────────────────────
@@ -1543,8 +1704,17 @@ function abrirKPI(label) {
       ${an.acumPrev!=null?`<span class="dacum-c">vs ${fmtValor(an.acumPrev,fmt)} en igual tramo de ${parseInt(an.periodo.slice(0,4))-1}</span>`:''}
     </div>` : ''}
 
-    ${origen ? `<div class="dsec-t">Origen de la variación</div>
-      <div class="dorigen">${origen}</div>` : ''}
+    ${origen && origen.length ? `<div class="dsec-t">Por qué se movió — análisis por niveles</div>
+      <div class="dniveles">
+        ${origen.map((b,k) => `
+          <div class="dnivel">
+            <div class="dnivel-n">${k+1}</div>
+            <div class="dnivel-c">
+              <div class="dnivel-t">${b.t}</div>
+              <div class="dnivel-b">${b.html}</div>
+            </div>
+          </div>`).join('')}
+      </div>` : ''}
 
     ${dec ? `<div class="dsec-t">Decisión</div>
       <div class="ddec ${fav===false?'urgente':''}">
@@ -1581,6 +1751,42 @@ function mesesComparables(vals, ps, anioA, anioB) {
     if (p.startsWith(anioB)) mesesB.add(p.slice(5,7));
   });
   return [...mesesA].filter(m => mesesB.has(m)).sort();
+}
+
+/**
+ * Descompone el cambio de margen entre dos momentos en cuánto lo explica el precio
+ * y cuánto el costo.  margen = 1 − costo/precio.
+ *   efecto precio = mover el precio dejando el costo del período inicial
+ *   efecto costo  = mover el costo ya con el precio nuevo
+ * Los dos efectos suman exactamente el cambio total de margen.
+ */
+function descomponerMargen(pIni, cIni, pFin, cFin) {
+  if ([pIni,cIni,pFin,cFin].some(x => x == null || x === 0)) return null;
+  const efPrecio = cIni * (1/pIni - 1/pFin) * 100;
+  const efCosto  = -(cFin - cIni) / pFin * 100;
+  const total    = efPrecio + efCosto;
+  const denom    = Math.abs(efPrecio) + Math.abs(efCosto);
+  return {
+    efPrecio, efCosto, total,
+    pesoPrecio: denom ? Math.abs(efPrecio)/denom*100 : 0,
+    pesoCosto:  denom ? Math.abs(efCosto)/denom*100  : 0,
+    culpable: Math.abs(efCosto) >= Math.abs(efPrecio) ? 'costo' : 'precio',
+  };
+}
+
+/** Frase lista para leer: qué explica el movimiento del margen. */
+function frasePorQue(d, pIni, cIni, pFin, cFin) {
+  if (!d) return '';
+  const dirP = pFin >= pIni ? 'subió' : 'bajó';
+  const dirC = cFin >= cIni ? 'subió' : 'bajó';
+  return `<strong>Por qué:</strong> el precio/kg ${dirP} de S/${pIni.toFixed(2)} a S/${pFin.toFixed(2)} ` +
+    `y el costo/kg ${dirC} de S/${cIni.toFixed(2)} a S/${cFin.toFixed(2)}. ` +
+    `De los ${Math.abs(d.total).toFixed(1)}pp de variación, ` +
+    `<strong>${Math.abs(d.efCosto).toFixed(1)}pp (${d.pesoCosto.toFixed(0)}%) vienen del costo</strong> ` +
+    `y ${Math.abs(d.efPrecio).toFixed(1)}pp (${d.pesoPrecio.toFixed(0)}%) del precio. ` +
+    (d.culpable === 'costo'
+      ? 'El problema está en materia prima e insumos, no en la política comercial.'
+      : 'El problema está en el precio de venta, no en el costo.');
 }
 
 function promEn(vals, ps, anio, meses) {
@@ -1626,17 +1832,24 @@ function diagnosticoCompleto() {
 
       const perLbl = comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(' + ');
       const perLblAnt = comp.map(m=>fmtPeriodo(anioAnt+'-'+m)).join(' + ');
+      const dMg = descomponerMargen(pA, cA, pB, cB);
       hallazgos.push({
         sev: efMg < 0 ? 'red' : 'green',
-        titulo: 'El margen se comprime pese a que el volumen crece',
+        titulo: dMg && dMg.culpable === 'costo'
+          ? 'El margen cae por el costo de materia prima, no por el precio'
+          : 'El margen cae por el precio de venta',
         periodo: `${perLbl} vs ${perLblAnt} · ${comp.length} ${comp.length===1?'mes':'meses'}`,
         cifra: `${(mB*100).toFixed(1)}%`,
         unidad: 'margen variable',
         sub: `${perLbl} · antes ${(mA*100).toFixed(1)}% (${(mB-mA)*100>=0?'+':''}${((mB-mA)*100).toFixed(1)}pp)`,
-        cuerpo: `Solo se comparan los meses que ambos años tienen medidos: <strong>${perLbl}</strong> contra <strong>${perLblAnt}</strong>. En ese tramo el volumen subió <strong>${((kgB-kgA)/kgA*100).toFixed(1)}%</strong> (${(kgA/1e6).toFixed(2)}M → ${(kgB/1e6).toFixed(2)}M kg) y la venta <strong>${((vB-vA)/vA*100).toFixed(1)}%</strong> (${fmtValor(vA,'money')} → ${fmtValor(vB,'money')}), pero el precio/kg bajó <strong>${Math.abs((pB-pA)/pA*100).toFixed(1)}%</strong> (S/${pA.toFixed(2)} → S/${pB.toFixed(2)}) mientras el costo/kg subió <strong>${((cB-cA)/cA*100).toFixed(1)}%</strong> (S/${cA.toFixed(2)} → S/${cB.toFixed(2)}).`,
-        impacto: `Margen en soles de esos ${comp.length} meses: <strong>${fmtValor(vA*mA,'money')} → ${fmtValor(vB*mB,'money')}</strong>. Vender más aportó ${fmtValor(efVol,'money')}; la caída del porcentaje restó ${fmtValor(Math.abs(efMg),'money')}.`,
-        palanca: `Sobre la venta de esos ${comp.length} meses, cada punto de margen equivale a ${fmtValor(vB*0.01,'money')}. El costo subió ${((cB-cA)/cA*100).toFixed(1)}% y el precio bajó ${Math.abs((pB-pA)/pA*100).toFixed(1)}%: el recorrido está en el costo.`,
-        area: 'Comercial + Operaciones',
+        cuerpo: `Solo se comparan los meses que ambos años tienen medidos: <strong>${perLbl}</strong> contra <strong>${perLblAnt}</strong>. En ese tramo el volumen subió <strong>${((kgB-kgA)/kgA*100).toFixed(1)}%</strong> (${(kgA/1e6).toFixed(2)}M → ${(kgB/1e6).toFixed(2)}M kg) y la venta <strong>${((vB-vA)/vA*100).toFixed(1)}%</strong> (${fmtValor(vA,'money')} → ${fmtValor(vB,'money')}).`,
+        impacto: dMg
+          ? frasePorQue(dMg, pA, cA, pB, cB) + ` En soles, el margen pasó de ${fmtValor(vA*mA,'money')} a ${fmtValor(vB*mB,'money')}.`
+          : `Margen en soles: ${fmtValor(vA*mA,'money')} → ${fmtValor(vB*mB,'money')}.`,
+        palanca: dMg && dMg.culpable === 'costo'
+          ? `Sobre la venta de esos ${comp.length} meses, cada punto de margen equivale a ${fmtValor(vB*0.01,'money')}. Recuperar el costo/kg al nivel de ${anioAnt} (S/${cA.toFixed(2)}) devolvería ${Math.abs(dMg.efCosto).toFixed(1)}pp de margen.`
+          : `Cada punto de margen equivale a ${fmtValor(vB*0.01,'money')} sobre la venta de esos ${comp.length} meses.`,
+        area: dMg && dMg.culpable === 'costo' ? 'Compras + Producción' : 'Comercial',
       });
     }
 
@@ -1644,19 +1857,31 @@ function diagnosticoCompleto() {
     const conMg = mg.map((v,i)=>({v,i})).filter(x=>x.v!=null);
     if (conMg.length >= 6) {
       const ult = conMg.slice(-6);
+      const iA = ult[0].i, iB = ult[ult.length-1].i;
       const pend = (ult[ult.length-1].v - ult[0].v) * 100;
       if (Math.abs(pend) >= 1) {
+        const d = descomponerMargen(pk[iA], ck[iA], pk[iB], ck[iB]);
         hallazgos.push({
           sev: pend < 0 ? 'red' : 'green',
-          titulo: pend < 0 ? 'La caída de margen es tendencia, no un mes malo' : 'El margen viene recuperándose',
-          periodo: `${fmtPeriodo(ps[ult[0].i])} → ${fmtPeriodo(ps[ult[ult.length-1].i])} · ${ult.length} meses`,
+          titulo: pend < 0
+            ? (d && d.culpable === 'costo'
+                ? 'La caída de margen viene del costo, no del precio'
+                : 'La caída de margen viene del precio de venta')
+            : 'El margen viene recuperándose',
+          periodo: `${fmtPeriodo(ps[iA])} → ${fmtPeriodo(ps[iB])} · ${ult.length} meses`,
           cifra: `${pend>=0?'+':''}${pend.toFixed(1)}pp`,
           unidad: 'margen variable',
-          sub: `entre ${fmtPeriodo(ps[ult[0].i])} y ${fmtPeriodo(ps[ult[ult.length-1].i])}`,
+          sub: `entre ${fmtPeriodo(ps[iA])} y ${fmtPeriodo(ps[iB])}`,
           cuerpo: `Margen variable mes a mes: ${ult.map(x=>`<strong>${fmtPeriodo(ps[x.i])}</strong> ${(x.v*100).toFixed(1)}%`).join(' → ')}.`,
-          impacto: pend < 0 ? `De ${(ult[0].v*100).toFixed(1)}% a ${(ult[ult.length-1].v*100).toFixed(1)}%. No es un mes aislado: el deterioro se repite.` : 'La corrección se sostiene mes a mes.',
-          palanca: pend < 0 ? 'Revisar contratos de materia prima y política de descuentos por cliente.' : 'Mantener lo que se está haciendo y documentarlo.',
-          area: 'Comercial + Compras',
+          impacto: d
+            ? frasePorQue(d, pk[iA], ck[iA], pk[iB], ck[iB])
+            : `De ${(ult[0].v*100).toFixed(1)}% a ${(ult[ult.length-1].v*100).toFixed(1)}%.`,
+          palanca: pend < 0
+            ? (d && d.culpable === 'costo'
+                ? `El costo/kg pasó de S/${ck[iA].toFixed(2)} a S/${ck[iB].toFixed(2)} (${((ck[iB]-ck[iA])/ck[iA]*100).toFixed(1)}%). Revisar contratos de materia prima e insumos antes de tocar precios.`
+                : `El precio/kg pasó de S/${pk[iA].toFixed(2)} a S/${pk[iB].toFixed(2)}. Revisar política de descuentos y mix de clientes.`)
+            : 'Mantener lo que se está haciendo y documentarlo.',
+          area: pend < 0 && d && d.culpable === 'costo' ? 'Compras + Producción' : 'Comercial',
         });
       }
     }
