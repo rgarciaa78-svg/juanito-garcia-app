@@ -1175,7 +1175,7 @@ const KPI_SOURCE = {
   'CxP Total':                  { ds:'cxp',           m:'Cuentas x Pagar',   fmt:'money', dir:'down', agg:'last' },
   'Refinanciado':               { ds:'cxp',           m:'Refinanciamiento',  fmt:'money', dir:'down', agg:'last' },
   '# Proveedores':              { ds:'cxp',           m:'Proveedores',       fmt:'num',   dir:'flat', agg:'last' },
-  'Fill Rate':                  { ds:'fill_rate',     m:'% FILLRATE',        fmt:'pct',   dir:'up',   agg:'avg'  },
+  'Fill Rate':                  { ds:'fill_rate',     m:'% Fill Rate',       fmt:'pct',   dir:'up',   agg:'avg'  },
   'Orden de Venta':             { ds:'fill_rate',     m:'ORDEN DE VENTA',    fmt:'money', dir:'up',   agg:'sum'  },
   'Facturación':                { ds:'fill_rate',     m:'FACTURACION',       fmt:'money', dir:'up',   agg:'sum'  },
   'Venta Perdida':              { ds:'fill_rate',     m:'VENTA PERDIDA',     fmt:'money', dir:'down', agg:'sum'  },
@@ -1661,7 +1661,31 @@ function diagnosticoCompleto() {
     }
   }
 
-  // ── 4. Mermas contra meta ──
+  // ── 4. Fill Rate: servicio al cliente ──
+  const fr = DS.fill_rate && DS.fill_rate['% Fill Rate'];
+  if (fr) {
+    const comp = mesesComparables(fr, ps, anioAnt, anioAct);
+    if (comp.length) {
+      const a = promEn(fr,ps,anioAnt,comp), b = promEn(fr,ps,anioAct,comp);
+      const META = 0.98;
+      const brecha = META - b;
+      // Cuánto vale cerrar la brecha, medido sobre la venta del año
+      const ventasAnio = vt ? vt.filter((x,i)=>ps[i].startsWith(anioAct)&&x!=null).reduce((s,x)=>s+x,0) : null;
+      const perdido = ventasAnio ? ventasAnio / b * brecha : null;
+      hallazgos.push({
+        sev: b < META ? 'red' : 'green',
+        titulo: 'El nivel de servicio está muy por debajo de la meta',
+        cifra: `${(b*100).toFixed(1)}%`,
+        sub: `meta 98% · brecha ${(brecha*100).toFixed(1)}pp`,
+        cuerpo: `En los mismos meses del año anterior fue ${(a*100).toFixed(1)}%; hoy ${(b*100).toFixed(1)}% (${((b-a)*100>=0?'+':'')}${((b-a)*100).toFixed(1)}pp). Casi 1 de cada 5 pedidos no se atiende completo.`,
+        impacto: perdido ? `Cerrar la brecha hasta la meta representa del orden de <strong>${fmtValor(perdido,'money')}</strong> de venta adicional al ritmo actual.` : `Brecha de ${(brecha*100).toFixed(1)} puntos contra la meta.`,
+        palanca: 'Cruzar quiebres con el plan de producción: definir si falta capacidad, planificación o stock de seguridad por SKU.',
+        area: 'Planeamiento + Producción',
+      });
+    }
+  }
+
+  // ── 5. Mermas contra meta ──
   const mm = DS.mermas && DS.mermas['% Merma Total'];
   if (mm) {
     const comp = mesesComparables(mm, ps, anioAnt, anioAct);

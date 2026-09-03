@@ -804,7 +804,9 @@ def build_productividad(found):
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
 
 def build_fill_rate(found):
-    fill_val = (found.get("% FILLRATE") or found.get("% Fill Rate") or found.get("% FillRate") or
+    # '% Fill Rate' SÍ responde al filtro de mes; '% FILLRATE' devuelve el acumulado
+    # histórico igual en todos los meses. Se prefiere la que refleja el mes en curso.
+    fill_val = (found.get("% Fill Rate") or found.get("% FILLRATE") or found.get("% FillRate") or
                 found.get("Fill Rate") or found.get("Tasa Atención") or found.get("Tasa Atencion"))
     fill_pct = to_float(fill_val)
     if fill_pct and abs(fill_pct) < 1: fill_pct *= 100
