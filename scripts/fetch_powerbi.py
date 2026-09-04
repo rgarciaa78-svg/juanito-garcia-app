@@ -661,6 +661,43 @@ def dax_control_interno_sum(token, ws_id, dataset_id, columna, empresa="Pauno", 
     return None
 
 
+def dax_control_resultado_acumulado(token, ws_id, dataset_id, empresa="Pauno", label="control_resultado"):
+    """Tarjeta combinada 'Resultado Acumulado' del Dashboard de Control Interno.
+
+    Confirmado con Copiar consulta el 2026-09-04: mismo filtro Empresa="Pauno"
+    que el resto de Control Interno, pero es UNA sola visual que trae 4 valores
+    juntos — incluye "% Cumplimento" como medida real del modelo (no hace
+    falta calcularlo con Puntos Teoricos/Calificacion, ya viene resuelto).
+
+    Devuelve dict: {color_kpi, cumplimiento_pct, calificacion, puntos_totales}.
+    """
+    empresa_esc = empresa.replace('"', '\\"')
+    q = (
+        "DEFINE VAR __DS0FilterTable = \n"
+        f'\tTREATAS({{"{empresa_esc}"}}, \'Pauno Registro de Ejecuciones\'[Empresa])\n\n'
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t__DS0FilterTable,\n"
+        '\t\t"Color_KPI", IGNORE(\'Pauno Registro de Ejecuciones\'[Color KPI]),\n'
+        '\t\t"v__Cumplimento", IGNORE(\'Pauno Registro de Ejecuciones\'[% Cumplimento]),\n'
+        '\t\t"SumCalificación_0_3_", IGNORE(\n'
+        "\t\t\tCALCULATE(SUM('Pauno Registro de Ejecuciones'[Calificación(0-3)]))\n"
+        "\t\t),\n"
+        '\t\t"SumPuntos_Totales", IGNORE(CALCULATE(SUM(\'Pauno Registro de Ejecuciones\'[Puntos Totales])))\n'
+        "\t)"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if not rows:
+        return None
+    r = rows[0]
+    return {
+        "color_kpi": r.get("[Color_KPI]") or r.get("Color_KPI"),
+        "cumplimiento_pct": to_float(r.get("[v__Cumplimento]") or r.get("v__Cumplimento")),
+        "calificacion": to_float(r.get("[SumCalificación_0_3_]") or r.get("SumCalificación_0_3_")),
+        "puntos_totales": to_float(r.get("[SumPuntos_Totales]") or r.get("SumPuntos_Totales")),
+    }
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -1436,13 +1473,10 @@ def build_control(found):
 
     Confirmado con Copiar consulta el 2026-09-04, filtro único Empresa="Pauno",
     sin fecha (acumulado histórico total): Satisfactorio, Con Observaciones,
-    Critico — las 3 comparten el mismo filtro y patrón de medida.
-
-    "% Cumplimiento" (69.32% en pantalla = Calificación 653 ÷ Puntos Teóricos
-    942) queda pendiente: son 2 medidas más que no se pudieron capturar con
-    Copiar consulta en esta sesión — no se inventa el cálculo con los 3
-    conteos de aquí porque no es la misma fórmula (no es una simple división
-    de conteos, es una calificación ponderada).
+    Critico, Planes de Acción (Total/Abiertos/Cerrados/Atrasados), Puntos
+    Ejecutados y — desde la tarjeta combinada "Resultado Acumulado" —
+    % Cumplimento, Calificación y Puntos Totales (el % Cumplimiento real
+    del modelo, no un cálculo derivado).
     """
     satisf_val = found.get("Satisfactorio")
     obs_val    = found.get("Con Observaciones")
@@ -1452,6 +1486,9 @@ def build_control(found):
     ejecutado_val = found.get("Ejecutado")
     total_planes_val = found.get("Total Planes de Acción")
     atrasados_val = found.get("Planes Atrasados")
+    cumpl_val = found.get("% Cumplimento")
+    calif_val = found.get("Calificación")
+    puntos_totales_val = found.get("Puntos Totales")
 
     satisf = to_float(satisf_val)
     obs    = to_float(obs_val)
@@ -1464,6 +1501,11 @@ def build_control(found):
     total_planes = to_float(total_planes_val) or ((abiertos or 0) + (cerrados or 0) if (abiertos is not None or cerrados is not None) else None)
     atrasados = to_float(atrasados_val)
     avance_planes_pct = (cerrados / total_planes * 100) if (cerrados is not None and total_planes) else None
+    cumpl_pct = to_float(cumpl_val)
+    if cumpl_pct is not None and abs(cumpl_pct) < 1:
+        cumpl_pct *= 100
+    calificacion = to_float(calif_val)
+    puntos_totales = to_float(puntos_totales_val)
 
     crit_pct = (crit / total * 100) if (crit is not None and total) else None
     sem = "green"
@@ -1493,9 +1535,22 @@ def build_control(found):
         kpis.append({"label": "% Avance Planes de Acción", "valor": f"{avance_planes_pct:.1f}%", "estado": "green" if avance_planes_pct>=80 else ("yellow" if avance_planes_pct>=50 else "red")})
     if ejecutado is not None:
         kpis.append({"label": "Puntos Ejecutados", "valor": str(int(ejecutado))})
+    if calificacion is not None:
+        kpis.append({"label": "Calificación", "valor": str(int(calificacion))})
+    if puntos_totales is not None:
+        kpis.append({"label": "Puntos Totales", "valor": str(int(puntos_totales))})
+    cumpl_sem = None
+    if cumpl_pct is not None:
+        cumpl_sem = "green" if cumpl_pct >= 85 else ("yellow" if cumpl_pct >= 70 else "red")
+        kpis.insert(0, {"label": "% Cumplimiento", "valor": f"{cumpl_pct:.2f}%", "meta": "85%", "estado": cumpl_sem})
 
-    alerta = f"{int(crit)} puntos de control en estado Crítico ({crit_pct:.1f}% del total)" if sem != "green" and crit else None
-    return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
+    estado_final = cumpl_sem or sem
+    alerta = None
+    if cumpl_sem and cumpl_sem != "green":
+        alerta = f"% Cumplimiento {cumpl_pct:.1f}% — bajo meta 85%"
+    elif sem != "green" and crit:
+        alerta = f"{int(crit)} puntos de control en estado Crítico ({crit_pct:.1f}% del total)"
+    return {"estado": estado_final if kpis else "green", "alerta": alerta, "kpis": kpis}
 
 def build_productividad(found):
     """Reporte '13. Productividad por Funcionario' — PAUNO.
@@ -2109,6 +2164,15 @@ def main():
             if ejecutado_v is not None:
                 scanned.setdefault("control_ds", {})["Ejecutado"] = ejecutado_v
                 print(f"    ✓ Control Interno: Ejecutado (suma)={ejecutado_v}")
+
+            resultado_acum = dax_control_resultado_acumulado(token, ws_id, control_ds_id)
+            if resultado_acum:
+                scanned.setdefault("control_ds", {}).update({
+                    "% Cumplimento": resultado_acum.get("cumplimiento_pct"),
+                    "Calificación": resultado_acum.get("calificacion"),
+                    "Puntos Totales": resultado_acum.get("puntos_totales"),
+                })
+                print(f"    ✓ Control Interno: Resultado Acumulado={resultado_acum}")
 
         # ── Control
         if scanned.get("control_ds"):
