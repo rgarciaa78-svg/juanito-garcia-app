@@ -187,6 +187,54 @@ ROW(
     return None
 
 
+def dax_consumo_venta_neta_kg(token, ws_id, dataset_id, label="consumo_ventaneta"):
+    """'Venta Neta (KG)' del reporte '14. Consumo Materiales indirectos de producción'.
+
+    No es medida, es la columna 'Maestra de Facturacion (Total)'[Peso total KG]
+    (con G — distinta de la columna [Peso total K] sin G que usa Productividad,
+    ver dax_productividad_venta_neta_kg) con SUM directo.
+
+    Filtros confirmados el 2026-09-03 con Copiar consulta — a diferencia de
+    'Costo Total' en este mismo reporte, ESTA tarjeta sí trae filtro de fecha
+    (desde 2025-07-01), más las 2 condiciones de venta (CATEGORIZACION,
+    TIPO DE NEGOCIO N2) y las mismas 4 de Planta/Kardex que usa Costo Total.
+    """
+    q = f"""EVALUATE
+ROW(
+  "v",
+  CALCULATE(
+    SUM('Maestra de Facturacion (Total)'[Peso total KG]),
+    FILTER(
+      KEEPFILTERS(VALUES('Calendario'[Date])),
+      'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1))
+    ),
+    TREATAS({{"VENTA BRUTA"}}, 'Maestra de Facturacion (Total)'[CATEGORIZACION]),
+    FILTER(
+      KEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),
+      NOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {{BLANK()}})
+    ),
+    TREATAS({{"Costo"}}, 'PLANTA POR CECOS'[TIPO DE OPERACION]),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),
+      NOT('Maestra de Kardex (Total)'[categoria_hijo] IN {{"ACUERDOS COMERCIALES"}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),
+      NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {{BLANK()}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),
+      NOT('Maestra de Kardex (Total)'[cuenta_analitica] IN
+        {{BLANK(),"[941002] CONTROL INTERNO","ALMACEN ATE","ALMACEN PACHACAMAC"}})
+    )
+  )
+)"""
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return rows[0].get("[v]") or rows[0].get("v")
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -780,11 +828,12 @@ def build_consumo_materiales(found):
     """Reporte '14. Consumo Materiales indirectos de produccion' — PAUNO.
 
     Estado por KPI (2026-09-03):
-      Costo Total          -> VALIDADO. Filtro exacto confirmado con Analizador de
-                              rendimiento > Copiar consulta (ver dax_consumo_costo_total).
-                              Sin filtro de fecha en el reporte — es un acumulado
-                              histórico total, no del año ni del mes.
-      Los otros 4 (Venta Neta KG, Costo x TN Vendida/Producida, Producción Neta)
+      Costo Total    -> VALIDADO (dax_consumo_costo_total). Sin filtro de fecha en
+                        el reporte — es un acumulado histórico total, no del año
+                        ni del mes.
+      Venta Neta KG  -> VALIDADO (dax_consumo_venta_neta_kg). Sí trae filtro de
+                        fecha (desde 2025-07-01), a diferencia de Costo Total.
+      Costo x TN Vendida, Costo x TN Producida, Producción Neta (KG)
         -> PRELIMINAR. Nombres confirmados solo leyendo el panel Datos > Measures,
            sin validar con Copiar consulta. No se debe confiar en ellos para
            decisiones críticas hasta repetir el mismo procedimiento.
@@ -809,7 +858,7 @@ def build_consumo_materiales(found):
         kpis.append({"label": "Costo Total", "valor": fmt_soles(abs(costo_total)),
                      "validado": True, "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)"})
     if venta_kg is not None:
-        kpis.append({"label": "Venta Neta (KG)", "valor": f"{venta_kg:,.0f} KG", "validado": False})
+        kpis.append({"label": "Venta Neta (KG)", "valor": f"{venta_kg:,.0f} KG", "validado": True})
     if costo_x_tn_vend is not None:
         kpis.append({"label": "Costo x TN Vendida", "valor": f"S/{costo_x_tn_vend:.2f}", "validado": False})
     if prod_neta is not None:
@@ -1170,6 +1219,13 @@ def main():
                 print(f"    ✓ Consumo [Costo total validado] filtrado = {v_ct}")
             else:
                 print("    ✗ Consumo [Costo total validado] — la consulta filtrada no devolvió valor")
+
+            v_vn = dax_consumo_venta_neta_kg(token, ws_id, ids["consumo"])
+            if v_vn is not None:
+                scanned.setdefault("consumo", {})["Peso total KG"] = v_vn
+                print(f"    ✓ Consumo [Venta Neta KG] filtrado = {v_vn}")
+            else:
+                print("    ✗ Consumo [Venta Neta KG] — la consulta filtrada no devolvió valor")
 
         # ── Consumo: SUM directo desde tablas del dataset consumo
         if "consumo" in ids:
