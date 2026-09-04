@@ -496,6 +496,46 @@ def dax_mermas_planta(token, ws_id, dataset_id, medida, almacenes, anio, con_tip
     return None
 
 
+def dax_inventario_kardex(token, ws_id, dataset_id, medida, anio, mes, label="inv_kardex"):
+    """Medida de 'KARDEX TOTAL' del reporte '6. Rotación de inventario'
+    (página "RI (Clasificación)", gráfico "Evolución de Inventario").
+
+    Confirmado con Copiar consulta el 2026-09-04. Filtros propios de este
+    dataset — distintos a los de Margen/Mermas, sin las exclusiones de
+    categoria_producto/producto/estado que usan esos otros reportes:
+      Calendario[Mes Año] <> "Jun 2025" (el reporte excluye ese mes siempre,
+        probablemente por dato parcial al inicio del histórico)
+      KARDEX TOTAL[Fecha] dentro del mes/año pedido
+
+    `medida` ej. "Días Rotación" (≈ Cobertura Total en el visual) o
+    "Días Rotación MP" (≈ Cobertura MP). También sirve para
+    "Consumo Acumulado Total S/ saldo".
+    """
+    medida_esc = medida.replace('"', '\\"')
+    anio, mes = int(anio), int(mes)
+    anio_sig, mes_sig = (anio + 1, 1) if mes == 12 else (anio, mes + 1)
+    q = (
+        'EVALUATE\nROW(\n  "v", CALCULATE(\n    ' + f"'KARDEX TOTAL'[{medida_esc}]" + ',\n'
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Calendario'[Mes Año])),\n"
+        "      NOT('Calendario'[Mes Año] IN {\"Jun 2025\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('KARDEX TOTAL'[Fecha])),\n"
+        "      AND(\n"
+        f"        'KARDEX TOTAL'[Fecha] >= DATE({anio}, {mes}, 1),\n"
+        f"        'KARDEX TOTAL'[Fecha] < DATE({anio_sig}, {mes_sig}, 1)\n"
+        "      )\n"
+        "    )\n"
+        "  )\n"
+        ")"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get("[v]") or rows[0].get("v"))
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
