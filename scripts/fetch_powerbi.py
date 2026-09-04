@@ -607,6 +607,32 @@ def dax_control_interno(token, ws_id, dataset_id, medida, empresa="Pauno", label
     return None
 
 
+def dax_planes_accion(token, ws_id, dataset_id, medida, empresa="Pauno", label="planes_accion"):
+    """Medida de 'Planes de Accion' (mismo dataset que Control Interno,
+    tabla distinta a 'Pauno Registro de Ejecuciones').
+
+    Confirmado con Copiar consulta el 2026-09-04 sobre la tarjeta
+    "Planes Abiertos": filtro único Empresa="Pauno" (mismo patrón que
+    Control Interno, sin fecha), pero usando SUMMARIZECOLUMNS + IGNORE
+    en vez de CALCULATE (así lo genera Power BI para esta tarjeta).
+
+    `medida` ej. "Planes Abiertos", "Planes Atrasados", "Total Planes de Acción".
+    """
+    medida_esc = medida.replace('"', '\\"')
+    empresa_esc = empresa.replace('"', '\\"')
+    alias = "".join(c if c.isalnum() else "_" for c in medida)
+    q = (
+        "DEFINE VAR __DS0FilterTable = \n"
+        f'\tTREATAS({{"{empresa_esc}"}}, \'Pauno Registro de Ejecuciones\'[Empresa])\n\n'
+        "EVALUATE\n"
+        f'\tSUMMARIZECOLUMNS(__DS0FilterTable, "{alias}", IGNORE(\'Planes de Accion\'[{medida_esc}]))'
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get(f"[{alias}]") or rows[0].get(alias))
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -1393,10 +1419,12 @@ def build_control(found):
     satisf_val = found.get("Satisfactorio")
     obs_val    = found.get("Con Observaciones")
     crit_val   = found.get("Critico")
+    abiertos_val = found.get("Planes Abiertos")
 
     satisf = to_float(satisf_val)
     obs    = to_float(obs_val)
     crit   = to_float(crit_val)
+    abiertos = to_float(abiertos_val)
     total  = sum(v for v in (satisf, obs, crit) if v is not None) or None
 
     crit_pct = (crit / total * 100) if (crit is not None and total) else None
@@ -1415,6 +1443,8 @@ def build_control(found):
         kpis.append({"label": "Crítico", "valor": str(int(crit)), "meta": "0", "estado": "red" if crit > 0 else "green"})
     if crit_pct is not None:
         kpis.append({"label": "% Puntos en estado Crítico", "valor": f"{crit_pct:.1f}%", "meta": "<10%", "estado": sem})
+    if abiertos is not None:
+        kpis.append({"label": "Planes de Acción Abiertos", "valor": str(int(abiertos)), "estado": "yellow" if abiertos > 0 else "green"})
 
     alerta = f"{int(crit)} puntos de control en estado Crítico ({crit_pct:.1f}% del total)" if sem != "green" and crit else None
     return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
@@ -2006,6 +2036,11 @@ def main():
                 scanned.setdefault("control_ds", {})["Critico"] = crit_v
             if satisf_v is not None or obs_v is not None or crit_v is not None:
                 print(f"    ✓ Control Interno: Satisfactorio={satisf_v} Con Observaciones={obs_v} Critico={crit_v}")
+
+            planes_abiertos_v = dax_planes_accion(token, ws_id, control_ds_id, "Planes Abiertos")
+            if planes_abiertos_v is not None:
+                scanned.setdefault("control_ds", {})["Planes Abiertos"] = planes_abiertos_v
+                print(f"    ✓ Control Interno: Planes Abiertos={planes_abiertos_v}")
 
         # ── Control
         if scanned.get("control_ds"):
