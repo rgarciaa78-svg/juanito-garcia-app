@@ -2886,9 +2886,11 @@ function renderMcKinseyArea(empresa, tipo) {
           {label:'Orden Venta', valSoles: ov,  color:'var(--accent)'},
           {label:'Facturado',   valSoles: fac, color:'var(--green)'},
           {label:'Venta Perdida', valSoles: vp, color:'var(--red)'},
-        ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Acumulado YTD. Meta: facturar 98% de OV.</div>` : 'Sin datos de OV.',
+        ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Acumulado YTD. Meta: facturar 98% de OV.
+          ${ov && fac ? ` Para llegar a la meta faltarían <strong>${rec}</strong> de facturación adicional sobre el acumulado actual.` : ''}
+        </div>` : 'Sin datos de OV.',
         IV: [
-          {palanca:'Reducir Venta Perdida', impacto: vp ? `Recuperar hasta ${fmtM(vp)} en ventas YTD` : 'Alto impacto en ingresos', accion:'Identificar los SKUs con mayor stockout. Priorizar reposición y revisar política de inventario de seguridad.', prioridad:fr<85?'ALTA':'MEDIA', col:fr<85?'var(--red)':'var(--yellow)'},
+          {palanca:'Reducir Venta Perdida', impacto: vp ? `Recuperar hasta ${fmtM(vp)} en ventas YTD (equivale a ${rec} para llegar a meta 98%)` : 'Alto impacto en ingresos', accion:'Identificar los SKUs con mayor stockout. Priorizar reposición y revisar política de inventario de seguridad.', prioridad:fr<85?'ALTA':'MEDIA', col:fr<85?'var(--red)':'var(--yellow)'},
           {palanca:'Mejorar OTD logístico', impacto:'Reducir pedidos incompletos', accion:'Medir tiempo promedio de despacho. Pedidos no entregados a tiempo son venta perdida aunque el producto esté disponible.', prioridad:'MEDIA', col:'var(--yellow)'},
           {palanca:'Revisión semanal de SKUs críticos', impacto:'Prevención proactiva', accion:'Lista de top 10 SKUs con mayor contribución a venta perdida — reunión lunes con Supply Chain.', prioridad:'MEDIA', col:'var(--yellow)'},
         ],
@@ -2918,17 +2920,15 @@ function renderMcKinseyArea(empresa, tipo) {
           'DATA_FACTURACION'[% MOROSIDAD])</code> — sin ningún filtro de año, mes ni fecha. El reporte
           solo guarda el valor de hoy, no un histórico por período. No hay forma de obtener "cómo estaba
           la mora en agosto 2025" desde esta tarjeta porque nunca se calculó ni se guardó para esa fecha.`),
-        III: pvenc ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div style="padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;text-align:center">
-            <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:4px">Vencido actual</div>
+        III: pvenc ? `<div style="padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;text-align:center;margin-bottom:8px">
+            <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:4px">CxC por vencer</div>
             <div style="font-size:22px;font-weight:800;color:var(--red)">${fmtM(pvenc)}</div>
           </div>
-          <div style="padding:12px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);border-radius:8px;text-align:center">
-            <div style="font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;margin-bottom:4px">Riesgo 30 días</div>
-            <div style="font-size:22px;font-weight:800;color:var(--yellow)">${fmtM(pvenc * 1.15)}</div>
-            <div style="font-size:10px;color:var(--sub);margin-top:2px">estimado si no se actúa</div>
-          </div>
-        </div>` : 'Sin desglose de tramos disponible.',
+          <div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+            No hay desglose por tramo de días (0-30 / 31-60 / 61-90 / &gt;90) confirmado con nombre de medida
+            exacto todavía — sin eso no se puede proyectar cuánto de este monto pasa a mora crítica el próximo
+            mes sin inventar una tasa de deterioro que Power BI no está entregando.
+          </div>` : 'Sin desglose de tramos disponible.',
         IV: [
           {palanca:'Cobranza activa clientes >60 días', impacto: pvenc ? `Recuperar ${fmtM(pvenc)} en cartera vencida` : 'Reducir mora a <5%', accion:'Identificar top 5 clientes por monto vencido. Gerencia Comercial llama esta semana con acuerdo de pago.', prioridad:'ALTA', col:'var(--red)'},
           {palanca:'Bloqueo de crédito clientes morosos', impacto:'Detener acumulación de deuda', accion:'Clientes con >60 días vencidos no reciben despacho hasta regularizar situación.', prioridad:'ALTA', col:'var(--red)'},
@@ -2959,8 +2959,14 @@ function renderMcKinseyArea(empresa, tipo) {
             <div style="font-size:10px;color:var(--sub);margin-top:4px">${(pctRef||0).toFixed(1)}% refinanciado del total CxP</div>
           </div>` : ''}
         </div>`,
-        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          Comparativo YoY de CxP requiere habilitar la medida en el dataset de Power BI para filtro por fecha.
+        II: `<div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+          ${nProv && cxp ? `<div style="font-size:16px;font-weight:800;color:var(--accent);margin-bottom:4px">${fmtM(cxp/parseFloat(nProv))}</div>
+          <div><strong>Deuda promedio por proveedor:</strong> ${fmtM(cxp)} entre ${nProv} proveedores activos.
+          Con ${pctRef !== null ? pctRef.toFixed(1) : '—'}% refinanciado, la concentración de riesgo depende de
+          cuántos proveedores concentran el monto refinanciado — dato no disponible sin desglose por proveedor.</div>` : ''}
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--sub)">
+            Comparativo YoY (agosto 2025) pendiente: este dataset no tiene filtro de fecha confirmado todavía.
+          </div>
         </div>`,
         III: (cxp && ref) ? svgWaterfall([
           {label:'CxP Total', valSoles: cxp, color:'var(--accent)'},
@@ -3037,7 +3043,13 @@ function renderMcKinseyArea(empresa, tipo) {
             });
             html += `</div>`;
           }
-          if (!porUEN.length && !porPlanta.length && !m) html += `<div style="font-size:11px;color:var(--sub)">Sin datos de desglose. Ejecutar workflow fetch_powerbi.</div>`;
+          if (!porUEN.length && !porPlanta.length) {
+            html += `<div style="font-size:10px;color:var(--sub);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+              Desglose por UEN (B&D/TIGO/MAQUILA) y por planta (Ate/Pachacámac/Terceros) no confirmado todavía —
+              requeriría el mismo procedimiento de Copiar consulta ya usado en Margen, aplicado a este reporte
+              de mermas específicamente (es un reporte distinto, con su propio filtro).
+            </div>`;
+          }
           html += `</div>`;
           return html;
         })(),
