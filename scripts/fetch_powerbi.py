@@ -39,6 +39,14 @@ DATE_CONTEXT = {
     "mermas":    ("Calendario", "Date"),
     "compras":   ("Calendario", "Date"),
     "fill_rate": ("Calendario", "Date"),
+    # 2026-09-03: sin filtro de fecha, productividad_ds/consumo devuelven el
+    # acumulado histórico total del dataset, no el mes. Confirmado con evidencia
+    # real: SUM PROD sin filtro=30.5M, con Calendario[Año]=2026 filtrado=9.75M,
+    # tarjeta real en Power BI=9.63M (cerca). Se agrega para que scan_dataset()
+    # use el mismo filtro mensual que ya aplica a margen/mermas/compras/fill_rate,
+    # en vez de la llamada plana sin filtro que usaba antes.
+    "productividad_ds": ("Calendario", "Date"),
+    "consumo":           ("Calendario", "Date"),
 }
 
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
@@ -178,7 +186,18 @@ SCAN_CANDIDATES = {
         "No Conformidades", "Incumplimientos",
     ],
     "productividad_ds": [
-        # Columnas exactas "Productividad por Funcionario" Power BI PAUNO
+        # Nombres REALES confirmados leyendo el panel Datos > Measures en Power BI Service
+        # (Editar informe) y validados con EVALUATE ROW(...) en DAX Query View — 2026-09-03.
+        "SUM PROD",              # -> Producción Total (KG)
+        "GASTO TOTAL",           # -> Planilla Total (S/.)
+        "PROD OPERATIVA",        # -> Planilla (S/.) entre KG Producido
+        "VENTA KG X SOL",        # -> Planilla (S/.) entre KG Vendido
+        # "Venta Neta (KG)" en el panel aparece como "Suma de Peso total KG" — eso es una
+        # COLUMNA con agregación implícita en la UI (Power BI antepone "Suma de" a columnas,
+        # no a medidas DAX reales), NO un nombre de medida válido para EVALUATE ROW(). Sin
+        # confirmar la tabla/columna real, no se adivina — queda sin este KPI hasta que se
+        # confirme con el Analizador de rendimiento (ver nota en build_productividad).
+        # Nombres viejos (adivinados, se mantienen como fallback por si alguno coincide):
         "Planilla (S/.) entre KG Vendido", "Planilla Entre KG Vendido", "Planilla/KG Vendido",
         "Planilla (S/.) entre KG Producido", "Planilla Entre KG Producido", "Planilla/KG Producido",
         "Produccion Total (KG)", "Produccion Total KG", "KG Producido", "Produccion Total",
@@ -209,7 +228,17 @@ SCAN_CANDIDATES = {
         "Ventas Real", "Real vs Ppto", "% Real vs Ppto",
     ],
     "consumo": [
-        # Medidas del reporte "Consumo de Materiales" (PRODUCCIÓN)
+        # Nombres REALES confirmados leyendo el panel Datos > Measures en Power BI Service
+        # (Editar informe) — "14. Consumo Materiales indirectos de produccion", 2026-09-03.
+        # No validados con DAX Query View (solo lectura de panel) — confirmar antes de usarlos
+        # para decisiones críticas.
+        "Costo total validado",     # -> Costo Total
+        "Peso total KG",            # -> Venta Neta (KG)
+        "Ratio costo / kg",         # -> Costo x TN Vendida
+        "Producción (KG) Odoo",     # -> Producción Neta (KG)
+        "Costo x ton producida",    # -> Costo x TN Producida
+        # Medidas del reporte "Consumo de Materiales" (PRODUCCIÓN) — nombres viejos adivinados,
+        # se mantienen como fallback:
         "CECO AJUSTADO", "Ceco Ajustado", "CECO", "Costo CECO",
         "MIP", "MIP (S/.)", "MIP Total", "Costo x TN", "Costo por TN",
         "TN PRODUCIDA", "TN Producida", "Toneladas Producidas", "Ton Producida",
@@ -610,42 +639,47 @@ def build_mermas(found):
     return result
 
 def build_consumo_materiales(found):
-    """Reporte PRODUCCIÓN: Consumo de Materiales — CECO Ajustado y MIP (S/.) / TN Producida."""
-    ceco_val  = (found.get("CECO AJUSTADO") or found.get("Ceco Ajustado") or
-                 found.get("CECO") or found.get("Costo CECO") or found.get("Costo Consumo"))
-    mip_val   = (found.get("MIP") or found.get("MIP (S/.)") or found.get("MIP Total") or
-                 found.get("Costo x TN") or found.get("Costo por TN"))
-    tn_val    = (found.get("TN PRODUCIDA") or found.get("TN Producida") or
-                 found.get("Toneladas Producidas") or found.get("Ton Producida"))
-    ate_val   = found.get("Consumo Ate") or found.get("Consumo Planta")
-    pach_val  = found.get("Consumo Pachacamac")
+    """Reporte '14. Consumo Materiales indirectos de produccion' — PAUNO.
 
-    ceco  = to_float(ceco_val)
-    mip   = to_float(mip_val)
-    tn    = to_float(tn_val)
+    Nombres de medida confirmados el 2026-09-03 leyendo el panel Datos > Measures
+    en Power BI Service (Editar informe). No validados con DAX Query View — a
+    diferencia de productividad_ds, aquí no se confirmó que EVALUATE ROW() resuelva
+    sin error, así que se mantiene el fallback a los nombres viejos adivinados.
+    """
+    costo_total_val = found.get("Costo total validado") or found.get("Costo Consumo")
+    venta_kg_val    = found.get("Peso total KG") or found.get("Venta Neta (KG)") or found.get("Venta Neta KG")
+    costo_x_tn_vend_val = found.get("Ratio costo / kg") or found.get("Costo x TN") or found.get("Costo por TN")
+    prod_neta_val   = found.get("Producción (KG) Odoo") or found.get("TN PRODUCIDA") or found.get("TN Producida")
+    costo_x_tn_prod_val = found.get("Costo x ton producida")
 
-    # Semáforo: si MIP sube = peor (mayor costo por tonelada)
+    costo_total     = to_float(costo_total_val)
+    venta_kg        = to_float(venta_kg_val)
+    costo_x_tn_vend = to_float(costo_x_tn_vend_val)
+    prod_neta       = to_float(prod_neta_val)
+    costo_x_tn_prod = to_float(costo_x_tn_prod_val)
+
+    # Sin meta ni benchmark definido por negocio todavía — verde de referencia.
     sem = "green"
-    if mip is not None:
-        # Benchmark: sin meta definida, por ahora verde = referencia
-        sem = "yellow" if mip and mip > 10 else "green"
 
     kpis = []
-    if ceco is not None:
-        kpis.append({"label": "CECO Ajustado Total", "valor": fmt_soles(abs(ceco))})
-    if mip is not None:
-        kpis.append({"label": "MIP (S/.) / TN", "valor": f"S/{mip:.2f}", "estado": sem})
-    if tn is not None:
-        kpis.append({"label": "TN Producidas", "valor": f"{tn:,.1f} TN"})
-    if ate_val is not None:
-        kpis.append({"label": "Consumo Planta Ate", "valor": fmt_soles(abs(to_float(ate_val)))})
-    if pach_val is not None:
-        kpis.append({"label": "Consumo Planta Pachacamac", "valor": fmt_soles(abs(to_float(pach_val)))})
+    if costo_total is not None:
+        kpis.append({"label": "Costo Total", "valor": fmt_soles(abs(costo_total))})
+    if venta_kg is not None:
+        kpis.append({"label": "Venta Neta (KG)", "valor": f"{venta_kg:,.0f} KG"})
+    if costo_x_tn_vend is not None:
+        kpis.append({"label": "Costo x TN Vendida", "valor": f"S/{costo_x_tn_vend:.2f}"})
+    if prod_neta is not None:
+        kpis.append({"label": "Producción Neta (KG)", "valor": f"{prod_neta:,.0f} KG"})
+    if costo_x_tn_prod is not None:
+        kpis.append({"label": "Costo x TN Producida", "valor": f"S/{costo_x_tn_prod:.2f}"})
 
-    alerta = None
     if not kpis:
         return None  # No hay datos — no agregar el reporte
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}
+    # Marcador visible en el JSON: estas 5 medidas se leyeron del panel de Power BI
+    # pero no se validaron con EVALUATE ROW() en DAX Query View (a diferencia de
+    # Producción Total en productividad_ds, que sí se validó). No se debe confiar
+    # en estas cifras para decisiones críticas hasta confirmarlas.
+    return {"estado": sem, "alerta": None, "kpis": kpis, "no_validado_dax": True}
 
 def build_compras(found):
     ratio_val  = (found.get("Ratio") or found.get("Eficiencia") or found.get("Eficiencia Costo") or
@@ -761,19 +795,60 @@ def build_control(found):
     return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
 
 def build_productividad(found):
-    # Nombres exactos del reporte "Productividad por Funcionario" Power BI
-    plan_kg_vend  = (found.get("Planilla (S/.) entre KG Vendido") or
-                     found.get("Planilla Entre KG Vendido") or found.get("Planilla/KG Vendido") or
-                     found.get("Planilla/kg") or found.get("S//kg"))
-    plan_kg_prod  = (found.get("Planilla (S/.) entre KG Producido") or
-                     found.get("Planilla Entre KG Producido") or found.get("Planilla/KG Producido") or
-                     found.get("Costo/kg") or found.get("Costo Planilla kg"))
-    prod_total    = (found.get("Produccion Total (KG)") or found.get("Produccion Total KG") or
+    """Reporte '13. Productividad por Funcionario' — PAUNO.
+
+    Nombres de medida confirmados el 2026-09-03 leyendo el panel Datos > Measures
+    en Power BI Service (Editar informe) y validados con EVALUATE ROW(...) en la
+    Vista de consultas DAX (todas resuelven sin error):
+      SUM PROD          -> Producción Total (KG)
+      GASTO TOTAL        -> Planilla Total (S/.)
+      PROD OPERATIVA      -> Planilla (S/.) entre KG Producido
+      VENTA KG X SOL       -> Planilla (S/.) entre KG Vendido
+
+    "Venta Neta (KG)" aparece en el panel como "Suma de Peso total KG" — eso es una
+    COLUMNA con agregación implícita en la UI (Power BI antepone "Suma de" a columnas,
+    nunca a medidas DAX reales), no un nombre de medida válido para EVALUATE ROW().
+    Sin confirmar la tabla/columna exacta (vía Analizador de rendimiento > Copiar
+    consulta sobre la tarjeta), no se adivina el nombre — el KPI queda ausente del
+    reporte hasta que se confirme, en vez de arriesgar un valor incorrecto.
+    """
+    # ── BARRERA DE SEGURIDAD — leer antes de tocar ──────────────────────────
+    # GASTO TOTAL se probó en vivo (2026-09-03) contra la tarjeta real de Power BI:
+    #   sin filtro     = -247
+    #   con Calendario[Año]=2026 = -117
+    #   tarjeta real   = S/4,484,364
+    # Ni el signo ni el orden de magnitud coinciden (~38,000x de diferencia) incluso
+    # filtrando por año. El reporte aplica ~9 filtros adicionales (clasificación de
+    # cuenta contable, exclusión de productos/estados, etc.) que este script no puede
+    # reconstruir sin adivinar valores no confirmados — y adivinar aquí es exactamente
+    # el riesgo que se busca evitar. PROD OPERATIVA y VENTA KG X SOL son ratios que
+    # también llevan planilla en el numerador, así que se asume que sufren el mismo
+    # problema mientras no se demuestre lo contrario.
+    #
+    # SUM PROD sí se validó cerca del real (30.5M sin filtro -> 9.75M con Año=2026 ->
+    # tarjeta real 9.63M), por eso es la única de las cuatro que se publica.
+    #
+    # Para levantar este bloqueo: abrir el .pbix en Power BI Desktop, activar el
+    # Analizador de rendimiento sobre cada tarjeta, "Copiar consulta", y reemplazar
+    # el CALCULATE simple por el filtro exacto que Power BI genera.
+    GASTO_TOTAL_CONFIRMADO = False  # cambiar a True solo tras validar con el DAX real
+
+    plan_kg_vend = plan_kg_prod = plan_total = None
+    if GASTO_TOTAL_CONFIRMADO:
+        plan_kg_vend  = (found.get("VENTA KG X SOL") or
+                         found.get("Planilla (S/.) entre KG Vendido") or
+                         found.get("Planilla Entre KG Vendido") or found.get("Planilla/KG Vendido"))
+        plan_kg_prod  = (found.get("PROD OPERATIVA") or
+                         found.get("Planilla (S/.) entre KG Producido") or
+                         found.get("Planilla Entre KG Producido") or found.get("Planilla/KG Producido"))
+        plan_total    = (found.get("GASTO TOTAL") or
+                         found.get("Planilla Total (S/.)") or found.get("Planilla Total"))
+
+    prod_total    = (found.get("SUM PROD") or
+                     found.get("Produccion Total (KG)") or found.get("Produccion Total KG") or
                      found.get("Produccion Total") or found.get("Kg Producidos") or found.get("Kg Producción"))
-    venta_neta_kg = (found.get("Venta Neta (KG)") or found.get("Venta Neta KG") or
-                     found.get("KG Vendido") or found.get("Venta Neta"))
-    plan_total    = (found.get("Planilla Total (S/.)") or found.get("Planilla Total") or
-                     found.get("Costo Planilla") or found.get("Total Planilla"))
+    # "Venta Neta (KG)" sin nombre de medida confirmado — ver docstring. No se adivina.
+    venta_neta_kg = None
 
     kpis = []
     def sf2(v, prefix="S/"):

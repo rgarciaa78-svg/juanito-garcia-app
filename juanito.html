@@ -3087,57 +3087,49 @@ function renderMcKinseyArea(empresa, tipo) {
         chatMsg: `Analiza la gestión de Compras de ${empresa}. El ratio Consumo÷Compra mide eficiencia: >100% jala inventario, <100% sobre-compra. ¿Qué recomendaciones tienes para optimizar el proceso de compras?`
       };
     },
-
     consumo_materiales: () => {
-      const cecoV  = rd.kpis?.find(k => k.label === 'CECO Ajustado Total')?.valor;
-      const mipV   = rd.kpis?.find(k => k.label === 'MIP (S/.) / TN')?.valor;
-      const tnV    = rd.kpis?.find(k => k.label === 'TN Producidas')?.valor;
-      const ateV   = rd.kpis?.find(k => k.label === 'Consumo Planta Ate')?.valor;
-      const pachV  = rd.kpis?.find(k => k.label === 'Consumo Planta Pachacamac')?.valor;
+      const costoTotalV = rd.kpis?.find(k => k.label === 'Costo Total')?.valor;
+      const ventaKgV    = rd.kpis?.find(k => k.label === 'Venta Neta (KG)')?.valor;
+      const costoTnVendV= rd.kpis?.find(k => k.label === 'Costo x TN Vendida')?.valor;
+      const prodNetaV   = rd.kpis?.find(k => k.label === 'Producción Neta (KG)')?.valor;
+      const costoTnProdV= rd.kpis?.find(k => k.label === 'Costo x TN Producida')?.valor;
       const isLC   = rd.live_connection === true;
+      const hayKpis = costoTotalV || ventaKgV || costoTnVendV || prodNetaV || costoTnProdV;
       return {
         titulo: 'Consumo de Materiales — Producción',
         I: `<div style="flex:1">
-          ${cecoV ? rowKpi('CECO Ajustado Total', cecoV, null, 'var(--fg)') : ''}
-          ${mipV  ? rowKpi('MIP (S/.) / TN Producida', mipV, null, 'var(--accent)') : ''}
-          ${tnV   ? rowKpi('TN Producidas agosto 2026', tnV, null, 'var(--fg)') : ''}
-          ${ateV  ? rowKpi('Consumo Planta Ate', ateV, null, 'var(--fg)') : ''}
-          ${pachV ? rowKpi('Consumo Planta Pachacamac', pachV, null, 'var(--fg)') : ''}
+          ${costoTotalV ? rowKpi('Costo Total', costoTotalV, null, 'var(--fg)') : ''}
+          ${ventaKgV    ? rowKpi('Venta Neta (KG)', ventaKgV, null, 'var(--fg)') : ''}
+          ${costoTnVendV? rowKpi('Costo x TN Vendida', costoTnVendV, null, 'var(--accent)') : ''}
+          ${prodNetaV   ? rowKpi('Producción Neta (KG)', prodNetaV, null, 'var(--fg)') : ''}
+          ${costoTnProdV? rowKpi('Costo x TN Producida', costoTnProdV, null, 'var(--accent)') : ''}
           ${isLC ? `<div style="font-size:11px;color:var(--sub);padding:10px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
             <strong>⚠️ Live Connection detectada</strong><br>
-            El dataset de Consumo de Materiales usa conexión directa a la fuente — la API de Power BI no puede ejecutar queries DAX sobre él.<br><br>
-            <strong>Datos visibles en Power BI:</strong> CECO AJUSTADO por centro de costo, MIP (S/.) / TN Producida, Consumo por COD-PROD (2025-2026).<br><br>
-            Para habilitarlo en Juanito, el dataset debe cambiarse a Import Mode en Power BI Service, o publicar las métricas clave como medidas en un dataset secundario.
-          </div>` : (!cecoV && !mipV ? `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
-            Medidas del dataset aún no descubiertas. Ejecutar workflow discover_measures para confirmar nombres exactos.
+            El dataset de Consumo de Materiales usa conexión directa a la fuente — la API de Power BI no puede ejecutar queries DAX sobre él.
+          </div>` : (!hayKpis ? `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
+            Medidas del dataset aún no descubiertas por el scraper.
           </div>` : '')}
           <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
-            Plantas: ATE ([924001]) · PACHACAMAC ([923001]) · Centros: Planta, Mantenimiento, Calidad.
+            Nombres de medida confirmados leyendo el panel Datos › Measures en Power BI Service (2026-09-03):
+            Costo total validado, Peso total KG, Ratio costo / kg, Producción (KG) Odoo, Costo x ton producida.
+            No validados con DAX Query View — confirmar antes de tomar decisiones críticas con estas cifras.
           </div>
         </div>`,
         II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          Comparativo YoY del CECO Ajustado y MIP requiere activar medidas con filtro de fecha en el dataset de Consumo. La estructura mensual 2025-2026 está visible en Power BI — se puede activar cuando se habilite el scraper completo.
+          Comparativo YoY pendiente: requiere confirmar que estas medidas responden a un filtro de fecha
+          (Calendario) y no devuelven el acumulado histórico fijo, igual que se detectó y corrigió en
+          Fill Rate y Cuentas por Pagar.
         </div>`,
-        III: (ateV || pachV) ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div style="padding:12px;background:var(--accent)11;border:1px solid var(--accent)33;border-radius:8px;text-align:center">
-            <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:4px">Planta ATE</div>
-            <div style="font-size:20px;font-weight:800;color:var(--accent)">${ateV || '—'}</div>
-          </div>
-          <div style="padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;text-align:center">
-            <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:4px">Planta PACHACAMAC</div>
-            <div style="font-size:20px;font-weight:800;color:var(--fg)">${pachV || '—'}</div>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--sub);margin-top:10px;padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          MIP (Materiales, Insumos, Packaging) S/. por TN producida = indicador clave de eficiencia productiva. Menor = mejor.
-        </div>` : `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">Desglose por planta disponible cuando el scraper descubra medidas filtradas por centro de costo.</div>`,
+        III: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+          Desglose por planta (Ate / Pachacámac) no confirmado para este dataset — no existe todavía
+          evidencia de una dimensión de planta filtrable en las medidas leídas.
+        </div>`,
         IV: [
-          {palanca:'Reducir MIP por TN producida', impacto:'Mejorar eficiencia de materiales', accion:'Analizar variación de MIP entre plantas ATE vs PACHACAMAC. La planta con mayor MIP tiene oportunidad de mejora en rendimiento de MP.', prioridad:'ALTA', col:'var(--red)'},
-          {palanca:'Optimizar CECO Ajustado por centro', impacto:'Reducción de costo de producción', accion:'Foco en centros de Mantenimiento ([922003]/[922004]) — si crecen más que producción, indica sobrecosto. Revisar eficiencia de mantenimiento preventivo vs correctivo.', prioridad:'MEDIA', col:'var(--yellow)'},
-          {palanca:'Benchmark MIP entre plantas', impacto:'Identificar mejores prácticas internas', accion:'Si ATE y PACHACAMAC tienen MIP diferente, transferir prácticas de la planta más eficiente. La dispersión interna es la palanca más rápida.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Confirmar contexto de filtro de estas 5 medidas', impacto:'Evitar publicar cifras incorrectas', accion:'Repetir para este dataset el mismo procedimiento aplicado a Productividad: Power BI Desktop → Analizador de rendimiento → Copiar consulta sobre cada tarjeta, para capturar el DAX exacto con filtros reales.', prioridad:'ALTA', col:'var(--red)'},
+          {palanca:'Validar con DAX Query View', impacto:'Confirmar que las medidas resuelven sin error', accion:'EVALUATE ROW("v",[Costo total validado]) y equivalentes para las otras 4 — hoy solo se confirmaron leyendo el panel, no ejecutando la consulta.', prioridad:'MEDIA', col:'var(--yellow)'},
         ],
-        V: ['MIP (S/.) / TN Producida por planta y mes (2025-2026)', 'CECO Ajustado por centro de costo ([924001], [923001], [922003], etc.)', 'TN Producidas por planta mensual', 'Variación MIP vs presupuesto', 'Desglose de consumo: MP, insumos, packaging por separado'],
-        chatMsg: `Analiza el Consumo de Materiales de ${empresa}: CECO Ajustado ${cecoV||'—'}, MIP por TN ${mipV||'—'}, TN Producidas ${tnV||'—'}. ¿Cómo interpretas la eficiencia productiva y qué acciones recomiendas?`
+        V: ['Costo Total por mes filtrado por Calendario', 'Venta Neta (KG) con serie mensual real', 'Costo x TN Vendida y Producida por planta', 'Dimensión de planta (Ate/Pachacámac) si existe en el modelo'],
+        chatMsg: `Analiza el Consumo de Materiales de ${empresa}: Costo Total ${costoTotalV||'—'}, Costo x TN Vendida ${costoTnVendV||'—'}, Costo x TN Producida ${costoTnProdV||'—'}. Recuerda que estas cifras aún no tienen el contexto de filtro confirmado — trátalas como preliminares.`
       };
     },
   };
