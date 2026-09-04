@@ -3071,27 +3071,46 @@ function renderMcKinseyArea(empresa, tipo) {
     },
 
     compras: () => {
+      const stockPP   = kv('compras', 'Stock PP (Punto de Pedido)');
+      const stockVal  = kv('compras', 'Stock Valorizado');
+      const cons3m    = kv('compras', 'Consumo Prom 3M');
+      const cons6m    = kv('compras', 'Consumo Prom 6M');
+      const faltantes = kv('compras', 'Faltantes');
+      const leadTime  = kv('compras', 'Lead Time Prom (días)');
+      const ratio     = kv('compras', 'Ratio Consumo/Compra');
+      const n3 = parseVal(cons3m), n6 = parseVal(cons6m);
+      const tendencia = (n3 != null && n6 != null) ? (n3 > n6 ? 'Consumo acelerando (3M > 6M)' : n3 < n6 ? 'Consumo desacelerando (3M < 6M)' : 'Consumo estable') : null;
       return {
-        titulo: 'Compras — Ratio Consumo/Compra',
-        I: `<div style="font-size:11px;color:var(--sub);padding:10px;background:rgba(0,0,0,.04);border-radius:8px">
-          <strong>Lógica:</strong> Ratio = Consumo ÷ Compra.<br>
-          <span style="color:var(--green)">▶ >100%</span> = jala inventario previo (compra menor al consumo)<br>
-          <span style="color:var(--red)">▶ &lt;100%</span> = sobre-compra (acumula stock)<br>
-          Los datos de compras están en el dataset "compras" — activar medidas en el scraper para obtener valores agosto.
+        titulo: 'Compras — Stock y Planificación',
+        I: `<div style="flex:1">
+          ${stockVal  ? rowKpi('Stock Valorizado', stockVal, null, 'var(--accent)') : ''}
+          ${stockPP   ? rowKpi('Stock PP (Punto de Pedido)', stockPP, null, 'var(--fg)') : ''}
+          ${cons3m    ? rowKpi('Consumo Promedio 3 meses', cons3m, null, 'var(--fg)') : ''}
+          ${cons6m    ? rowKpi('Consumo Promedio 6 meses', cons6m, null, 'var(--fg)') : ''}
+          ${faltantes ? rowKpi('Faltantes', faltantes, null, parseVal(faltantes) > 0 ? 'var(--red)' : 'var(--green)') : ''}
+          ${leadTime  ? rowKpi('Lead Time Promedio', leadTime, null, 'var(--fg)') : ''}
+          ${ratio     ? rowKpi('Ratio Consumo/Compra', ratio, '80-100%', 'var(--accent)') : ''}
+          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
+            <strong>Ratio Consumo/Compra:</strong> Consumo ÷ Compra. &gt;100% jala inventario previo (compra menor al consumo);
+            &lt;100% sobre-compra (acumula stock). ${ratio ? '' : 'Sin dato disponible este mes.'}
+          </div>
+          ${tendencia ? `<div style="font-size:10px;color:var(--sub);margin-top:4px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">📈 ${tendencia}</div>` : ''}
         </div>`,
         II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          Comparativo YoY de compras requiere activar medidas de ratio en el scraper. Actualmente el dataset de compras tiene ${Object.keys((DATA.empresas||{})[empresa]?.reportes?.compras?.kpis||{}).length||0} KPIs disponibles.
+          Comparativo YoY no disponible: este reporte no está en la serie histórica mensual (series.json) todavía.
+          Los valores mostrados son del mes en curso, leídos directamente de Power BI.
         </div>`,
         III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
-          Acumulado de compras vs consumo YTD requiere datos históricos por mes. Activar en scraper: "Monto Compra", "Monto Consumo", "Ratio" con filtro de fecha agosto.
+          Acumulado YTD no disponible por la misma razón — requiere agregar el dataset de compras a fetch_series.py
+          para construir la serie mensual.
         </div>`,
         IV: [
-          {palanca:'Alinear compras a consumo real', impacto:'Reducir sobre-stock y capital inmovilizado', accion:'Si ratio <100%: revisar qué materias primas se compran en exceso. Ajustar frecuencia de pedido.', prioridad:'MEDIA', col:'var(--yellow)'},
-          {palanca:'Activar datos de compras en Power BI', impacto:'Visibilidad completa del ratio', accion:'Habilitar en scraper las medidas: Monto Compra, Monto Consumo, Ratio — con filtro agosto 2026.', prioridad:'ALTA', col:'var(--red)'},
-          {palanca:'Negociación con proveedores clave', impacto:'Reducir costo unitario de compra', accion:'Concentrar volumen en proveedores estratégicos para ganar poder de negociación. Meta: -3% costo de compra.', prioridad:'BAJA', col:'var(--sub)'},
+          {palanca:'Revisar faltantes activos', impacto:'Evitar quiebre de stock en producción', accion: faltantes && parseVal(faltantes) > 0 ? `Hay ${faltantes} ítems marcados como faltantes — priorizar reposición según Lead Time.` : 'Sin faltantes registrados este mes.', prioridad: faltantes && parseVal(faltantes) > 0 ? 'ALTA' : 'BAJA', col: faltantes && parseVal(faltantes) > 0 ? 'var(--red)' : 'var(--sub)'},
+          {palanca:'Alinear compras a consumo real', impacto:'Reducir sobre-stock y capital inmovilizado', accion:'Si el ratio Consumo/Compra está bajo 80%: revisar qué materias primas se compran en exceso frente al consumo real.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Negociación con proveedores clave', impacto:'Reducir costo unitario de compra', accion:'Concentrar volumen en proveedores estratégicos para ganar poder de negociación.', prioridad:'BAJA', col:'var(--sub)'},
         ],
-        V: ['Ratio Consumo/Compra por categoría de materia prima', 'Monto total compras agosto vs consumo', 'Histórico mensual ratio 2025', 'Top 10 materias primas por volumen de compra'],
-        chatMsg: `Analiza la gestión de Compras de ${empresa}. El ratio Consumo÷Compra mide eficiencia: >100% jala inventario, <100% sobre-compra. ¿Qué recomendaciones tienes para optimizar el proceso de compras?`
+        V: ['Serie histórica mensual de compras (agregar a fetch_series.py)', 'Ratio Consumo/Compra por categoría de materia prima', 'Top materias primas por volumen de compra'],
+        chatMsg: `Analiza la gestión de Compras de ${empresa}: Stock Valorizado ${stockVal||'—'}, Consumo Prom 3M ${cons3m||'—'}, Consumo Prom 6M ${cons6m||'—'}${faltantes?`, Faltantes ${faltantes}`:''}. ¿Qué recomendaciones tienes para optimizar el proceso de compras?`
       };
     },
     consumo_materiales: () => {
