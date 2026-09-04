@@ -428,6 +428,55 @@ def dax_mermas_uen(token, ws_id, dataset_id, medida, anio, extra_filtro=None, la
     return None
 
 
+def dax_mermas_planta(token, ws_id, dataset_id, almacenes, anio, label="mermas_planta"):
+    """'% Merma total' del reporte de mermas (pestaña RESUMEN, gráfico 'Merma
+    Mensual por Planta') filtrado por 'Tabla Mermas'[almacen].
+
+    Confirmado con Copiar consulta el 2026-09-04 sobre el gráfico "PLANTA ATE":
+    en el modelo, la planta Ate corresponde al almacén "Lácteos Producción"
+    (no se llama "Ate" literalmente en la columna [almacen]). Mismos 6 filtros
+    de página que Mermas por UEN, con TIPO DE BASE incluido siempre aquí.
+
+    `almacenes` es una lista de valores de [almacen] — normalmente uno solo,
+    pero TREATAS admite varios si una planta agrupa más de un almacén.
+    La medida es genérica: 'Tabla Mermas'[% Merma total] (sin sufijo de UEN).
+    """
+    vals = ",".join(f'"{a}"' for a in almacenes)
+    q = (
+        'EVALUATE\nROW(\n  "v", CALCULATE(\n    \'Tabla Mermas\'[% Merma total],\n'
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Calendario'[Date])),\n"
+        "      'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\n"
+        "      NOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\n"
+        "    ),\n"
+        "    TREATAS({" + vals + "}, 'Tabla Mermas'[almacen]),\n"
+        "    TREATAS({" + str(int(anio)) + "}, 'Calendario'[Año]),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[categoria_producto] IN\n"
+        "        {\"BONIFICACION Y REBATES\",\"CHATARRA\",\"INTERESES\",\"MATERIA PRIMA\",\"SERVICIOS\",\"SUMINISTROS\",BLANK()})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[producto] IN\n"
+        "        {\"PAVO C/M C/ASA EP CONG (8 KG)\",\"ALIMENTACION COMERCIAL\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\n"
+        "    )\n"
+        "  )\n"
+        ")"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get("[v]") or rows[0].get("v"))
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
