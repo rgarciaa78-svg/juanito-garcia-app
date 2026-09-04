@@ -377,6 +377,51 @@ def dax_margen_total(token, ws_id, dataset_id, anio, label="margen_total"):
     return _dax_margen_precio_costo(token, ws_id, dataset_id, None, anio, label)
 
 
+def dax_mermas_uen(token, ws_id, dataset_id, medida, anio, label="mermas_uen"):
+    """Ejecuta una medida de 'Tabla Mermas' (ej. '% Merma total B&D') del reporte
+    '4. Reporte de mermas' con el filtro de página confirmado con Copiar consulta
+    el 2026-09-04, capturado sobre la tarjeta 'Merma B&D':
+      Calendario[Date] >= 2025-07-31 (mismo corte que otros reportes)
+      Calendario[Año] = <anio>
+      Maestra de Facturacion (Total)[categoria_producto] excluye 7 categorías
+      Maestra de Facturacion (Total)[producto] excluye 2 productos
+      Maestra de Facturacion (Total)[estado] excluye "Cancelado"
+
+    `medida` es el nombre exacto de la medida en 'Tabla Mermas', ej.
+    "% Merma total B&D". Los nombres para TIGO y MAQUILA aún no están
+    confirmados — no se adivinan por sustitución de texto.
+    """
+    medida_esc = medida.replace('"', '\\"')
+    q = (
+        'EVALUATE\nROW(\n  "v", CALCULATE(\n    ' + f"'Tabla Mermas'[{medida_esc}]" + ',\n'
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Calendario'[Date])),\n"
+        "      'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
+        "    ),\n"
+        "    TREATAS({" + str(int(anio)) + "}, 'Calendario'[Año]),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[categoria_producto] IN\n"
+        "        {\"BONIFICACION Y REBATES\",\"CHATARRA\",\"INTERESES\",\"MATERIA PRIMA\",\"SERVICIOS\",\"SUMINISTROS\",BLANK()})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[producto] IN\n"
+        "        {\"PAVO C/M C/ASA EP CONG (8 KG)\",\"ALIMENTACION COMERCIAL\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\n"
+        "    )\n"
+        "  )\n"
+        ")"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get("[v]") or rows[0].get("v"))
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
