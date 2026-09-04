@@ -255,6 +255,14 @@ def dax_consumo_costo_x_tn_vendida(token, ws_id, dataset_id, label="consumo_cost
     return _dax_consumo_filtro_venta(token, ws_id, dataset_id, "[Ratio costo / kg]", label)
 
 
+def dax_consumo_costo_x_tn_producida(token, ws_id, dataset_id, label="consumo_costotnprod"):
+    """'Costo x TN Producida' del reporte '14. Consumo Materiales indirectos de producción'.
+    Es la medida 'Medidas'[Costo x ton producida] — mismos 7 filtros que
+    Venta Neta (KG) / Costo x TN Vendida, confirmados con Copiar consulta el 2026-09-03.
+    """
+    return _dax_consumo_filtro_venta(token, ws_id, dataset_id, "[Costo x ton producida]", label)
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -857,8 +865,10 @@ def build_consumo_materiales(found):
                               7 filtros que Venta Neta KG.
       Producción Neta KG   -> VALIDADO (dax_consumo_produccion_neta_kg). Mismos
                               4 filtros que Costo Total, sin fecha.
-      Costo x TN Producida -> PRELIMINAR. Nombre confirmado solo leyendo el panel
-                              Datos > Measures, sin validar con Copiar consulta.
+      Costo x TN Producida -> VALIDADO (dax_consumo_costo_x_tn_producida). Mismos
+                              7 filtros que Venta Neta KG / Costo x TN Vendida.
+
+    Los 5 KPIs de este reporte quedaron validados con Copiar consulta el 2026-09-03.
     """
     costo_total_val = found.get("Costo total validado") or found.get("Costo Consumo")
     venta_kg_val    = found.get("Peso total KG") or found.get("Venta Neta (KG)") or found.get("Venta Neta KG")
@@ -886,7 +896,7 @@ def build_consumo_materiales(found):
     if prod_neta is not None:
         kpis.append({"label": "Producción Neta (KG)", "valor": f"{prod_neta:,.0f} KG", "validado": True})
     if costo_x_tn_prod is not None:
-        kpis.append({"label": "Costo x TN Producida", "valor": f"S/{costo_x_tn_prod:.2f}", "validado": False})
+        kpis.append({"label": "Costo x TN Producida", "valor": f"S/{costo_x_tn_prod:.2f}", "validado": True})
 
     if not kpis:
         return None  # No hay datos — no agregar el reporte
@@ -1262,6 +1272,13 @@ def main():
                 print(f"    ✓ Consumo [Producción Neta KG] filtrado = {v_pn}")
             else:
                 print("    ✗ Consumo [Producción Neta KG] — la consulta filtrada no devolvió valor")
+
+            v_ctp = dax_consumo_costo_x_tn_producida(token, ws_id, ids["consumo"])
+            if v_ctp is not None:
+                scanned.setdefault("consumo", {})["Costo x ton producida"] = v_ctp
+                print(f"    ✓ Consumo [Costo x TN Producida] filtrado = {v_ctp}")
+            else:
+                print("    ✗ Consumo [Costo x TN Producida] — la consulta filtrada no devolvió valor")
 
         # ── Consumo: SUM directo desde tablas del dataset consumo
         if "consumo" in ids:

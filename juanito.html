@@ -3109,27 +3109,31 @@ function renderMcKinseyArea(empresa, tipo) {
           </div>` : (!hayKpis ? `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
             Medidas del dataset aún no descubiertas por el scraper.
           </div>` : '')}
-          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
-            Nombres de medida confirmados leyendo el panel Datos › Measures en Power BI Service (2026-09-03):
-            Costo total validado, Peso total KG, Ratio costo / kg, Producción (KG) Odoo, Costo x ton producida.
-            No validados con DAX Query View — confirmar antes de tomar decisiones críticas con estas cifras.
+          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(22,163,74,.08);border-left:3px solid #16a34a;border-radius:4px">
+            <strong>✓ 5 de 5 KPIs validados</strong> con Analizador de rendimiento › Copiar consulta (2026-09-03) —
+            cada medida ejecuta el filtro DAX exacto que usa el visual real en Power BI, no una llamada sin filtro.
+          </div>
+          <div style="font-size:10px;color:var(--sub);margin-top:6px;padding:6px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
+            <strong>Nota:</strong> Costo Total y Producción Neta (KG) no tienen filtro de fecha en el reporte —
+            son acumulados históricos totales del dataset, no del año ni del mes. Venta Neta (KG), Costo x TN
+            Vendida y Costo x TN Producida sí filtran desde jul-2025.
           </div>
         </div>`,
         II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          Comparativo YoY pendiente: requiere confirmar que estas medidas responden a un filtro de fecha
-          (Calendario) y no devuelven el acumulado histórico fijo, igual que se detectó y corrigió en
-          Fill Rate y Cuentas por Pagar.
+          Comparativo YoY no aplica para Costo Total ni Producción Neta (KG): al no tener filtro de fecha,
+          no hay un valor "del mes anterior" ni "del año anterior" que comparar. Para las otras 3, se podría
+          calcular acotando el filtro de fecha a un rango mensual — pendiente de definir con negocio.
         </div>`,
         III: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
           Desglose por planta (Ate / Pachacámac) no confirmado para este dataset — no existe todavía
           evidencia de una dimensión de planta filtrable en las medidas leídas.
         </div>`,
         IV: [
-          {palanca:'Confirmar contexto de filtro de estas 5 medidas', impacto:'Evitar publicar cifras incorrectas', accion:'Repetir para este dataset el mismo procedimiento aplicado a Productividad: Power BI Desktop → Analizador de rendimiento → Copiar consulta sobre cada tarjeta, para capturar el DAX exacto con filtros reales.', prioridad:'ALTA', col:'var(--red)'},
-          {palanca:'Validar con DAX Query View', impacto:'Confirmar que las medidas resuelven sin error', accion:'EVALUATE ROW("v",[Costo total validado]) y equivalentes para las otras 4 — hoy solo se confirmaron leyendo el panel, no ejecutando la consulta.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Definir con negocio si Costo Total debe ser mensual', impacto:'Hoy es un acumulado histórico total, puede no ser el KPI que espera el CEO', accion:'Confirmar con el equipo de BI si el reporte debería tener un slicer de fecha para Costo Total y Producción Neta, o si el acumulado histórico es intencional.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Exponer dimensión de planta', impacto:'Permitiría comparar Ate vs Pachacámac', accion:'Pedir a BI que exponga PLANTA POR CECOS como dimensión filtrable para poder desglosar estos 5 KPIs por planta.', prioridad:'BAJA', col:'var(--accent)'},
         ],
-        V: ['Costo Total por mes filtrado por Calendario', 'Venta Neta (KG) con serie mensual real', 'Costo x TN Vendida y Producida por planta', 'Dimensión de planta (Ate/Pachacámac) si existe en el modelo'],
-        chatMsg: `Analiza el Consumo de Materiales de ${empresa}: Costo Total ${costoTotalV||'—'}, Costo x TN Vendida ${costoTnVendV||'—'}, Costo x TN Producida ${costoTnProdV||'—'}. Recuerda que estas cifras aún no tienen el contexto de filtro confirmado — trátalas como preliminares.`
+        V: ['Costo Total y Producción Neta con filtro de fecha (si negocio lo requiere)', 'Desglose por planta (Ate/Pachacámac)', 'Serie histórica mensual para las 3 medidas que sí filtran por fecha'],
+        chatMsg: `Analiza el Consumo de Materiales de ${empresa}: Costo Total ${costoTotalV||'—'}, Costo x TN Vendida ${costoTnVendV||'—'}, Costo x TN Producida ${costoTnProdV||'—'}. Estas cifras ya están validadas con el filtro DAX exacto del reporte real.`
       };
     },
   };
