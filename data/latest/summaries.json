@@ -6,10 +6,10 @@
     "PAUNO": "yellow"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 17.9% — sobre meta"
+    "PAUNO": "Morosidad 16.7% — sobre meta"
   },
   "holding_ventas": "S/7.73M",
-  "holding_mora": "17.9%",
+  "holding_mora": "16.7%",
   "agenda_ceo": {
     "decidir_hoy": [],
     "escalar_semana": [],
@@ -20,43 +20,43 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "yellow",
-          "alerta": "Morosidad 17.9% — sobre meta",
+          "alerta": "Morosidad 16.7% — sobre meta",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "17.9%",
+              "valor": "16.7%",
               "meta": "15%",
               "estado": "yellow"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/4.13M"
+              "valor": "S/4.09M"
             }
           ],
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/4.13M",
+              "valor": "S/4.09M",
               "estado": "green"
             }
           ]
         },
         "cuentas_por_pagar": {
-          "estado": "green",
-          "alerta": null,
+          "estado": "yellow",
+          "alerta": "Refinanciado S/6.71M — gestionar",
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/15.23M"
+              "valor": "S/17.89M"
             },
             {
               "label": "Refinanciado",
-              "valor": "S/4.57M",
-              "estado": "green"
+              "valor": "S/6.71M",
+              "estado": "yellow"
             },
             {
               "label": "# Proveedores",
-              "valor": "142"
+              "valor": "143"
             }
           ]
         },
@@ -124,7 +124,7 @@
             },
             {
               "label": "Costo x TN Vendida",
-              "valor": "S/133.40",
+              "valor": "S/133.27",
               "validado": true
             },
             {
@@ -192,19 +192,19 @@
           "kpis": [
             {
               "label": "Stock PP (Punto de Pedido)",
-              "valor": "1943996"
+              "valor": "1825611"
             },
             {
               "label": "Stock Valorizado",
-              "valor": "S/5.60M"
+              "valor": "S/5.85M"
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10747190"
+              "valor": "10802666"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10478795"
+              "valor": "10506532"
             }
           ]
         },
@@ -220,8 +220,14 @@
         },
         "control_interno": {
           "estado": "red",
-          "alerta": "108 puntos de control en estado Crítico (34.7% del total)",
+          "alerta": "% Cumplimiento 69.3% — bajo meta 85%",
           "kpis": [
+            {
+              "label": "% Cumplimiento",
+              "valor": "69.32%",
+              "meta": "85%",
+              "estado": "red"
+            },
             {
               "label": "Puntos de Control evaluados",
               "valor": "311"
@@ -249,6 +255,10 @@
               "estado": "red"
             },
             {
+              "label": "Total Planes de Acción",
+              "valor": "93"
+            },
+            {
               "label": "Planes de Acción Abiertos",
               "valor": "1",
               "estado": "yellow"
@@ -259,13 +269,27 @@
               "estado": "green"
             },
             {
+              "label": "Planes de Acción Atrasados",
+              "valor": "29",
+              "meta": "0",
+              "estado": "red"
+            },
+            {
               "label": "% Avance Planes de Acción",
-              "valor": "98.4%",
-              "estado": "green"
+              "valor": "66.7%",
+              "estado": "yellow"
             },
             {
               "label": "Puntos Ejecutados",
               "valor": "314"
+            },
+            {
+              "label": "Calificación",
+              "valor": "653"
+            },
+            {
+              "label": "Puntos Totales",
+              "valor": "942"
             }
           ]
         },
@@ -307,15 +331,15 @@
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/125.71M"
+              "valor": "S/125.88M"
             },
             {
               "label": "Facturación",
-              "valor": "S/94.52M"
+              "valor": "S/94.71M"
             },
             {
               "label": "Venta Perdida",
-              "valor": "S/31.20M",
+              "valor": "S/31.18M",
               "estado": "red"
             }
           ]
@@ -326,7 +350,7 @@
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "84.7%",
+              "valor": "96.0%",
               "meta": "100%",
               "estado": "green"
             }
