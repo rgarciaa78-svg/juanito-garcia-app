@@ -428,36 +428,49 @@ def dax_mermas_uen(token, ws_id, dataset_id, medida, anio, extra_filtro=None, la
     return None
 
 
-def dax_mermas_planta(token, ws_id, dataset_id, medida, almacenes, anio, label="mermas_planta"):
+def dax_mermas_planta(token, ws_id, dataset_id, medida, almacenes, anio, con_tipo_base=True, label="mermas_planta"):
     """Medida de 'Tabla Mermas' del reporte de mermas (pestaña RESUMEN, gráfico
     'Merma Mensual por Planta') filtrada por 'Tabla Mermas'[almacen].
 
     Confirmado con Copiar consulta el 2026-09-04, capturado directamente del
-    panel del Analizador de rendimiento (fila "PLANTA ATE"/"PLANTA PACHACAMAC"
-    bajo el grupo "MERMA MENSUAL POR PLANTA", no las filas duplicadas de
-    "MERMA DIARIA POR PLANTA" más abajo en la misma lista):
-      Planta Ate         -> almacen "Lácteos Producción" · medida genérica
-                             'Tabla Mermas'[% Merma total] (sin sufijo)
-      Planta Pachacámac  -> almacen "Salsas Producción"   · medida
-                             'Tabla Mermas'[% Merma total SALSAS] (con sufijo)
-    Cada planta puede tener su propia medida — no se asume el mismo patrón
-    de nombre para todas, igual que ya pasó con Mermas por UEN.
+    panel del Analizador de rendimiento (fila "PLANTA ATE"/"PLANTA PACHACAMAC"/
+    "PLANTA TERCEROS" bajo el grupo "MERMA MENSUAL POR PLANTA", no las filas
+    duplicadas de "MERMA DIARIA POR PLANTA" más abajo en la misma lista):
+      Planta Ate         -> almacen "Lácteos Producción"                 · medida
+                             genérica 'Tabla Mermas'[% Merma total] (sin sufijo)
+                             · SÍ trae filtro TIPO DE BASE
+      Planta Pachacámac  -> almacen "Salsas Producción"                   · medida
+                             'Tabla Mermas'[% Merma total SALSAS]
+                             · SÍ trae filtro TIPO DE BASE
+      Planta Terceros    -> almacenes de maquiladores externos (Abuela
+                             Maquila, Piamonte Maquila, Lácteos Dosimetría)
+                             · medida 'Tabla Mermas'[% Merma total MAQUILA]
+                             (una M — distinta de la medida UEN "MMAQUILA")
+                             · NO trae filtro TIPO DE BASE (confirmado ausente
+                             en su Copiar consulta, a diferencia de las otras 2)
+    Cada planta puede tener su propia medida y sus propios filtros — no se
+    asume el mismo patrón para todas, igual que ya pasó con Mermas por UEN.
 
     `almacenes` es una lista de valores de [almacen] — normalmente uno solo,
     pero TREATAS admite varios si una planta agrupa más de un almacén.
+    `con_tipo_base` controla si se incluye el filtro TIPO DE BASE — pasar
+    False para Terceros.
     """
     medida_esc = medida.replace('"', '\\"')
     vals = ",".join(f'"{a}"' for a in almacenes)
+    tipo_base = (
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\n"
+        "      NOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\n"
+        "    ),\n"
+    ) if con_tipo_base else ""
     q = (
         'EVALUATE\nROW(\n  "v", CALCULATE(\n    ' + f"'Tabla Mermas'[{medida_esc}]" + ',\n'
         "    FILTER(\n"
         "      KEEPFILTERS(VALUES('Calendario'[Date])),\n"
         "      'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
         "    ),\n"
-        "    FILTER(\n"
-        "      KEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\n"
-        "      NOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\n"
-        "    ),\n"
+        + tipo_base +
         "    TREATAS({" + vals + "}, 'Tabla Mermas'[almacen]),\n"
         "    TREATAS({" + str(int(anio)) + "}, 'Calendario'[Año]),\n"
         "    FILTER(\n"
@@ -1746,9 +1759,36 @@ def main():
                     empresa_data["reportes"]["mermas"]["por_uen"] = uen_merma
                     print(f"  Mermas UEN: {uen_merma}")
 
-                # Por Planta (ATE / PACHACAMAC / TERCEROS) — filtro exacto AÚN NO confirmado
-                # con Copiar consulta. Pendiente: repetir el mismo procedimiento sobre las
-                # tarjetas de merma por planta antes de reactivar este desglose.
+                # Por Planta (ATE / PACHACAMAC / TERCEROS) — filtro exacto confirmado con
+                # Copiar consulta el 2026-09-04, capturado desde el gráfico "Merma Mensual
+                # por Planta" (pestaña RESUMEN). En el modelo, cada planta corresponde a un
+                # almacén con nombre propio (no "ATE"/"PACHACAMAC"/"TERCEROS" literal):
+                #   Ate         -> almacén "Lácteos Producción"     · medida genérica
+                #   Pachacámac  -> almacén "Salsas Producción"       · medida "...SALSAS"
+                #   Terceros    -> almacenes de maquiladores externos (Abuela Maquila,
+                #                  Piamonte Maquila, Lácteos Dosimetría) · medida "...MAQUILA"
+                #                  (una sola M — distinta de la medida UEN "MMAQUILA")
+                # (planta, medida, almacenes, con_tipo_base) — Terceros NO trae el
+                # filtro TIPO DE BASE, confirmado ausente en su Copiar consulta.
+                PLANTA_MERMA_CONFIG = [
+                    ("ATE",        "% Merma total",         ["Lacteos Producción"], True),
+                    ("PACHACAMAC", "% Merma total SALSAS",  ["Salsas Producción"], True),
+                    ("TERCEROS",   "% Merma total MAQUILA", ["Abuela Maquila", "Piamonte Maquila", "Lacteos Dosimetria"], False),
+                ]
+                planta_merma = []
+                for planta, medida, almacenes, con_tb in PLANTA_MERMA_CONFIG:
+                    v = dax_mermas_planta(token, ws_id, mermas_ds_id, medida, almacenes, PREV_YEAR,
+                                           con_tipo_base=con_tb, label=f"merma-planta-{planta}")
+                    if v is not None:
+                        if abs(v) < 1: v *= 100
+                        s = "red" if v > 3 else ("yellow" if v > 2 else "green")
+                        planta_merma.append({"planta": planta, "merma": f"{v:.2f}%", "estado": s})
+                        print(f"    ✓ Merma Planta [{planta}] filtrado = {v:.2f}%")
+                    else:
+                        print(f"    ✗ Merma Planta [{planta}] — la consulta filtrada no devolvió valor")
+                if planta_merma:
+                    empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
+                    print(f"  Mermas Planta: {planta_merma}")
 
         # ── Compras
         if scanned.get("compras"):
