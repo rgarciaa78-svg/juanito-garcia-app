@@ -2242,7 +2242,7 @@ function buildDecisionMatrix(empresa, reportesData) {
   const pvencer = kv('cuentas_por_cobrar','CxC por vencer');
   if (mora !== null) items.push({
     area:'Cobranzas', indicador:'Morosidad CxC', valor: kv('cuentas_por_cobrar','Morosidad')||'—',
-    meta:'5%', brecha: mora ? `${(mora-5).toFixed(1)}pp` : '—',
+    meta:'15%', brecha: mora ? `${(mora-15).toFixed(1)}pp` : '—',
     impacto: pvencer ? `${pvencer} en riesgo de vencer` : `${mora.toFixed(1)}% sobre meta`,
     accion:'Activar cobranza activa. Evaluar bloqueo de crédito a clientes con >60 días.',
     tipo:'cuentas_por_cobrar', estado: rp.cuentas_por_cobrar?.estado||'neutral',
@@ -2414,7 +2414,7 @@ function renderEmpresa(empresa, containerId) {
         { grupo:'Supply', kpi:'Fill Rate',           val: kv('fill_rate','Fill Rate'),            meta:98,  tipo:'fill_rate', inv:false },
         { grupo:'Supply', kpi:'Venta Perdida',       val: kv('fill_rate','Venta Perdida'),        meta:null, tipo:'fill_rate', inv:true },
         { grupo:'Supply', kpi:'Stock',               val: kv('sop_inventario','Inventario Total'),meta:null, tipo:'sop_inventario', inv:false },
-        { grupo:'Cobranzas', kpi:'Morosidad CxC',   val: kv('cuentas_por_cobrar','Morosidad'),   meta:5,   tipo:'cuentas_por_cobrar', inv:true },
+        { grupo:'Cobranzas', kpi:'Morosidad CxC',   val: kv('cuentas_por_cobrar','Morosidad'),   meta:15,  tipo:'cuentas_por_cobrar', inv:true },
         { grupo:'Cobranzas', kpi:'CxC por vencer',  val: kv('cuentas_por_cobrar','CxC por vencer'), meta:null, tipo:'cuentas_por_cobrar', inv:true },
         { grupo:'Finanzas', kpi:'CxP Total',         val: kv('cuentas_por_pagar','CxP Total'),   meta:null, tipo:'cuentas_por_pagar', inv:true },
         { grupo:'Finanzas', kpi:'Refinanciado',      val: kv('cuentas_por_pagar','Refinanciado'),meta:null, tipo:'cuentas_por_pagar', inv:true },
@@ -2481,14 +2481,15 @@ function renderEmpresa(empresa, containerId) {
   <!-- GAUGE ROW: indicadores % -->
   <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;justify-content:space-around">
     ${[
-      {tipo:'cuentas_por_cobrar', lbl:'Morosidad', kpiLbl:'Morosidad', meta:5, inv:true},
-      {tipo:'mermas',             lbl:'Mermas',    kpiLbl:'Merma Total', meta:2, inv:true},
-      {tipo:'margen_variable_pag2', lbl:'Avance Ppto', kpiLbl:'Avance vs Ppto', meta:100, inv:false},
+      // red/yellow = umbrales exactos del backend (sem_thresh en fetch_powerbi.py) — no formula generica
+      {tipo:'cuentas_por_cobrar', lbl:'Morosidad', kpiLbl:'Morosidad', meta:15, red:20, yellow:15, inv:true},
+      {tipo:'mermas',             lbl:'Mermas',    kpiLbl:'Merma Total', meta:2, red:3, yellow:2, inv:true},
+      {tipo:'margen_variable_pag2', lbl:'Avance Ppto', kpiLbl:'Avance vs Ppto', meta:100, red:60, yellow:80, inv:false},
     ].filter(g => rp[g.tipo]).map(g => {
       const val = parseVal(kv(g.tipo, g.kpiLbl)) || 0;
-      const ok  = g.inv ? val <= g.meta : val >= g.meta*0.9;
-      const warn= g.inv ? val <= g.meta*1.5 : val >= g.meta*0.7;
-      const color = ok ? 'var(--green)' : warn ? 'var(--yellow)' : 'var(--red)';
+      const color = g.inv
+        ? (val > g.red ? 'var(--red)' : val > g.yellow ? 'var(--yellow)' : 'var(--green)')
+        : (val <= g.red ? 'var(--red)' : val <= g.yellow ? 'var(--yellow)' : 'var(--green)');
       const cfg  = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===g.tipo);
       const click = cfg ? `onclick="showDetail('${empresa}','${g.tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')"` : '';
       return `<div ${click} style="text-align:center;cursor:pointer;padding:10px;background:var(--surface);border-radius:10px;border:1px solid var(--border);min-width:90px;flex:1">
@@ -2668,7 +2669,7 @@ function renderChartForReporte(tipo, rd) {
     const fac = num('Facturación');
     const vp  = num('Venta Perdida');
     if (!fr && !ov) return '';
-    const col = (fr||0) >= 98 ? 'var(--green)' : (fr||0) >= 85 ? 'var(--yellow)' : 'var(--red)';
+    const col = (fr||0) > 95 ? 'var(--green)' : (fr||0) > 85 ? 'var(--yellow)' : 'var(--red)';
     return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
       ${fr ? svgGauge(fr, 'Fill Rate', col, '98%') : ''}
       ${ov ? svgWaterfall([
@@ -2687,13 +2688,13 @@ function renderChartForReporte(tipo, rd) {
     const mora  = num('Morosidad');
     const pvenc = num('CxC por vencer');
     if (!mora) return '';
-    const col = mora >= 15 ? 'var(--red)' : mora >= 8 ? 'var(--yellow)' : 'var(--green)';
+    const col = mora >= 20 ? 'var(--red)' : mora >= 15 ? 'var(--yellow)' : 'var(--green)';
     return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
-      ${svgGauge(mora, 'Morosidad', col, '5%')}
+      ${svgGauge(mora, 'Morosidad', col, '15%')}
       ${pvenc ? `<div style="flex:1;min-width:120px">
         <div style="font-size:11px;color:var(--sub);margin-bottom:4px">Por vencer próximos 30 días</div>
         <div style="font-size:24px;font-weight:800;color:var(--yellow)">${fmtM(pvenc)}</div>
-        <div style="font-size:11px;color:var(--sub);margin-top:8px">Brecha vs meta 5%: <strong style="color:${col}">${(mora-5).toFixed(1)}pp</strong></div>
+        <div style="font-size:11px;color:var(--sub);margin-top:8px">Brecha vs meta 15%: <strong style="color:${col}">${(mora-15).toFixed(1)}pp</strong></div>
         <div style="font-size:11px;color:var(--sub)">Acción: Activar cobranza activa y bloquear crédito a clientes >60 días.</div>
       </div>` : ''}
     </div>`;
@@ -2717,7 +2718,7 @@ function renderChartForReporte(tipo, rd) {
   if (tipo === 'margen_variable_pag2') {
     const av = num('Avance vs Ppto');
     if (!av) return '';
-    const col = av >= 90 ? 'var(--green)' : av >= 70 ? 'var(--yellow)' : 'var(--red)';
+    const col = av > 80 ? 'var(--green)' : av > 60 ? 'var(--yellow)' : 'var(--red)';
     return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
       ${svgGauge(av, 'Avance vs Ppto', col, '100%')}
       <div style="flex:1;min-width:130px">
@@ -2768,7 +2769,7 @@ function renderTablaEjecutiva(empresa) {
     { area:'Avance vs Ppto',  valor: get('margen_variable_pag2','Avance vs Ppto'), meta:'100%', tipo:'margen_variable_pag2' },
     { area:'Fill Rate',       valor: get('fill_rate','Fill Rate'),                 meta:'98%',  tipo:'fill_rate' },
     { area:'Venta Perdida',   valor: get('fill_rate','Venta Perdida'),             meta:'S/0',  tipo:'fill_rate' },
-    { area:'Morosidad CxC',   valor: get('cuentas_por_cobrar','Morosidad'),        meta:'<5%',  tipo:'cuentas_por_cobrar' },
+    { area:'Morosidad CxC',   valor: get('cuentas_por_cobrar','Morosidad'),        meta:'<15%', tipo:'cuentas_por_cobrar' },
     { area:'CxC por vencer',  valor: get('cuentas_por_cobrar','CxC por vencer'),   meta:'—',    tipo:'cuentas_por_cobrar' },
     { area:'CxP Total',       valor: get('cuentas_por_pagar','CxP Total'),         meta:'—',    tipo:'cuentas_por_pagar' },
     { area:'Refinanciado',    valor: get('cuentas_por_pagar','Refinanciado'),      meta:'—',    tipo:'cuentas_por_pagar' },
@@ -2863,7 +2864,7 @@ function renderMcKinseyArea(empresa, tipo) {
       const ov   = parseVal(kv('fill_rate','Orden de Venta'));
       const fac  = parseVal(kv('fill_rate','Facturación'));
       const vp   = parseVal(kv('fill_rate','Venta Perdida'));
-      const col  = (fr||0) >= 98 ? 'var(--green)' : (fr||0) >= 85 ? 'var(--yellow)' : 'var(--red)';
+      const col  = (fr||0) > 95 ? 'var(--green)' : (fr||0) > 85 ? 'var(--yellow)' : 'var(--red)';
       const rec  = ov ? fmtM(ov * 0.98 - (fac||0)) : '—';
       return {
         titulo: 'Fill Rate — Nivel de Servicio',
@@ -2896,15 +2897,15 @@ function renderMcKinseyArea(empresa, tipo) {
     cuentas_por_cobrar: () => {
       const mora  = parseVal(kv('cuentas_por_cobrar','Morosidad'));
       const pvenc = parseVal(kv('cuentas_por_cobrar','CxC por vencer'));
-      const col   = (mora||0) >= 15 ? 'var(--red)' : (mora||0) >= 8 ? 'var(--yellow)' : 'var(--green)';
+      const col   = (mora||0) >= 20 ? 'var(--red)' : (mora||0) >= 15 ? 'var(--yellow)' : 'var(--green)';
       return {
         titulo: 'Cuentas por Cobrar — Cobranzas',
         I: `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
-          ${mora ? svgGauge(mora, 'Morosidad', col, '5%') : ''}
+          ${mora ? svgGauge(mora, 'Morosidad', col, '15%') : ''}
           <div style="flex:1;min-width:140px">
-            ${rowKpi('Morosidad agosto 2026', kv('cuentas_por_cobrar','Morosidad')||'—', '<5%', col)}
+            ${rowKpi('Morosidad agosto 2026', kv('cuentas_por_cobrar','Morosidad')||'—', '<15%', col)}
             ${rowKpi('CxC por vencer', kv('cuentas_por_cobrar','CxC por vencer')||'—', null, 'var(--yellow)')}
-            ${mora ? rowKpi('Brecha vs meta 5%', '+'+(mora-5).toFixed(1)+'pp', null, 'var(--red)') : ''}
+            ${mora ? rowKpi('Brecha vs meta 15%', '+'+(mora-15).toFixed(1)+'pp', null, 'var(--red)') : ''}
             <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(239,68,68,.06);border-radius:6px">🚨 Morosidad crítica — activa cobranza inmediata para clientes >60 días.</div>
           </div>
         </div>`,
@@ -3297,8 +3298,8 @@ function renderVentasMcKinsey(empresa) {
   const gap    = (ppto && venta)   ? ppto - venta            : null;
   const recFR  = (ov && vp)        ? ov * 0.98 - (ov - vp)  : null; // ventas adicionales si FR=98%
 
-  const col       = (avance||0) >= 90 ? 'var(--green)' : (avance||0) >= 70 ? 'var(--yellow)' : 'var(--red)';
-  const colMargen = (margen||0) >= 52 ? 'var(--green)' : (margen||0) >= 46 ? 'var(--yellow)' : 'var(--red)';
+  const col       = (avance||0) > 80 ? 'var(--green)' : (avance||0) > 60 ? 'var(--yellow)' : 'var(--red)';
+  const colMargen = (margen||0) > 52 ? 'var(--green)' : (margen||0) > 46 ? 'var(--yellow)' : 'var(--red)';
 
   // Proyección fin de año: asume agosto es mes 8, mensual promedio = venta actual
   const proySepDic = venta ? venta * 4 : null;
@@ -3435,7 +3436,7 @@ function renderVentasMcKinsey(empresa) {
         (mismo método que ya cerró Productividad y Consumo de Materiales). Correr el workflow de nuevo
         no resuelve esto por sí solo.
       </div>`);
-    const colU = (p) => parseFloat(p||0) >= 52 ? 'var(--green)' : parseFloat(p||0) >= 46 ? 'var(--yellow)' : 'var(--red)';
+    const colU = (p) => parseFloat(p||0) > 52 ? 'var(--green)' : parseFloat(p||0) > 46 ? 'var(--yellow)' : 'var(--red)';
     return mcSection('III.b','Margen por Unidad de Negocio',`
       <div style="display:grid;grid-template-columns:repeat(${uenData.length},1fr);gap:10px">
         ${uenData.map(u => `<div style="padding:12px;background:${colU(parseFloat(u.margen))}11;border:1px solid ${colU(parseFloat(u.margen))}33;border-radius:8px;text-align:center">
