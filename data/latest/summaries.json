@@ -12,13 +12,7 @@
   "holding_mora": "18.6%",
   "agenda_ceo": {
     "decidir_hoy": [],
-    "escalar_semana": [
-      {
-        "empresa": "PAUNO",
-        "texto": "Margen 43.1% bajo meta 52%.",
-        "responsable": "Comercial"
-      }
-    ],
+    "escalar_semana": [],
     "monitorear": []
   },
   "empresas": {
@@ -67,8 +61,8 @@
           ]
         },
         "margen_variable": {
-          "estado": "red",
-          "alerta": "Margen 43.1% — bajo meta 52%",
+          "estado": "yellow",
+          "alerta": "Margen 49.2% — bajo meta 52%",
           "kpis": [
             {
               "label": "Ventas mes",
@@ -76,17 +70,40 @@
             },
             {
               "label": "Margen variable",
-              "valor": "43.1%",
+              "valor": "49.2%",
               "meta": "52%",
-              "estado": "red"
+              "estado": "yellow"
             },
             {
               "label": "Precio/kg",
-              "valor": "S/5.74"
+              "valor": "S/5.85"
             },
             {
               "label": "Costo/kg",
-              "valor": "S/3.27"
+              "valor": "S/2.97"
+            }
+          ],
+          "por_uen": [
+            {
+              "uen": "B&D",
+              "margen": "64.2%",
+              "precio_kg": "S/5.86",
+              "costo_kg": "S/2.10",
+              "estado": "green"
+            },
+            {
+              "uen": "MAQUILA",
+              "margen": "40.0%",
+              "precio_kg": "S/4.71",
+              "costo_kg": "S/2.83",
+              "estado": "red"
+            },
+            {
+              "uen": "TIGO",
+              "margen": "51.3%",
+              "precio_kg": "S/12.23",
+              "costo_kg": "S/5.95",
+              "estado": "yellow"
             }
           ]
         },
