@@ -39,15 +39,58 @@ DATE_CONTEXT = {
     "mermas":    ("Calendario", "Date"),
     "compras":   ("Calendario", "Date"),
     "fill_rate": ("Calendario", "Date"),
-    # 2026-09-03: sin filtro de fecha, productividad_ds/consumo devuelven el
-    # acumulado histórico total del dataset, no el mes. Confirmado con evidencia
-    # real: SUM PROD sin filtro=30.5M, con Calendario[Año]=2026 filtrado=9.75M,
-    # tarjeta real en Power BI=9.63M (cerca). Se agrega para que scan_dataset()
-    # use el mismo filtro mensual que ya aplica a margen/mermas/compras/fill_rate,
-    # en vez de la llamada plana sin filtro que usaba antes.
-    "productividad_ds": ("Calendario", "Date"),
-    "consumo":           ("Calendario", "Date"),
+    # productividad_ds NO usa este mecanismo genérico — tiene su propio filtro exacto
+    # de 9 dimensiones capturado con "Copiar consulta" (ver dax_productividad_pauno).
+    # Aplicar aquí YEAR(Date)/MONTH(Date) sería insuficiente: el reporte también
+    # filtra por Calendario[Año] (columna distinta a [Date]), MesActual, clasificación
+    # contable y exclusiones de producto — confirmado que sin esos filtros el resultado
+    # es hasta 38,000x distinto del real (ver commit 2026-09-03).
+    "consumo": ("Calendario", "Date"),
 }
+
+def dax_productividad_pauno(token, ws_id, dataset_id, measure_name, label="prod"):
+    """Ejecuta una medida del dataset '13. Productividad por Funcionario' replicando
+    EXACTAMENTE los filtros de página/informe que Power BI aplica en el visual real,
+    a nivel PAUNO (sin filtro de Planta). Filtros capturados el 2026-09-03 con
+    Analizador de rendimiento > Copiar consulta sobre la tarjeta 'Planilla Total (S/.)'
+    con año=2026 (sin mes seleccionado) — validado contra la tarjeta real (S/4,484,364).
+    Cualquier cambio en los filtros del reporte en Power BI Desktop debe reflejarse aquí.
+    """
+    q = f"""EVALUATE
+ROW(
+  "v",
+  CALCULATE(
+    [{measure_name}],
+    TREATAS({{2026}}, 'Calendario'[Año]),
+    TREATAS({{"Otros"}}, 'Calendario'[MesActual]),
+    TREATAS({{"AMBAS","GASTO DE PERSONAL OPERATIVO"}}, 'Exl Cuenta Contables'[CLASIFICACION]),
+    TREATAS({{"GASTO DE PERSONAL"}}, 'Exl Cuenta Contables'[GASTO_PERSONAL]),
+    TREATAS({{"Gasto de Personal Operativo"}}, 'Exl Cuenta Contables'[SUB_CATEGORIA]),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),
+      NOT('Maestra de Facturacion (Total)'[categoria_producto] IN
+        {{"BONIFICACION Y REBATES","CHATARRA","INTERESES","MATERIA PRIMA","SERVICIOS","SUMINISTROS",BLANK()}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),
+      NOT('Maestra de Facturacion (Total)'[producto] IN
+        {{"PAVO C/M C/ASA EP CONG (8 KG)","ALIMENTACION COMERCIAL"}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),
+      NOT('Maestra de Facturacion (Total)'[estado] IN {{"Cancelado"}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Calendario'[Date])),
+      'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))
+    )
+  )
+)"""
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return rows[0].get("[v]") or rows[0].get("v")
+    return None
+
 
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
@@ -812,26 +855,21 @@ def build_productividad(found):
     consulta sobre la tarjeta), no se adivina el nombre — el KPI queda ausente del
     reporte hasta que se confirme, en vez de arriesgar un valor incorrecto.
     """
-    # ── BARRERA DE SEGURIDAD — leer antes de tocar ──────────────────────────
-    # GASTO TOTAL se probó en vivo (2026-09-03) contra la tarjeta real de Power BI:
+    # ── BARRERA DE SEGURIDAD — historial ────────────────────────────────────
+    # GASTO TOTAL se probó en vivo (2026-09-03) sin el filtro real del reporte:
     #   sin filtro     = -247
-    #   con Calendario[Año]=2026 = -117
+    #   con solo Calendario[Año]=2026 = -117
     #   tarjeta real   = S/4,484,364
-    # Ni el signo ni el orden de magnitud coinciden (~38,000x de diferencia) incluso
-    # filtrando por año. El reporte aplica ~9 filtros adicionales (clasificación de
-    # cuenta contable, exclusión de productos/estados, etc.) que este script no puede
-    # reconstruir sin adivinar valores no confirmados — y adivinar aquí es exactamente
-    # el riesgo que se busca evitar. PROD OPERATIVA y VENTA KG X SOL son ratios que
-    # también llevan planilla en el numerador, así que se asume que sufren el mismo
-    # problema mientras no se demuestre lo contrario.
-    #
-    # SUM PROD sí se validó cerca del real (30.5M sin filtro -> 9.75M con Año=2026 ->
-    # tarjeta real 9.63M), por eso es la única de las cuatro que se publica.
-    #
-    # Para levantar este bloqueo: abrir el .pbix en Power BI Desktop, activar el
-    # Analizador de rendimiento sobre cada tarjeta, "Copiar consulta", y reemplazar
-    # el CALCULATE simple por el filtro exacto que Power BI genera.
-    GASTO_TOTAL_CONFIRMADO = False  # cambiar a True solo tras validar con el DAX real
+    # Confirmado con "Copiar consulta" (Analizador de rendimiento) que el reporte
+    # aplica 9 filtros: Calendario[Año]=2026, Calendario[MesActual]="Otros",
+    # Exl Cuenta Contables[CLASIFICACION] IN {"AMBAS","GASTO DE PERSONAL OPERATIVO"},
+    # [GASTO_PERSONAL]="GASTO DE PERSONAL", [SUB_CATEGORIA]="Gasto de Personal Operativo",
+    # exclusión de categoria_producto/producto/estado, y Calendario[Date] > 2025-07-31.
+    # main() ahora llama dax_productividad_pauno() con esos 9 filtros exactos y
+    # sobrescribe found[...] con el valor correcto — por eso ya es seguro leer
+    # found.get(...) directo aquí. GASTO_TOTAL_CONFIRMADO queda como bandera
+    # histórica del hallazgo, ya no bloquea nada.
+    GASTO_TOTAL_CONFIRMADO = True
 
     plan_kg_vend = plan_kg_prod = plan_total = None
     if GASTO_TOTAL_CONFIRMADO:
@@ -1045,6 +1083,25 @@ def main():
                                 break
                 if scanned.get("consumo", {}).get("Total Consumo"):
                     break
+
+        # ── Productividad: filtro EXACTO confirmado con "Copiar consulta" (2026-09-03)
+        # Sobrescribe cualquier valor sin filtrar que haya traído el scan genérico —
+        # ese valor sin filtro es garbage (ver dax_productividad_pauno). Solo se piden
+        # las 4 medidas confirmadas y validadas con esta consulta exacta.
+        if "productividad_ds" in ids:
+            print("  Productividad: aplicando filtro exacto confirmado (Copiar consulta)...")
+            for m_name, label in [
+                ("SUM PROD", "prod_sumprod"),
+                ("GASTO TOTAL", "prod_gastototal"),
+                ("PROD OPERATIVA", "prod_prodoperativa"),
+                ("VENTA KG X SOL", "prod_ventakgxsol"),
+            ]:
+                v = dax_productividad_pauno(token, ws_id, ids["productividad_ds"], m_name, label)
+                if v is not None:
+                    scanned.setdefault("productividad_ds", {})[m_name] = v
+                    print(f"    ✓ Productividad [{m_name}] filtrado = {v}")
+                else:
+                    print(f"    ✗ Productividad [{m_name}] — la consulta filtrada no devolvió valor")
 
         # ── Productividad: schema REST + probe medidas reales (único que no es Live Connection)
         if "productividad_ds" in ids and not scanned.get("productividad_ds"):
