@@ -3260,8 +3260,11 @@ function renderMcKinseyArea(empresa, tipo) {
       const totalV = kv('control_interno', 'Puntos de Control evaluados');
       const critPctV = kv('control_interno', '% Puntos en estado Crítico');
       const abiertos = kv('control_interno', 'Planes de Acción Abiertos');
+      const cerrados = kv('control_interno', 'Planes de Acción Cerrados');
+      const avancePlanesV = kv('control_interno', '% Avance Planes de Acción');
       const satisfN = parseVal(satisf), obsN = parseVal(obs), critN = parseVal(crit);
-      const critPctN = parseVal(critPctV), abiertosN = parseVal(abiertos);
+      const critPctN = parseVal(critPctV), abiertosN = parseVal(abiertos), cerradosN = parseVal(cerrados);
+      const avancePlanesN = parseVal(avancePlanesV);
       return {
         titulo: 'Control Interno',
         I: `<div style="flex:1">
@@ -3271,6 +3274,8 @@ function renderMcKinseyArea(empresa, tipo) {
           ${crit   ? rowKpi('Crítico', crit, '0', 'var(--red)') : ''}
           ${critPctV ? rowKpi('% en estado Crítico', critPctV, '<10%', critPctN>20?'var(--red)':critPctN>10?'var(--yellow)':'var(--green)') : ''}
           ${abiertos ? rowKpi('Planes de Acción Abiertos', abiertos, null, 'var(--yellow)') : ''}
+          ${cerrados ? rowKpi('Planes de Acción Cerrados', cerrados, null, 'var(--green)') : ''}
+          ${avancePlanesV ? rowKpi('% Avance Planes de Acción', avancePlanesV, '80%', avancePlanesN>=80?'var(--green)':avancePlanesN>=50?'var(--yellow)':'var(--red)') : ''}
           <div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
             ${(satisfN!=null || obsN!=null || critN!=null)
               ? `Acumulado histórico total de PAUNO (sin filtro de fecha — el selector de mes del dashboard no afecta estas tarjetas,
@@ -3291,7 +3296,7 @@ function renderMcKinseyArea(empresa, tipo) {
           {palanca:'Confirmar % Cumplimiento (Puntos Teóricos / Calificación)', impacto:'Hoy no hay indicador de cumplimiento, solo el desglose por severidad', accion:'Capturar Copiar consulta sobre las tarjetas "Puntos Teoricos" y "Calificacion" del dashboard de auditoría (tabla Pauno Registro de Ejecuciones) para calcular el % exacto.', prioridad:'MEDIA', col:'var(--yellow)'},
         ],
         V: ['% Cumplimiento (Calificación / Puntos Teóricos)', 'Serie histórica mensual por severidad'],
-        chatMsg: `Analiza el Control Interno de ${empresa}: ${totalV||'—'} puntos de control evaluados — Satisfactorio ${satisf||'—'}, Con Observaciones ${obs||'—'}, Crítico ${crit||'—'} (${critPctV||'—'} del total). Planes de Acción Abiertos: ${abiertos||'—'}. Es acumulado histórico, no del mes.`
+        chatMsg: `Analiza el Control Interno de ${empresa}: ${totalV||'—'} puntos de control evaluados — Satisfactorio ${satisf||'—'}, Con Observaciones ${obs||'—'}, Crítico ${crit||'—'} (${critPctV||'—'} del total). Planes de Acción: ${abiertos||'—'} abiertos, ${cerrados||'—'} cerrados (${avancePlanesV||'—'} avance). Es acumulado histórico, no del mes.`
       };
     },
   };

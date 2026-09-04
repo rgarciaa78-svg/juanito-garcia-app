@@ -1420,12 +1420,16 @@ def build_control(found):
     obs_val    = found.get("Con Observaciones")
     crit_val   = found.get("Critico")
     abiertos_val = found.get("Planes Abiertos")
+    cerrados_val = found.get("Planes Cerrados")
 
     satisf = to_float(satisf_val)
     obs    = to_float(obs_val)
     crit   = to_float(crit_val)
     abiertos = to_float(abiertos_val)
+    cerrados = to_float(cerrados_val)
     total  = sum(v for v in (satisf, obs, crit) if v is not None) or None
+    total_planes = (abiertos or 0) + (cerrados or 0) if (abiertos is not None or cerrados is not None) else None
+    avance_planes_pct = (cerrados / total_planes * 100) if (cerrados is not None and total_planes) else None
 
     crit_pct = (crit / total * 100) if (crit is not None and total) else None
     sem = "green"
@@ -1445,6 +1449,10 @@ def build_control(found):
         kpis.append({"label": "% Puntos en estado Crítico", "valor": f"{crit_pct:.1f}%", "meta": "<10%", "estado": sem})
     if abiertos is not None:
         kpis.append({"label": "Planes de Acción Abiertos", "valor": str(int(abiertos)), "estado": "yellow" if abiertos > 0 else "green"})
+    if cerrados is not None:
+        kpis.append({"label": "Planes de Acción Cerrados", "valor": str(int(cerrados)), "estado": "green"})
+    if avance_planes_pct is not None:
+        kpis.append({"label": "% Avance Planes de Acción", "valor": f"{avance_planes_pct:.1f}%", "estado": "green" if avance_planes_pct>=80 else ("yellow" if avance_planes_pct>=50 else "red")})
 
     alerta = f"{int(crit)} puntos de control en estado Crítico ({crit_pct:.1f}% del total)" if sem != "green" and crit else None
     return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
@@ -2041,6 +2049,11 @@ def main():
             if planes_abiertos_v is not None:
                 scanned.setdefault("control_ds", {})["Planes Abiertos"] = planes_abiertos_v
                 print(f"    ✓ Control Interno: Planes Abiertos={planes_abiertos_v}")
+
+            planes_cerrados_v = dax_planes_accion(token, ws_id, control_ds_id, "Planes Cerrados")
+            if planes_cerrados_v is not None:
+                scanned.setdefault("control_ds", {})["Planes Cerrados"] = planes_cerrados_v
+                print(f"    ✓ Control Interno: Planes Cerrados={planes_cerrados_v}")
 
         # ── Control
         if scanned.get("control_ds"):
