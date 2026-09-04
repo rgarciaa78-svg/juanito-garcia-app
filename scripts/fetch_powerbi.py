@@ -92,6 +92,58 @@ ROW(
     return None
 
 
+def dax_productividad_venta_neta_kg(token, ws_id, dataset_id, label="prod_ventaneta"):
+    """Venta Neta (KG) del reporte '13. Productividad por Funcionario' — PAUNO.
+
+    No es una medida DAX: en el panel aparece como 'Suma de Peso total KG' porque
+    es la COLUMNA 'Maestra de Facturacion (Total)'[Peso total K] con agregación SUM
+    directa. Confirmado con Analizador de rendimiento > Copiar consulta sobre la
+    tarjeta (2026-09-03) — validado contra la tarjeta real (9,834,538 con año=2026).
+
+    Lleva los mismos 9 filtros que dax_productividad_pauno() más 2 exclusivos de
+    esta tarjeta: CATEGORIZACION="VENTA BRUTA" y TIPO DE NEGOCIO N2 no vacío.
+    """
+    q = f"""EVALUATE
+ROW(
+  "v",
+  CALCULATE(
+    SUM('Maestra de Facturacion (Total)'[Peso total K]),
+    TREATAS({{"VENTA BRUTA"}}, 'Maestra de Facturacion (Total)'[CATEGORIZACION]),
+    FILTER(
+      KEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),
+      NOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {{BLANK()}})
+    ),
+    TREATAS({{2026}}, 'Calendario'[Año]),
+    TREATAS({{"Otros"}}, 'Calendario'[MesActual]),
+    TREATAS({{"AMBAS","GASTO DE PERSONAL OPERATIVO"}}, 'Exl Cuenta Contables'[CLASIFICACION]),
+    TREATAS({{"GASTO DE PERSONAL"}}, 'Exl Cuenta Contables'[GASTO_PERSONAL]),
+    TREATAS({{"Gasto de Personal Operativo"}}, 'Exl Cuenta Contables'[SUB_CATEGORIA]),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),
+      NOT('Maestra de Facturacion (Total)'[categoria_producto] IN
+        {{"BONIFICACION Y REBATES","CHATARRA","INTERESES","MATERIA PRIMA","SERVICIOS","SUMINISTROS",BLANK()}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),
+      NOT('Maestra de Facturacion (Total)'[producto] IN
+        {{"PAVO C/M C/ASA EP CONG (8 KG)","ALIMENTACION COMERCIAL"}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),
+      NOT('Maestra de Facturacion (Total)'[estado] IN {{"Cancelado"}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Calendario'[Date])),
+      'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))
+    )
+  )
+)"""
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return rows[0].get("[v]") or rows[0].get("v")
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -848,12 +900,12 @@ def build_productividad(found):
       PROD OPERATIVA      -> Planilla (S/.) entre KG Producido
       VENTA KG X SOL       -> Planilla (S/.) entre KG Vendido
 
-    "Venta Neta (KG)" aparece en el panel como "Suma de Peso total KG" — eso es una
-    COLUMNA con agregación implícita en la UI (Power BI antepone "Suma de" a columnas,
-    nunca a medidas DAX reales), no un nombre de medida válido para EVALUATE ROW().
-    Sin confirmar la tabla/columna exacta (vía Analizador de rendimiento > Copiar
-    consulta sobre la tarjeta), no se adivina el nombre — el KPI queda ausente del
-    reporte hasta que se confirme, en vez de arriesgar un valor incorrecto.
+    "Venta Neta (KG)" aparece en el panel como "Suma de Peso total KG" porque es la
+    COLUMNA 'Maestra de Facturacion (Total)'[Peso total K] con SUM directo, no una
+    medida DAX — confirmado el 2026-09-03 con Analizador de rendimiento > Copiar
+    consulta (ver dax_productividad_venta_neta_kg). Trae 2 filtros propios que las
+    otras 4 tarjetas no tienen: CATEGORIZACION="VENTA BRUTA" y TIPO DE NEGOCIO N2
+    no vacío.
     """
     # ── BARRERA DE SEGURIDAD — historial ────────────────────────────────────
     # GASTO TOTAL se probó en vivo (2026-09-03) sin el filtro real del reporte:
@@ -885,8 +937,9 @@ def build_productividad(found):
     prod_total    = (found.get("SUM PROD") or
                      found.get("Produccion Total (KG)") or found.get("Produccion Total KG") or
                      found.get("Produccion Total") or found.get("Kg Producidos") or found.get("Kg Producción"))
-    # "Venta Neta (KG)" sin nombre de medida confirmado — ver docstring. No se adivina.
-    venta_neta_kg = None
+    # "Venta Neta (KG)" — columna SUM confirmada y filtrada por
+    # dax_productividad_venta_neta_kg(), guardada bajo esta clave interna.
+    venta_neta_kg = found.get("__VENTA_NETA_KG__")
 
     kpis = []
     def sf2(v, prefix="S/"):
@@ -1102,6 +1155,15 @@ def main():
                     print(f"    ✓ Productividad [{m_name}] filtrado = {v}")
                 else:
                     print(f"    ✗ Productividad [{m_name}] — la consulta filtrada no devolvió valor")
+
+            # Venta Neta (KG): no es medida, es columna SUM con 2 filtros propios
+            # (CATEGORIZACION="VENTA BRUTA" + TIPO DE NEGOCIO N2) — ver dax_productividad_venta_neta_kg
+            v_vn = dax_productividad_venta_neta_kg(token, ws_id, ids["productividad_ds"])
+            if v_vn is not None:
+                scanned.setdefault("productividad_ds", {})["__VENTA_NETA_KG__"] = v_vn
+                print(f"    ✓ Productividad [Venta Neta KG] filtrado = {v_vn}")
+            else:
+                print("    ✗ Productividad [Venta Neta KG] — la consulta filtrada no devolvió valor")
 
         # ── Productividad: schema REST + probe medidas reales (único que no es Live Connection)
         if "productividad_ds" in ids and not scanned.get("productividad_ds"):
