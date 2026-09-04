@@ -3262,6 +3262,7 @@ function renderMcKinseyArea(empresa, tipo) {
       const totalPlanes = kv('control_interno', 'Total Planes de Acción');
       const abiertos = kv('control_interno', 'Planes de Acción Abiertos');
       const cerrados = kv('control_interno', 'Planes de Acción Cerrados');
+      const atrasados = kv('control_interno', 'Planes de Acción Atrasados');
       const avancePlanesV = kv('control_interno', '% Avance Planes de Acción');
       const ejecutado = kv('control_interno', 'Puntos Ejecutados');
       const satisfN = parseVal(satisf), obsN = parseVal(obs), critN = parseVal(crit);
@@ -3278,6 +3279,7 @@ function renderMcKinseyArea(empresa, tipo) {
           ${totalPlanes ? rowKpi('Total Planes de Acción', totalPlanes, null, 'var(--fg)') : ''}
           ${abiertos ? rowKpi('Planes de Acción Abiertos', abiertos, null, 'var(--yellow)') : ''}
           ${cerrados ? rowKpi('Planes de Acción Cerrados', cerrados, null, 'var(--green)') : ''}
+          ${atrasados ? rowKpi('Planes de Acción Atrasados', atrasados, '0', 'var(--red)') : ''}
           ${avancePlanesV ? rowKpi('% Avance Planes de Acción', avancePlanesV, '80%', avancePlanesN>=80?'var(--green)':avancePlanesN>=50?'var(--yellow)':'var(--red)') : ''}
           ${ejecutado ? rowKpi('Puntos Ejecutados', ejecutado, null, 'var(--fg)') : ''}
           <div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
