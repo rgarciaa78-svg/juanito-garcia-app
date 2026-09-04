@@ -2605,9 +2605,12 @@ function renderKpiCardDetail(k, empresa, reporteLabel, reporteDesc) {
 function parseVal(s) {
   if (!s) return null;
   s = String(s).trim();
-  const mM = s.match(/([\d,]+\.?\d*)\s*M/i);
+  // (?![a-zA-Z]) evita que la "k" de "kg"/"km" o la "m" de otro sufijo se
+  // confundan con los multiplicadores K (miles) / M (millones) — sin esto,
+  // "9,834,538 kg" se leía como "9,834,538 K" y se inflaba 1000x.
+  const mM = s.match(/([\d,]+\.?\d*)\s*M(?![a-zA-Z])/i);
   if (mM) return parseFloat(mM[1].replace(/,/g,'')) * 1e6;
-  const mK = s.match(/([\d,]+\.?\d*)\s*K/i);
+  const mK = s.match(/([\d,]+\.?\d*)\s*K(?![a-zA-Z])/i);
   if (mK) return parseFloat(mK[1].replace(/,/g,'')) * 1e3;
   return parseFloat(s.replace(/[^0-9.\-]/g,'')) || null;
 }
@@ -3058,13 +3061,16 @@ function renderMcKinseyArea(empresa, tipo) {
           <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">Stock como referencia de capital inmovilizado y capacidad de atención.</div>
         </div>`,
         II: yoyBlock(stockN, yoy.stock ?? null, 'Stock Total', v => fmtM(v)),
-        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-          <div style="font-size:11px;color:var(--sub)">Para análisis de rotación, días de cobertura y dead stock se requiere activar medidas adicionales en el scraper: "Días Inventario", "Dead Stock", "% Dead Stock".</div>
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
+          Este dataset ("Rotación de inventario") solo expone <strong>Stock Total</strong> — ninguna medida de
+          rotación, días de cobertura ni dead stock está confirmada todavía, así que no se puede calcular
+          cuánto de ese stock está inmovilizado sin arriesgar una cifra inventada. Nota: el Stock Valorizado
+          que aparece en el reporte de Compras es un dataset distinto — no se combinan aquí porque no está
+          confirmado que midan el mismo universo de inventario.
         </div>`,
         IV: [
-          {palanca:'Reducir dead stock', impacto:'Liberar capital inmovilizado', accion:'Identificar SKUs sin movimiento >30 días. Plan de liquidación o traslado entre plantas.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Confirmar medidas de rotación', impacto:'Hoy no hay base para saber si el stock está sano o inmovilizado', accion:'Repetir Copiar consulta sobre las tarjetas de Días Inventario, Dead Stock y % Dead Stock del reporte real de Power BI.', prioridad:'ALTA', col:'var(--red)'},
           {palanca:'Alinear stock a demanda prevista', impacto:'Mejorar Fill Rate sin sobrestockear', accion:'S&OP semanal cruzando forecast de ventas con inventario disponible. Detectar gaps antes de que generen venta perdida.', prioridad:'MEDIA', col:'var(--yellow)'},
-          {palanca:'Reducir días de inventario', impacto:'Mejora de capital de trabajo', accion:'Benchmark: industria alimentaria target 7-12 días. Medir días actuales y fijar meta.', prioridad:'BAJA', col:'var(--sub)'},
         ],
         V: ['Días de cobertura por SKU', '% Dead Stock (sin movimiento >30 días)', 'Stock por planta / almacén', 'Histórico de inventario mensual 2025'],
         chatMsg: `Analiza el Inventario de ${empresa}: Stock Total ${stock||'—'}. ¿Cuál es la lectura del nivel de inventario y qué optimizaciones recomiendas?`
@@ -3081,6 +3087,9 @@ function renderMcKinseyArea(empresa, tipo) {
       const ratio     = kv('compras', 'Ratio Consumo/Compra');
       const n3 = parseVal(cons3m), n6 = parseVal(cons6m);
       const tendencia = (n3 != null && n6 != null) ? (n3 > n6 ? 'Consumo acelerando (3M > 6M)' : n3 < n6 ? 'Consumo desacelerando (3M < 6M)' : 'Consumo estable') : null;
+      const nPP = parseVal(stockPP);
+      const coberturaDias = (nPP != null && n3) ? (nPP / (n3/30)) : null;
+      const varTend = (n3 != null && n6) ? (n3-n6)/n6*100 : null;
       return {
         titulo: 'Compras — Stock y Planificación',
         I: `<div style="flex:1">
@@ -3097,13 +3106,23 @@ function renderMcKinseyArea(empresa, tipo) {
           </div>
           ${tendencia ? `<div style="font-size:10px;color:var(--sub);margin-top:4px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">📈 ${tendencia}</div>` : ''}
         </div>`,
-        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          Comparativo YoY no disponible: este reporte no está en la serie histórica mensual (series.json) todavía.
-          Los valores mostrados son del mes en curso, leídos directamente de Power BI.
+        II: `<div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+          ${coberturaDias != null ? `<div style="font-size:16px;font-weight:800;color:${coberturaDias<7?'var(--red)':coberturaDias<15?'var(--yellow)':'var(--green)'};margin-bottom:4px">${coberturaDias.toFixed(1)} días</div>
+          <div><strong>Cobertura del Stock PP</strong> (punto de pedido) al ritmo de consumo actual: con ${stockPP} unidades en stock
+          y un consumo promedio de ${cons3m}/mes (3M), el stock alcanza para ${coberturaDias.toFixed(1)} días antes de necesitar reposición.
+          ${coberturaDias < 7 ? ' Es una cobertura ajustada — cualquier atraso del proveedor genera riesgo de quiebre.' : coberturaDias < 15 ? ' Cobertura moderada, dentro de rango normal para reposición periódica.' : ' Cobertura amplia — no hay riesgo inmediato de quiebre.'}</div>` : 'Sin datos suficientes para calcular cobertura de stock.'}
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--sub)">
+            Comparativo YoY (agosto 2025) pendiente: este dataset no está en la serie histórica mensual todavía.
+          </div>
         </div>`,
-        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
-          Acumulado YTD no disponible por la misma razón — requiere agregar el dataset de compras a fetch_series.py
-          para construir la serie mensual.
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text,var(--fg))">
+          ${varTend != null ? `<strong>Tendencia de consumo:</strong> el promedio de 3 meses (${cons3m}) es ${varTend>=0?'+':''}${varTend.toFixed(1)}%
+          ${varTend>=0?'mayor':'menor'} que el de 6 meses (${cons6m}) —
+          ${Math.abs(varTend) < 2 ? 'el ritmo de consumo se mantiene estable, sin señales de aceleración ni desaceleración relevantes.' : varTend > 0 ? 'el consumo viene acelerando en el trimestre reciente frente al semestre — vale la pena confirmar si es estacional o una tendencia sostenida antes de ajustar compras.' : 'el consumo viene desacelerando en el trimestre reciente — revisar si hay riesgo de sobre-stock si las compras no se ajustan al mismo ritmo.'}` : ''}
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--sub)">
+            Acumulado YTD (año completo) pendiente: requiere agregar el dataset de compras a fetch_series.py
+            para construir la serie mensual.
+          </div>
         </div>`,
         IV: [
           {palanca:'Revisar faltantes activos', impacto:'Evitar quiebre de stock en producción', accion: faltantes && parseVal(faltantes) > 0 ? `Hay ${faltantes} ítems marcados como faltantes — priorizar reposición según Lead Time.` : 'Sin faltantes registrados este mes.', prioridad: faltantes && parseVal(faltantes) > 0 ? 'ALTA' : 'BAJA', col: faltantes && parseVal(faltantes) > 0 ? 'var(--red)' : 'var(--sub)'},
@@ -3169,6 +3188,14 @@ function renderMcKinseyArea(empresa, tipo) {
       const prodTotal   = kv('productividad', 'Producción Total (KG)');
       const ventaNeta   = kv('productividad', 'Venta Neta (KG)');
       const planTotal   = kv('productividad', 'Planilla Total');
+
+      // Números derivados de los 5 KPIs ya cargados — sin depender de series.json
+      const prodN = parseVal(prodTotal), ventaN = parseVal(ventaNeta);
+      const gapPct = (prodN && ventaN) ? ((ventaN - prodN) / prodN * 100) : null;
+      const pkProdN = parseVal(planKgProd), pkVendN = parseVal(planKgVend);
+      const diffPk = (pkProdN != null && pkVendN != null) ? (pkProdN - pkVendN) : null;
+      const fmtKg = n => n == null ? '—' : Math.abs(n) >= 1e6 ? (n/1e6).toFixed(2)+'M' : n.toLocaleString('es-PE');
+
       return {
         titulo: 'Productividad por Funcionario',
         I: `<div style="flex:1">
@@ -3182,15 +3209,31 @@ function renderMcKinseyArea(empresa, tipo) {
             + clasificación contable de gasto de personal), confirmado con Analizador de rendimiento › Copiar consulta.
           </div>
         </div>`,
-        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          Comparativo YoY no disponible: este reporte no está en la serie histórica mensual (series.json) todavía.
+        II: `<div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+          ${gapPct != null ? `<div style="font-size:16px;font-weight:800;color:${gapPct>=0?'var(--green)':'var(--red)'};margin-bottom:4px">${gapPct>=0?'+':''}${gapPct.toFixed(1)}%</div>
+          <div><strong>Venta Neta vs Producción:</strong> se vendieron ${fmtKg(ventaN)} kg contra ${fmtKg(prodN)} kg producidos.
+          ${gapPct >= 0
+            ? `Se vendió más de lo que se produjo este mes — la diferencia sale de inventario acumulado (destockeo).`
+            : `Se produjo más de lo que se vendió — el inventario de producto terminado creció este mes.`}</div>`
+          : 'Sin datos suficientes para calcular la brecha producción/venta.'}
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--sub)">
+            Comparativo YoY (agosto 2025) pendiente: este reporte no está en la serie histórica mensual todavía —
+            requeriría agregar productividad_ds a fetch_series.py.
+          </div>
         </div>`,
-        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
-          Desglose por planta (Ate / Pachacámac) disponible en el reporte de Power BI pero no capturado todavía
-          en el scraper — requeriría repetir Copiar consulta con el filtro de planta activo.
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text,var(--fg))">
+          ${diffPk != null ? `<strong>Costo de planilla por kg:</strong> producir cuesta ${planKgProd}/kg y vender cuesta ${planKgVend}/kg —
+          una diferencia de S/${Math.abs(diffPk).toFixed(3)} ${diffPk>0?'más caro producir que vender':'más caro vender que producir'}.
+          ${Math.abs(diffPk) < 0.02
+            ? ' La diferencia es mínima: la mano de obra de producción y de ventas/despacho está bien balanceada.'
+            : ' La diferencia es significativa — vale la pena revisar si un área concentra más horas-hombre que la otra.'}` : ''}
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--sub)">
+            Desglose por planta (Ate / Pachacámac) disponible en Power BI pero no capturado todavía —
+            requeriría repetir Copiar consulta con el filtro de planta activo.
+          </div>
         </div>`,
         IV: [
-          {palanca:'Confirmar Venta Neta con su propia consulta', impacto:'Hoy usa el mismo filtro de Producción — no capturado por separado', accion:'Repetir Copiar consulta sobre la tarjeta Venta Neta específicamente si se necesita mayor precisión.', prioridad:'BAJA', col:'var(--sub)'},
+          {palanca: gapPct != null && gapPct >= 3 ? 'Revisar nivel de inventario de producto terminado' : 'Confirmar Venta Neta con su propia consulta', impacto: gapPct != null && gapPct >= 3 ? `Se está vendiendo ${gapPct.toFixed(1)}% más de lo producido — el stock se reduce` : 'Hoy usa el mismo filtro de Producción — no capturado por separado', accion: gapPct != null && gapPct >= 3 ? 'Confirmar con Compras/S&OP si el destockeo es planeado o si hay riesgo de quiebre en los próximos meses.' : 'Repetir Copiar consulta sobre la tarjeta Venta Neta específicamente si se necesita mayor precisión.', prioridad: gapPct != null && gapPct >= 3 ? 'MEDIA' : 'BAJA', col: gapPct != null && gapPct >= 3 ? 'var(--yellow)' : 'var(--sub)'},
           {palanca:'Desglose por planta', impacto:'Comparar eficiencia Ate vs Pachacámac', accion:'Capturar Copiar consulta con el filtro de planta activo para cada una de las 5 medidas.', prioridad:'MEDIA', col:'var(--yellow)'},
         ],
         V: ['Desglose por planta (Ate/Pachacámac)', 'Serie histórica mensual', 'Comparativo YoY'],
@@ -3200,27 +3243,35 @@ function renderMcKinseyArea(empresa, tipo) {
 
     control_interno: () => {
       const satisf = kv('control_interno', 'Satisfactorio');
+      const satisfN = parseVal(satisf);
       return {
         titulo: 'Control Interno',
         I: `<div style="flex:1">
           ${satisf ? rowKpi('Controles satisfactorios', satisf, null, 'var(--green)') : ''}
-          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
-            ${satisf ? 'Dato leído directamente de Power BI.' : 'Sin dato disponible este mes.'}
+          <div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+            ${satisfN != null
+              ? `Es un <strong>conteo</strong> (${satisfN} controles calificados como satisfactorios), no un porcentaje —
+                 el reporte de Power BI no expone el total de controles auditados, así que no se puede calcular
+                 qué proporción representa este número sin arriesgar una cifra inventada.`
+              : 'Sin dato disponible este mes.'}
           </div>
         </div>`,
-        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-          Comparativo YoY no disponible: este reporte no está en la serie histórica mensual (series.json) todavía.
+        II: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
+          Este es el único KPI confirmado de este dataset. Sin el total de controles auditados ni un histórico
+          mensual no hay base para calcular tendencia, comparativo YoY, ni acumulado — mostrar cualquiera de
+          esos cálculos sería inventar un dato que Power BI no está entregando.
         </div>`,
         III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
-          Solo se lee un KPI de este dataset ("Satisfactorio"). El reporte de Power BI probablemente tiene más
-          indicadores (hallazgos críticos, % cumplimiento, no conformidades) que no están confirmados con
-          nombre de medida exacto todavía.
+          El reporte de auditoría en Power BI probablemente tiene más indicadores (hallazgos críticos,
+          % cumplimiento, no conformidades) — ninguno confirmado todavía con nombre de medida exacto.
+          Repetir el mismo procedimiento de Copiar consulta usado en Productividad y Consumo de Materiales
+          resolvería esto.
         </div>`,
         IV: [
-          {palanca:'Confirmar medidas adicionales de auditoría', impacto:'Hoy solo se lee un indicador de este reporte', accion:'Capturar Copiar consulta sobre las demás tarjetas del reporte de auditoría para ampliar la cobertura.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Confirmar medidas adicionales de auditoría', impacto:'Hoy solo se lee un indicador de este reporte, sin base para % ni tendencia', accion:'Capturar Copiar consulta sobre las demás tarjetas del reporte de auditoría (% Cumplimiento, hallazgos críticos) para ampliar la cobertura.', prioridad:'MEDIA', col:'var(--yellow)'},
         ],
-        V: ['% Cumplimiento de controles', 'Puntos críticos / hallazgos', 'Serie histórica mensual'],
-        chatMsg: `Analiza el Control Interno de ${empresa}: ${satisf||'—'} controles satisfactorios. ¿Qué otros indicadores de auditoría faltan por confirmar?`
+        V: ['% Cumplimiento de controles (numerador y denominador)', 'Puntos críticos / hallazgos', 'Serie histórica mensual'],
+        chatMsg: `Analiza el Control Interno de ${empresa}: ${satisf||'—'} controles satisfactorios (conteo, sin base de comparación todavía). ¿Qué otros indicadores de auditoría faltan por confirmar?`
       };
     },
   };
