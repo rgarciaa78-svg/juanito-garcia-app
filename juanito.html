@@ -2832,7 +2832,9 @@ function renderMcKinseyArea(empresa, tipo) {
   const yoyBlock = (valorActual, valorYoY, labelMetrica, fmt) => {
     if (valorYoY === null || valorYoY === undefined) {
       return `<div style="padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px;font-size:11px;color:var(--sub)">
-        Comparativo ${yearYoY} vs 2026 pendiente — ejecutar workflow <code>discover_measures</code> en GitHub Actions.
+        Comparativo ${yearYoY} vs 2026 pendiente — el descubrimiento automático de la tabla de fecha
+        de este dataset falló. Se necesita capturar el filtro DAX real con Analizador de rendimiento ›
+        Copiar consulta (mismo método que ya cerró Productividad y Consumo de Materiales).
       </div>`;
     }
     const delta = valorActual !== null ? ((valorActual - valorYoY) / Math.abs(valorYoY || 1)) * 100 : null;
