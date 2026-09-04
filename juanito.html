@@ -3161,6 +3161,67 @@ function renderMcKinseyArea(empresa, tipo) {
         chatMsg: `Analiza el Consumo de Materiales de ${empresa}: Costo Total ${costoTotalV||'—'}, Costo x TN Vendida ${costoTnVendV||'—'}, Costo x TN Producida ${costoTnProdV||'—'}. Estas cifras ya están validadas con el filtro DAX exacto del reporte real.`
       };
     },
+
+    productividad: () => {
+      const planKgProd = kv('productividad', 'Planilla S/. / KG Producido');
+      const planKgVend = kv('productividad', 'Planilla S/. / KG Vendido');
+      const prodTotal   = kv('productividad', 'Producción Total (KG)');
+      const ventaNeta   = kv('productividad', 'Venta Neta (KG)');
+      const planTotal   = kv('productividad', 'Planilla Total');
+      return {
+        titulo: 'Productividad por Funcionario',
+        I: `<div style="flex:1">
+          ${planTotal   ? rowKpi('Planilla Total (S/.)', planTotal, null, 'var(--accent)') : ''}
+          ${prodTotal   ? rowKpi('Producción Total (KG)', prodTotal, null, 'var(--fg)') : ''}
+          ${ventaNeta   ? rowKpi('Venta Neta (KG)', ventaNeta, null, 'var(--fg)') : ''}
+          ${planKgProd  ? rowKpi('Planilla / KG Producido', planKgProd, null, 'var(--fg)') : ''}
+          ${planKgVend  ? rowKpi('Planilla / KG Vendido', planKgVend, null, 'var(--fg)') : ''}
+          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
+            Filtrado con el contexto exacto del reporte "13. Productividad por Funcionario" (Calendario[Año]
+            + clasificación contable de gasto de personal), confirmado con Analizador de rendimiento › Copiar consulta.
+          </div>
+        </div>`,
+        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+          Comparativo YoY no disponible: este reporte no está en la serie histórica mensual (series.json) todavía.
+        </div>`,
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
+          Desglose por planta (Ate / Pachacámac) disponible en el reporte de Power BI pero no capturado todavía
+          en el scraper — requeriría repetir Copiar consulta con el filtro de planta activo.
+        </div>`,
+        IV: [
+          {palanca:'Confirmar Venta Neta con su propia consulta', impacto:'Hoy usa el mismo filtro de Producción — no capturado por separado', accion:'Repetir Copiar consulta sobre la tarjeta Venta Neta específicamente si se necesita mayor precisión.', prioridad:'BAJA', col:'var(--sub)'},
+          {palanca:'Desglose por planta', impacto:'Comparar eficiencia Ate vs Pachacámac', accion:'Capturar Copiar consulta con el filtro de planta activo para cada una de las 5 medidas.', prioridad:'MEDIA', col:'var(--yellow)'},
+        ],
+        V: ['Desglose por planta (Ate/Pachacámac)', 'Serie histórica mensual', 'Comparativo YoY'],
+        chatMsg: `Analiza la Productividad por Funcionario de ${empresa}: Planilla Total ${planTotal||'—'}, Planilla/KG Producido ${planKgProd||'—'}, Planilla/KG Vendido ${planKgVend||'—'}, Producción Total ${prodTotal||'—'} KG. ¿Cómo interpretas la eficiencia de mano de obra y qué acciones recomiendas?`
+      };
+    },
+
+    control_interno: () => {
+      const satisf = kv('control_interno', 'Satisfactorio');
+      return {
+        titulo: 'Control Interno',
+        I: `<div style="flex:1">
+          ${satisf ? rowKpi('Controles satisfactorios', satisf, null, 'var(--green)') : ''}
+          <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
+            ${satisf ? 'Dato leído directamente de Power BI.' : 'Sin dato disponible este mes.'}
+          </div>
+        </div>`,
+        II: `<div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
+          Comparativo YoY no disponible: este reporte no está en la serie histórica mensual (series.json) todavía.
+        </div>`,
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
+          Solo se lee un KPI de este dataset ("Satisfactorio"). El reporte de Power BI probablemente tiene más
+          indicadores (hallazgos críticos, % cumplimiento, no conformidades) que no están confirmados con
+          nombre de medida exacto todavía.
+        </div>`,
+        IV: [
+          {palanca:'Confirmar medidas adicionales de auditoría', impacto:'Hoy solo se lee un indicador de este reporte', accion:'Capturar Copiar consulta sobre las demás tarjetas del reporte de auditoría para ampliar la cobertura.', prioridad:'MEDIA', col:'var(--yellow)'},
+        ],
+        V: ['% Cumplimiento de controles', 'Puntos críticos / hallazgos', 'Serie histórica mensual'],
+        chatMsg: `Analiza el Control Interno de ${empresa}: ${satisf||'—'} controles satisfactorios. ¿Qué otros indicadores de auditoría faltan por confirmar?`
+      };
+    },
   };
 
   // Fallback para tipos sin configuración específica
@@ -3468,6 +3529,8 @@ function showDetail(empresa, tipo, label, archivo, desc) {
     consumo_materiales: 'Consumo de Materiales',
     sop_inventario: 'S&OP — Inventario',
     compras: 'Gestión de Compras',
+    productividad: 'Productividad por Funcionario',
+    control_interno: 'Control Interno',
   };
 
   const tituloDetalle = renderTituloArea[tipo] || label;
