@@ -3262,6 +3262,7 @@ function renderMcKinseyArea(empresa, tipo) {
       const abiertos = kv('control_interno', 'Planes de Acción Abiertos');
       const cerrados = kv('control_interno', 'Planes de Acción Cerrados');
       const avancePlanesV = kv('control_interno', '% Avance Planes de Acción');
+      const ejecutado = kv('control_interno', 'Puntos Ejecutados');
       const satisfN = parseVal(satisf), obsN = parseVal(obs), critN = parseVal(crit);
       const critPctN = parseVal(critPctV), abiertosN = parseVal(abiertos), cerradosN = parseVal(cerrados);
       const avancePlanesN = parseVal(avancePlanesV);
@@ -3276,6 +3277,7 @@ function renderMcKinseyArea(empresa, tipo) {
           ${abiertos ? rowKpi('Planes de Acción Abiertos', abiertos, null, 'var(--yellow)') : ''}
           ${cerrados ? rowKpi('Planes de Acción Cerrados', cerrados, null, 'var(--green)') : ''}
           ${avancePlanesV ? rowKpi('% Avance Planes de Acción', avancePlanesV, '80%', avancePlanesN>=80?'var(--green)':avancePlanesN>=50?'var(--yellow)':'var(--red)') : ''}
+          ${ejecutado ? rowKpi('Puntos Ejecutados', ejecutado, null, 'var(--fg)') : ''}
           <div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
             ${(satisfN!=null || obsN!=null || critN!=null)
               ? `Acumulado histórico total de PAUNO (sin filtro de fecha — el selector de mes del dashboard no afecta estas tarjetas,

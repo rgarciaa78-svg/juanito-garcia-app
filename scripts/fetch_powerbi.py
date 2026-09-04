@@ -633,6 +633,34 @@ def dax_planes_accion(token, ws_id, dataset_id, medida, empresa="Pauno", label="
     return None
 
 
+def dax_control_interno_sum(token, ws_id, dataset_id, columna, empresa="Pauno", label="control_interno_sum"):
+    """Suma de una columna (no medida) de 'Pauno Registro de Ejecuciones'.
+
+    Confirmado con Copiar consulta el 2026-09-04 sobre la columna
+    '¿Ejecutado?': mismo filtro Empresa="Pauno" que el resto de Control
+    Interno, pero usando SUMMARIZECOLUMNS + IGNORE(CALCULATE(SUM(...)))
+    en vez de referenciar una medida ya definida en el modelo.
+
+    `columna` ej. "¿Ejecutado?".
+    """
+    columna_esc = columna.replace('"', '\\"')
+    empresa_esc = empresa.replace('"', '\\"')
+    alias = "Sumv_" + "".join(c for c in columna if c.isalnum()) + "_"
+    q = (
+        "DEFINE VAR __DS0FilterTable = \n"
+        f'\tTREATAS({{"{empresa_esc}"}}, \'Pauno Registro de Ejecuciones\'[Empresa])\n\n'
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t__DS0FilterTable,\n"
+        f'\t\t"{alias}", IGNORE(CALCULATE(SUM(\'Pauno Registro de Ejecuciones\'[{columna_esc}])))\n'
+        "\t)"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get(f"[{alias}]") or rows[0].get(alias))
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -1421,12 +1449,14 @@ def build_control(found):
     crit_val   = found.get("Critico")
     abiertos_val = found.get("Planes Abiertos")
     cerrados_val = found.get("Planes Cerrados")
+    ejecutado_val = found.get("Ejecutado")
 
     satisf = to_float(satisf_val)
     obs    = to_float(obs_val)
     crit   = to_float(crit_val)
     abiertos = to_float(abiertos_val)
     cerrados = to_float(cerrados_val)
+    ejecutado = to_float(ejecutado_val)
     total  = sum(v for v in (satisf, obs, crit) if v is not None) or None
     total_planes = (abiertos or 0) + (cerrados or 0) if (abiertos is not None or cerrados is not None) else None
     avance_planes_pct = (cerrados / total_planes * 100) if (cerrados is not None and total_planes) else None
@@ -1453,6 +1483,8 @@ def build_control(found):
         kpis.append({"label": "Planes de Acción Cerrados", "valor": str(int(cerrados)), "estado": "green"})
     if avance_planes_pct is not None:
         kpis.append({"label": "% Avance Planes de Acción", "valor": f"{avance_planes_pct:.1f}%", "estado": "green" if avance_planes_pct>=80 else ("yellow" if avance_planes_pct>=50 else "red")})
+    if ejecutado is not None:
+        kpis.append({"label": "Puntos Ejecutados", "valor": str(int(ejecutado))})
 
     alerta = f"{int(crit)} puntos de control en estado Crítico ({crit_pct:.1f}% del total)" if sem != "green" and crit else None
     return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
@@ -2054,6 +2086,11 @@ def main():
             if planes_cerrados_v is not None:
                 scanned.setdefault("control_ds", {})["Planes Cerrados"] = planes_cerrados_v
                 print(f"    ✓ Control Interno: Planes Cerrados={planes_cerrados_v}")
+
+            ejecutado_v = dax_control_interno_sum(token, ws_id, control_ds_id, "¿Ejecutado?")
+            if ejecutado_v is not None:
+                scanned.setdefault("control_ds", {})["Ejecutado"] = ejecutado_v
+                print(f"    ✓ Control Interno: Ejecutado (suma)={ejecutado_v}")
 
         # ── Control
         if scanned.get("control_ds"):
