@@ -428,22 +428,28 @@ def dax_mermas_uen(token, ws_id, dataset_id, medida, anio, extra_filtro=None, la
     return None
 
 
-def dax_mermas_planta(token, ws_id, dataset_id, almacenes, anio, label="mermas_planta"):
-    """'% Merma total' del reporte de mermas (pestaña RESUMEN, gráfico 'Merma
-    Mensual por Planta') filtrado por 'Tabla Mermas'[almacen].
+def dax_mermas_planta(token, ws_id, dataset_id, medida, almacenes, anio, label="mermas_planta"):
+    """Medida de 'Tabla Mermas' del reporte de mermas (pestaña RESUMEN, gráfico
+    'Merma Mensual por Planta') filtrada por 'Tabla Mermas'[almacen].
 
-    Confirmado con Copiar consulta el 2026-09-04 sobre el gráfico "PLANTA ATE":
-    en el modelo, la planta Ate corresponde al almacén "Lácteos Producción"
-    (no se llama "Ate" literalmente en la columna [almacen]). Mismos 6 filtros
-    de página que Mermas por UEN, con TIPO DE BASE incluido siempre aquí.
+    Confirmado con Copiar consulta el 2026-09-04, capturado directamente del
+    panel del Analizador de rendimiento (fila "PLANTA ATE"/"PLANTA PACHACAMAC"
+    bajo el grupo "MERMA MENSUAL POR PLANTA", no las filas duplicadas de
+    "MERMA DIARIA POR PLANTA" más abajo en la misma lista):
+      Planta Ate         -> almacen "Lácteos Producción" · medida genérica
+                             'Tabla Mermas'[% Merma total] (sin sufijo)
+      Planta Pachacámac  -> almacen "Salsas Producción"   · medida
+                             'Tabla Mermas'[% Merma total SALSAS] (con sufijo)
+    Cada planta puede tener su propia medida — no se asume el mismo patrón
+    de nombre para todas, igual que ya pasó con Mermas por UEN.
 
     `almacenes` es una lista de valores de [almacen] — normalmente uno solo,
     pero TREATAS admite varios si una planta agrupa más de un almacén.
-    La medida es genérica: 'Tabla Mermas'[% Merma total] (sin sufijo de UEN).
     """
+    medida_esc = medida.replace('"', '\\"')
     vals = ",".join(f'"{a}"' for a in almacenes)
     q = (
-        'EVALUATE\nROW(\n  "v", CALCULATE(\n    \'Tabla Mermas\'[% Merma total],\n'
+        'EVALUATE\nROW(\n  "v", CALCULATE(\n    ' + f"'Tabla Mermas'[{medida_esc}]" + ',\n'
         "    FILTER(\n"
         "      KEEPFILTERS(VALUES('Calendario'[Date])),\n"
         "      'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
