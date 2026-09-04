@@ -3259,6 +3259,7 @@ function renderMcKinseyArea(empresa, tipo) {
       const crit   = kv('control_interno', 'Crítico') || kv('control_interno', 'Critico');
       const totalV = kv('control_interno', 'Puntos de Control evaluados');
       const critPctV = kv('control_interno', '% Puntos en estado Crítico');
+      const totalPlanes = kv('control_interno', 'Total Planes de Acción');
       const abiertos = kv('control_interno', 'Planes de Acción Abiertos');
       const cerrados = kv('control_interno', 'Planes de Acción Cerrados');
       const avancePlanesV = kv('control_interno', '% Avance Planes de Acción');
@@ -3274,6 +3275,7 @@ function renderMcKinseyArea(empresa, tipo) {
           ${obs    ? rowKpi('Con Observaciones', obs, null, 'var(--yellow)') : ''}
           ${crit   ? rowKpi('Crítico', crit, '0', 'var(--red)') : ''}
           ${critPctV ? rowKpi('% en estado Crítico', critPctV, '<10%', critPctN>20?'var(--red)':critPctN>10?'var(--yellow)':'var(--green)') : ''}
+          ${totalPlanes ? rowKpi('Total Planes de Acción', totalPlanes, null, 'var(--fg)') : ''}
           ${abiertos ? rowKpi('Planes de Acción Abiertos', abiertos, null, 'var(--yellow)') : ''}
           ${cerrados ? rowKpi('Planes de Acción Cerrados', cerrados, null, 'var(--green)') : ''}
           ${avancePlanesV ? rowKpi('% Avance Planes de Acción', avancePlanesV, '80%', avancePlanesN>=80?'var(--green)':avancePlanesN>=50?'var(--yellow)':'var(--red)') : ''}

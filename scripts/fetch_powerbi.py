@@ -1450,6 +1450,7 @@ def build_control(found):
     abiertos_val = found.get("Planes Abiertos")
     cerrados_val = found.get("Planes Cerrados")
     ejecutado_val = found.get("Ejecutado")
+    total_planes_val = found.get("Total Planes de Acción")
 
     satisf = to_float(satisf_val)
     obs    = to_float(obs_val)
@@ -1458,7 +1459,8 @@ def build_control(found):
     cerrados = to_float(cerrados_val)
     ejecutado = to_float(ejecutado_val)
     total  = sum(v for v in (satisf, obs, crit) if v is not None) or None
-    total_planes = (abiertos or 0) + (cerrados or 0) if (abiertos is not None or cerrados is not None) else None
+    # Total real del modelo (medida propia) en vez de sumar Abiertos+Cerrados a mano.
+    total_planes = to_float(total_planes_val) or ((abiertos or 0) + (cerrados or 0) if (abiertos is not None or cerrados is not None) else None)
     avance_planes_pct = (cerrados / total_planes * 100) if (cerrados is not None and total_planes) else None
 
     crit_pct = (crit / total * 100) if (crit is not None and total) else None
@@ -1477,6 +1479,8 @@ def build_control(found):
         kpis.append({"label": "Crítico", "valor": str(int(crit)), "meta": "0", "estado": "red" if crit > 0 else "green"})
     if crit_pct is not None:
         kpis.append({"label": "% Puntos en estado Crítico", "valor": f"{crit_pct:.1f}%", "meta": "<10%", "estado": sem})
+    if total_planes is not None:
+        kpis.append({"label": "Total Planes de Acción", "valor": str(int(total_planes))})
     if abiertos is not None:
         kpis.append({"label": "Planes de Acción Abiertos", "valor": str(int(abiertos)), "estado": "yellow" if abiertos > 0 else "green"})
     if cerrados is not None:
@@ -2086,6 +2090,11 @@ def main():
             if planes_cerrados_v is not None:
                 scanned.setdefault("control_ds", {})["Planes Cerrados"] = planes_cerrados_v
                 print(f"    ✓ Control Interno: Planes Cerrados={planes_cerrados_v}")
+
+            total_planes_v = dax_planes_accion(token, ws_id, control_ds_id, "Total Planes de Acción")
+            if total_planes_v is not None:
+                scanned.setdefault("control_ds", {})["Total Planes de Acción"] = total_planes_v
+                print(f"    ✓ Control Interno: Total Planes de Acción={total_planes_v}")
 
             ejecutado_v = dax_control_interno_sum(token, ws_id, control_ds_id, "¿Ejecutado?")
             if ejecutado_v is not None:
