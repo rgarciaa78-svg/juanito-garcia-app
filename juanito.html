@@ -3255,35 +3255,41 @@ function renderMcKinseyArea(empresa, tipo) {
 
     control_interno: () => {
       const satisf = kv('control_interno', 'Satisfactorio');
-      const satisfN = parseVal(satisf);
+      const obs    = kv('control_interno', 'Con Observaciones');
+      const crit   = kv('control_interno', 'Crítico') || kv('control_interno', 'Critico');
+      const totalV = kv('control_interno', 'Puntos de Control evaluados');
+      const critPctV = kv('control_interno', '% Puntos en estado Crítico');
+      const satisfN = parseVal(satisf), obsN = parseVal(obs), critN = parseVal(crit);
+      const critPctN = parseVal(critPctV);
       return {
         titulo: 'Control Interno',
         I: `<div style="flex:1">
-          ${satisf ? rowKpi('Controles satisfactorios', satisf, null, 'var(--green)') : ''}
+          ${totalV ? rowKpi('Puntos de Control evaluados', totalV, null, 'var(--fg)') : ''}
+          ${satisf ? rowKpi('Satisfactorio', satisf, null, 'var(--green)') : ''}
+          ${obs    ? rowKpi('Con Observaciones', obs, null, 'var(--yellow)') : ''}
+          ${crit   ? rowKpi('Crítico', crit, '0', 'var(--red)') : ''}
+          ${critPctV ? rowKpi('% en estado Crítico', critPctV, '<10%', critPctN>20?'var(--red)':critPctN>10?'var(--yellow)':'var(--green)') : ''}
           <div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-            ${satisfN != null
-              ? `Es un <strong>conteo</strong> (${satisfN} controles calificados como satisfactorios), no un porcentaje —
-                 el reporte de Power BI no expone el total de controles auditados, así que no se puede calcular
-                 qué proporción representa este número sin arriesgar una cifra inventada.`
-              : 'Sin dato disponible este mes.'}
+            ${(satisfN!=null || obsN!=null || critN!=null)
+              ? `Acumulado histórico total de PAUNO (sin filtro de fecha — el selector de mes del dashboard no afecta estas tarjetas,
+                 confirmado con Copiar consulta). ${critN ? `<strong>${critN} puntos de control</strong> están en estado Crítico` : 'Sin puntos críticos registrados'}.`
+              : 'Sin dato disponible.'}
           </div>
         </div>`,
         II: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
-          Este es el único KPI confirmado de este dataset. Sin el total de controles auditados ni un histórico
-          mensual no hay base para calcular tendencia, comparativo YoY, ni acumulado — mostrar cualquiera de
-          esos cálculos sería inventar un dato que Power BI no está entregando.
+          % Cumplimiento (69.3% visto en pantalla = Calificación ÷ Puntos Teóricos) queda pendiente de confirmar —
+          son 2 medidas adicionales de una tabla distinta que no se pudieron capturar todavía con Copiar consulta;
+          no se calcula aquí para no arriesgar una fórmula inventada.
         </div>`,
         III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
-          El reporte de auditoría en Power BI probablemente tiene más indicadores (hallazgos críticos,
-          % cumplimiento, no conformidades) — ninguno confirmado todavía con nombre de medida exacto.
-          Repetir el mismo procedimiento de Copiar consulta usado en Productividad y Consumo de Materiales
-          resolvería esto.
+          Sin histórico mensual disponible para estas 3 medidas (son acumulado total, no por mes) — no hay base
+          para mostrar tendencia ni comparativo YoY sin inventar un dato que Power BI no está entregando.
         </div>`,
         IV: [
-          {palanca:'Confirmar medidas adicionales de auditoría', impacto:'Hoy solo se lee un indicador de este reporte, sin base para % ni tendencia', accion:'Capturar Copiar consulta sobre las demás tarjetas del reporte de auditoría (% Cumplimiento, hallazgos críticos) para ampliar la cobertura.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Confirmar % Cumplimiento (Puntos Teóricos / Calificación)', impacto:'Hoy no hay indicador de cumplimiento, solo el desglose por severidad', accion:'Capturar Copiar consulta sobre las tarjetas "Puntos Teoricos" y "Calificacion" del dashboard de auditoría (tabla Pauno Registro de Ejecuciones) para calcular el % exacto.', prioridad:'MEDIA', col:'var(--yellow)'},
         ],
-        V: ['% Cumplimiento de controles (numerador y denominador)', 'Puntos críticos / hallazgos', 'Serie histórica mensual'],
-        chatMsg: `Analiza el Control Interno de ${empresa}: ${satisf||'—'} controles satisfactorios (conteo, sin base de comparación todavía). ¿Qué otros indicadores de auditoría faltan por confirmar?`
+        V: ['% Cumplimiento (Calificación / Puntos Teóricos)', 'Serie histórica mensual por severidad'],
+        chatMsg: `Analiza el Control Interno de ${empresa}: ${totalV||'—'} puntos de control evaluados — Satisfactorio ${satisf||'—'}, Con Observaciones ${obs||'—'}, Crítico ${crit||'—'} (${critPctV||'—'} del total). Es acumulado histórico, no del mes.`
       };
     },
   };

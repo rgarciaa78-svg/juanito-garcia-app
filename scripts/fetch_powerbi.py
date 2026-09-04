@@ -1378,25 +1378,45 @@ def build_inventario(found):
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
 
 def build_control(found):
-    cumpl_val  = found.get("% Cumplimiento") or found.get("Cumplimiento") or found.get("Conformidad") or found.get("% Conformidad")
-    crit_val   = (found.get("Puntos Críticos") or found.get("Puntos Criticos") or
-                  found.get("Hallazgos Críticos") or found.get("No Conformidades") or found.get("Incumplimientos"))
-    satisf_val = found.get("Satisfactorio") or found.get("Observaciones")
+    """Dashboard de Control Interno ('8. Reporte de auditoría').
 
-    cumpl_pct = to_float(cumpl_val)
-    if cumpl_pct and abs(cumpl_pct) < 1: cumpl_pct *= 100
-    sem = sem_thresh(cumpl_pct, red_below=70, yellow_below=85)
+    Confirmado con Copiar consulta el 2026-09-04, filtro único Empresa="Pauno",
+    sin fecha (acumulado histórico total): Satisfactorio, Con Observaciones,
+    Critico — las 3 comparten el mismo filtro y patrón de medida.
+
+    "% Cumplimiento" (69.32% en pantalla = Calificación 653 ÷ Puntos Teóricos
+    942) queda pendiente: son 2 medidas más que no se pudieron capturar con
+    Copiar consulta en esta sesión — no se inventa el cálculo con los 3
+    conteos de aquí porque no es la misma fórmula (no es una simple división
+    de conteos, es una calificación ponderada).
+    """
+    satisf_val = found.get("Satisfactorio")
+    obs_val    = found.get("Con Observaciones")
+    crit_val   = found.get("Critico")
+
+    satisf = to_float(satisf_val)
+    obs    = to_float(obs_val)
+    crit   = to_float(crit_val)
+    total  = sum(v for v in (satisf, obs, crit) if v is not None) or None
+
+    crit_pct = (crit / total * 100) if (crit is not None and total) else None
+    sem = "green"
+    if crit_pct is not None:
+        sem = "red" if crit_pct > 20 else ("yellow" if crit_pct > 10 else "green")
 
     kpis = []
-    if cumpl_pct is not None:
-        kpis.append({"label": "Cumplimiento", "valor": f"{cumpl_pct:.1f}%", "meta": "85%", "estado": sem})
-    if crit_val is not None:
-        s = "red" if to_float(crit_val) and to_float(crit_val) > 0 else "green"
-        kpis.append({"label": "Puntos críticos", "valor": str(int(to_float(crit_val) or 0)), "meta": "0", "estado": s})
-    if satisf_val is not None:
-        kpis.append({"label": "Satisfactorio", "valor": str(int(to_float(satisf_val) or satisf_val)), "estado": "green"})
+    if total is not None:
+        kpis.append({"label": "Puntos de Control evaluados", "valor": str(int(total))})
+    if satisf is not None:
+        kpis.append({"label": "Satisfactorio", "valor": str(int(satisf)), "estado": "green"})
+    if obs is not None:
+        kpis.append({"label": "Con Observaciones", "valor": str(int(obs)), "estado": "yellow"})
+    if crit is not None:
+        kpis.append({"label": "Crítico", "valor": str(int(crit)), "meta": "0", "estado": "red" if crit > 0 else "green"})
+    if crit_pct is not None:
+        kpis.append({"label": "% Puntos en estado Crítico", "valor": f"{crit_pct:.1f}%", "meta": "<10%", "estado": sem})
 
-    alerta = f"Cumplimiento {fmt_pct(cumpl_pct)} — bajo meta 85%" if sem != "green" and cumpl_pct else None
+    alerta = f"{int(crit)} puntos de control en estado Crítico ({crit_pct:.1f}% del total)" if sem != "green" and crit else None
     return {"estado": sem if kpis else "green", "alerta": alerta, "kpis": kpis}
 
 def build_productividad(found):
@@ -1969,6 +1989,23 @@ def main():
             r = build_inventario(scanned["inventario"])
             empresa_data["reportes"]["sop_inventario"] = r
             print(f"  S&OP {len(r['kpis'])} KPIs sem={r['estado']}")
+
+        # ── Control Interno — filtro exacto confirmado con Copiar consulta (2026-09-04)
+        # sobre '8. Reporte de auditoria' (Dashboard de Control Interno): solo
+        # Empresa="Pauno", sin filtro de fecha (acumulado histórico total).
+        control_ds_id = DATASET_IDS.get(empresa, {}).get("control_ds")
+        if control_ds_id:
+            satisf_v = dax_control_interno(token, ws_id, control_ds_id, "Satisfactorio")
+            obs_v    = dax_control_interno(token, ws_id, control_ds_id, "Con Observaciones")
+            crit_v   = dax_control_interno(token, ws_id, control_ds_id, "Critico")
+            if satisf_v is not None:
+                scanned.setdefault("control_ds", {})["Satisfactorio"] = satisf_v
+            if obs_v is not None:
+                scanned.setdefault("control_ds", {})["Con Observaciones"] = obs_v
+            if crit_v is not None:
+                scanned.setdefault("control_ds", {})["Critico"] = crit_v
+            if satisf_v is not None or obs_v is not None or crit_v is not None:
+                print(f"    ✓ Control Interno: Satisfactorio={satisf_v} Con Observaciones={obs_v} Critico={crit_v}")
 
         # ── Control
         if scanned.get("control_ds"):
