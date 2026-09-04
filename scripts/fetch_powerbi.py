@@ -580,6 +580,33 @@ def dax_inventario_composicion(token, ws_id, dataset_id, label="inv_composicion"
     return out
 
 
+def dax_control_interno(token, ws_id, dataset_id, medida, empresa="Pauno", label="control_interno"):
+    """Medida de 'Pauno Registro de Ejecuciones' del reporte '8. Reporte de
+    auditoría' (Dashboard de Control Interno).
+
+    Confirmado con Copiar consulta el 2026-09-04 sobre la tarjeta
+    "Satisfactorio": el único filtro es Empresa="Pauno" — SIN filtro de
+    fecha ni mes, a pesar de que el dashboard tiene un selector de mes.
+    Los KPIs de resumen (Puntos de Control, Satisfactorio, Con Observaciones,
+    Crítico, % Cumplimiento) son un acumulado histórico total, no del mes.
+
+    `medida` ej. "Satisfactorio", "Con Observaciones", "Critico",
+    "Puntos de Control", "% Cumplimiento".
+    """
+    medida_esc = medida.replace('"', '\\"')
+    empresa_esc = empresa.replace('"', '\\"')
+    q = (
+        'EVALUATE\nROW(\n  "v", CALCULATE(\n    ' + f"'Pauno Registro de Ejecuciones'[{medida_esc}]" + ',\n'
+        f'    TREATAS({{"{empresa_esc}"}}, \'Pauno Registro de Ejecuciones\'[Empresa])\n'
+        "  )\n"
+        ")"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get("[v]") or rows[0].get("v"))
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
