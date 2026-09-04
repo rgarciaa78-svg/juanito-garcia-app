@@ -273,33 +273,29 @@ def dax_consumo_costo_x_tn_producida(token, ws_id, dataset_id, label="consumo_co
     return _dax_consumo_filtro_venta(token, ws_id, dataset_id, "[Costo x ton producida]", label)
 
 
-def dax_margen_uen(token, ws_id, dataset_id, uen, anio, label="margen_uen"):
-    """Precio/kg y Costo/kg del reporte de Margen filtrados por UEN
-    (TIPO DE NEGOCIO N1 = "B&D" / "MAQUILA" / "TIGO").
-
-    Filtros confirmados el 2026-09-04 con Analizador de rendimiento > Copiar consulta
-    sobre la tabla de "Análisis de Ventas" filtrada a B&D — 13 filtros de página:
-    CATEGORIZACION='VENTA BRUTA', exclusión de "BONIFICACION SELL IN",
-    TIPO DE NEGOCIO N1=<uen>, Calendario[Año]=<anio>, y 8 filtros más de exclusión
-    de categoria_producto/producto/estado/CUENTA ORIGEN sobre 4 tablas distintas
+def _dax_margen_filtros(uen, anio):
+    """Los 12 filtros de página confirmados con Copiar consulta (2026-09-04) sobre
+    la tabla "Análisis de Ventas" del reporte de Margen: CATEGORIZACION='VENTA BRUTA',
+    exclusión de "BONIFICACION SELL IN", Calendario[Año]=<anio>, y 8 filtros más de
+    exclusión de categoria_producto/producto/estado/CUENTA ORIGEN sobre 4 tablas
     ('Exl A Maestra de Facturas de Venta', 'Maestra de Facturacion (Total)',
-    'Maestra de Kardex (Total)', 'OrdenxFactura'). Las medidas son
-    'Medidas Julito'[Precio x Kilo] y [Costo x Kilo] — mismo nombre que las
-    medidas ya validadas para el margen consolidado, aquí referenciadas sin
-    prefijo de tabla porque el nombre de medida es único en el modelo.
+    'Maestra de Kardex (Total)', 'OrdenxFactura').
 
-    La consulta original de Power BI agrupa por mes (visual de tabla); aquí se
-    colapsa a un solo agregado del año completo — el filtro de Año es el mismo,
-    solo se omite el agrupamiento por mes.
+    Si `uen` no es None, agrega un 13er filtro TIPO DE NEGOCIO N1=<uen> — confirmado
+    capturando la misma consulta con la tarjeta filtrada a "B&D". Sin `uen` es el
+    consolidado total (confirmado con una segunda captura sin ese filtro).
     """
-    uen_esc = uen.replace('"', '\\"')
-    filtros = (
+    filtro_uen = ""
+    if uen:
+        uen_esc = uen.replace('"', '\\"')
+        filtro_uen = "    TREATAS({\"" + uen_esc + "\"}, 'Exl Tipo de Negocio'[TIPO DE NEGOCIO N1]),\n"
+    return (
         "TREATAS({\"VENTA BRUTA\"}, 'Exl A Maestra de Facturas de Venta'[CATEGORIZACION]),\n"
         "    FILTER(\n"
         "      KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[DESCRIPCION])),\n"
         "      NOT('Exl A Maestra de Facturas de Venta'[DESCRIPCION] IN {\"BONIFICACION SELL IN\"})\n"
         "    ),\n"
-        "    TREATAS({\"" + uen_esc + "\"}, 'Exl Tipo de Negocio'[TIPO DE NEGOCIO N1]),\n"
+        + filtro_uen +
         "    TREATAS({" + str(int(anio)) + "}, 'Calendario'[Año]),\n"
         "    FILTER(\n"
         "      KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[categoria_producto])),\n"
@@ -342,6 +338,15 @@ def dax_margen_uen(token, ws_id, dataset_id, uen, anio, label="margen_uen"):
         "        {\"PAVO C/M C/ASA EP CONG (8 KG)\",\"ALIMENTACION COMERCIAL\"})\n"
         "    )"
     )
+
+
+def _dax_margen_precio_costo(token, ws_id, dataset_id, uen, anio, label):
+    """Ejecuta Precio x Kilo / Costo x Kilo con los filtros de _dax_margen_filtros.
+    Las medidas son 'Medidas Julito'[Precio x Kilo] y [Costo x Kilo] — mismo nombre
+    que las medidas ya validadas para el margen consolidado, aquí referenciadas sin
+    prefijo de tabla porque el nombre de medida es único en el modelo.
+    """
+    filtros = _dax_margen_filtros(uen, anio)
     q = (
         'EVALUATE\nROW(\n  "precio", CALCULATE([Precio x Kilo],\n    ' + filtros + '\n  ),\n'
         '  "costo", CALCULATE([Costo x Kilo],\n    ' + filtros + "\n  )\n)"
@@ -352,6 +357,24 @@ def dax_margen_uen(token, ws_id, dataset_id, uen, anio, label="margen_uen"):
         costo = to_float(rows[0].get("[costo]") or rows[0].get("costo"))
         return precio, costo
     return None, None
+
+
+def dax_margen_uen(token, ws_id, dataset_id, uen, anio, label="margen_uen"):
+    """Precio/kg y Costo/kg filtrados por UEN (TIPO DE NEGOCIO N1 = "B&D" / "MAQUILA" / "TIGO").
+    La consulta original de Power BI agrupa por mes (visual de tabla); aquí se
+    colapsa a un solo agregado del año completo.
+    """
+    return _dax_margen_precio_costo(token, ws_id, dataset_id, uen, anio, label)
+
+
+def dax_margen_total(token, ws_id, dataset_id, anio, label="margen_total"):
+    """Precio/kg y Costo/kg consolidados (todas las UEN), con el mismo filtro de
+    página de 12 condiciones que dax_margen_uen pero sin el filtro de UEN —
+    confirmado con una segunda Copiar consulta capturada sin ese filtro activo
+    (2026-09-04). Reemplaza al valor que traía el escaneo genérico con solo
+    filtro de fecha, que no aplicaba las 11 exclusiones adicionales del reporte.
+    """
+    return _dax_margen_precio_costo(token, ws_id, dataset_id, None, anio, label)
 
 
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
@@ -1520,6 +1543,19 @@ def main():
 
         # ── Margen
         if scanned.get("margen"):
+            margen_ds_id_total = DATASET_IDS.get(empresa, {}).get("margen")
+            if margen_ds_id_total:
+                # Sobrescribe Precio x Kilo / Costo x Kilo con el filtro exacto de
+                # 12 condiciones confirmado con Copiar consulta (2026-09-04) — el
+                # escaneo genérico solo aplicaba filtro de fecha, sin las 11
+                # exclusiones adicionales del reporte "Análisis de Ventas".
+                p_tot, c_tot = dax_margen_total(token, ws_id, margen_ds_id_total, PREV_YEAR)
+                if p_tot is not None and c_tot is not None:
+                    scanned["margen"]["Precio x Kilo"] = p_tot
+                    scanned["margen"]["Costo x Kilo"] = c_tot
+                    print(f"    ✓ Margen total filtrado: precio=S/{p_tot:.2f} costo=S/{c_tot:.2f}")
+                else:
+                    print("    ✗ Margen total filtrado — la consulta no devolvió valor")
             r, ventas, margen = build_margen(scanned["margen"])
             empresa_data["reportes"]["margen_variable"] = r
             if ventas:
