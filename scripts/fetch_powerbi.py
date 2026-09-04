@@ -144,34 +144,41 @@ ROW(
     return None
 
 
-def _dax_consumo_filtro_kardex(token, ws_id, dataset_id, value_expr, label):
-    """Aplica los 4 filtros confirmados con Copiar consulta que comparten las
+def _dax_consumo_filtro_kardex(token, ws_id, dataset_id, value_expr, label, anio=None):
+    """Aplica los filtros confirmados con Copiar consulta que comparten las
     tarjetas 'Costo Total' y 'Producción Neta (KG)' del reporte '14. Consumo
-    Materiales indirectos de producción' (2026-09-03) — SIN filtro de fecha,
-    son acumulados históricos de todo el dataset, no del año ni del mes.
+    Materiales indirectos de producción'.
+
+    2026-09-03: primera captura, SIN año seleccionado en el reporte -> sin filtro
+    de fecha, acumulado histórico total. 2026-09-04: se repitió la captura con
+    el selector "2026" marcado en el reporte -> agrega TREATAS({{2026}},
+    'Calendario'[Año]). Por eso `anio` es parámetro: pasar PREV_YEAR (o el año
+    que corresponda) para obtener el dato del año, u omitir para el histórico total.
     `value_expr` es la expresión DAX del valor (columna con SUM o [Medida]).
     """
-    q = f"""EVALUATE
-ROW(
-  "v",
-  CALCULATE(
-    {value_expr},
-    TREATAS({{"Costo"}}, 'PLANTA POR CECOS'[TIPO DE OPERACION]),
-    FILTER(
-      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),
-      NOT('Maestra de Kardex (Total)'[categoria_hijo] IN {{"ACUERDOS COMERCIALES"}})
-    ),
-    FILTER(
-      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),
-      NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {{BLANK()}})
-    ),
-    FILTER(
-      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),
-      NOT('Maestra de Kardex (Total)'[cuenta_analitica] IN
-        {{BLANK(),"[941002] CONTROL INTERNO","ALMACEN ATE","ALMACEN PACHACAMAC"}})
+    # Se construye por concatenación simple (no f-string para todo el bloque) para
+    # no arriesgar un error de escapado de llaves entre DAX y Python.
+    filtro_anio = ("TREATAS({" + str(int(anio)) + "}, 'Calendario'[Año]),\n    ") if anio else ""
+    q = (
+        'EVALUATE\nROW(\n  "v",\n  CALCULATE(\n    ' + value_expr + ",\n    " +
+        filtro_anio +
+        "TREATAS({\"Costo\"}, 'PLANTA POR CECOS'[TIPO DE OPERACION]),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\n"
+        "      NOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\n"
+        "      NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\n"
+        "      NOT('Maestra de Kardex (Total)'[cuenta_analitica] IN\n"
+        "        {BLANK(),\"[941002] CONTROL INTERNO\",\"ALMACEN ATE\",\"ALMACEN PACHACAMAC\"})\n"
+        "    )\n"
+        "  )\n"
+        ")"
     )
-  )
-)"""
     rows = dax(token, ws_id, dataset_id, q, label)
     if rows:
         return rows[0].get("[v]") or rows[0].get("v")
@@ -181,16 +188,19 @@ ROW(
 def dax_consumo_costo_total(token, ws_id, dataset_id, label="consumo_costo"):
     """'Costo Total' del reporte '14. Consumo Materiales indirectos de producción'.
     Es la medida 'Maestra de Kardex (Total)'[Costo total validado].
+    Filtrado por Calendario[Año]=PREV_YEAR desde 2026-09-04 (antes era histórico
+    total sin año — se corrigió tras confirmar con una segunda Copiar consulta,
+    esta vez con el selector de año marcado en el reporte).
     """
-    return _dax_consumo_filtro_kardex(token, ws_id, dataset_id, "[Costo total validado]", label)
+    return _dax_consumo_filtro_kardex(token, ws_id, dataset_id, "[Costo total validado]", label, anio=PREV_YEAR)
 
 
 def dax_consumo_produccion_neta_kg(token, ws_id, dataset_id, label="consumo_prodneta"):
     """'Producción Neta (KG)' del reporte '14. Consumo Materiales indirectos de producción'.
-    Es la medida 'Medidas'[Producción (KG) Odoo] — mismos 4 filtros que Costo Total,
-    confirmados con Copiar consulta el 2026-09-03. Sin filtro de fecha.
+    Es la medida 'Medidas'[Producción (KG) Odoo] — mismos filtros que Costo Total,
+    incluido Calendario[Año]=PREV_YEAR (ver dax_consumo_costo_total).
     """
-    return _dax_consumo_filtro_kardex(token, ws_id, dataset_id, "[Producción (KG) Odoo]", label)
+    return _dax_consumo_filtro_kardex(token, ws_id, dataset_id, "[Producción (KG) Odoo]", label, anio=PREV_YEAR)
 
 
 def _dax_consumo_filtro_venta(token, ws_id, dataset_id, value_expr, label):
@@ -855,20 +865,24 @@ def build_mermas(found):
 def build_consumo_materiales(found):
     """Reporte '14. Consumo Materiales indirectos de produccion' — PAUNO.
 
-    Estado por KPI (2026-09-03):
-      Costo Total    -> VALIDADO (dax_consumo_costo_total). Sin filtro de fecha en
-                        el reporte — es un acumulado histórico total, no del año
-                        ni del mes.
-      Venta Neta KG        -> VALIDADO (dax_consumo_venta_neta_kg). Sí trae filtro
-                              de fecha (desde 2025-07-01), a diferencia de Costo Total.
+    Estado por KPI:
+      Costo Total          -> VALIDADO (dax_consumo_costo_total). Filtrado por
+                              Calendario[Año]=PREV_YEAR desde 2026-09-04 — la primera
+                              captura (2026-09-03) no tenía año seleccionado en el
+                              reporte y traía el acumulado histórico total; se repitió
+                              la captura con "2026" marcado y se corrigió.
+      Venta Neta KG        -> VALIDADO (dax_consumo_venta_neta_kg). Filtro de fecha
+                              propio (desde 2025-07-01).
       Costo x TN Vendida   -> VALIDADO (dax_consumo_costo_x_tn_vendida). Mismos
                               7 filtros que Venta Neta KG.
       Producción Neta KG   -> VALIDADO (dax_consumo_produccion_neta_kg). Mismos
-                              4 filtros que Costo Total, sin fecha.
+                              filtros que Costo Total, incluido Calendario[Año].
+                              NOTA: no se recapturó "Copiar consulta" para esta
+                              tarjeta con el año marcado — se asume el mismo filtro
+                              de página que Costo Total por estar en el mismo reporte,
+                              pero no está confirmado 1:1 como las demás.
       Costo x TN Producida -> VALIDADO (dax_consumo_costo_x_tn_producida). Mismos
                               7 filtros que Venta Neta KG / Costo x TN Vendida.
-
-    Los 5 KPIs de este reporte quedaron validados con Copiar consulta el 2026-09-03.
     """
     costo_total_val = found.get("Costo total validado") or found.get("Costo Consumo")
     venta_kg_val    = found.get("Peso total KG") or found.get("Venta Neta (KG)") or found.get("Venta Neta KG")
