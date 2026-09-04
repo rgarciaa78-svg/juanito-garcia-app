@@ -4395,6 +4395,30 @@ function crossCheckMora() {
   return `<div style="background:#1e1b4b;color:#c4b5fd;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:12px">⚡ <strong>Inconsistencia detectada (mora):</strong><br>${alertas.join('<br>')}<br><span style="font-size:11px">Validar qué fuente es la actualizada.</span></div>`;
 }
 
+const JUANITO_AI_WORKER_URL = 'https://autumn-boat-225d.rgarciaa78.workers.dev';
+
+// Llama al Worker (Gemini) con el contexto real del dashboard. Devuelve null si falla
+// (sin internet, Worker caído, clave inválida, etc.) para poder usar el fallback local.
+async function preguntarJuanitoIA(pregunta) {
+  try {
+    const resp = await fetch(JUANITO_AI_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pregunta,
+        contexto: construirContexto(),
+        historial: chatHistorial.slice(-6)
+      })
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.respuesta || null;
+  } catch (e) {
+    console.warn('Juanito IA no disponible, usando respuesta local:', e);
+    return null;
+  }
+}
+
 async function sendJuanito() {
   const input = document.getElementById('juanito-input');
   const text = input.value.trim();
@@ -4411,10 +4435,15 @@ async function sendJuanito() {
   const loadEl = addJuanitoMsg('assistant', '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>');
   loadEl.classList.add('loading');
 
-  await new Promise(r => setTimeout(r, 400 + Math.random() * 200));
-
-  const local = buscarRespuestaLocal(text);
-  let cuerpo = local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text);
+  const iaResp = await preguntarJuanitoIA(text);
+  let cuerpo;
+  if (iaResp) {
+    cuerpo = iaResp;
+  } else {
+    await new Promise(r => setTimeout(r, 200));
+    const local = buscarRespuestaLocal(text);
+    cuerpo = local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text);
+  }
 
   // Solo mostrar banner y crosscheck en la primera respuesta de la sesión
   const esPrimera = chatHistorial.filter(m => m.rol === 'assistant').length === 0;
