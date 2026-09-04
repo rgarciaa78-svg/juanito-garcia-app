@@ -30,7 +30,12 @@
   },
   "consumo": {
     "Consumo": null,
-    "Compras": null
+    "Compras": null,
+    "Costo total validado": null,
+    "Peso total KG": null,
+    "Ratio costo / kg": null,
+    "Producción (KG) Odoo": null,
+    "Costo x ton producida": null
   },
   "fill_rate": {
     "% FILLRATE": null,
@@ -49,5 +54,12 @@
   },
   "planificacion": {
     "% Avance": null
+  },
+  "productividad_ds": {
+    "SUM PROD": null,
+    "GASTO TOTAL": null,
+    "PROD OPERATIVA": null,
+    "VENTA KG X SOL": null,
+    "__VENTA_NETA_KG__": null
   }
 }

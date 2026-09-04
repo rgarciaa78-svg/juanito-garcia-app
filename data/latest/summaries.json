@@ -1,15 +1,15 @@
 {
-  "fecha": "03/09/2026",
-  "fecha_actualizacion": "2026-09-03",
+  "fecha": "04/09/2026",
+  "fecha_actualizacion": "2026-09-04",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "yellow"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 18.7% — sobre meta"
+    "PAUNO": "Morosidad 18.6% — sobre meta"
   },
-  "holding_ventas": "S/7.51M",
-  "holding_mora": "18.7%",
+  "holding_ventas": "S/7.68M",
+  "holding_mora": "18.6%",
   "agenda_ceo": {
     "decidir_hoy": [],
     "escalar_semana": [
@@ -26,23 +26,23 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "yellow",
-          "alerta": "Morosidad 18.7% — sobre meta",
+          "alerta": "Morosidad 18.6% — sobre meta",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "18.7%",
+              "valor": "18.6%",
               "meta": "15%",
               "estado": "yellow"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/4.16M"
+              "valor": "S/3.97M"
             }
           ],
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/4.16M",
+              "valor": "S/3.97M",
               "estado": "green"
             }
           ]
@@ -53,7 +53,7 @@
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/17.73M"
+              "valor": "S/17.86M"
             },
             {
               "label": "Refinanciado",
@@ -72,7 +72,7 @@
           "kpis": [
             {
               "label": "Ventas mes",
-              "valor": "S/7.51M"
+              "valor": "S/7.68M"
             },
             {
               "label": "Margen variable",
@@ -91,10 +91,37 @@
           ]
         },
         "consumo_materiales": {
-          "estado": "grey",
+          "estado": "green",
           "alerta": null,
-          "kpis": [],
-          "live_connection": true
+          "kpis": [
+            {
+              "label": "Costo Total",
+              "valor": "S/1.41M",
+              "validado": true,
+              "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)"
+            },
+            {
+              "label": "Venta Neta (KG)",
+              "valor": "1,289,741 KG",
+              "validado": true
+            },
+            {
+              "label": "Costo x TN Vendida",
+              "valor": "S/133.46",
+              "validado": true
+            },
+            {
+              "label": "Producción Neta (KG)",
+              "valor": "9,770,387 KG",
+              "validado": true
+            },
+            {
+              "label": "Costo x TN Producida",
+              "valor": "S/136.10",
+              "validado": true
+            }
+          ],
+          "no_validado_dax": false
         },
         "mermas": {
           "estado": "red",
@@ -114,19 +141,19 @@
           "kpis": [
             {
               "label": "Stock PP (Punto de Pedido)",
-              "valor": "1987909"
+              "valor": "1943996"
             },
             {
               "label": "Stock Valorizado",
-              "valor": "S/5.73M"
+              "valor": "S/5.60M"
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10795713"
+              "valor": "10747190"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10497429"
+              "valor": "10478795"
             }
           ]
         },
@@ -136,7 +163,7 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/145,463"
+              "valor": "S/148,279"
             }
           ]
         },
@@ -148,6 +175,32 @@
               "label": "Satisfactorio",
               "valor": "141",
               "estado": "green"
+            }
+          ]
+        },
+        "productividad": {
+          "estado": "green",
+          "alerta": null,
+          "kpis": [
+            {
+              "label": "Planilla S/. / KG Producido",
+              "valor": "S/0.47"
+            },
+            {
+              "label": "Planilla S/. / KG Vendido",
+              "valor": "S/0.46"
+            },
+            {
+              "label": "Producción Total (KG)",
+              "valor": "9,629,256 kg"
+            },
+            {
+              "label": "Venta Neta (KG)",
+              "valor": "9,834,538 kg"
+            },
+            {
+              "label": "Planilla Total",
+              "valor": "S/4.48M"
             }
           ]
         },
@@ -163,7 +216,7 @@
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/125.54M"
+              "valor": "S/125.71M"
             },
             {
               "label": "Facturación",
@@ -171,20 +224,20 @@
             },
             {
               "label": "Venta Perdida",
-              "valor": "S/31.02M",
+              "valor": "S/31.20M",
               "estado": "red"
             }
           ]
         },
         "margen_variable_pag2": {
-          "estado": "green",
-          "alerta": null,
+          "estado": "yellow",
+          "alerta": "Avance 63.0% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "82.8%",
+              "valor": "63.0%",
               "meta": "100%",
-              "estado": "green"
+              "estado": "yellow"
             }
           ]
         }
