@@ -377,10 +377,10 @@ def dax_margen_total(token, ws_id, dataset_id, anio, label="margen_total"):
     return _dax_margen_precio_costo(token, ws_id, dataset_id, None, anio, label)
 
 
-def dax_mermas_uen(token, ws_id, dataset_id, medida, anio, label="mermas_uen"):
+def dax_mermas_uen(token, ws_id, dataset_id, medida, anio, extra_filtro=None, label="mermas_uen"):
     """Ejecuta una medida de 'Tabla Mermas' (ej. '% Merma total B&D') del reporte
-    '4. Reporte de mermas' con el filtro de página confirmado con Copiar consulta
-    el 2026-09-04, capturado sobre la tarjeta 'Merma B&D':
+    '4. Reporte de mermas' con el filtro de página común, confirmado con Copiar
+    consulta el 2026-09-04 sobre las tarjetas 'Merma B&D' y 'Merma TIGO':
       Calendario[Date] >= 2025-07-31 (mismo corte que otros reportes)
       Calendario[Año] = <anio>
       Maestra de Facturacion (Total)[categoria_producto] excluye 7 categorías
@@ -388,16 +388,22 @@ def dax_mermas_uen(token, ws_id, dataset_id, medida, anio, label="mermas_uen"):
       Maestra de Facturacion (Total)[estado] excluye "Cancelado"
 
     `medida` es el nombre exacto de la medida en 'Tabla Mermas', ej.
-    "% Merma total B&D". Los nombres para TIGO y MAQUILA aún no están
-    confirmados — no se adivinan por sustitución de texto.
+    "% Merma total B&D" / "% Merma total TIGO".
+
+    `extra_filtro` es un filtro DAX adicional propio de la tarjeta (string, sin
+    coma final) — TIGO trae uno que B&D no tiene:
+    'Tabla Mermas'[TIPO DE BASE] no vacío. No se asume que todas las UEN
+    comparten exactamente los mismos filtros — cada una se confirma por separado.
     """
     medida_esc = medida.replace('"', '\\"')
+    extra = f"    {extra_filtro},\n" if extra_filtro else ""
     q = (
         'EVALUATE\nROW(\n  "v", CALCULATE(\n    ' + f"'Tabla Mermas'[{medida_esc}]" + ',\n'
         "    FILTER(\n"
         "      KEEPFILTERS(VALUES('Calendario'[Date])),\n"
         "      'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
         "    ),\n"
+        + extra +
         "    TREATAS({" + str(int(anio)) + "}, 'Calendario'[Año]),\n"
         "    FILTER(\n"
         "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\n"
