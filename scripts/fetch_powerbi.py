@@ -273,6 +273,87 @@ def dax_consumo_costo_x_tn_producida(token, ws_id, dataset_id, label="consumo_co
     return _dax_consumo_filtro_venta(token, ws_id, dataset_id, "[Costo x ton producida]", label)
 
 
+def dax_margen_uen(token, ws_id, dataset_id, uen, anio, label="margen_uen"):
+    """Precio/kg y Costo/kg del reporte de Margen filtrados por UEN
+    (TIPO DE NEGOCIO N1 = "B&D" / "MAQUILA" / "TIGO").
+
+    Filtros confirmados el 2026-09-04 con Analizador de rendimiento > Copiar consulta
+    sobre la tabla de "Análisis de Ventas" filtrada a B&D — 13 filtros de página:
+    CATEGORIZACION='VENTA BRUTA', exclusión de "BONIFICACION SELL IN",
+    TIPO DE NEGOCIO N1=<uen>, Calendario[Año]=<anio>, y 8 filtros más de exclusión
+    de categoria_producto/producto/estado/CUENTA ORIGEN sobre 4 tablas distintas
+    ('Exl A Maestra de Facturas de Venta', 'Maestra de Facturacion (Total)',
+    'Maestra de Kardex (Total)', 'OrdenxFactura'). Las medidas son
+    'Medidas Julito'[Precio x Kilo] y [Costo x Kilo] — mismo nombre que las
+    medidas ya validadas para el margen consolidado, aquí referenciadas sin
+    prefijo de tabla porque el nombre de medida es único en el modelo.
+
+    La consulta original de Power BI agrupa por mes (visual de tabla); aquí se
+    colapsa a un solo agregado del año completo — el filtro de Año es el mismo,
+    solo se omite el agrupamiento por mes.
+    """
+    uen_esc = uen.replace('"', '\\"')
+    filtros = (
+        "TREATAS({\"VENTA BRUTA\"}, 'Exl A Maestra de Facturas de Venta'[CATEGORIZACION]),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[DESCRIPCION])),\n"
+        "      NOT('Exl A Maestra de Facturas de Venta'[DESCRIPCION] IN {\"BONIFICACION SELL IN\"})\n"
+        "    ),\n"
+        "    TREATAS({\"" + uen_esc + "\"}, 'Exl Tipo de Negocio'[TIPO DE NEGOCIO N1]),\n"
+        "    TREATAS({" + str(int(anio)) + "}, 'Calendario'[Año]),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[categoria_producto])),\n"
+        "      NOT('Exl A Maestra de Facturas de Venta'[categoria_producto] IN {\"CHATARRA\",\"SERVICIOS\",BLANK()})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[producto])),\n"
+        "      NOT('Exl A Maestra de Facturas de Venta'[producto] IN\n"
+        "        {\"PAVO C/M C/ASA EP CONG (8 KG)\",\"ALIMENTACION COMERCIAL\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[estado])),\n"
+        "      NOT('Exl A Maestra de Facturas de Venta'[estado] IN {\"Cancelado\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[categoria_producto] IN\n"
+        "        {BLANK(),\"BONIFICACION Y REBATES\",\"INTERESES\",\"MATERIA PRIMA\",\"SUMINISTROS\",\"SERVICIOS\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\n"
+        "      NOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\n"
+        "      NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('OrdenxFactura'[categoria_producto])),\n"
+        "      NOT('OrdenxFactura'[categoria_producto] IN\n"
+        "        {BLANK(),\"BONIFICACION Y REBATES\",\"CHATARRA\",\"SERVICIOS\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('OrdenxFactura'[estado])),\n"
+        "      NOT('OrdenxFactura'[estado] IN {\"Cancelado\"})\n"
+        "    ),\n"
+        "    FILTER(\n"
+        "      KEEPFILTERS(VALUES('OrdenxFactura'[producto])),\n"
+        "      NOT('OrdenxFactura'[producto] IN\n"
+        "        {\"PAVO C/M C/ASA EP CONG (8 KG)\",\"ALIMENTACION COMERCIAL\"})\n"
+        "    )"
+    )
+    q = (
+        'EVALUATE\nROW(\n  "precio", CALCULATE([Precio x Kilo],\n    ' + filtros + '\n  ),\n'
+        '  "costo", CALCULATE([Costo x Kilo],\n    ' + filtros + "\n  )\n)"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        precio = to_float(rows[0].get("[precio]") or rows[0].get("precio"))
+        costo = to_float(rows[0].get("[costo]") or rows[0].get("costo"))
+        return precio, costo
+    return None, None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -1450,31 +1531,26 @@ def main():
                     "empresa": empresa, "texto": f"Margen {fmt_pct(margen)} bajo meta 52%.", "responsable": "Comercial"
                 })
 
-            # ── Margen por UEN (B&D, MAQUILA, TIGO) via DAX filtro TIPO DE NEGOCIO N1
+            # ── Margen por UEN (B&D, MAQUILA, TIGO) — filtro exacto confirmado
+            # con Copiar consulta el 2026-09-04 (ver dax_margen_uen). Reemplaza el
+            # bloque anterior que adivinaba nombres de tabla ("Maestro Productos",
+            # "Productos", "DimProducto") y nunca encontraba dato — la tabla real
+            # es 'Exl Tipo de Negocio'[TIPO DE NEGOCIO N1].
             margen_ds_id = DATASET_IDS.get(empresa, {}).get("margen")
-            margen_m = None
-            for m_name in ["% Margen", "Margen Variable", "% MV", "R. MARGEN", "Venta Total"]:
-                if scanned.get("margen", {}).get(m_name) is not None:
-                    margen_m = m_name
-                    break
-            if margen_ds_id and margen_m:
-                uens = ["B&D", "MAQUILA", "TIGO"]
+            if margen_ds_id:
                 uen_data = []
-                for uen in uens:
-                    for tbl_col in [("Maestro Productos", "TIPO DE NEGOCIO N1"),
-                                    ("Maestro Productos", "TIPO DE NEGOCIO N2"),
-                                    ("Productos", "TIPO DE NEGOCIO N1"),
-                                    ("DimProducto", "TIPO DE NEGOCIO N1"),
-                                    ("data", "TIPO DE NEGOCIO N1")]:
-                        q = (f'EVALUATE ROW("v", CALCULATE([{margen_m}],'
-                             f'FILTER(ALL(\'{tbl_col[0]}\'), \'{tbl_col[0]}\'[{tbl_col[1]}] = "{uen}")))')
-                        rows = dax(token, ws_id, margen_ds_id, q, label=f"margen-uen-{uen}")
-                        if rows and list(rows[0].values())[0] is not None:
-                            val = list(rows[0].values())[0]
-                            pct = to_float(val)
-                            if pct and abs(pct) < 1: pct *= 100
-                            uen_data.append({"uen": uen, "margen": f"{pct:.1f}%", "estado": "green" if (pct or 0)>=52 else ("yellow" if (pct or 0)>=46 else "red")})
-                            break
+                for uen in ["B&D", "MAQUILA", "TIGO"]:
+                    precio, costo = dax_margen_uen(token, ws_id, margen_ds_id, uen, PREV_YEAR, label=f"margen-uen-{uen}")
+                    if precio and costo and precio > 0:
+                        pct = (precio - costo) / precio * 100
+                        uen_data.append({
+                            "uen": uen, "margen": f"{pct:.1f}%",
+                            "precio_kg": f"S/{precio:.2f}", "costo_kg": f"S/{costo:.2f}",
+                            "estado": "green" if pct >= 52 else ("yellow" if pct >= 46 else "red"),
+                        })
+                        print(f"    ✓ Margen UEN [{uen}]: precio=S/{precio:.2f} costo=S/{costo:.2f} margen={pct:.1f}%")
+                    else:
+                        print(f"    ✗ Margen UEN [{uen}] — la consulta filtrada no devolvió valor")
                 if uen_data:
                     empresa_data["reportes"]["margen_variable"]["por_uen"] = uen_data
                     print(f"  Margen UEN: {uen_data}")
