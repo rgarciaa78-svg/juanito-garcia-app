@@ -1662,61 +1662,38 @@ def main():
             empresa_data["reportes"]["mermas"] = r
             print(f"  Mermas {len(r['kpis'])} KPIs sem={r['estado']}")
 
-            # ── Mermas por UEN y por Planta via DAX CALCULATE+FILTER
+            # ── Mermas por UEN — filtro exacto confirmado con Copiar consulta (2026-09-04)
+            # Reemplaza el bloque anterior que adivinaba tabla/columna ("Maestro Productos",
+            # "UEN", "Unidad Negocio"...) y nunca encontraba dato real.
             mermas_ds_id = DATASET_IDS.get(empresa, {}).get("mermas")
-            merma_m = None
-            for m_name in ["% Merma Total", "% Merma", "% MERMAS", "Merma Total"]:
-                if scanned.get("mermas", {}).get(m_name) is not None:
-                    merma_m = m_name; break
-            if mermas_ds_id and merma_m:
-                # Descubrir tablas reales del dataset mermas para usar nombres correctos
-                merma_tables = discover_tables_in_dataset(token, ws_id, mermas_ds_id)
-                all_merma_tbls = list(merma_tables.keys()) if merma_tables else []
-                print(f"  Tablas mermas: {all_merma_tbls}")
-
-                # Por UEN — buscar tabla con columna de tipo negocio
+            if mermas_ds_id:
+                # (medida en 'Tabla Mermas', filtro extra propio de la tarjeta o None)
+                UEN_MERMA_CONFIG = [
+                    ("B&D",     "% Merma total B&D",     None),
+                    ("TIGO",    "% Merma total TIGO",
+                     "FILTER(\n      KEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\n      NOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\n    )"),
+                    # Nombre real confirmado con doble M: "MMAQUILA", no "MAQUILA"
+                    ("MAQUILA", "% Merma total MMAQUILA",
+                     "FILTER(\n      KEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\n      NOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\n    )"),
+                ]
                 uen_merma = []
-                uen_cols = ["TIPO DE NEGOCIO N1", "TIPO DE NEGOCIO N2", "UEN", "Unidad Negocio",
-                            "Negocio", "Tipo Negocio", "TipoNegocio"]
-                for uen in ["B&D", "TIGO", "MAQUILA"]:
-                    found_uen = False
-                    # Probar con tablas reales descubiertas primero
-                    for tbl in all_merma_tbls + ["Maestro Productos", "Productos", "DimProducto", "data"]:
-                        if found_uen: break
-                        for col in uen_cols:
-                            q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
-                                 f'FILTER(ALL(\'{tbl}\'), \'{tbl}\'[{col}] = "{uen}")))')
-                            rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-uen-{uen}")
-                            if rows and list(rows[0].values())[0] is not None:
-                                v = to_float(list(rows[0].values())[0])
-                                if v and abs(v) < 1: v *= 100
-                                s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
-                                uen_merma.append({"uen": uen, "merma": f"{v:.2f}%", "estado": s})
-                                found_uen = True; break
+                for uen, medida, extra in UEN_MERMA_CONFIG:
+                    v = dax_mermas_uen(token, ws_id, mermas_ds_id, medida, PREV_YEAR,
+                                        extra_filtro=extra, label=f"merma-uen-{uen}")
+                    if v is not None:
+                        if abs(v) < 1: v *= 100
+                        s = "red" if v > 3 else ("yellow" if v > 2 else "green")
+                        uen_merma.append({"uen": uen, "merma": f"{v:.2f}%", "estado": s})
+                        print(f"    ✓ Merma UEN [{uen}] filtrado = {v:.2f}%")
+                    else:
+                        print(f"    ✗ Merma UEN [{uen}] — la consulta filtrada no devolvió valor")
                 if uen_merma:
                     empresa_data["reportes"]["mermas"]["por_uen"] = uen_merma
                     print(f"  Mermas UEN: {uen_merma}")
 
-                # Por Planta (ATE / PACHACAMAC / TERCEROS)
-                planta_merma = []
-                planta_cols = ["PLANTA", "Planta", "planta", "CENTRO", "Centro"]
-                for planta in ["ATE", "PACHACAMAC", "TERCEROS"]:
-                    found_plt = False
-                    for tbl in all_merma_tbls + ["Detalle Mermas", "Mermas", "Control Produccion", "data"]:
-                        if found_plt: break
-                        for col in planta_cols:
-                            q = (f'EVALUATE ROW("v", CALCULATE([{merma_m}],'
-                                 f'FILTER(ALL(\'{tbl}\'), \'{tbl}\'[{col}] = "{planta}")))')
-                            rows = dax(token, ws_id, mermas_ds_id, q, label=f"merma-plt-{planta}")
-                            if rows and list(rows[0].values())[0] is not None:
-                                v = to_float(list(rows[0].values())[0])
-                                if v and abs(v) < 1: v *= 100
-                                s = "red" if (v or 0)>3 else ("yellow" if (v or 0)>2 else "green")
-                                planta_merma.append({"planta": planta, "merma": f"{v:.2f}%", "estado": s})
-                                found_plt = True; break
-                if planta_merma:
-                    empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
-                    print(f"  Mermas Planta: {planta_merma}")
+                # Por Planta (ATE / PACHACAMAC / TERCEROS) — filtro exacto AÚN NO confirmado
+                # con Copiar consulta. Pendiente: repetir el mismo procedimiento sobre las
+                # tarjetas de merma por planta antes de reactivar este desglose.
 
         # ── Compras
         if scanned.get("compras"):
