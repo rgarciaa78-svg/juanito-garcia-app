@@ -3344,7 +3344,11 @@ function renderVentasMcKinsey(empresa) {
     const uenData = rp2.margen_variable?.por_uen || [];
     if (!uenData.length) return mcSection('III.b','Margen por Unidad de Negocio (B&D / MAQUILA / TIGO)',`
       <div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
-        Desglose por UEN (B&D, MAQUILA, TIGO) requiere que el workflow descubra la medida "% Margen" con filtro por "TIPO DE NEGOCIO N1". Activar en próxima corrida de discover_measures + fetch_powerbi.
+        Desglose por UEN (B&D, MAQUILA, TIGO) pendiente. El descubrimiento automático de filtros no
+        encuentra la combinación correcta — se necesita capturar el filtro DAX real con Analizador de
+        rendimiento › Copiar consulta sobre una tarjeta de margen filtrada por UEN en Power BI Service
+        (mismo método que ya cerró Productividad y Consumo de Materiales). Correr el workflow de nuevo
+        no resuelve esto por sí solo.
       </div>`);
     const colU = (p) => parseFloat(p||0) >= 52 ? 'var(--green)' : parseFloat(p||0) >= 46 ? 'var(--yellow)' : 'var(--red)';
     return mcSection('III.b','Margen por Unidad de Negocio',`
@@ -3405,7 +3409,7 @@ function renderVentasMcKinsey(empresa) {
         'Ventas mensuales 2025 (12 meses) — comparativo YoY',
         'Ventas YTD 2026 acumulado (enero–agosto)',
         'Presupuesto absoluto por mes (no solo el %)',
-        'Margen por UEN: B&D / MAQUILA / TIGO — workflow discover_measures con filtro TIPO DE NEGOCIO',
+        'Margen por UEN: B&D / MAQUILA / TIGO — requiere Copiar consulta desde Power BI Service (Analizador de rendimiento), no solo correr el workflow',
         'Precio/kg vs Costo/kg histórico mensual',
         'Pipeline comercial: pedidos en proceso y probabilidad de cierre',
       ].filter(Boolean).map(d => `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)">
