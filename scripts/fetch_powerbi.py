@@ -144,6 +144,49 @@ ROW(
     return None
 
 
+def dax_consumo_costo_total(token, ws_id, dataset_id, label="consumo_costo"):
+    """'Costo Total' del reporte '14. Consumo Materiales indirectos de producción'.
+
+    Filtros confirmados el 2026-09-03 con Analizador de rendimiento > Copiar consulta:
+      'PLANTA POR CECOS'[TIPO DE OPERACION] = "Costo"
+      'Maestra de Kardex (Total)'[categoria_hijo] <> "ACUERDOS COMERCIALES"
+      'Maestra de Kardex (Total)'[CUENTA ORIGEN] no vacío
+      'Maestra de Kardex (Total)'[cuenta_analitica] no en {vacío, "[941002] CONTROL
+        INTERNO", "ALMACEN ATE", "ALMACEN PACHACAMAC"}
+
+    ADVERTENCIA: esta consulta NO trae ningún filtro de fecha/Calendario — a
+    diferencia de Productividad, "Costo Total" aquí es un acumulado histórico de
+    todo el dataset, no del año ni del mes. Si se necesita el dato mensual, hay que
+    pedir al equipo de BI que agregue un slicer de fecha al reporte y volver a
+    capturar la consulta con ese filtro activo.
+    """
+    q = f"""EVALUATE
+ROW(
+  "v",
+  CALCULATE(
+    [Costo total validado],
+    TREATAS({{"Costo"}}, 'PLANTA POR CECOS'[TIPO DE OPERACION]),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),
+      NOT('Maestra de Kardex (Total)'[categoria_hijo] IN {{"ACUERDOS COMERCIALES"}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),
+      NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {{BLANK()}})
+    ),
+    FILTER(
+      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),
+      NOT('Maestra de Kardex (Total)'[cuenta_analitica] IN
+        {{BLANK(),"[941002] CONTROL INTERNO","ALMACEN ATE","ALMACEN PACHACAMAC"}})
+    )
+  )
+)"""
+    rows = dax(token, ws_id, dataset_id, q, label)
+    if rows:
+        return rows[0].get("[v]") or rows[0].get("v")
+    return None
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -736,10 +779,15 @@ def build_mermas(found):
 def build_consumo_materiales(found):
     """Reporte '14. Consumo Materiales indirectos de produccion' — PAUNO.
 
-    Nombres de medida confirmados el 2026-09-03 leyendo el panel Datos > Measures
-    en Power BI Service (Editar informe). No validados con DAX Query View — a
-    diferencia de productividad_ds, aquí no se confirmó que EVALUATE ROW() resuelva
-    sin error, así que se mantiene el fallback a los nombres viejos adivinados.
+    Estado por KPI (2026-09-03):
+      Costo Total          -> VALIDADO. Filtro exacto confirmado con Analizador de
+                              rendimiento > Copiar consulta (ver dax_consumo_costo_total).
+                              Sin filtro de fecha en el reporte — es un acumulado
+                              histórico total, no del año ni del mes.
+      Los otros 4 (Venta Neta KG, Costo x TN Vendida/Producida, Producción Neta)
+        -> PRELIMINAR. Nombres confirmados solo leyendo el panel Datos > Measures,
+           sin validar con Copiar consulta. No se debe confiar en ellos para
+           decisiones críticas hasta repetir el mismo procedimiento.
     """
     costo_total_val = found.get("Costo total validado") or found.get("Costo Consumo")
     venta_kg_val    = found.get("Peso total KG") or found.get("Venta Neta (KG)") or found.get("Venta Neta KG")
@@ -758,23 +806,23 @@ def build_consumo_materiales(found):
 
     kpis = []
     if costo_total is not None:
-        kpis.append({"label": "Costo Total", "valor": fmt_soles(abs(costo_total))})
+        kpis.append({"label": "Costo Total", "valor": fmt_soles(abs(costo_total)),
+                     "validado": True, "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)"})
     if venta_kg is not None:
-        kpis.append({"label": "Venta Neta (KG)", "valor": f"{venta_kg:,.0f} KG"})
+        kpis.append({"label": "Venta Neta (KG)", "valor": f"{venta_kg:,.0f} KG", "validado": False})
     if costo_x_tn_vend is not None:
-        kpis.append({"label": "Costo x TN Vendida", "valor": f"S/{costo_x_tn_vend:.2f}"})
+        kpis.append({"label": "Costo x TN Vendida", "valor": f"S/{costo_x_tn_vend:.2f}", "validado": False})
     if prod_neta is not None:
-        kpis.append({"label": "Producción Neta (KG)", "valor": f"{prod_neta:,.0f} KG"})
+        kpis.append({"label": "Producción Neta (KG)", "valor": f"{prod_neta:,.0f} KG", "validado": False})
     if costo_x_tn_prod is not None:
-        kpis.append({"label": "Costo x TN Producida", "valor": f"S/{costo_x_tn_prod:.2f}"})
+        kpis.append({"label": "Costo x TN Producida", "valor": f"S/{costo_x_tn_prod:.2f}", "validado": False})
 
     if not kpis:
         return None  # No hay datos — no agregar el reporte
-    # Marcador visible en el JSON: estas 5 medidas se leyeron del panel de Power BI
-    # pero no se validaron con EVALUATE ROW() en DAX Query View (a diferencia de
-    # Producción Total en productividad_ds, que sí se validó). No se debe confiar
-    # en estas cifras para decisiones críticas hasta confirmarlas.
-    return {"estado": sem, "alerta": None, "kpis": kpis, "no_validado_dax": True}
+    # Marcador de reporte: True mientras quede al menos un KPI sin validar con
+    # Copiar consulta. Cada KPI individual lleva su propio campo "validado".
+    hay_sin_validar = any(not k.get("validado") for k in kpis)
+    return {"estado": sem, "alerta": None, "kpis": kpis, "no_validado_dax": hay_sin_validar}
 
 def build_compras(found):
     ratio_val  = (found.get("Ratio") or found.get("Eficiencia") or found.get("Eficiencia Costo") or
@@ -1111,6 +1159,17 @@ def main():
             # No usar fallback total — el SUM acumulado es incorrecto para mostrar como "Compras mes"
             if compras_val is None:
                 print(f"    Compras: ratio agosto no accesible via API (Live Connection)")
+
+        # ── Consumo: 'Costo Total' con el filtro EXACTO confirmado (Copiar consulta, 2026-09-03)
+        # Sin filtro de fecha — ver docstring de dax_consumo_costo_total. Sobrescribe
+        # cualquier valor sin filtrar que traiga el heurístico de abajo.
+        if "consumo" in ids:
+            v_ct = dax_consumo_costo_total(token, ws_id, ids["consumo"])
+            if v_ct is not None:
+                scanned.setdefault("consumo", {})["Costo total validado"] = v_ct
+                print(f"    ✓ Consumo [Costo total validado] filtrado = {v_ct}")
+            else:
+                print("    ✗ Consumo [Costo total validado] — la consulta filtrada no devolvió valor")
 
         # ── Consumo: SUM directo desde tablas del dataset consumo
         if "consumo" in ids:
