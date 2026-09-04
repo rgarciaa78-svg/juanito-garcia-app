@@ -2253,7 +2253,7 @@ function buildDecisionMatrix(empresa, reportesData) {
   const merma = fmtNum(kv('mermas','Merma Total'));
   if (merma !== null) items.push({
     area:'Operaciones', indicador:'Mermas', valor: kv('mermas','Merma Total')||'—',
-    meta:'3%', brecha: merma ? `${(merma-3).toFixed(2)}pp` : '—',
+    meta:'2%', brecha: merma ? `${(merma-2).toFixed(2)}pp` : '—',
     impacto: `${merma.toFixed(2)}% merma — encima del límite operativo`,
     accion:'Auditar proceso en planta. Identificar turno/línea con mayor pérdida.',
     tipo:'mermas', estado: rp.mermas?.estado||'neutral',
@@ -2418,7 +2418,7 @@ function renderEmpresa(empresa, containerId) {
         { grupo:'Cobranzas', kpi:'CxC por vencer',  val: kv('cuentas_por_cobrar','CxC por vencer'), meta:null, tipo:'cuentas_por_cobrar', inv:true },
         { grupo:'Finanzas', kpi:'CxP Total',         val: kv('cuentas_por_pagar','CxP Total'),   meta:null, tipo:'cuentas_por_pagar', inv:true },
         { grupo:'Finanzas', kpi:'Refinanciado',      val: kv('cuentas_por_pagar','Refinanciado'),meta:null, tipo:'cuentas_por_pagar', inv:true },
-        { grupo:'Operaciones', kpi:'Mermas',         val: kv('mermas','Merma Total'),             meta:3,   tipo:'mermas', inv:true },
+        { grupo:'Operaciones', kpi:'Mermas',         val: kv('mermas','Merma Total'),             meta:2,   tipo:'mermas', inv:true },
       ].filter(r => r.val && r.val !== '—').map((row, i) => {
         const valN = fmtNum(row.val);
         const est  = rp[row.tipo]?.estado || 'neutral';
@@ -2482,7 +2482,7 @@ function renderEmpresa(empresa, containerId) {
   <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;justify-content:space-around">
     ${[
       {tipo:'cuentas_por_cobrar', lbl:'Morosidad', kpiLbl:'Morosidad', meta:5, inv:true},
-      {tipo:'mermas',             lbl:'Mermas',    kpiLbl:'Merma Total', meta:3, inv:true},
+      {tipo:'mermas',             lbl:'Mermas',    kpiLbl:'Merma Total', meta:2, inv:true},
       {tipo:'margen_variable_pag2', lbl:'Avance Ppto', kpiLbl:'Avance vs Ppto', meta:100, inv:false},
     ].filter(g => rp[g.tipo]).map(g => {
       const val = parseVal(kv(g.tipo, g.kpiLbl)) || 0;
@@ -2702,13 +2702,13 @@ function renderChartForReporte(tipo, rd) {
   if (tipo === 'mermas') {
     const m = num('Merma Total');
     if (!m) return '';
-    const col = m >= 5 ? 'var(--red)' : m >= 3 ? 'var(--yellow)' : 'var(--green)';
-    const brecha = (m - 3).toFixed(2);
+    const col = m > 3 ? 'var(--red)' : m > 2 ? 'var(--yellow)' : 'var(--green)';
+    const brecha = (m - 2).toFixed(2);
     return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0">
-      ${svgGauge(m, 'Merma Total', col, '3%')}
+      ${svgGauge(m, 'Merma Total', col, '2%')}
       <div style="flex:1;min-width:120px">
         <div style="font-size:13px;font-weight:700;color:${col}">+${brecha}pp sobre meta</div>
-        <div style="font-size:11px;color:var(--sub);margin-top:6px">Merma de <strong>${m.toFixed(2)}%</strong> vs límite operativo de <strong>3%</strong>.</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">Merma de <strong>${m.toFixed(2)}%</strong> vs límite operativo de <strong>2%</strong>.</div>
         <div style="font-size:11px;color:var(--sub);margin-top:6px">Acción: Auditar línea/turno con mayor pérdida. Revisar temperatura, manipulación y vencimientos.</div>
       </div>
     </div>`;
@@ -2772,7 +2772,7 @@ function renderTablaEjecutiva(empresa) {
     { area:'CxC por vencer',  valor: get('cuentas_por_cobrar','CxC por vencer'),   meta:'—',    tipo:'cuentas_por_cobrar' },
     { area:'CxP Total',       valor: get('cuentas_por_pagar','CxP Total'),         meta:'—',    tipo:'cuentas_por_pagar' },
     { area:'Refinanciado',    valor: get('cuentas_por_pagar','Refinanciado'),      meta:'—',    tipo:'cuentas_por_pagar' },
-    { area:'Mermas',          valor: get('mermas','Merma Total'),                  meta:'<3%',  tipo:'mermas' },
+    { area:'Mermas',          valor: get('mermas','Merma Total'),                  meta:'<2%',  tipo:'mermas' },
     { area:'Stock',           valor: get('sop_inventario','Inventario Total'),     meta:'—',    tipo:'sop_inventario' },
   ].filter(r => r.valor !== '—');
 
@@ -2975,14 +2975,14 @@ function renderMcKinseyArea(empresa, tipo) {
 
     mermas: () => {
       const m = parseVal(kv('mermas','Merma Total'));
-      const col = (m||0) >= 5 ? 'var(--red)' : (m||0) >= 3 ? 'var(--yellow)' : 'var(--green)';
-      const brecha = m ? (m - 3).toFixed(2) : null;
+      const col = (m||0) > 3 ? 'var(--red)' : (m||0) > 2 ? 'var(--yellow)' : 'var(--green)';
+      const brecha = m ? (m - 2).toFixed(2) : null;
       return {
         titulo: 'Mermas — Pérdidas Operativas',
         I: `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
-          ${m ? svgGauge(m, 'Merma Total', col, '3%') : ''}
+          ${m ? svgGauge(m, 'Merma Total', col, '2%') : ''}
           <div style="flex:1;min-width:140px">
-            ${rowKpi('% Merma agosto 2026', kv('mermas','Merma Total')||'—', '<3%', col)}
+            ${rowKpi('% Merma agosto 2026', kv('mermas','Merma Total')||'—', '<2%', col)}
             ${brecha ? rowKpi('Exceso sobre meta', '+'+brecha+'pp', null, 'var(--red)') : ''}
             <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(239,68,68,.06);border-radius:6px">Cada punto porcentual de merma = ~1% de ventas convertido en pérdida.</div>
           </div>
@@ -2999,9 +2999,9 @@ function renderMcKinseyArea(empresa, tipo) {
           let html = `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">`;
           // Totales
           if (m && brecha) {
-            html += `<div style="font-size:11px;font-weight:700;margin-bottom:8px">Brecha vs meta 3%</div>
+            html += `<div style="font-size:11px;font-weight:700;margin-bottom:8px">Brecha vs meta 2%</div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:12px">
-              <div><div style="font-size:10px;color:var(--sub)">Meta</div><div style="font-size:18px;font-weight:800;color:var(--green)">3.00%</div></div>
+              <div><div style="font-size:10px;color:var(--sub)">Meta</div><div style="font-size:18px;font-weight:800;color:var(--green)">2.00%</div></div>
               <div><div style="font-size:10px;color:var(--sub)">Real agosto</div><div style="font-size:18px;font-weight:800;color:${col}">${m.toFixed(2)}%</div></div>
               <div><div style="font-size:10px;color:var(--sub)">Exceso</div><div style="font-size:18px;font-weight:800;color:var(--red)">+${brecha}pp</div></div>
             </div>`;
@@ -3043,7 +3043,7 @@ function renderMcKinseyArea(empresa, tipo) {
           {palanca:'FIFO estricto en despacho', impacto:'Reducir vencimientos', accion:'Capacitación y control de FIFO en almacén. Rotar producto más antiguo primero en picking.', prioridad:'MEDIA', col:'var(--yellow)'},
         ],
         V: ['Merma por planta (Ate, Pachacamac, Terceros)', 'Merma por turno y línea de producción', 'Histórico mensual de merma 2025', 'Top SKUs con mayor tasa de merma'],
-        chatMsg: `Analiza las Mermas de ${empresa} agosto 2026: ${kv('mermas','Merma Total')||'—'} vs meta <3%. Brecha de ${brecha||'?'}pp. Dame diagnóstico ejecutivo y plan de reducción de mermas.`
+        chatMsg: `Analiza las Mermas de ${empresa} agosto 2026: ${kv('mermas','Merma Total')||'—'} vs meta <2%. Brecha de ${brecha||'?'}pp. Dame diagnóstico ejecutivo y plan de reducción de mermas.`
       };
     },
 
