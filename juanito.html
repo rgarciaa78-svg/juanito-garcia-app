@@ -2877,7 +2877,7 @@ function renderMcKinseyArea(empresa, tipo) {
             <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">⚠️ OV/Facturación/VP son acumulados YTD, no solo agosto.</div>
           </div>
         </div>`,
-        II: yoyBlock(fr, yoy.fill_rate ?? null, 'Fill Rate', v => v.toFixed(1)+'%'),
+        II: yoyBlock(fr, yoy.fill_rate != null ? yoy.fill_rate * 100 : null, 'Fill Rate', v => v.toFixed(1)+'%'),
         III: ov ? svgWaterfall([
           {label:'Orden Venta', valSoles: ov,  color:'var(--accent)'},
           {label:'Facturado',   valSoles: fac, color:'var(--green)'},
@@ -2908,7 +2908,7 @@ function renderMcKinseyArea(empresa, tipo) {
             <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(239,68,68,.06);border-radius:6px">🚨 Morosidad crítica — activa cobranza inmediata para clientes >60 días.</div>
           </div>
         </div>`,
-        II: yoyBlock(mora, yoy.morosidad ?? null, 'Morosidad CxC', v => v.toFixed(1)+'%',
+        II: yoyBlock(mora, yoy.morosidad != null ? yoy.morosidad * 100 : null, 'Morosidad CxC', v => v.toFixed(1)+'%',
           `Comparativo YoY no disponible para Morosidad. Confirmado con Analizador de rendimiento ›
           Copiar consulta (2026-09-04): la tarjeta de Morosidad es <code>EVALUATE ROW("v",
           'DATA_FACTURACION'[% MOROSIDAD])</code> — sin ningún filtro de año, mes ni fecha. El reporte
@@ -2987,7 +2987,7 @@ function renderMcKinseyArea(empresa, tipo) {
             <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(239,68,68,.06);border-radius:6px">Cada punto porcentual de merma = ~1% de ventas convertido en pérdida.</div>
           </div>
         </div>`,
-        II: yoyBlock(m, yoy.mermas ?? null, 'Merma', v => v.toFixed(2)+'%'),
+        II: yoyBlock(m, yoy.mermas != null ? yoy.mermas * 100 : null, 'Merma', v => v.toFixed(2)+'%'),
         III: (() => {
           const rp_m = rp.mermas || {};
           const porUEN    = rp_m.por_uen    || [];
