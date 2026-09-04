@@ -3110,8 +3110,8 @@ function renderMcKinseyArea(empresa, tipo) {
             Medidas del dataset aún no descubiertas por el scraper.
           </div>` : '')}
           <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(22,163,74,.08);border-left:3px solid #16a34a;border-radius:4px">
-            <strong>✓ 5 de 5 KPIs validados</strong> con Analizador de rendimiento › Copiar consulta (2026-09-03) —
-            cada medida ejecuta el filtro DAX exacto que usa el visual real en Power BI, no una llamada sin filtro.
+            <strong>✓ 5 de 5 KPIs validados 1:1</strong> con Analizador de rendimiento › Copiar consulta
+            (2026-09-03/04) — cada medida ejecuta el filtro DAX exacto capturado del visual real en Power BI.
           </div>
           <div style="font-size:10px;color:var(--sub);margin-top:6px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
             Costo Total y Producción Neta (KG) filtran por el año en curso (Calendario[Año]) — corregido
@@ -3128,7 +3128,7 @@ function renderMcKinseyArea(empresa, tipo) {
           evidencia de una dimensión de planta filtrable en las medidas leídas.
         </div>`,
         IV: [
-          {palanca:'Confirmar filtro de Producción Neta (KG) por separado', impacto:'Hoy se asume el mismo filtro de página que Costo Total, sin capturar su propia consulta con el año marcado', accion:'Repetir Analizador de rendimiento > Copiar consulta sobre la tarjeta Producción Neta (KG) con 2026 seleccionado, para confirmar 1:1 en vez de asumir.', prioridad:'MEDIA', col:'var(--yellow)'},
+          {palanca:'Capturar comparativo YoY', impacto:'Permitiría ver tendencia año contra año en los 5 KPIs', accion:'Repetir Copiar consulta con 2025 seleccionado en vez de 2026, para tener el punto de comparación.', prioridad:'MEDIA', col:'var(--yellow)'},
           {palanca:'Exponer dimensión de planta', impacto:'Permitiría comparar Ate vs Pachacámac', accion:'Pedir a BI que exponga PLANTA POR CECOS como dimensión filtrable para poder desglosar estos 5 KPIs por planta.', prioridad:'BAJA', col:'var(--accent)'},
         ],
         V: ['Comparativo YoY para los 5 KPIs', 'Desglose por planta (Ate/Pachacámac)', 'Serie histórica mensual'],

@@ -876,13 +876,13 @@ def build_consumo_materiales(found):
       Costo x TN Vendida   -> VALIDADO (dax_consumo_costo_x_tn_vendida). Mismos
                               7 filtros que Venta Neta KG.
       Producción Neta KG   -> VALIDADO (dax_consumo_produccion_neta_kg). Mismos
-                              filtros que Costo Total, incluido Calendario[Año].
-                              NOTA: no se recapturó "Copiar consulta" para esta
-                              tarjeta con el año marcado — se asume el mismo filtro
-                              de página que Costo Total por estar en el mismo reporte,
-                              pero no está confirmado 1:1 como las demás.
+                              filtros que Costo Total, incluido Calendario[Año] —
+                              confirmado 1:1 con su propia Copiar consulta (2026-09-04),
+                              idéntica a la de Costo Total salvo la medida.
       Costo x TN Producida -> VALIDADO (dax_consumo_costo_x_tn_producida). Mismos
                               7 filtros que Venta Neta KG / Costo x TN Vendida.
+
+    Los 5 KPIs de este reporte quedaron validados 1:1 con Copiar consulta.
     """
     costo_total_val = found.get("Costo total validado") or found.get("Costo Consumo")
     venta_kg_val    = found.get("Peso total KG") or found.get("Venta Neta (KG)") or found.get("Venta Neta KG")
