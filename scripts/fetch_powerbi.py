@@ -536,6 +536,50 @@ def dax_inventario_kardex(token, ws_id, dataset_id, medida, anio, mes, label="in
     return None
 
 
+def dax_inventario_composicion(token, ws_id, dataset_id, label="inv_composicion"):
+    """Desglose de Saldo Soles por 'SALDO ACTUAL'[Clasificación Segun Consumo]
+    (WORKING / EXCESO 1 / EXCESO 2 / DEAD) del gráfico "Composición de
+    Inventario" en '6. Rotación de inventario'.
+
+    Confirmado con Copiar consulta el 2026-09-04. A diferencia de
+    dax_inventario_kardex, esta consulta devuelve VARIAS filas (una por
+    categoría) — no un solo valor. El filtro de fecha es amplio
+    (2025-06-30 a 2027-01-01): la clasificación es una foto actual, no un
+    corte mensual.
+
+    Devuelve una lista de (clasificacion, saldo_soles) ordenada de mayor a
+    menor, igual que el gráfico de cascada real.
+    """
+    q = (
+        "EVALUATE\n"
+        "SUMMARIZECOLUMNS(\n"
+        "  'SALDO ACTUAL'[Clasificación Segun Consumo],\n"
+        "  FILTER(\n"
+        "    KEEPFILTERS(VALUES('KARDEX TOTAL'[Fecha])),\n"
+        "    AND(\n"
+        "      'KARDEX TOTAL'[Fecha] >= DATE(2025, 6, 30),\n"
+        "      'KARDEX TOTAL'[Fecha] < DATE(2027, 1, 1)\n"
+        "    )\n"
+        "  ),\n"
+        '  "SumSaldo_Soles", CALCULATE(SUM(\'SALDO ACTUAL\'[Saldo Soles]))\n'
+        ")\n"
+        "ORDER BY [SumSaldo_Soles] DESC"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        clasif = None
+        saldo = None
+        for k, v in r.items():
+            if "Clasificaci" in k:
+                clasif = v
+            elif "SumSaldo" in k:
+                saldo = to_float(v)
+        if clasif is not None:
+            out.append((clasif, saldo))
+    return out
+
+
 def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
@@ -1245,30 +1289,63 @@ def build_compras(found):
     return {"estado": sem, "alerta": alerta, "kpis": kpis}, ratio
 
 def build_inventario(found):
-    dead_val    = found.get("Dead Stock") or found.get("Stock Muerto") or found.get("Inmovilizado") or found.get("Stock Inmovilizado")
-    deadpct_val = found.get("% Dead Stock") or found.get("% Inmovilizado") or found.get("% Dead") or found.get("Pct Dead")
-    total_val   = (found.get("Inventario Total") or found.get("Total Inventario") or
+    # ── Composición confirmada con Copiar consulta (2026-09-04): lista de
+    # (clasificación, saldo soles) desde 'SALDO ACTUAL'[Clasificación Segun
+    # Consumo] — WORKING / EXCESO 1 / EXCESO 2 / DEAD. Tiene prioridad sobre
+    # los nombres adivinados de abajo, que quedan solo como fallback.
+    composicion = found.get("_composicion") or []
+    comp_map = {}
+    for clasif, saldo in composicion:
+        key = str(clasif or "").strip().upper()
+        comp_map[key] = to_float(saldo)
+
+    dead_val    = comp_map.get("DEAD") or found.get("Dead Stock") or found.get("Stock Muerto") or found.get("Inmovilizado") or found.get("Stock Inmovilizado")
+    working_val = comp_map.get("WORKING") or found.get("Working Stock") or found.get("Stock Activo") or found.get("Stock Working") or found.get("Stock Normal")
+    exceso1_val = comp_map.get("EXCESO 1")
+    exceso2_val = comp_map.get("EXCESO 2")
+    total_val   = (sum(v for v in comp_map.values() if v) if comp_map else None) or (
+                   found.get("Inventario Total") or found.get("Total Inventario") or
                    found.get("Saldo Inventario") or found.get("Valor Inventario") or
                    found.get("Stock Total") or found.get("Total Stock") or found.get("Costo Inventario"))
-    working_val = found.get("Working Stock") or found.get("Stock Activo") or found.get("Stock Working") or found.get("Stock Normal")
+    cob_total = found.get("Cobertura Total (días)")
+    cob_mp    = found.get("Cobertura MP (días)")
 
+    deadpct_val = found.get("% Dead Stock") or found.get("% Inmovilizado") or found.get("% Dead") or found.get("Pct Dead")
     dead_pct = to_float(deadpct_val)
     if dead_pct and abs(dead_pct) < 1: dead_pct *= 100
     if dead_pct is None and dead_val and total_val:
         d, t = to_float(dead_val), to_float(total_val)
         if d and t and t > 0: dead_pct = d / t * 100
 
-    sem = sem_thresh(dead_pct, red_above=10, yellow_above=5)
+    # No usar sem_thresh() aquí: su heurística "abs(n)<1 -> multiplicar x100"
+    # duplicaría la escala cuando dead_pct ya es un porcentaje válido y chico
+    # (ej. 0.3%), convirtiéndolo por error en 30% y disparando rojo.
+    if dead_pct is None:
+        sem = "green"
+    elif dead_pct >= 10:
+        sem = "red"
+    elif dead_pct >= 5:
+        sem = "yellow"
+    else:
+        sem = "green"
 
     kpis = []
+    if total_val is not None:
+        kpis.append({"label": "Inventario Total", "valor": fmt_soles(total_val)})
+    if cob_total is not None:
+        kpis.append({"label": "Cobertura Total", "valor": f"{cob_total:.0f} días"})
+    if cob_mp is not None:
+        kpis.append({"label": "Cobertura MP", "valor": f"{cob_mp:.0f} días"})
     if dead_val is not None:
         kpis.append({"label": "Dead Stock", "valor": fmt_soles(dead_val), "meta": "<S/500K", "estado": sem})
     if dead_pct is not None:
         kpis.append({"label": "% Dead Stock", "valor": f"{dead_pct:.1f}%", "meta": "<5%", "estado": sem})
-    if total_val is not None:
-        kpis.append({"label": "Inventario Total", "valor": fmt_soles(total_val)})
     if working_val is not None:
         kpis.append({"label": "Working Stock", "valor": fmt_soles(working_val)})
+    if exceso1_val is not None:
+        kpis.append({"label": "Exceso 1 (2-5 meses)", "valor": fmt_soles(exceso1_val)})
+    if exceso2_val is not None:
+        kpis.append({"label": "Exceso 2 (5-12 meses)", "valor": fmt_soles(exceso2_val)})
 
     alerta = f"Dead Stock {dead_pct:.1f}% del inventario" if sem != "green" and dead_pct else None
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
@@ -1841,6 +1918,24 @@ def main():
                     "texto": f"Ratio {ratio:.1f}% — {'jalando inventario' if ratio and ratio>100 else 'sobre-compra'}.",
                     "responsable": "Logística"
                 })
+
+        # ── Inventario — filtro exacto confirmado con Copiar consulta (2026-09-04)
+        # sobre el reporte '6. Rotación de inventario' (página RI Clasificación).
+        inv_ds_id = DATASET_IDS.get(empresa, {}).get("inventario")
+        if inv_ds_id:
+            cob_total = dax_inventario_kardex(token, ws_id, inv_ds_id, "Días Rotación", PREV_YEAR, PREV_MONTH)
+            cob_mp    = dax_inventario_kardex(token, ws_id, inv_ds_id, "Días Rotación MP", PREV_YEAR, PREV_MONTH)
+            if cob_total is not None:
+                scanned.setdefault("inventario", {})["Cobertura Total (días)"] = cob_total
+                print(f"    ✓ Inventario [Cobertura Total] filtrado = {cob_total:.1f} días")
+            if cob_mp is not None:
+                scanned.setdefault("inventario", {})["Cobertura MP (días)"] = cob_mp
+                print(f"    ✓ Inventario [Cobertura MP] filtrado = {cob_mp:.1f} días")
+
+            composicion = dax_inventario_composicion(token, ws_id, inv_ds_id)
+            if composicion:
+                scanned.setdefault("inventario", {})["_composicion"] = composicion
+                print(f"    ✓ Inventario [Composición]: {composicion}")
 
         # ── Inventario
         if scanned.get("inventario"):
