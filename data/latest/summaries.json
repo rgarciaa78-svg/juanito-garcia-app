@@ -6,10 +6,10 @@
     "PAUNO": "yellow"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 18.6% — sobre meta"
+    "PAUNO": "Morosidad 17.9% — sobre meta"
   },
-  "holding_ventas": "S/7.68M",
-  "holding_mora": "18.6%",
+  "holding_ventas": "S/7.73M",
+  "holding_mora": "17.9%",
   "agenda_ceo": {
     "decidir_hoy": [],
     "escalar_semana": [],
@@ -20,43 +20,43 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "yellow",
-          "alerta": "Morosidad 18.6% — sobre meta",
+          "alerta": "Morosidad 17.9% — sobre meta",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "18.6%",
+              "valor": "17.9%",
               "meta": "15%",
               "estado": "yellow"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.97M"
+              "valor": "S/4.13M"
             }
           ],
           "tramos": [
             {
               "label": "Por vencer",
-              "valor": "S/3.97M",
+              "valor": "S/4.13M",
               "estado": "green"
             }
           ]
         },
         "cuentas_por_pagar": {
-          "estado": "yellow",
-          "alerta": "Refinanciado S/6.71M — gestionar",
+          "estado": "green",
+          "alerta": null,
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/17.86M"
+              "valor": "S/15.23M"
             },
             {
               "label": "Refinanciado",
-              "valor": "S/6.71M",
-              "estado": "yellow"
+              "valor": "S/4.57M",
+              "estado": "green"
             },
             {
               "label": "# Proveedores",
-              "valor": "143"
+              "valor": "142"
             }
           ]
         },
@@ -66,7 +66,7 @@
           "kpis": [
             {
               "label": "Ventas mes",
-              "valor": "S/7.68M"
+              "valor": "S/7.73M"
             },
             {
               "label": "Margen variable",
@@ -86,14 +86,14 @@
           "por_uen": [
             {
               "uen": "B&D",
-              "margen": "64.2%",
-              "precio_kg": "S/5.86",
+              "margen": "64.1%",
+              "precio_kg": "S/5.87",
               "costo_kg": "S/2.10",
               "estado": "green"
             },
             {
               "uen": "MAQUILA",
-              "margen": "40.0%",
+              "margen": "39.9%",
               "precio_kg": "S/4.71",
               "costo_kg": "S/2.83",
               "estado": "red"
@@ -113,28 +113,28 @@
           "kpis": [
             {
               "label": "Costo Total",
-              "valor": "S/1.41M",
+              "valor": "S/1.42M",
               "validado": true,
               "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)"
             },
             {
               "label": "Venta Neta (KG)",
-              "valor": "1,289,741 KG",
+              "valor": "1,308,398 KG",
               "validado": true
             },
             {
               "label": "Costo x TN Vendida",
-              "valor": "S/133.46",
+              "valor": "S/133.40",
               "validado": true
             },
             {
               "label": "Producción Neta (KG)",
-              "valor": "9,770,387 KG",
+              "valor": "9,789,547 KG",
               "validado": true
             },
             {
               "label": "Costo x TN Producida",
-              "valor": "S/136.10",
+              "valor": "S/136.02",
               "validado": true
             }
           ],
@@ -149,6 +149,40 @@
               "valor": "4.87%",
               "meta": "2%",
               "estado": "red"
+            }
+          ],
+          "por_uen": [
+            {
+              "uen": "B&D",
+              "merma": "1.49%",
+              "estado": "green"
+            },
+            {
+              "uen": "TIGO",
+              "merma": "4.27%",
+              "estado": "red"
+            },
+            {
+              "uen": "MAQUILA",
+              "merma": "2.94%",
+              "estado": "yellow"
+            }
+          ],
+          "por_planta": [
+            {
+              "planta": "ATE",
+              "merma": "3.11%",
+              "estado": "red"
+            },
+            {
+              "planta": "PACHACAMAC",
+              "merma": "1.81%",
+              "estado": "green"
+            },
+            {
+              "planta": "TERCEROS",
+              "merma": "0.69%",
+              "estado": "green"
             }
           ]
         },
@@ -180,18 +214,58 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/148,279"
+              "valor": "S/6.67M"
             }
           ]
         },
         "control_interno": {
-          "estado": "green",
-          "alerta": null,
+          "estado": "red",
+          "alerta": "108 puntos de control en estado Crítico (34.7% del total)",
           "kpis": [
             {
+              "label": "Puntos de Control evaluados",
+              "valor": "311"
+            },
+            {
               "label": "Satisfactorio",
-              "valor": "141",
+              "valor": "139",
               "estado": "green"
+            },
+            {
+              "label": "Con Observaciones",
+              "valor": "64",
+              "estado": "yellow"
+            },
+            {
+              "label": "Crítico",
+              "valor": "108",
+              "meta": "0",
+              "estado": "red"
+            },
+            {
+              "label": "% Puntos en estado Crítico",
+              "valor": "34.7%",
+              "meta": "<10%",
+              "estado": "red"
+            },
+            {
+              "label": "Planes de Acción Abiertos",
+              "valor": "1",
+              "estado": "yellow"
+            },
+            {
+              "label": "Planes de Acción Cerrados",
+              "valor": "62",
+              "estado": "green"
+            },
+            {
+              "label": "% Avance Planes de Acción",
+              "valor": "98.4%",
+              "estado": "green"
+            },
+            {
+              "label": "Puntos Ejecutados",
+              "valor": "314"
             }
           ]
         },
@@ -213,7 +287,7 @@
             },
             {
               "label": "Venta Neta (KG)",
-              "valor": "9,834,538 kg"
+              "valor": "9,853,195 kg"
             },
             {
               "label": "Planilla Total",
@@ -247,14 +321,14 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "yellow",
-          "alerta": "Avance 63.0% vs presupuesto",
+          "estado": "green",
+          "alerta": null,
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "63.0%",
+              "valor": "84.7%",
               "meta": "100%",
-              "estado": "yellow"
+              "estado": "green"
             }
           ]
         }
