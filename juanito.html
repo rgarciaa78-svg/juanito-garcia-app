@@ -432,8 +432,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
    Todo va scoped bajo .dxp para no chocar con las clases viejas de la app.
    ══════════════════════════════════════════════════════════════════════════ */
 .dxp{
-  --ink:#1B2430; --paper:#EEEEE8; --surface:#F7F7F3; --surface2:#E3E3DC;
-  --border:#D3D3CA; --sub:#6B7680; --accent:#2C6E63; --accent-soft:#DCE9E6;
+  /* Fondo blanco + cabeceras azul oscuro (paleta corporativa PAUNO) */
+  --ink:#0F2A4A; --navy:#0F2A4A; --paper:#FFFFFF; --surface:#FFFFFF; --surface2:#F1F4F8;
+  --border:#DDE3EA; --sub:#5F6B7A; --accent:#0F2A4A; --accent-soft:#E6ECF3;
   --red:#B23A2F; --red-soft:#F5E1DE; --yellow:#966412; --yellow-soft:#F2E7D2;
   --green:#3D7A4B; --green-soft:#DEEBE0;
   --fd:'Fraunces',Georgia,serif; --fb:'IBM Plex Sans',system-ui,sans-serif; --fm:'IBM Plex Mono',ui-monospace,monospace;
@@ -448,7 +449,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .dxp .view.active{display:block}
 
 /* Masthead */
-.dxp .masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:18px}
+.dxp .masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;background:var(--navy);color:#fff;padding:22px 24px;margin:-26px -18px 18px}
+@media (min-width:768px){ .dxp .masthead{ margin:-26px -32px 20px; padding:26px 32px } }
+.dxp .masthead .eyebrow{color:rgba(255,255,255,.6)}
+.dxp .masthead h1{color:#fff}
+.dxp .masthead .meta-block{color:rgba(255,255,255,.6)}
+.dxp .masthead .meta-block b{color:#fff}
 .dxp .mast-left{cursor:pointer}
 .dxp .eyebrow{font-family:var(--fm);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sub)}
 .dxp h1{font-family:var(--fd);font-weight:600;font-size:clamp(24px,3.6vw,34px);margin:2px 0 0;text-wrap:balance;color:var(--ink);letter-spacing:0}
@@ -570,9 +576,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .dxp .deck-footer .conf{color:var(--red);font-weight:600}
 
 /* Detalle I–V dentro de .dxp */
-.dxp .detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;border-bottom:2px solid var(--stripe,var(--ink));padding-bottom:14px;margin-bottom:18px}
-.dxp .detail-title{font-family:var(--fd);font-weight:600;font-size:26px}
-.dxp .detail-sub{font-size:11.5px;color:var(--sub);margin-top:3px}
+.dxp .detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;background:var(--navy);color:#fff;border-bottom:4px solid var(--stripe,var(--navy));padding:22px 24px;margin:0 -18px 18px}
+@media (min-width:768px){ .dxp .detail-head{ margin:0 -32px 20px; padding:26px 32px } }
+.dxp .detail-title{font-family:var(--fd);font-weight:600;font-size:26px;color:#fff}
+.dxp .detail-sub{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:3px}
 .dxp .roman-grid{display:grid;grid-template-columns:320px 1fr 1fr;gap:16px;align-items:start}
 .dxp .roman-grid>div{background:var(--surface);border:1px solid var(--border);padding:22px 24px;min-width:0}
 .dxp .roman-grid>div:nth-child(1){grid-row:1 / 3;grid-column:1}
@@ -581,7 +588,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .dxp .roman-grid>div:nth-child(4){grid-column:2;grid-row:2}
 .dxp .roman-grid>div:nth-child(5){grid-column:3;grid-row:2}
 .dxp .roman-h{font-family:var(--fm);font-size:11px;color:var(--accent);font-weight:600;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
-.dxp .roman-h .rn{background:var(--accent);color:var(--surface);width:19px;height:19px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.dxp .roman-h .rn{background:var(--navy);color:#fff;width:19px;height:19px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
 .dxp .kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
 .dxp .kv:last-child{border-bottom:none}
 .dxp .kv .l{color:var(--sub)}
@@ -2508,6 +2515,10 @@ function dxpStats() {
   const at = parseVal(s.ciAtrasados), tp = parseVal(s.ciPlanes);
   s.ciAtrasPct = (at != null && tp) ? (at / tp * 100) : null;
 
+  // Margen por UEN (para palanca y desglose)
+  const umg = (rp.margen_variable?.por_uen || []).slice().sort((a,b) => parseVal(a.margen) - parseVal(b.margen));
+  s.uenPeorMg = umg[0]; s.uenMejorMg = umg[umg.length-1];
+
   // Mermas por UEN / planta
   const uen = (rp.mermas?.por_uen || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma));
   const pla = (rp.mermas?.por_planta || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma));
@@ -2554,9 +2565,20 @@ function dxpStats() {
   const mm = ds.mermas && ds.mermas['% Merma Total'];
   if (mm) { const v = mm.filter(x=>x!=null); s.mmN = v.length; s.mmSobreMeta = v.filter(x=>x>0.02).length; }
 
-  s.dsConf = Object.keys(ds).length;
-  s.dsSin  = Object.keys((SERIES && SERIES.sin_serie) || {}).length;
-  s.dsTot  = s.dsConf + s.dsSin;
+  // Confiabilidad calculada EN VIVO con dxpSerieOk (no se confía en el split que
+  // trae series.json, porque el pipeline con detección de series planas puede no
+  // haberse re-ejecutado todavía). Un dataset es confiable si al menos una de sus
+  // medidas pasa la prueba de serie real.
+  s.repConSerie = DXP_ORDEN.filter(tp => {
+    const c = DXP_SERIE_CFG[tp];
+    return c && !!dxpSerie(c.ds, c.medida);
+  });
+  s.repSinSerie = DXP_ORDEN.filter(tp => !s.repConSerie.includes(tp));
+  s.dsConf = s.repConSerie.length;
+  s.dsTot  = DXP_ORDEN.length;
+  // Datasets cuya serie existe pero es plana (medida sin filtro de fecha)
+  s.dsPlanaLista = Object.keys(ds).filter(n => !Object.values(ds[n] || {}).some(dxpSerieOk));
+  s.dsSinEsquema = Object.keys((SERIES && SERIES.sin_serie) || {}).length;
 
   // YoY de ventas (acumulado comparable)
   if (vt && ps.length) {
@@ -2622,14 +2644,12 @@ function dxpExecSummary(s) {
 // ── Bloque: aviso de calidad de dato ───────────────────────────────────────
 function dxpNoteBanner(s) {
   if (!s.dsTot) return '';
-  const planas = Object.values((SERIES && SERIES.sin_serie) || {})
-    .reduce((n,d) => n + ((d.medidas_planas||[]).length), 0);
   return `
     <div class="note-banner crit">
       <span class="tag">HALLAZGO DE CALIDAD DE DATO — YA CORREGIDO EN EL PIPELINE</span>
-      <span>${s.dsSin} de ${s.dsTot} datasets históricos de Power BI ${planas?`(${planas} medida${planas>1?'s':''} plana${planas>1?'s':''}) `:''}devolvían el mismo valor repetido mes a mes — medida sin filtro de fecha.
+      <span>Solo <b>${s.dsConf} de ${s.dsTot} reportes</b> tienen serie mensual utilizable. ${s.dsPlanaLista.length?`Los datasets <b>${s.dsPlanaLista.join(', ')}</b> devuelven el mismo valor repetido mes a mes (medida sin filtro de fecha)`:''}${s.dsPlanaLista.length&&s.dsSinEsquema?' y ':''}${s.dsSinEsquema?`${s.dsSinEsquema} datasets no exponen columna de fecha`:''}.
       <code>fetch_series.py</code> ahora detecta esto automáticamente (valores distintos vs meses con dato) y las excluye de
-      <code>series.json</code> en vez de graficarlas como tendencia real. Solo <b>${s.dsConf}</b> quedan como series confiables.
+      <code>series.json</code>, y el dashboard vuelve a verificarlo en el navegador antes de dibujar cualquier gráfico: los reportes sin serie válida muestran el motivo en vez de una tendencia falsa.
       Pendiente: repetir Copiar consulta en vivo sobre los descartados para conseguir la fórmula real (la detección automática identifica el síntoma, no reemplaza la corrección de origen).</span>
     </div>`;
 }
@@ -2688,7 +2708,7 @@ function dxpHolding(s) {
       <div class="hs-cell"><div class="hs-label">Mora consolidada</div><div class="hs-val" style="color:var(--yellow)">${s.mora||'—'}</div><div class="hs-delta" style="color:var(--sub)">meta 15%</div></div>
       <div class="hs-cell"><div class="hs-label">Reportes en Crítico</div><div class="hs-val" style="color:var(--red)">${s.criticos.length} / ${DXP_ORDEN.length}</div><div class="hs-delta" style="color:var(--sub)">${s.criticos.map(t=>DXP_CORTO[t]).join(', ')||'—'}</div></div>
       <div class="hs-cell"><div class="hs-label">Reportes en Atención</div><div class="hs-val" style="color:var(--yellow)">${s.atencion.length} / ${DXP_ORDEN.length}</div><div class="hs-delta" style="color:var(--sub)">${s.atencion.map(t=>DXP_CORTO[t]).join(', ')||'—'}</div></div>
-      <div class="hs-cell"><div class="hs-label">Series confiables</div><div class="hs-val">${s.dsConf} / ${s.dsTot}</div><div class="hs-delta" style="color:var(--sub)">datasets con serie mensual</div></div>
+      <div class="hs-cell"><div class="hs-label">Reportes con serie mensual</div><div class="hs-val">${s.dsConf} / ${s.dsTot}</div><div class="hs-delta" style="color:var(--sub)">${s.repConSerie.map(x=>DXP_CORTO[x]).join(', ')}</div></div>
     </div>`;
 }
 
@@ -4355,52 +4375,439 @@ function renderVentasMcKinsey(empresa) {
   return html;
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+//  DXP — Detalle de reporte (formato I–V idéntico para los 11 reportes)
+//  Base: el dashboard de Margen Variable del artifact aprobado.
+//  Toda cifra sale de summaries.json (mes actual) o series.json (serie mensual).
+// ══════════════════════════════════════════════════════════════════════════
+
+// Detección de serie plana, misma regla que fetch_series.py: una medida cuya
+// cantidad de valores distintos es ínfima frente a los meses con dato no es una
+// tendencia real (la medida ignora el filtro de fecha en el modelo de Power BI).
+function dxpSerieOk(arr) {
+  if (!Array.isArray(arr)) return false;
+  const v = arr.filter(x => x != null);
+  if (v.length < 3) return false;
+  // 1) Suficientes valores distintos
+  const distintos = new Set(v.map(x => Math.round(x * 1e6))).size;
+  if (distintos <= Math.max(2, Math.floor(v.length / 7))) return false;
+  // 2) Amplitud relativa mínima: un rango < 1% de la media es ruido, no tendencia
+  const mn = Math.min(...v), mx = Math.max(...v);
+  const media = v.reduce((a, b) => a + b, 0) / v.length;
+  if (media && Math.abs((mx - mn) / media) < 0.01) return false;
+  // 3) Valor congelado: si un mismo valor ocupa más de la mitad de los meses,
+  //    la medida quedó fija en la última medición y no refleja el mes.
+  // Redondeo RELATIVO a la magnitud de la serie: así el ruido de coma flotante
+  // (0.95971109 vs 0.95971062) no parte un mismo valor en dos buckets distintos.
+  const conteo = {};
+  v.forEach(x => { const k = Math.round(x / (media || 1) * 1e4); conteo[k] = (conteo[k] || 0) + 1; });
+  if (Math.max(...Object.values(conteo)) > v.length / 2) return false;
+  return true;
+}
+function dxpSerie(ds, medida) {
+  const a = (SERIES && SERIES.datasets && SERIES.datasets[ds] || {})[medida];
+  return dxpSerieOk(a) ? a : null;
+}
+
+// Config por reporte: qué serie usar en el panel de tendencia y por qué no hay.
+const DXP_SERIE_CFG = {
+  margen_variable:      { ds:'margen',        medida:'Costo x Kilo',   extra:'Venta Total', label:'Costo x Kilo (S/)', label2:'Ventas (S/)', pct:false },
+  fill_rate:            { ds:'fill_rate',     medida:'% Fill Rate',    label:'% Fill Rate', pct:true,  meta:98 },
+  mermas:               { ds:'mermas',        medida:'% Merma Total',  label:'% Merma Total', pct:true, meta:2, metaArriba:true },
+  margen_variable_pag2: { ds:'planificacion', medida:'% Avance',       label:'% Avance', pct:true, meta:100 },
+  cuentas_por_pagar:    { ds:'cxp',           medida:'Refinanciamiento',label:'Refinanciamiento (S/)', pct:false },
+  compras:              { ds:'compras',       medida:'Consumo Prom 3M',label:'Consumo Prom 3M', pct:false },
+  sop_inventario:       { ds:'inventario',    medida:'Stock Total',    label:'Stock Total (kg)', pct:false },
+};
+const DXP_SIN_SERIE_MOTIVO = {
+  cuentas_por_cobrar: 'La API de Power BI devolvió <b>HTTP 404</b> al pedir el esquema de fecha de este dataset — no tiene columna de calendario detectable. Solo existe el corte del mes actual.',
+  control_interno:    'Las tarjetas de este dashboard son un <b>acumulado histórico total</b>: no responden al selector de mes (confirmado con Copiar consulta). No existe serie mensual que graficar.',
+  consumo_materiales: 'Las medidas de este dataset devolvieron <b>HTTP 404</b> al pedir esquema temporal y no tienen columna de fecha filtrable — son acumulado histórico, no del mes.',
+  productividad:      'Este dataset no está entre los que exponen serie mensual en <code>series.json</code> — solo existe el corte del mes actual.',
+};
+
+// Palancas y vacíos por reporte, cuantificados con las cifras reales de `s`.
+function dxpPalancas(tipo, s) {
+  const P = (n, pr, imp, acc) => ({ n, pr, imp, acc });
+  switch (tipo) {
+    case 'margen_variable': return [
+      P('Auditar Costo x Kilo por componente','alta',
+        `Costo/kg ${dxpSigno(s.ckDelta,1)} en ${s.ckN} meses vs precio ${dxpSigno(s.pkDelta,1)}`,
+        'Aislar cuánto del alza es materia prima, mano de obra o merma antes de tocar precio.'),
+      s.uenPeorMg ? P(`Priorizar UEN de menor margen (${s.uenPeorMg.uen})`,'alta',
+        `${s.uenPeorMg.uen} ${s.uenPeorMg.margen} vs ${s.uenMejorMg.uen} ${s.uenMejorMg.margen}`,
+        `Revisar mezcla y costo de ${s.uenPeorMg.uen}: precio ${s.uenPeorMg.precio_kg} · costo ${s.uenPeorMg.costo_kg}.`) : null,
+      P('Cruzar con Mermas','media', `Merma ${s.mermaTotal||'—'} — sobre meta 2%`,
+        'La merma entra directo al costo/kg: bajarla mejora margen sin tocar precio.'),
+      s.mgAct != null ? P('Reconciliar margen oficial vs implícito','media',
+        `Brecha de ${Math.abs(parseVal(s.margenOf) - s.mgAct).toFixed(1)} pts entre 2 cálculos`,
+        `KPI oficial ${s.margenOf} vs (Precio−Costo)/Precio ${dxpPct(s.mgAct,2)} — metodologías distintas.`) : null,
+    ].filter(Boolean);
+    case 'fill_rate': return [
+      P('Cerrar la brecha a meta 98%','alta',
+        `${(98-parseVal(s.fillRate)).toFixed(1)} pts ≈ ${s.ventaPerdida} en juego`,
+        'Cada punto de fill rate recuperado se convierte en facturación ya pedida por el cliente.'),
+      s.frBajoMeta ? P('Investigar los meses de peor servicio','alta',
+        `${s.frBajoMeta}/${s.frN} meses bajo meta en la serie`,
+        'Cruzar los mínimos contra quiebres de stock por SKU: separar "no había producto" de "no se despachó".') : null,
+      P('Desglosar Venta Perdida por SKU y cliente','media',
+        `${dxpPct(s.vpPct)} de la Orden de Venta (${s.ordenVenta})`,
+        'Hoy solo existe el agregado — sin desglose no se puede priorizar reposición.'),
+    ].filter(Boolean);
+    case 'mermas': return [
+      s.uenPeor ? P(`Foco quirúrgico en ${s.uenPeor.uen}${s.plaPeor?' + '+s.plaPeor.planta:''}`,'alta',
+        `${s.ratioUen?s.ratioUen.toFixed(1)+'x':''}${s.ratioPla?' y '+s.ratioPla.toFixed(1)+'x':''} vs la mejor referencia interna`,
+        'La desviación está concentrada, no es estructural de toda la operación.') : null,
+      s.uenMejor ? P(`Replicar el proceso de ${s.uenMejor.uen}/${s.plaMejor?s.plaMejor.planta:''}`,'alta',
+        `${s.uenMejor.uen} ${s.uenMejor.merma}${s.plaMejor?' · '+s.plaMejor.planta+' '+s.plaMejor.merma:''}`,
+        'Ya cumplen o están cerca de meta — benchmark interno sin costo.') : null,
+      P('Abrir merma por SKU dentro de la peor UEN','media', 'Sin desglose por producto hoy',
+        'Permite atacar los SKU que concentran la pérdida en vez de un plan genérico.'),
+    ].filter(Boolean);
+    case 'control_interno': return [
+      P(`Cerrar los ${s.ciAtrasados} planes de acción atrasados`,'alta',
+        `Avance ${s.rp.control_interno?.kpis?.find(k=>k.label==='% Avance Planes de Acción')?.valor||'—'} → ${(( (parseVal(s.ciPlanes)-1) / parseVal(s.ciPlanes))*100).toFixed(1)}% sin auditar un punto nuevo`,
+        'Es la palanca de mayor apalancamiento: el cumplimiento no sube porque los hallazgos no se cierran.'),
+      P(`Plan sobre los ${s.ciCritico} puntos en estado Crítico`,'alta',
+        `${s.ciCritPct} del total evaluado (${s.ciEval} puntos)`,
+        'Reducir la exposición crítica es lo que mueve el % de cumplimiento hacia la meta de 85%.'),
+      P('Habilitar % Cumplimiento con filtro mensual','media','Hoy no hay comparativo MoM/YoY posible',
+        'La tarjeta es un acumulado histórico: sin corte mensual no se puede medir si mejora.'),
+    ];
+    case 'cuentas_por_cobrar': return [
+      P('Capturar el tramo de vencimiento (aging)','alta','Hoy imposible priorizar cobranza',
+        'Sin 30/60/90 días ni desglose por cliente no se sabe qué cobrar primero.'),
+      P('Cerrar la brecha a meta','media',
+        `${(parseVal(s.mora)-15).toFixed(1)} pts sobre meta 15% · ${s.cxcVencer} por vencer`,
+        'Desviación moderada: activar cobranza sobre la cartera próxima a vencer.'),
+    ];
+    case 'cuentas_por_pagar': return [
+      P(`Gestionar los ${s.refinanciado} refinanciados`,'alta',
+        `${dxpPct(s.refPct)} de la deuda total (${s.cxpTotal})`,
+        'Un ratio así señala tensión de caja recurrente; priorizar por criticidad de suministro.'),
+      P('Reconstruir la serie con filtro de Calendario','media','Serie mensual hoy inválida',
+        'La medida devuelve el mismo total en todos los meses — no permite ver tendencia.'),
+    ];
+    case 'consumo_materiales': return [
+      P('Sin acción inmediata','baja',
+        `Costo x TN Producida (${s.kv('consumo_materiales','Costo x TN Producida')}) vs Vendida (${s.kv('consumo_materiales','Costo x TN Vendida')})`,
+        'Ambos indicadores están alineados entre sí; no hay desviación que atacar hoy.'),
+      P('Conseguir el corte mensual de estas 5 medidas','media','Hoy son acumulado histórico total',
+        'Sin corte por mes no se puede usar como palanca del Margen Variable.'),
+    ];
+    case 'compras': return [
+      P('Exponer el ratio Consumo ÷ Compra','media',
+        `Consumo Prom 3M ${s.kv('compras','Consumo Prom 3M')} vs 6M ${s.kv('compras','Consumo Prom 6M')}`,
+        'La regla ya está definida (>100% jala inventario, <100% sobre-compra) pero no se muestra.'),
+      P('Validar si la serie plana es un bug','media','Variación mes a mes casi nula',
+        'Confirmar con Copiar consulta si es demanda estable real o la medida ignora la fecha.'),
+    ];
+    case 'sop_inventario': return [
+      P('Recuperar Cobertura y Composición','alta','Query ya validado en sesión previa',
+        `Sin el desglose no se sabe cuánto de ${s.kv('sop_inventario','Inventario Total')} es Dead Stock.`),
+    ];
+    case 'productividad': return [
+      P('Definir meta formal de Planilla/kg','media',
+        `Hoy ${s.kv('productividad','Planilla S/. / KG Producido')} sin meta de referencia`,
+        'Es el único KPI sin alerta que no tiene meta — hoy solo informa, no permite decidir.'),
+    ];
+    case 'margen_variable_pag2': return [
+      P('Reconstruir el query con filtro de Calendario real','alta','Serie con valor repetido mes a mes',
+        `No se puede confirmar si ${s.avancePpto} es el avance real del mes o un dato congelado.`),
+    ];
+    default: return [];
+  }
+}
+function dxpVacios(tipo, s) {
+  switch (tipo) {
+    case 'margen_variable': return ['Sin desglose del Costo x Kilo (materia prima / mano de obra / merma)',
+      'Precio y Costo del mes (summaries) difieren de los últimos puntos de la serie — dos consultas distintas, pendiente reconciliar',
+      'Sin serie de Precio/Costo para los primeros meses del período'];
+    case 'fill_rate': return ['Sin desglose de la Venta Perdida por SKU / cliente / canal',
+      'Sin causa raíz registrada (quiebre de stock vs logística vs producción)','Sin serie para los primeros meses del período'];
+    case 'mermas': return ['Sin serie histórica por UEN ni por planta (solo el corte del mes)',
+      'Sin desglose por SKU dentro de cada UEN','Sin causa registrada por punto de merma'];
+    case 'control_interno': return ['Sin serie mensual de % Cumplimiento (es acumulado histórico)',
+      'Sin desglose de los puntos críticos por Gerencia / Jefatura','Sin fecha de vencimiento de los planes atrasados'];
+    case 'cuentas_por_cobrar': return ['Sin tramo de vencimiento (aging 30/60/90)','Sin desglose por cliente',
+      'Sin serie mensual — es el reporte con menor profundidad de los 11'];
+    case 'cuentas_por_pagar': return ['Serie mensual inválida (mismo valor repetido)',
+      'Sin ranking de proveedores por monto y criticidad','Sin fecha de vencimiento del refinanciado'];
+    case 'consumo_materiales': return ['Sin corte mensual (es acumulado histórico total)','Sin desglose por tipo de material o insumo'];
+    case 'compras': return ['Ratio Consumo ÷ Compra no calculado en este corte','Serie de Consumo Prom con variación sospechosamente baja'];
+    case 'sop_inventario': return ['Cobertura (días de rotación) no incluida en esta corrida',
+      'Composición Working / Exceso / Dead Stock no incluida','Serie de Stock Total inválida (valor repetido)'];
+    case 'productividad': return ['Sin meta formal definida para Planilla/kg','Sin serie histórica ni desglose por planta / UEN'];
+    case 'margen_variable_pag2': return ['Serie mensual con valor idéntico en la mayoría de meses',
+      'Sin forma de confirmar si el avance es del mes o un dato congelado','Sin desglose por área o proyecto'];
+    default: return [];
+  }
+}
+
+// Sección III — desglose real por reporte (barras / ratios), sin inventar nada.
+function dxpDesglose(tipo, s) {
+  const bar = (name, val, pct, color) => `<div class="bd-row"><span class="name">${name}</span><div class="bd-bar-track"><div class="bd-bar-fill" style="width:${Math.max(2,Math.min(100,pct))}%;background:${color}"></div></div><span class="val">${val}</span></div>`;
+  const col = e => e === 'red' ? 'var(--red)' : e === 'yellow' ? 'var(--yellow)' : 'var(--green)';
+  const mini = (l, v) => `<div class="stat-mini"><span>${l}</span><b>${v}</b></div>`;
+
+  if (tipo === 'mermas') {
+    const mx = Math.max(...[...(s.rp.mermas.por_uen||[]),...(s.rp.mermas.por_planta||[])].map(x=>parseVal(x.merma)||0)) || 1;
+    return { t:'Desglose — UEN / Planta', h:
+      (s.rp.mermas.por_uen||[]).map(u => bar(u.uen, u.merma, parseVal(u.merma)/mx*100, col(u.estado))).join('')
+      + ((s.rp.mermas.por_planta||[]).length ? '<div style="height:8px"></div>' : '')
+      + (s.rp.mermas.por_planta||[]).map(pl => bar(pl.planta, pl.merma, parseVal(pl.merma)/mx*100, col(pl.estado))).join('')
+      + (s.ratioUen ? mini(`Ratio ${s.uenPeor.uen} / ${s.uenMejor.uen}`, s.ratioUen.toFixed(1)+'x') : '')
+      + (s.ratioPla ? mini(`Ratio ${s.plaPeor.planta} / ${s.plaMejor.planta}`, s.ratioPla.toFixed(1)+'x') : '') };
+  }
+  if (tipo === 'margen_variable') {
+    const u = s.rp.margen_variable.por_uen || [];
+    const mx = Math.max(...u.map(x=>parseVal(x.margen)||0)) || 1;
+    return { t:'Desglose — Margen por UEN', h:
+      u.map(x => bar(x.uen, x.margen, parseVal(x.margen)/mx*100, col(x.estado))).join('')
+      + u.map(x => mini(`${x.uen} · precio / costo`, `${x.precio_kg} / ${x.costo_kg}`)).join('')
+      + (s.ckIni != null ? mini(`Δ Costo/kg (${fmtPeriodo(s.ckIniP)}→${fmtPeriodo(s.ckFinP)})`, dxpSigno(s.ckDelta,1)) : '')
+      + (s.pkDelta != null ? mini('Δ Precio/kg (mismo período)', dxpSigno(s.pkDelta,1)) : '') };
+  }
+  if (tipo === 'fill_rate') {
+    const ov = parseVal(s.ordenVenta) || 1;
+    return { t:'Desglose — cascada del pedido', h:
+      bar('Orden Venta', s.ordenVenta, 100, 'var(--sub)')
+      + bar('Facturado', s.facturacion, parseVal(s.facturacion)/ov*100, 'var(--green)')
+      + bar('Venta Perdida', s.ventaPerdida, parseVal(s.ventaPerdida)/ov*100, 'var(--red)')
+      + mini('Venta Perdida / Facturación', (parseVal(s.ventaPerdida)/parseVal(s.facturacion)*100).toFixed(1)+'%') };
+  }
+  if (tipo === 'control_interno') {
+    const tp = parseVal(s.ciPlanes) || 1;
+    const g = l => s.rp.control_interno.kpis.find(k=>k.label===l)?.valor;
+    return { t:'Desglose — Planes de Acción', h:
+      bar('Total', s.ciPlanes, 100, 'var(--sub)')
+      + bar('Cerrados', g('Planes de Acción Cerrados'), parseVal(g('Planes de Acción Cerrados'))/tp*100, 'var(--green)')
+      + bar('Atrasados', s.ciAtrasados, parseVal(s.ciAtrasados)/tp*100, 'var(--red)')
+      + bar('Abiertos', g('Planes de Acción Abiertos'), parseVal(g('Planes de Acción Abiertos'))/tp*100, 'var(--yellow)')
+      + mini('% Avance planes', g('% Avance Planes de Acción'))
+      + mini('% Atrasados / Total', dxpPct(s.ciAtrasPct)) };
+  }
+  if (tipo === 'cuentas_por_pagar') {
+    return { t:'Desglose — composición de la deuda', h:
+      bar('Refinanciado', s.refinanciado, s.refPct, 'var(--yellow)')
+      + bar('Corriente', fmtM(parseVal(s.cxpTotal)-parseVal(s.refinanciado)), 100-s.refPct, 'var(--green)')
+      + mini('CxP promedio / proveedor', fmtM(parseVal(s.cxpTotal)/parseVal(s.proveedores))) };
+  }
+  if (tipo === 'consumo_materiales') {
+    const cp = parseVal(s.kv('consumo_materiales','Costo x TN Producida')), cv = parseVal(s.kv('consumo_materiales','Costo x TN Vendida'));
+    const pn = parseVal(s.kv('consumo_materiales','Producción Neta (KG)')), vn = parseVal(s.kv('consumo_materiales','Venta Neta (KG)'));
+    return { t:'Desglose — eficiencia de costo', h:
+      mini('Costo x TN Producida vs Vendida', ((cp/cv-1)*100).toFixed(2)+'%')
+      + (pn&&vn ? mini('Producción / Venta Neta', (pn/vn).toFixed(2)+'x') : '') };
+  }
+  if (tipo === 'productividad') {
+    const pr = parseVal(s.kv('productividad','Producción Total (KG)')), ve = parseVal(s.kv('productividad','Venta Neta (KG)'));
+    const pp = parseVal(s.kv('productividad','Planilla S/. / KG Producido')), pv = parseVal(s.kv('productividad','Planilla S/. / KG Vendido'));
+    return { t:'Desglose — planilla vs volumen', h:
+      (pr&&ve ? mini('Venta Neta / Producción', (ve/pr).toFixed(3)+'x') : '')
+      + (pp&&pv ? mini('Planilla/kg Vendido vs Producido', ((pv/pp-1)*100).toFixed(1)+'%') : '')
+      + mini('Planilla Total', s.kv('productividad','Planilla Total')) };
+  }
+  if (tipo === 'compras') {
+    const c3 = parseVal(s.kv('compras','Consumo Prom 3M')), c6 = parseVal(s.kv('compras','Consumo Prom 6M'));
+    const sv = parseVal(s.kv('compras','Stock Valorizado')), pp = parseVal(s.kv('compras','Stock PP (Punto de Pedido)'));
+    return { t:'Desglose — consumo y stock', h:
+      (c3&&c6 ? mini('Consumo Prom 3M / 6M', (c3/c6).toFixed(3)+'x') : '')
+      + (sv&&pp ? mini('Stock Valorizado / Punto de Pedido', (sv/pp).toFixed(2)+'x') : '') };
+  }
+  return { t:'Desglose', h:'<div class="nd">Este reporte no expone un desglose adicional en el modelo de Power BI — solo el agregado del mes.</div>' };
+}
+
+// Sección II — comparativo (MoM / YoY / acumulado) desde la serie confiable.
+function dxpComparativo(tipo, s) {
+  const cfg = DXP_SERIE_CFG[tipo];
+  if (!cfg) return `<div class="nd">${DXP_SIN_SERIE_MOTIVO[tipo] || 'Sin serie mensual disponible para este reporte.'}</div>`;
+  const arr = dxpSerie(cfg.ds, cfg.medida);
+  if (!arr) return `<div class="nd">Serie descartada: la medida <b>${cfg.medida}</b> devuelve prácticamente el mismo valor en todos los meses — no filtra por fecha en el modelo. Mostrarla como tendencia sería una línea recta falsa.</div>`;
+  const ps = s.ps, k = cfg.pct ? 100 : 1;
+  const val = arr.map((v,i)=>({v,i})).filter(x=>x.v!=null);
+  const act = val[val.length-1], prev = val[val.length-2];
+  const iYoY = ps.indexOf(ps[act.i].slice(0,4)-1 + ps[act.i].slice(4));
+  const yoyV = iYoY >= 0 ? arr[iYoY] : null;
+  const mom = prev ? (cfg.pct ? (act.v-prev.v)*100 : (act.v/prev.v-1)*100) : null;
+  const yoy = yoyV != null ? (cfg.pct ? (act.v-yoyV)*100 : (act.v/yoyV-1)*100) : null;
+  const prom = val.reduce((a,b)=>a+b.v,0)/val.length;
+  const mx = val.reduce((a,b)=>b.v>a.v?b:a), mn = val.reduce((a,b)=>b.v<a.v?b:a);
+  const fmtv = v => cfg.pct ? (v*100).toFixed(2)+'%' : (Math.abs(v)>=1e6 ? fmtM(v) : v.toFixed(2));
+  const fueraMeta = cfg.meta != null ? val.filter(x => cfg.metaArriba ? x.v*k > cfg.meta : x.v*k < cfg.meta).length : null;
+  const buenoMoM = cfg.metaArriba ? (mom < 0) : (mom > 0);
+  const buenoYoY = cfg.metaArriba ? (yoy < 0) : (yoy > 0);
+  return `
+    <div class="comp-line"><span class="l">MoM · vs ${prev?fmtPeriodo(ps[prev.i]):'—'}</span><span class="${mom==null?'flat-c':buenoMoM?'up-c':'down-c'}">${mom==null?'—':(mom>=0?'▲ +':'▼ ')+Math.abs(mom).toFixed(2)+(cfg.pct?' pts':'%')}</span></div>
+    <div class="comp-line"><span class="l">YoY · vs ${iYoY>=0?fmtPeriodo(ps[iYoY]):'—'}</span><span class="${yoy==null?'flat-c':buenoYoY?'up-c':'down-c'}">${yoy==null?'—':(yoy>=0?'▲ +':'▼ ')+Math.abs(yoy).toFixed(2)+(cfg.pct?' pts':'%')}</span></div>
+    <div class="stat-mini" style="margin-top:8px"><span>Promedio ${val.length} meses</span><b>${fmtv(prom)}</b></div>
+    <div class="stat-mini"><span>Máximo</span><b>${fmtv(mx.v)} (${fmtPeriodo(ps[mx.i])})</b></div>
+    <div class="stat-mini"><span>Mínimo</span><b>${fmtv(mn.v)} (${fmtPeriodo(ps[mn.i])})</b></div>
+    ${fueraMeta != null ? `<div class="stat-mini"><span>Meses fuera de meta ${cfg.meta}%</span><b style="color:var(--red)">${fueraMeta} / ${val.length}</b></div>` : ''}`;
+}
+
+// Panel de tendencia grande (idéntico al de Margen en el artifact).
+function dxpTrendPanel(tipo, s) {
+  const cfg = DXP_SERIE_CFG[tipo];
+  const motivo = DXP_SIN_SERIE_MOTIVO[tipo];
+  if (!cfg) return `<div class="no-trend-box"><span class="icon">⊗</span><span class="txt"><b>Sin gráfico de tendencia MoM / Acumulado / YoY.</b> ${motivo||'No hay serie mensual para este reporte.'}</span></div>`;
+  const arr = dxpSerie(cfg.ds, cfg.medida);
+  if (!arr) return `<div class="no-trend-box"><span class="icon">⊗</span><span class="txt"><b>Gráfico descartado por calidad de dato.</b> La medida <b>${cfg.medida}</b> devuelve casi el mismo valor en todos los meses del período — no filtra por fecha en el modelo de Power BI. Graficarla mostraría una tendencia falsa.</span></div>`;
+
+  const ps = s.ps;
+  const extra = cfg.extra ? dxpSerie(cfg.ds, cfg.extra) : null;
+  const pts = a => {
+    const v = a.map((x,i)=>({x,i})).filter(o=>o.x!=null);
+    const mn = Math.min(...v.map(o=>o.x)), mx = Math.max(...v.map(o=>o.x)), rg = (mx-mn)||1;
+    const n = a.length-1 || 1;
+    return { d: v.map(o=>`${(o.i/n*700).toFixed(1)},${(176-(o.x-mn)/rg*168-4).toFixed(1)}`).join(' '), v, mn, mx };
+  };
+  const A = pts(arr), B = extra ? pts(extra) : null;
+  const val = A.v, act = val[val.length-1], prev = val[val.length-2];
+  const k = cfg.pct ? 100 : 1;
+  const mom = prev ? (cfg.pct ? (act.x-prev.x)*100 : (act.x/prev.x-1)*100) : null;
+  const iYoY = ps.indexOf((parseInt(ps[act.i].slice(0,4))-1) + ps[act.i].slice(4));
+  const yoyV = iYoY >= 0 ? arr[iYoY] : null;
+  const yoy = yoyV != null ? (cfg.pct ? (act.x-yoyV)*100 : (act.x/yoyV-1)*100) : null;
+  const fmtv = v => cfg.pct ? (v*100).toFixed(2)+'%' : (Math.abs(v)>=1e6 ? fmtM(v) : 'S/'+v.toFixed(2));
+  // Acumulado del año en curso vs mismo tramo del año anterior
+  const aAct = ps[act.i].slice(0,4), aAnt = String(parseInt(aAct)-1);
+  const comp = mesesComparables(arr, ps, aAnt, aAct);
+  // Solo se suma cuando la métrica es aditiva (un flujo). Precios/costos unitarios,
+  // porcentajes y saldos se promedian: "costo x kilo acumulado" no significa nada.
+  const aditiva = cfg.acum === 'suma';
+  const agg = (a2,ps2,an,cm) => aditiva ? sumaEn(a2,ps2,an,cm) : promEn(a2,ps2,an,cm);
+  const acumB = comp.length ? agg(arr,ps,aAct,comp) : null;
+  const acumA = comp.length ? agg(arr,ps,aAnt,comp) : null;
+  const acumVar = (acumA && acumB) ? (cfg.pct ? (acumB-acumA)*100 : (acumB/acumA-1)*100) : null;
+  const buenoMoM = cfg.metaArriba ? (mom<0) : (mom>0), buenoYoY = cfg.metaArriba ? (yoy<0) : (yoy>0), buenoAc = cfg.metaArriba ? (acumVar<0) : (acumVar>0);
+  const metaY = cfg.meta != null ? (176 - ((cfg.meta/k) - A.mn)/((A.mx-A.mn)||1)*168 - 4) : null;
+
+  return `
+  <div class="trend-panel">
+    <div class="trend-panel-h">
+      <div class="roman-h"><span class="rn">II</span>Tendencia mensual — ${cfg.label}</div>
+      <span class="src">Fuente: series.json · ${val.length} puntos (${fmtPeriodo(ps[val[0].i])} → ${fmtPeriodo(ps[act.i])})</span>
+    </div>
+    <div class="compare-cards">
+      <div class="cc"><div class="cc-label">MoM · vs ${prev?fmtPeriodo(ps[prev.i]):'—'}</div>
+        <div class="cc-val ${mom==null?'flat-c':buenoMoM?'up-c':'down-c'}">${mom==null?'—':(mom>=0?'▲ +':'▼ ')+Math.abs(mom).toFixed(2)+(cfg.pct?' pts':'%')}</div>
+        <div class="cc-sub">${prev?fmtv(prev.x)+' → '+fmtv(act.x):'sin mes previo'}</div></div>
+      <div class="cc"><div class="cc-label">Acumulado ${comp.length?comp.length+' meses '+aAct:'—'}</div>
+        <div class="cc-val ${acumVar==null?'flat-c':buenoAc?'up-c':'down-c'}">${acumB==null?'—':fmtv(acumB)}</div>
+        <div class="cc-sub">${aditiva?'suma':'promedio'} del tramo comparable${acumA!=null?` · ${aAnt}: ${fmtv(acumA)}`:''}</div></div>
+      <div class="cc"><div class="cc-label">YoY · vs ${aAnt}</div>
+        <div class="cc-val ${yoy==null?'flat-c':buenoYoY?'up-c':'down-c'}">${yoy==null?'—':(yoy>=0?'▲ +':'▼ ')+Math.abs(yoy).toFixed(2)+(cfg.pct?' pts':'%')}</div>
+        <div class="cc-sub">${yoyV!=null?fmtv(yoyV)+' → '+fmtv(act.x):'sin dato del año anterior'}</div></div>
+    </div>
+    <div class="chart-legend">
+      <span class="lg"><span class="sw" style="background:var(--red)"></span>${cfg.label} (${val.length} pts)</span>
+      ${B?`<span class="lg"><span class="sw" style="background:var(--accent)"></span>${cfg.label2} (escala propia)</span>`:''}
+      ${cfg.meta!=null?`<span class="lg"><span class="sw" style="background:var(--sub);opacity:.5"></span>Meta ${cfg.meta}%</span>`:''}
+    </div>
+    <div class="chart-big"><svg viewBox="0 0 700 180" preserveAspectRatio="none">
+      <line x1="0" y1="4" x2="700" y2="4" stroke="var(--border)" stroke-dasharray="2,4"/>
+      <line x1="0" y1="61" x2="700" y2="61" stroke="var(--border)" stroke-dasharray="2,4"/>
+      <line x1="0" y1="119" x2="700" y2="119" stroke="var(--border)" stroke-dasharray="2,4"/>
+      <line x1="0" y1="176" x2="700" y2="176" stroke="var(--border)"/>
+      ${metaY!=null && metaY>=0 && metaY<=176 ? `<line x1="0" y1="${metaY.toFixed(1)}" x2="700" y2="${metaY.toFixed(1)}" stroke="var(--sub)" stroke-dasharray="4,3" opacity=".6"/>` : ''}
+      ${B?`<polyline points="${B.d}" fill="none" stroke="var(--accent)" stroke-width="2" opacity=".6" vector-effect="non-scaling-stroke"/>`:''}
+      <polyline points="${A.d}" fill="none" stroke="var(--red)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    </svg></div>
+    <div class="chart-axis-labels"><span>${fmtPeriodo(ps[val[0].i])}</span><span>${fmtPeriodo(ps[Math.floor((val[0].i+act.i)/2)])}</span><span>${fmtPeriodo(ps[act.i])} (actual)</span></div>
+    <div class="chart-stats-row">
+      <span class="item">Actual <b>${fmtv(act.x)}</b></span>
+      <span class="item">Máximo <b>${fmtv(A.mx)}</b></span>
+      <span class="item">Mínimo <b>${fmtv(A.mn)}</b></span>
+      ${cfg.meta!=null?`<span class="item">Meta <b>${cfg.meta}%</b></span>`:''}
+    </div>
+  </div>`;
+}
+
+// ── Detalle completo de un reporte (I–V + tendencia) ──────────────────────
 function showDetail(empresa, tipo, label, archivo, desc) {
   const screenEl = document.getElementById('screen-' + currentTab);
   navHistory.push({ screen: 'screen-' + currentTab, tab: currentTab, savedHtml: screenEl ? screenEl.innerHTML : '' });
-  const empData = (DATA.empresas || {})[empresa] || {};
-  const rd = (empData.reportes || {})[tipo] || {};
+  const rd = ((DATA.empresas || {})[empresa] || {}).reportes?.[tipo] || {};
+  const s = dxpStats();
+  const idx = DXP_ORDEN.indexOf(tipo);
+  const est = rd.estado === 'red' ? 'crit' : rd.estado === 'yellow' ? 'warn' : 'ok';
+  const estTxt = est === 'crit' ? 'Crítico' : est === 'warn' ? 'Atención' : 'Sin alerta';
+  const stripe = est === 'crit' ? 'var(--red)' : est === 'warn' ? 'var(--yellow)' : 'var(--green)';
+  const nombre = DXP_NOMBRE[tipo] || label || tipo;
 
-  // TODOS los reportes usan marco McKinsey estandarizado
-  const VENTAS_TIPOS = ['margen_variable', 'margen_variable_pag2'];
-  const AREA_TIPOS = ['fill_rate','cuentas_por_cobrar','cuentas_por_pagar','mermas','sop_inventario','compras'];
+  const kpis = rd.kpis || [];
+  const PREF = { margen_variable:'Margen variable', margen_variable_pag2:'Avance vs Ppto',
+                 cuentas_por_pagar:'CxP Total', compras:'Stock Valorizado' };
+  const hero = (PREF[tipo] && kpis.find(k => k.label === PREF[tipo])) || kpis[0] || {};
+  const resto = kpis.filter(k => k !== hero);
+  const cls = e => e === 'red' ? 'crit' : e === 'yellow' ? 'warn' : e === 'green' ? 'ok' : '';
+  const brecha = (hero.meta && parseVal(hero.valor) != null && parseVal(hero.meta) != null)
+    ? (parseVal(hero.valor) - parseVal(hero.meta)) : null;
 
-  const renderTituloArea = {
-    margen_variable: 'Análisis de Ventas',
-    margen_variable_pag2: 'Avance vs Presupuesto',
-    fill_rate: 'Fill Rate — Nivel de Servicio',
-    cuentas_por_cobrar: 'Cuentas por Cobrar',
-    cuentas_por_pagar: 'Cuentas por Pagar',
-    mermas: 'Mermas Operativas',
-    consumo_materiales: 'Consumo de Materiales',
-    sop_inventario: 'S&OP — Inventario',
-    compras: 'Gestión de Compras',
-    productividad: 'Productividad por Funcionario',
-    control_interno: 'Control Interno',
-  };
+  const cfgSerie = DXP_SERIE_CFG[tipo];
+  const serieOk = cfgSerie ? !!dxpSerie(cfgSerie.ds, cfgSerie.medida) : false;
+  const sub = `${hero.label || 'KPI principal'} · mes actual${serieOk ? ' + serie mensual confiable' : ' · sin serie mensual confiable'}`;
 
-  const tituloDetalle = renderTituloArea[tipo] || label;
-  let mcHtml = '';
-  if (VENTAS_TIPOS.includes(tipo)) {
-    mcHtml = renderVentasMcKinsey(empresa);
-  } else {
-    mcHtml = renderMcKinseyArea(empresa, tipo);
-  }
+  const desg = dxpDesglose(tipo, s);
+  const pal = dxpPalancas(tipo, s);
+  const vac = dxpVacios(tipo, s);
+  const chat = `Analiza el reporte "${nombre}" de ${empresa}: ${hero.label} ${hero.valor}${hero.meta?` (meta ${hero.meta})`:''}. ${rd.alerta||''} ¿Qué significa y qué debo hacer?`;
 
-  const estadoPill = rd.estado === 'red' ? 'crit' : rd.estado === 'yellow' ? 'warn' : 'ok';
-  const estadoTxt  = rd.estado === 'red' ? 'Crítico' : rd.estado === 'yellow' ? 'Atención' : 'Sin alerta';
-  document.getElementById('screen-' + currentTab).innerHTML =
-    `<div class="mck-wrap">
-    <div class="mck-pad">
-      <button class="mck-back" onclick="goBack()">← ${empresa}</button>
+  screenEl.innerHTML = `
+  <div class="dxp"><div class="wrap">
+    <button class="back-link" onclick="goBack()">← Volver al resumen</button>
+    <div class="detail-head" style="--stripe:${stripe}">
+      <div>
+        <div class="detail-title">${idx>=0?String(idx+1).padStart(2,'0')+' · ':''}${nombre}</div>
+        <div class="detail-sub">${sub}</div>
+      </div>
+      <span class="pill ${est}">${estTxt}</span>
     </div>
-    <div class="mck-head">
-      <div><div class="mck-title">${tituloDetalle}</div><div class="mck-sub">Marco McKinsey — Agosto 2026 · Fuente: Power BI</div></div>
-      <span class="mck-pill ${estadoPill}">${estadoTxt}</span>
+
+    <div class="roman-grid">
+      <div>
+        <div class="roman-h"><span class="rn">I</span>KPIs</div>
+        ${hero.valor ? `<div class="hero-l">${hero.label}</div><div class="hero-v" style="color:${stripe}">${hero.valor}</div>` : ''}
+        ${hero.meta ? `<div class="kv"><span class="l">Meta</span><span class="v">${hero.meta}</span></div>` : ''}
+        ${brecha != null ? `<div class="kv"><span class="l">Brecha</span><span class="v ${est}">${(brecha>=0?'+':'')+brecha.toFixed(2)} pts</span></div>` : ''}
+        ${resto.map(k => `<div class="kv"><span class="l">${k.label}</span><span class="v ${cls(k.estado)}">${k.valor}${k.meta?` <small>meta ${k.meta}</small>`:''}</span></div>`).join('')}
+        ${rd.alerta ? `<div class="nd" style="margin-top:12px">${rd.alerta}</div>` : ''}
+      </div>
+
+      <div>
+        <div class="roman-h"><span class="rn">II</span>Comparativo</div>
+        ${dxpComparativo(tipo, s)}
+      </div>
+
+      <div>
+        <div class="roman-h"><span class="rn">III</span>${desg.t}</div>
+        ${desg.h}
+      </div>
+
+      <div>
+        <div class="roman-h"><span class="rn">IV</span>Palancas</div>
+        ${pal.length ? pal.map(p => `<div class="palanca">
+          <div class="palanca-top"><span class="palanca-nombre">${p.n}</span><span class="pr ${p.pr}">${p.pr}</span></div>
+          <div class="palanca-impacto">${p.imp}</div>
+          <div class="nd" style="margin-top:4px">${p.acc}</div>
+        </div>`).join('') : '<div class="nd">Sin palancas pendientes para este reporte.</div>'}
+      </div>
+
+      <div>
+        <div class="roman-h"><span class="rn">V</span>Vacíos</div>
+        ${vac.length ? vac.map(v => `<div class="vacio-item"><span class="mk">▸</span>${v}</div>`).join('') : '<div class="nd">Sin vacíos de información registrados.</div>'}
+      </div>
+
+      ${dxpTrendPanel(tipo, s)}
     </div>
-    ${mcHtml}
-    </div>`;
-  return;
+
+    <div class="cta-ia"><button data-msg="${chat.replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Analizar con Juanito (IA)</button></div>
+    <div class="deck-footer"><span>PAUNO — Diagnóstico Ejecutivo</span><span class="conf">Confidencial · Uso interno</span><span>${idx>=0?String(idx+1).padStart(2,'0')+' · ':''}${nombre}</span></div>
+  </div></div>`;
+
+  const sc = document.getElementById('screens-container'); if (sc) sc.scrollTop = 0;
+  const bb = document.getElementById('back-btn'); if (bb) bb.classList.add('visible');
 }
 
 function goBack() {
