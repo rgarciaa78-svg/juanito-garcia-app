@@ -441,6 +441,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* Plan de acción 30/60/90 */
 /* Mapa de causalidad — cadenas hallazgo → causa → efecto */
 /* Grilla de 11 tarjetas de reporte — clic abre el dashboard completo */
+/* "Holding — este mes" — franja de 5 celdas, formato del modelo aprobado */
+.hstrip-head { display: flex; align-items: center; gap: 8px; margin: 22px 14px 12px; }
+.hstrip-head-t { font-family: var(--mk-mono); font-size: 10.5px; font-weight: 700; color: var(--mk-navy); text-transform: uppercase; letter-spacing: 1.1px; }
+.hstrip-head-line { flex: 1; height: 1px; background: var(--mk-border); }
+.hstrip { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 1px; background: var(--mk-border); border: 1px solid var(--mk-border); margin: 0 14px 20px; }
+.hstrip-cell { background: #fff; padding: 14px 16px; }
+.hstrip-l { font-family: var(--mk-mono); font-size: 9.5px; color: var(--mk-sub); text-transform: uppercase; letter-spacing: .06em; }
+.hstrip-v { font-family: var(--mk-mono); font-size: 21px; font-weight: 600; margin-top: 5px; }
+.hstrip-d { font-size: 10px; color: var(--mk-sub); margin-top: 4px; }
+
 .rcard-head-row { display: flex; align-items: center; gap: 8px; margin: 22px 14px 12px; }
 .rcard-head-t { font-family: var(--mk-mono); font-size: 10.5px; font-weight: 700; color: var(--mk-navy); text-transform: uppercase; letter-spacing: 1.1px; }
 .rcard-head-line { flex: 1; height: 1px; background: var(--mk-border); }
@@ -1204,13 +1214,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div id="dq-banner-row"></div>
         <div id="causal-row"></div>
         <div id="heatmap-row"></div>
-        <div id="rcard-grid-row"></div>
-        <div id="diagnostico-row"></div>
         <div id="roadmap-row"></div>
-        <div id="kpi-exec-grid"></div>
-        <div id="agenda-dividir"></div>
-        <div id="agenda-decidir-section"></div>
-        <div id="agenda-semana-section"></div>
+        <div id="holding-strip-row"></div>
+        <div id="rcard-grid-row"></div>
       </div>
 
       <!-- PAUNO -->
@@ -2265,6 +2271,32 @@ function renderHeatmap() {
 // Mapa de causalidad: 3 cadenas reales (hallazgo → causa → efecto) armadas
 // directamente desde los KPIs de cada reporte, sin depender de diagnosticoCompleto.
 // Grilla de 11 tarjetas de reporte (formato "rcard" del modelo aprobado) — clic abre el dashboard I-V.
+// "Holding — este mes": 5 celdas con datos reales (ventas, mora, conteo de estados, series confiables).
+function renderHoldingStrip() {
+  const el = document.getElementById('holding-strip-row');
+  if (!el) return;
+  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
+  const ORDEN = ['control_interno','fill_rate','mermas','margen_variable','cuentas_por_cobrar','cuentas_por_pagar','consumo_materiales','compras','sop_inventario','productividad','margen_variable_pag2'];
+  const NOMBRE_CORTO = { control_interno:'Control Interno', fill_rate:'Fill Rate', mermas:'Mermas', margen_variable:'Margen', cuentas_por_cobrar:'CxC', cuentas_por_pagar:'CxP', margen_variable_pag2:'Avance Ppto' };
+  const criticos = ORDEN.filter(t => rpts[t]?.estado === 'red');
+  const atencion = ORDEN.filter(t => rpts[t]?.estado === 'yellow');
+  const confiables = Object.keys((SERIES && SERIES.datasets) || {}).length;
+  const totalDs = confiables + Object.keys((SERIES && SERIES.sin_serie) || {}).length;
+  const yoy = DATA.yoy || {};
+  const ventaAct = parseVal(DATA.holding_ventas);
+  const yoyDelta = (yoy.ventas && ventaAct) ? ((ventaAct - yoy.ventas) / yoy.ventas * 100) : null;
+
+  el.innerHTML = `
+    <div class="hstrip-head"><span class="hstrip-head-t">Holding — este mes</span><div class="hstrip-head-line"></div></div>
+    <div class="hstrip">
+      <div class="hstrip-cell"><div class="hstrip-l">Ventas</div><div class="hstrip-v">${DATA.holding_ventas||'—'}</div><div class="hstrip-d" style="color:${yoyDelta==null?'var(--mk-sub)':yoyDelta>=0?'var(--mk-green)':'var(--mk-red)'}">${yoyDelta==null?'—':(yoyDelta>=0?'▲ +':'▼ ')+yoyDelta.toFixed(1)+'% YoY'}</div></div>
+      <div class="hstrip-cell"><div class="hstrip-l">Mora consolidada</div><div class="hstrip-v" style="color:var(--mk-yellow)">${DATA.holding_mora||'—'}</div><div class="hstrip-d">meta 15%</div></div>
+      <div class="hstrip-cell"><div class="hstrip-l">Reportes en Crítico</div><div class="hstrip-v" style="color:var(--mk-red)">${criticos.length} / ${ORDEN.length}</div><div class="hstrip-d">${criticos.map(t=>NOMBRE_CORTO[t]||t).join(', ')||'—'}</div></div>
+      <div class="hstrip-cell"><div class="hstrip-l">Reportes en Atención</div><div class="hstrip-v" style="color:var(--mk-yellow)">${atencion.length} / ${ORDEN.length}</div><div class="hstrip-d">${atencion.map(t=>NOMBRE_CORTO[t]||t).join(', ')||'—'}</div></div>
+      <div class="hstrip-cell"><div class="hstrip-l">Series confiables</div><div class="hstrip-v">${confiables} / ${totalDs}</div><div class="hstrip-d">de datasets con serie mensual</div></div>
+    </div>`;
+}
+
 function renderReportCards() {
   const el = document.getElementById('rcard-grid-row');
   if (!el) return;
@@ -2511,20 +2543,13 @@ function renderHome() {
       </div>`;
   });
 
-  document.getElementById('kpi-exec-grid').innerHTML = html;
   renderVeredicto();
   renderDataQualityBanner();
   renderCausalMap();
   renderHeatmap();
-  renderReportCards();
-  renderDiagnostico();
   renderRoadmap();
-
-  const agenda = DATA.agenda_ceo || {};
-  const dv = document.getElementById('agenda-dividir');
-  if (dv) dv.innerHTML = '';
-  renderAgendaSection('agenda-decidir-section', 'DECIDIR HOY', 'red', agenda.decidir_hoy || []);
-  renderAgendaSection('agenda-semana-section', 'ESCALAR ESTA SEMANA', 'yellow', agenda.escalar_semana || []);
+  renderHoldingStrip();
+  renderReportCards();
 }
 
 function renderAgendaSection(id, title, color, items) {
