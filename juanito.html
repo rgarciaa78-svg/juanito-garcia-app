@@ -115,7 +115,38 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 @media (min-width: 768px) {
   .screen { padding: 24px 32px 32px; }
   #screen-home.active { display: block; }
-  #kpi-exec-grid, #agenda-decidir-section, #agenda-semana-section { max-width: 960px; }
+}
+/* En pantallas grandes el dashboard respira como el modelo aprobado:
+   ancho máximo centrado + escala tipográfica mayor (no comprimido tipo app móvil). */
+@media (min-width: 1100px) {
+  #screen-home.active { max-width: 1320px; margin: 0 auto; }
+  #screen-home .veredicto-box,
+  #screen-home .dq-banner { margin-left: 0; margin-right: 0; padding: 26px 28px; }
+  #screen-home .causal-head, #screen-home .hstrip-head,
+  #screen-home .rcard-head-row, #screen-home .roadmap-head { margin-left: 0; margin-right: 0; }
+  #screen-home .causal-wrap, #screen-home .heatmap-strip,
+  #screen-home .hstrip, #screen-home .rcard-grid,
+  #screen-home .roadmap-cols { margin-left: 0; margin-right: 0; }
+  #screen-home .causal-wrap { padding: 22px 24px; }
+  #screen-home .flow-box { padding: 12px 15px; }
+  #screen-home .flow-box .fb-v { font-size: 18px; }
+  #screen-home .hm-cell { padding: 12px 6px; }
+  #screen-home .hm-dot { width: 24px; height: 24px; font-size: 10px; }
+  #screen-home .hm-lbl { font-size: 9.5px; }
+  #screen-home .hstrip-cell { padding: 16px 18px; }
+  #screen-home .hstrip-v { font-size: 24px; }
+  #screen-home .rcard-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  #screen-home .rcard-head2 { padding: 15px 18px 8px; }
+  #screen-home .rcard-title { font-size: 18px; }
+  #screen-home .rcard-kpi2 { padding: 0 18px 12px; }
+  #screen-home .rcard-kpi2 .v { font-size: 30px; }
+  #screen-home .rcard-body2 { padding: 12px 18px 16px; font-size: 12.5px; }
+  #screen-home .causal-head-t, #screen-home .hstrip-head-t,
+  #screen-home .rcard-head-t, #screen-home .roadmap-head-t { font-size: 12px; }
+  #screen-home .rm-item { padding: 14px 18px; }
+  #screen-home .rm-item-top { font-size: 13.5px; }
+  #screen-home .rm-item-txt { font-size: 12px; }
+  #screen-home .roadmap-col-h { padding: 12px 18px; font-size: 11px; }
 }
 
 /* ============================
@@ -268,6 +299,13 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* Cabecera ejecutiva */
 .exec-header { background: var(--navy2); padding: 13px 18px 12px; margin: -16px -14px 14px; }
 @media (min-width: 768px) { .exec-header { margin: -24px -32px 16px; padding: 15px 32px 14px; } }
+@media (min-width: 1100px) {
+  #screen-home .exec-header { padding: 26px 40px 24px; margin: -24px calc((100% - 100vw)/2) 20px; }
+  #screen-home .exec-title { font-size: clamp(22px,2.4vw,30px); }
+  #screen-home .exec-eyebrow { font-size: 10.5px; }
+  #screen-home .epill { font-size: 10px; padding: 3px 10px; }
+  #screen-home .veredicto-txt { font-size: clamp(20px,1.9vw,26px); }
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    Dashboards de detalle por reporte — sistema visual McKinsey estandarizado
