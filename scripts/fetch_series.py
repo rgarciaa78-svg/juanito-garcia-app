@@ -307,12 +307,34 @@ def main():
             print("    Batch falló — usando mes a mes")
             serie = serie_mes_a_mes(token, ds_id, medidas, tbl, col, periodos)
 
-        # Reporta cobertura
+        # Reporta cobertura y detecta series "planas": la medida no responde
+        # al filtro de fecha genérico (CALCULATE + FILTER(ALL(Calendario)))
+        # y Power BI devuelve el mismo total sin importar el mes — mismo bug
+        # confirmado a mano en Control Interno/CxP/Inventario/Avance/Compras.
+        # No se puede saber de antemano qué medida tiene este problema sin
+        # Copiar consulta, así que se detecta por evidencia: casi todos los
+        # valores no nulos son idénticos.
+        serie_confiable = {}
         for med, vals in serie.items():
             con_dato = sum(1 for v in vals if v is not None)
-            print(f"    [{med}]: {con_dato}/{len(vals)} meses con dato")
+            no_nulos = [v for v in vals if v is not None]
+            distintos = len({round(v, 6) for v in no_nulos}) if no_nulos else 0
+            es_plana = con_dato >= 3 and distintos <= max(2, con_dato // 7)
+            estado = "PLANA — no confiable" if es_plana else "OK"
+            print(f"    [{med}]: {con_dato}/{len(vals)} meses con dato, {distintos} valores distintos → {estado}")
+            if es_plana:
+                sin_serie.setdefault(ds_key, {"medidas": [], "tablas": [tbl], "columnas_fecha": [f"{tbl}[{col}]"]})
+                sin_serie[ds_key].setdefault("medidas_planas", []).append({
+                    "medida": med, "valores_distintos": distintos, "meses_con_dato": con_dato,
+                    "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — "
+                              "posible relación inactiva o la medida ignora el filtro de fecha (confirmado con "
+                              "Copiar consulta solo en Control Interno; para las demás falta validar en vivo).",
+                })
+            else:
+                serie_confiable[med] = vals
 
-        resultado[ds_key] = serie
+        if serie_confiable:
+            resultado[ds_key] = serie_confiable
         print()
 
     out = {
