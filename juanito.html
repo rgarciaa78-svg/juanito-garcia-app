@@ -274,6 +274,52 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .epill.amber { background: rgba(245,158,11,0.25); color: #fcd34d; }
 .epill.muted { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.42); }
 
+/* Veredicto ejecutivo (síntesis de 1 frase) */
+.veredicto-box {
+  margin: 10px 14px 4px; padding: 14px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 8px;
+}
+.veredicto-box.ok { border-left-color: var(--green); }
+.veredicto-eyebrow {
+  font-size: 9px; font-weight: 800; color: var(--sub); text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 5px;
+}
+.veredicto-txt { font-size: 13px; line-height: 1.5; color: var(--text); }
+.veredicto-txt b { font-weight: 800; }
+
+/* Heatmap de reportes (vista de calor) */
+.heatmap-strip {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(64px,1fr));
+  gap: 1px; background: var(--border); border: 1px solid var(--border);
+  margin: 12px 14px; border-radius: 8px; overflow: hidden;
+}
+.hm-cell { background: var(--surface); padding: 8px 4px; text-align: center; cursor: pointer; }
+.hm-cell:active { background: var(--bg3); }
+.hm-dot {
+  width: 20px; height: 20px; border-radius: 50%; margin: 0 auto 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 800; color: #fff;
+}
+.hm-dot.red { background: var(--red); } .hm-dot.yellow { background: var(--yellow); } .hm-dot.green { background: var(--green); }
+.hm-lbl { font-size: 8px; color: var(--sub); line-height: 1.2; height: 18px; overflow: hidden; }
+
+/* Plan de acción 30/60/90 */
+.roadmap-head { display: flex; align-items: center; gap: 8px; margin: 18px 14px 10px; }
+.roadmap-head-t { font-size: 10px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: 1.1px; }
+.roadmap-head-line { flex: 1; height: 1px; background: var(--border); }
+.roadmap-cols { display: flex; flex-direction: column; gap: 10px; padding: 0 14px; }
+.roadmap-col { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.roadmap-col-h {
+  padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .5px; display: flex; justify-content: space-between; color: #fff;
+}
+.roadmap-col-h.red { background: var(--red); } .roadmap-col-h.yellow { background: var(--yellow); } .roadmap-col-h.green { background: var(--green); }
+.rm-item { padding: 10px 12px; border-top: 1px solid var(--border); background: var(--surface); }
+.rm-item:first-child { border-top: none; }
+.rm-item-top { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text); }
+.rm-item-area { font-size: 9px; color: var(--accent); font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+.rm-item-txt { font-size: 11px; color: var(--sub); margin-top: 3px; line-height: 1.4; }
+
 /* Diagnóstico ejecutivo */
 .diag-head { display: flex; align-items: center; gap: 8px; margin: 2px 0 10px; }
 .diag-head-t {
@@ -985,7 +1031,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <!-- HOME -->
       <div id="screen-home" class="screen active">
         <div id="exec-header-row"></div>
+        <div id="veredicto-row"></div>
+        <div id="heatmap-row"></div>
         <div id="diagnostico-row"></div>
+        <div id="roadmap-row"></div>
         <div id="kpi-exec-grid"></div>
         <div id="agenda-dividir"></div>
         <div id="agenda-decidir-section"></div>
@@ -1967,6 +2016,91 @@ function diagnosticoCompleto() {
   return { anioAct, anioAnt, hallazgos };
 }
 
+// Ordena hallazgos por severidad (rojos primero) y compone una síntesis de 1 frase para el CEO.
+function renderVeredicto() {
+  const el = document.getElementById('veredicto-row');
+  if (!el) return;
+  const d = diagnosticoCompleto();
+  if (!d || !d.hallazgos.length) { el.innerHTML = ''; return; }
+
+  const rojos = d.hallazgos.filter(h => h.sev === 'red');
+  const verdes = d.hallazgos.filter(h => h.sev !== 'red');
+  const peor = rojos[0] || d.hallazgos[0];
+  const ok = rojos.length === 0;
+
+  const frase = ok
+    ? `Los ${d.hallazgos.length} hallazgos analizados de ${d.anioAct} están en línea o mejor que ${d.anioAnt} — sin alertas críticas que requieran acción inmediata.`
+    : `De ${d.hallazgos.length} hallazgos analizados, <b>${rojos.length} están en rojo</b>. El más urgente: <b>${peor.titulo.charAt(0).toLowerCase()+peor.titulo.slice(1)}</b> (${peor.cifra}${peor.unidad?' '+peor.unidad:''})${verdes.length?`, mientras que ${verdes.length} indicador${verdes.length>1?'es':''} sí ${verdes.length>1?'muestran':'muestra'} mejora.`:'.'}`;
+
+  el.innerHTML = `
+    <div class="veredicto-box ${ok?'ok':''}">
+      <div class="veredicto-eyebrow">Veredicto — resumen ejecutivo</div>
+      <div class="veredicto-txt">${frase}</div>
+    </div>`;
+}
+
+// Vista de calor: 1 fila con el estado de cada reporte de PAUNO, clic → abre el reporte.
+function renderHeatmap() {
+  const el = document.getElementById('heatmap-row');
+  if (!el) return;
+  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
+  const ORDEN = [
+    'control_interno','fill_rate','mermas','margen_variable','cuentas_por_cobrar',
+    'cuentas_por_pagar','consumo_materiales','compras','sop_inventario',
+    'productividad','margen_variable_pag2',
+  ];
+  const NOMBRE_CORTO = {
+    control_interno: 'C. Interno', fill_rate: 'Fill Rate', mermas: 'Mermas',
+    margen_variable: 'Margen', cuentas_por_cobrar: 'CxC', cuentas_por_pagar: 'CxP',
+    consumo_materiales: 'Consumo', compras: 'Compras', sop_inventario: 'Inventario',
+    productividad: 'Product.', margen_variable_pag2: 'Avance Ppto',
+  };
+  const celdas = ORDEN.map(tipo => {
+    const rd = rpts[tipo];
+    if (!rd) return '';
+    const est = rd.estado === 'yellow' ? 'yellow' : (rd.estado === 'red' ? 'red' : 'green');
+    const nombre = NOMBRE_CORTO[tipo] || tipo;
+    const kpi = (rd.kpis || [])[0];
+    const marca = est === 'red' ? '!' : est === 'yellow' ? '·' : '✓';
+    return `<div class="hm-cell" onclick="showTab('pauno')" title="${kpi ? kpi.label+': '+kpi.valor : ''}">
+      <div class="hm-dot ${est}">${marca}</div>
+      <div class="hm-lbl">${nombre}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="heatmap-strip">${celdas}</div>`;
+}
+
+// Consolida las "palancas" de cada hallazgo real en un plan de acción por horizonte de tiempo.
+function renderRoadmap() {
+  const el = document.getElementById('roadmap-row');
+  if (!el) return;
+  const d = diagnosticoCompleto();
+  if (!d || !d.hallazgos.length) { el.innerHTML = ''; return; }
+
+  const ahora = d.hallazgos.filter(h => h.sev === 'red');
+  const despues = d.hallazgos.filter(h => h.sev !== 'red');
+
+  const col = (items, titulo, cls, sub) => !items.length ? '' : `
+    <div class="roadmap-col">
+      <div class="roadmap-col-h ${cls}"><span>${titulo}</span><span>${sub}</span></div>
+      ${items.map(h => `
+        <div class="rm-item">
+          <div class="rm-item-top"><span>${h.titulo}</span><span class="rm-item-area">${h.area}</span></div>
+          <div class="rm-item-txt">${h.palanca}</div>
+        </div>`).join('')}
+    </div>`;
+
+  el.innerHTML = `
+    <div class="roadmap-head">
+      <span class="roadmap-head-t">Plan de acción</span>
+      <div class="roadmap-head-line"></div>
+    </div>
+    <div class="roadmap-cols">
+      ${col(ahora, 'Actuar ahora', 'red', `${ahora.length}`)}
+      ${col(despues, 'Sostener / monitorear', 'green', `${despues.length}`)}
+    </div>`;
+}
+
 function renderDiagnostico() {
   const el = document.getElementById('diagnostico-row');
   if (!el) return;
@@ -2085,7 +2219,10 @@ function renderHome() {
   });
 
   document.getElementById('kpi-exec-grid').innerHTML = html;
+  renderVeredicto();
+  renderHeatmap();
   renderDiagnostico();
+  renderRoadmap();
 
   const agenda = DATA.agenda_ceo || {};
   const dv = document.getElementById('agenda-dividir');
@@ -2386,7 +2523,7 @@ function renderEmpresa(empresa, containerId) {
             <span style="font-size:10px;background:${stateColor(item.estado)}22;color:${stateColor(item.estado)};padding:1px 6px;border-radius:10px;font-weight:700">${item.brecha} brecha</span>
           </div>
           <div style="font-size:11px;color:var(--sub);margin-top:3px">📊 ${item.impacto}</div>
-          <div style="font-size:11px;color:var(--fg);margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">→ ${item.accion}</div>
+          <div style="font-size:11px;color:var(--text);margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">→ ${item.accion}</div>
         </div>
         <div style="font-size:10px;color:${stateColor(item.estado)};font-weight:700;flex-shrink:0">${item.area}</div>
       </div>`;
@@ -2830,7 +2967,7 @@ function renderMcKinseyArea(empresa, tipo) {
   const rowKpi = (lbl, val, meta, col) => `
     <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:11px;color:var(--sub)">${lbl}</span>
-      <span style="font-size:13px;font-weight:700;color:${col||'var(--fg)'};">${val}${meta?` <span style="font-size:10px;font-weight:400;color:var(--sub)">meta ${meta}</span>`:''}</span>
+      <span style="font-size:13px;font-weight:700;color:${col||'var(--text)'};">${val}${meta?` <span style="font-size:10px;font-weight:400;color:var(--sub)">meta ${meta}</span>`:''}</span>
     </div>`;
 
   const yoyBlock = (valorActual, valorYoY, labelMetrica, fmt, motivoPendiente) => {
@@ -2875,7 +3012,7 @@ function renderMcKinseyArea(empresa, tipo) {
           ${fr ? svgGauge(fr, 'Fill Rate', col, '98%') : ''}
           <div style="flex:1;min-width:140px">
             ${rowKpi('Fill Rate agosto 2026', kv('fill_rate','Fill Rate')||'—', '98%', col)}
-            ${rowKpi('Orden de Venta (YTD)', kv('fill_rate','Orden de Venta')||'—', null, 'var(--fg)')}
+            ${rowKpi('Orden de Venta (YTD)', kv('fill_rate','Orden de Venta')||'—', null, 'var(--text)')}
             ${rowKpi('Facturación (YTD)',     kv('fill_rate','Facturación')||'—',    null, 'var(--green)')}
             ${rowKpi('Venta Perdida (YTD)',   kv('fill_rate','Venta Perdida')||'—',  null, 'var(--red)')}
             <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">⚠️ OV/Facturación/VP son acumulados YTD, no solo agosto.</div>
@@ -2948,10 +3085,10 @@ function renderMcKinseyArea(empresa, tipo) {
       return {
         titulo: 'Cuentas por Pagar — Proveedores',
         I: `<div style="flex:1">
-          ${rowKpi('CxP Total', kv('cuentas_por_pagar','CxP Total')||'—', null, 'var(--fg)')}
+          ${rowKpi('CxP Total', kv('cuentas_por_pagar','CxP Total')||'—', null, 'var(--text)')}
           ${rowKpi('Refinanciado', kv('cuentas_por_pagar','Refinanciado')||'—', null, col)}
           ${pctRef !== null ? rowKpi('% Refinanciado / Total', pctRef.toFixed(1)+'%', '<30%', col) : ''}
-          ${nProv ? rowKpi('# Proveedores activos', nProv, null, 'var(--fg)') : ''}
+          ${nProv ? rowKpi('# Proveedores activos', nProv, null, 'var(--text)') : ''}
           ${ref && cxp ? `<div style="margin-top:10px">
             <div style="height:10px;border-radius:5px;background:var(--border);overflow:hidden">
               <div style="height:100%;width:${Math.min(100,pctRef||0).toFixed(0)}%;background:${col};border-radius:5px"></div>
@@ -2959,7 +3096,7 @@ function renderMcKinseyArea(empresa, tipo) {
             <div style="font-size:10px;color:var(--sub);margin-top:4px">${(pctRef||0).toFixed(1)}% refinanciado del total CxP</div>
           </div>` : ''}
         </div>`,
-        II: `<div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+        II: `<div style="font-size:11px;color:var(--text,var(--text));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
           ${nProv && cxp ? `<div style="font-size:16px;font-weight:800;color:var(--accent);margin-bottom:4px">${fmtM(cxp/parseFloat(nProv))}</div>
           <div><strong>Deuda promedio por proveedor:</strong> ${fmtM(cxp)} entre ${nProv} proveedores activos.
           Con ${pctRef !== null ? pctRef.toFixed(1) : '—'}% refinanciado, la concentración de riesgo depende de
@@ -3106,11 +3243,11 @@ function renderMcKinseyArea(empresa, tipo) {
         titulo: 'Compras — Stock y Planificación',
         I: `<div style="flex:1">
           ${stockVal  ? rowKpi('Stock Valorizado', stockVal, null, 'var(--accent)') : ''}
-          ${stockPP   ? rowKpi('Stock PP (Punto de Pedido)', stockPP, null, 'var(--fg)') : ''}
-          ${cons3m    ? rowKpi('Consumo Promedio 3 meses', cons3m, null, 'var(--fg)') : ''}
-          ${cons6m    ? rowKpi('Consumo Promedio 6 meses', cons6m, null, 'var(--fg)') : ''}
+          ${stockPP   ? rowKpi('Stock PP (Punto de Pedido)', stockPP, null, 'var(--text)') : ''}
+          ${cons3m    ? rowKpi('Consumo Promedio 3 meses', cons3m, null, 'var(--text)') : ''}
+          ${cons6m    ? rowKpi('Consumo Promedio 6 meses', cons6m, null, 'var(--text)') : ''}
           ${faltantes ? rowKpi('Faltantes', faltantes, null, parseVal(faltantes) > 0 ? 'var(--red)' : 'var(--green)') : ''}
-          ${leadTime  ? rowKpi('Lead Time Promedio', leadTime, null, 'var(--fg)') : ''}
+          ${leadTime  ? rowKpi('Lead Time Promedio', leadTime, null, 'var(--text)') : ''}
           ${ratio     ? rowKpi('Ratio Consumo/Compra', ratio, '80-100%', 'var(--accent)') : ''}
           <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
             <strong>Ratio Consumo/Compra:</strong> Consumo ÷ Compra. &gt;100% jala inventario previo (compra menor al consumo);
@@ -3118,7 +3255,7 @@ function renderMcKinseyArea(empresa, tipo) {
           </div>
           ${tendencia ? `<div style="font-size:10px;color:var(--sub);margin-top:4px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">📈 ${tendencia}</div>` : ''}
         </div>`,
-        II: `<div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+        II: `<div style="font-size:11px;color:var(--text,var(--text));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
           ${coberturaDias != null ? `<div style="font-size:16px;font-weight:800;color:${coberturaDias<7?'var(--red)':coberturaDias<15?'var(--yellow)':'var(--green)'};margin-bottom:4px">${coberturaDias.toFixed(1)} días</div>
           <div><strong>Cobertura del Stock PP</strong> (punto de pedido) al ritmo de consumo actual: con ${stockPP} unidades en stock
           y un consumo promedio de ${cons3m}/mes (3M), el stock alcanza para ${coberturaDias.toFixed(1)} días antes de necesitar reposición.
@@ -3127,7 +3264,7 @@ function renderMcKinseyArea(empresa, tipo) {
             Comparativo YoY (agosto 2025) pendiente: este dataset no está en la serie histórica mensual todavía.
           </div>
         </div>`,
-        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text,var(--fg))">
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text,var(--text))">
           ${varTend != null ? `<strong>Tendencia de consumo:</strong> el promedio de 3 meses (${cons3m}) es ${varTend>=0?'+':''}${varTend.toFixed(1)}%
           ${varTend>=0?'mayor':'menor'} que el de 6 meses (${cons6m}) —
           ${Math.abs(varTend) < 2 ? 'el ritmo de consumo se mantiene estable, sin señales de aceleración ni desaceleración relevantes.' : varTend > 0 ? 'el consumo viene acelerando en el trimestre reciente frente al semestre — vale la pena confirmar si es estacional o una tendencia sostenida antes de ajustar compras.' : 'el consumo viene desacelerando en el trimestre reciente — revisar si hay riesgo de sobre-stock si las compras no se ajustan al mismo ritmo.'}` : ''}
@@ -3156,10 +3293,10 @@ function renderMcKinseyArea(empresa, tipo) {
       return {
         titulo: 'Consumo de Materiales — Producción',
         I: `<div style="flex:1">
-          ${costoTotalV ? rowKpi('Costo Total', costoTotalV, null, 'var(--fg)') : ''}
-          ${ventaKgV    ? rowKpi('Venta Neta (KG)', ventaKgV, null, 'var(--fg)') : ''}
+          ${costoTotalV ? rowKpi('Costo Total', costoTotalV, null, 'var(--text)') : ''}
+          ${ventaKgV    ? rowKpi('Venta Neta (KG)', ventaKgV, null, 'var(--text)') : ''}
           ${costoTnVendV? rowKpi('Costo x TN Vendida', costoTnVendV, null, 'var(--accent)') : ''}
-          ${prodNetaV   ? rowKpi('Producción Neta (KG)', prodNetaV, null, 'var(--fg)') : ''}
+          ${prodNetaV   ? rowKpi('Producción Neta (KG)', prodNetaV, null, 'var(--text)') : ''}
           ${costoTnProdV? rowKpi('Costo x TN Producida', costoTnProdV, null, 'var(--accent)') : ''}
           ${isLC ? `<div style="font-size:11px;color:var(--sub);padding:10px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:4px">
             <strong>⚠️ Live Connection detectada</strong><br>
@@ -3212,16 +3349,16 @@ function renderMcKinseyArea(empresa, tipo) {
         titulo: 'Productividad por Funcionario',
         I: `<div style="flex:1">
           ${planTotal   ? rowKpi('Planilla Total (S/.)', planTotal, null, 'var(--accent)') : ''}
-          ${prodTotal   ? rowKpi('Producción Total (KG)', prodTotal, null, 'var(--fg)') : ''}
-          ${ventaNeta   ? rowKpi('Venta Neta (KG)', ventaNeta, null, 'var(--fg)') : ''}
-          ${planKgProd  ? rowKpi('Planilla / KG Producido', planKgProd, null, 'var(--fg)') : ''}
-          ${planKgVend  ? rowKpi('Planilla / KG Vendido', planKgVend, null, 'var(--fg)') : ''}
+          ${prodTotal   ? rowKpi('Producción Total (KG)', prodTotal, null, 'var(--text)') : ''}
+          ${ventaNeta   ? rowKpi('Venta Neta (KG)', ventaNeta, null, 'var(--text)') : ''}
+          ${planKgProd  ? rowKpi('Planilla / KG Producido', planKgProd, null, 'var(--text)') : ''}
+          ${planKgVend  ? rowKpi('Planilla / KG Vendido', planKgVend, null, 'var(--text)') : ''}
           <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">
             Filtrado con el contexto exacto del reporte "13. Productividad por Funcionario" (Calendario[Año]
             + clasificación contable de gasto de personal), confirmado con Analizador de rendimiento › Copiar consulta.
           </div>
         </div>`,
-        II: `<div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+        II: `<div style="font-size:11px;color:var(--text,var(--text));line-height:1.6;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
           ${gapPct != null ? `<div style="font-size:16px;font-weight:800;color:${gapPct>=0?'var(--green)':'var(--red)'};margin-bottom:4px">${gapPct>=0?'+':''}${gapPct.toFixed(1)}%</div>
           <div><strong>Venta Neta vs Producción:</strong> se vendieron ${fmtKg(ventaN)} kg contra ${fmtKg(prodN)} kg producidos.
           ${gapPct >= 0
@@ -3233,7 +3370,7 @@ function renderMcKinseyArea(empresa, tipo) {
             requeriría agregar productividad_ds a fetch_series.py.
           </div>
         </div>`,
-        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text,var(--fg))">
+        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text,var(--text))">
           ${diffPk != null ? `<strong>Costo de planilla por kg:</strong> producir cuesta ${planKgProd}/kg y vender cuesta ${planKgVend}/kg —
           una diferencia de S/${Math.abs(diffPk).toFixed(3)} ${diffPk>0?'más caro producir que vender':'más caro vender que producir'}.
           ${Math.abs(diffPk) < 0.02
@@ -3277,20 +3414,20 @@ function renderMcKinseyArea(empresa, tipo) {
         titulo: 'Control Interno',
         I: `<div style="flex:1">
           ${cumplV ? rowKpi('% Cumplimiento', cumplV, '85%', cumplColor) : ''}
-          ${totalV ? rowKpi('Puntos de Control evaluados', totalV, null, 'var(--fg)') : ''}
+          ${totalV ? rowKpi('Puntos de Control evaluados', totalV, null, 'var(--text)') : ''}
           ${satisf ? rowKpi('Satisfactorio', satisf, null, 'var(--green)') : ''}
           ${obs    ? rowKpi('Con Observaciones', obs, null, 'var(--yellow)') : ''}
           ${crit   ? rowKpi('Crítico', crit, '0', 'var(--red)') : ''}
           ${critPctV ? rowKpi('% en estado Crítico', critPctV, '<10%', critPctN>20?'var(--red)':critPctN>10?'var(--yellow)':'var(--green)') : ''}
-          ${totalPlanes ? rowKpi('Total Planes de Acción', totalPlanes, null, 'var(--fg)') : ''}
+          ${totalPlanes ? rowKpi('Total Planes de Acción', totalPlanes, null, 'var(--text)') : ''}
           ${abiertos ? rowKpi('Planes de Acción Abiertos', abiertos, null, 'var(--yellow)') : ''}
           ${cerrados ? rowKpi('Planes de Acción Cerrados', cerrados, null, 'var(--green)') : ''}
           ${atrasados ? rowKpi('Planes de Acción Atrasados', atrasados, '0', 'var(--red)') : ''}
           ${avancePlanesV ? rowKpi('% Avance Planes de Acción', avancePlanesV, '80%', avancePlanesN>=80?'var(--green)':avancePlanesN>=50?'var(--yellow)':'var(--red)') : ''}
-          ${ejecutado ? rowKpi('Puntos Ejecutados', ejecutado, null, 'var(--fg)') : ''}
-          ${calificacion ? rowKpi('Calificación', calificacion, null, 'var(--fg)') : ''}
-          ${puntosTotales ? rowKpi('Puntos Totales', puntosTotales, null, 'var(--fg)') : ''}
-          <div style="font-size:11px;color:var(--text,var(--fg));line-height:1.6;margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+          ${ejecutado ? rowKpi('Puntos Ejecutados', ejecutado, null, 'var(--text)') : ''}
+          ${calificacion ? rowKpi('Calificación', calificacion, null, 'var(--text)') : ''}
+          ${puntosTotales ? rowKpi('Puntos Totales', puntosTotales, null, 'var(--text)') : ''}
+          <div style="font-size:11px;color:var(--text,var(--text));line-height:1.6;margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
             ${(satisfN!=null || obsN!=null || critN!=null)
               ? `Acumulado histórico total de PAUNO (sin filtro de fecha — el selector de mes del dashboard no afecta estas tarjetas,
                  confirmado con Copiar consulta). ${critN ? `<strong>${critN} puntos de control</strong> están en estado Crítico` : 'Sin puntos críticos registrados'}.`
@@ -3403,7 +3540,7 @@ function renderVentasMcKinsey(empresa) {
   const row2 = (lbl, val, sub, color) => `
     <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:11px;color:var(--sub)">${lbl}</span>
-      <span style="font-size:13px;font-weight:700;color:${color||'var(--fg)'};">${val}${sub?` <span style="font-size:10px;font-weight:400;color:var(--sub)">${sub}</span>`:''}</span>
+      <span style="font-size:13px;font-weight:700;color:${color||'var(--text)'};">${val}${sub?` <span style="font-size:10px;font-weight:400;color:var(--sub)">${sub}</span>`:''}</span>
     </div>`;
 
   let html = `
@@ -3439,9 +3576,9 @@ function renderVentasMcKinsey(empresa) {
         ${margen ? svgGauge(margen, 'Margen Var.', colMargen, '52%') : ''}
       </div>
       <div style="flex:1;min-width:160px">
-        ${row2('Ventas reales agosto 2026', ventaV||'—', '', 'var(--fg)')}
+        ${row2('Ventas reales agosto 2026', ventaV||'—', '', 'var(--text)')}
         ${margenV ? row2('Margen Variable', margenV, 'meta ≥52%', colMargen) : row2('Margen Variable', '— sin dato', 'ejecutar workflow', 'var(--sub)')}
-        ${precioV ? row2('Precio/kg', precioV, '', 'var(--fg)') : ''}
+        ${precioV ? row2('Precio/kg', precioV, '', 'var(--text)') : ''}
         ${costoV  ? row2('Costo/kg',  costoV,  '', 'var(--sub)') : ''}
         ${row2('Avance vs Presupuesto', avanceV||'—', 'meta 100%', col)}
         ${row2('Presupuesto implícito mensual', ppto ? fmtM(ppto) : '—', '(= real ÷ avance)', 'var(--sub)')}
