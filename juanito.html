@@ -268,16 +268,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
    MacBook (≥1180px) = I fija a la izquierda + II-V en grilla 2x2
    ══════════════════════════════════════════════════════════════════════ */
 .mck-wrap {
-  max-width: 1180px; margin: 0 auto;
+  max-width: 1180px; margin: -16px -14px 0; width: calc(100% + 28px);
   --mk-ink:#1B2430; --mk-paper:#EEEEE8; --mk-surface:#F7F7F3; --mk-surface2:#E3E3DC;
   --mk-border:#D3D3CA; --mk-sub:#6B7680; --mk-accent:#2C6E63; --mk-accent-soft:#DCE9E6;
   --mk-red:#B23A2F; --mk-red-soft:#F5E1DE; --mk-yellow:#966412; --mk-yellow-soft:#F2E7D2;
   --mk-green:#3D7A4B; --mk-green-soft:#DEEBE0;
   --mk-display:'Fraunces',Georgia,serif; --mk-body:'IBM Plex Sans',system-ui,sans-serif; --mk-mono:'IBM Plex Mono',ui-monospace,monospace;
   background: var(--mk-paper); color: var(--mk-ink); font-family: var(--mk-body);
-  font-size: 13.5px; line-height: 1.5; padding: 16px 14px 40px; margin: -16px -16px 0;
+  font-size: 13.5px; line-height: 1.5; padding: 16px 14px 40px; box-sizing: border-box;
 }
-@media (min-width: 768px) { .mck-wrap { padding: 22px 24px 50px; margin: -22px -24px 0; } }
+@media (min-width: 768px) {
+  .mck-wrap { margin: -24px -32px 0; width: calc(100% + 64px); padding: 24px 32px 50px; max-width: none; }
+}
+@media (min-width: 1244px) {
+  .mck-wrap { width: 1180px; margin: -24px auto 0; }
+}
 
 .mck-back { font-family: var(--mk-mono); font-size: 11px; color: var(--mk-accent); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; margin-bottom: 14px; }
 .mck-back:hover { text-decoration: underline; }
