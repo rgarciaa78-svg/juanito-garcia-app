@@ -269,32 +269,38 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
    ══════════════════════════════════════════════════════════════════════ */
 .mck-wrap {
   max-width: 1180px; margin: -16px -14px 0; width: calc(100% + 28px);
-  --mk-ink:#1B2430; --mk-paper:#EEEEE8; --mk-surface:#F7F7F3; --mk-surface2:#E3E3DC;
-  --mk-border:#D3D3CA; --mk-sub:#6B7680; --mk-accent:#2C6E63; --mk-accent-soft:#DCE9E6;
+  --mk-ink:#0F2136; --mk-navy:#0F2A4A; --mk-paper:#FFFFFF; --mk-surface:#FFFFFF; --mk-surface2:#EEF1F5;
+  --mk-border:#DEE3E9; --mk-sub:#6B7680; --mk-accent:#0F2A4A; --mk-accent-soft:#E4EAF1;
   --mk-red:#B23A2F; --mk-red-soft:#F5E1DE; --mk-yellow:#966412; --mk-yellow-soft:#F2E7D2;
   --mk-green:#3D7A4B; --mk-green-soft:#DEEBE0;
   --mk-display:'Fraunces',Georgia,serif; --mk-body:'IBM Plex Sans',system-ui,sans-serif; --mk-mono:'IBM Plex Mono',ui-monospace,monospace;
   background: var(--mk-paper); color: var(--mk-ink); font-family: var(--mk-body);
-  font-size: 13.5px; line-height: 1.5; padding: 16px 14px 40px; box-sizing: border-box;
+  font-size: 13.5px; line-height: 1.5; padding: 0 0 40px; box-sizing: border-box;
 }
 @media (min-width: 768px) {
-  .mck-wrap { margin: -24px -32px 0; width: calc(100% + 64px); padding: 24px 32px 50px; max-width: none; }
+  .mck-wrap { margin: -24px -32px 0; width: calc(100% + 64px); padding: 0 0 50px; max-width: none; }
 }
 @media (min-width: 1244px) {
-  .mck-wrap { width: 1180px; margin: -24px auto 0; }
+  .mck-wrap { width: calc(1180px + 64px); margin: -24px auto 0; }
 }
 
-.mck-back { font-family: var(--mk-mono); font-size: 11px; color: var(--mk-accent); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; margin-bottom: 14px; }
+.mck-pad { padding: 16px 14px 0; }
+@media (min-width: 768px) { .mck-pad { padding: 24px 32px 0; } }
+
+.mck-back { font-family: var(--mk-mono); font-size: 11px; color: var(--mk-navy); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; margin-bottom: 14px; }
 .mck-back:hover { text-decoration: underline; }
-.mck-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--mk-stripe, var(--mk-ink)); padding-bottom: 14px; margin-bottom: 18px; }
-.mck-title { font-family: var(--mk-display); font-weight: 600; font-size: clamp(20px,3vw,26px); text-wrap: balance; }
-.mck-sub { font-size: 11.5px; color: var(--mk-sub); margin-top: 4px; }
+/* Cabecera azul oscuro — banda a todo el ancho, texto blanco */
+.mck-head { background: var(--mk-navy); color: #fff; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 20px 14px; margin-bottom: 18px; }
+@media (min-width: 768px) { .mck-head { padding: 26px 32px; } }
+.mck-title { font-family: var(--mk-display); font-weight: 600; font-size: clamp(20px,3vw,26px); text-wrap: balance; color: #fff; }
+.mck-sub { font-size: 11.5px; color: rgba(255,255,255,.65); margin-top: 4px; }
 .mck-pill { font-family: var(--mk-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; white-space: nowrap; }
 .mck-pill.crit { background: var(--mk-red-soft); color: var(--mk-red); }
 .mck-pill.warn { background: var(--mk-yellow-soft); color: var(--mk-yellow); }
 .mck-pill.ok   { background: var(--mk-green-soft); color: var(--mk-green); }
 
-.mck-grid { display: flex; flex-direction: column; gap: 14px; }
+.mck-grid { display: flex; flex-direction: column; gap: 14px; padding: 0 14px; }
+@media (min-width: 768px) { .mck-grid { padding: 0 32px; } }
 .mck-sec { min-width: 0; background: var(--mk-surface); border: 1px solid var(--mk-border); padding: 18px 20px; }
 @media (min-width: 768px) {
   .mck-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: start; }
@@ -3583,9 +3589,9 @@ function renderMcKinseyArea(empresa, tipo) {
     ${mcSection('V', 'Datos Necesarios para Análisis Completo', `${vHtml}<div class="mck-nd" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--mk-border)">Estos datos están en Power BI — requieren habilitarlos en el scraper con medidas filtradas por período.</div>`)}
     </div>
 
-    <div class="mck-cta">
+    <div class="mck-pad"><div class="mck-cta">
       <button data-msg="${(chatMsg||'').replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Analizar con Juanito (IA)</button>
-    </div>`;
+    </div></div>`;
 }
 
 // ── Análisis McKinsey de Ventas ───────────────────────────────────────────────
@@ -3639,11 +3645,13 @@ function renderVentasMcKinsey(empresa) {
 
   let html = `
   <!-- HEADLINE KPI — 4 tarjetas: Ventas / Margen / Avance / Brecha -->
+  <div class="mck-pad">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--mk-border);border:1px solid var(--mk-border);margin-bottom:16px">
     ${heroCard('Ventas Agosto 2026', ventaV || '—', 'Dato real — Power BI', null, true)}
     ${heroCard('Margen Variable', margenV || '—', `meta ≥52%${margenV ? '' : ' · requiere workflow'}`, colMargen)}
     ${heroCard('Avance vs Ppto', avanceV || '—', 'meta 100%', col)}
     ${heroCard('Brecha vs Plan', gap ? fmtM(gap) : '—', `${avance ? (100-avance).toFixed(1)+'pp' : ''} por cerrar`, 'var(--mk-red)')}
+  </div>
   </div>
 
   <div class="mck-grid">
@@ -3898,14 +3906,17 @@ function showDetail(empresa, tipo, label, archivo, desc) {
     mcHtml = renderMcKinseyArea(empresa, tipo);
   }
 
+  const estadoPill = rd.estado === 'red' ? 'crit' : rd.estado === 'yellow' ? 'warn' : 'ok';
+  const estadoTxt  = rd.estado === 'red' ? 'Crítico' : rd.estado === 'yellow' ? 'Atención' : 'Sin alerta';
   document.getElementById('screen-' + currentTab).innerHTML =
     `<div class="mck-wrap">
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 0 16px;cursor:pointer" onclick="goBack()">
-      <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--accent);stroke-width:2.5;fill:none"><polyline points="15 18 9 12 15 6"/></svg>
-      <span style="font-size:13px;font-weight:700;color:var(--accent)">← ${empresa}</span>
+    <div class="mck-pad">
+      <button class="mck-back" onclick="goBack()">← ${empresa}</button>
     </div>
-    <div style="font-size:20px;font-weight:800;margin-bottom:4px">${tituloDetalle}</div>
-    <div style="font-size:11px;color:var(--sub);margin-bottom:16px">Marco McKinsey — Agosto 2026 · Fuente: Power BI</div>
+    <div class="mck-head">
+      <div><div class="mck-title">${tituloDetalle}</div><div class="mck-sub">Marco McKinsey — Agosto 2026 · Fuente: Power BI</div></div>
+      <span class="mck-pill ${estadoPill}">${estadoTxt}</span>
+    </div>
     ${mcHtml}
     </div>`;
   return;
