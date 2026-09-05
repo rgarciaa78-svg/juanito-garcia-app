@@ -651,6 +651,13 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   .dxp .roman-grid>div:nth-child(5){grid-column:2;grid-row:3}
 }
 @media (max-width:640px){
+  /* Barras del desglose: en pantallas angostas el nombre deja de ser una columna
+     fija y la fila puede envolver, para que ninguna barra desborde el contenedor. */
+  .dxp .bd-row{flex-wrap:wrap;gap:4px 8px}
+  .dxp .bd-row .name{width:auto;flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+  .dxp .bd-bar-track{flex:1 1 100%;order:3}
+  .dxp .bd-row .val{width:auto;min-width:52px}
+  .dxp .stat-mini,.dxp .comp-line{flex-wrap:wrap;gap:2px 10px}
   .dxp .roman-grid{grid-template-columns:1fr;gap:12px}
   .dxp .roman-grid>div{grid-column:1 !important;grid-row:auto !important;padding:18px}
   .dxp .masthead{flex-direction:column;align-items:flex-start}
@@ -3419,6 +3426,26 @@ function svgWaterfall(items) {
 }
 
 function renderChartForReporte(tipo, rd) {
+  // Medidas que Power BI sí entrega en series.json pero que no vienen en
+  // summaries.json — se agregan como KPI real (con su período de origen).
+  const EXTRA_SERIE = {
+    mermas:            [{ ds:'mermas',     medida:'Merma',           label:'Merma (medida absoluta)', pct:true }],
+    cuentas_por_pagar: [{ ds:'cxp',        medida:'Refinanciamiento',label:'Refinanciamiento (serie)', money:true },
+                        { ds:'cxp',        medida:'Proveedores',     label:'Proveedores (serie)' }],
+    sop_inventario:    [{ ds:'inventario', medida:'Stock Total',     label:'Stock Total (kg)' }],
+    margen_variable:   [{ ds:'margen',     medida:'Venta Total',     label:'Venta Total (serie)', money:true }],
+    fill_rate:         [{ ds:'fill_rate',  medida:'ORDEN DE VENTA',  label:'Orden de Venta (serie)', money:true }],
+  };
+  const extras = (EXTRA_SERIE[tipo] || []).map(e => {
+    const a = (SERIES?.datasets?.[e.ds] || {})[e.medida];
+    if (!Array.isArray(a)) return null;
+    const v = a.map((x,i)=>({x,i})).filter(o=>o.x!=null);
+    if (!v.length) return null;
+    const u = v[v.length-1];
+    const val = e.pct ? (u.x*100).toFixed(2)+'%' : e.money ? fmtM(u.x) : u.x.toLocaleString('es-PE',{maximumFractionDigits:2});
+    return { label: e.label, valor: val, periodo: s.ps[u.i] };
+  }).filter(Boolean);
+
   const kpis = rd.kpis || [];
   const get  = (lbl) => kpis.find(k => k.label === lbl)?.valor;
   const num  = (lbl) => parseVal(get(lbl));
@@ -4497,7 +4524,7 @@ function dxpPalancas(tipo, s) {
     ];
     case 'compras': return [
       P('Exponer el ratio Consumo ÷ Compra','media',
-        `Consumo Prom 3M ${s.kv('compras','Consumo Prom 3M')} vs 6M ${s.kv('compras','Consumo Prom 6M')}`,
+        `Consumo Prom 3M ${Number(parseVal(s.kv('compras','Consumo Prom 3M'))).toLocaleString('es-PE')} vs 6M ${Number(parseVal(s.kv('compras','Consumo Prom 6M'))).toLocaleString('es-PE')}`,
         'La regla ya está definida (>100% jala inventario, <100% sobre-compra) pero no se muestra.'),
       P('Validar si la serie plana es un bug','media','Variación mes a mes casi nula',
         'Confirmar con Copiar consulta si es demanda estable real o la medida ignora la fecha.'),
@@ -4611,19 +4638,147 @@ function dxpDesglose(tipo, s) {
   if (tipo === 'compras') {
     const c3 = parseVal(s.kv('compras','Consumo Prom 3M')), c6 = parseVal(s.kv('compras','Consumo Prom 6M'));
     const sv = parseVal(s.kv('compras','Stock Valorizado')), pp = parseVal(s.kv('compras','Stock PP (Punto de Pedido)'));
+    const mxc = Math.max(c3, c6) || 1, mxs = Math.max(sv, pp) || 1;
+    const nf = v => v.toLocaleString('es-PE', { maximumFractionDigits: 0 });
     return { t:'Desglose — consumo y stock', h:
-      (c3&&c6 ? mini('Consumo Prom 3M / 6M', (c3/c6).toFixed(3)+'x') : '')
-      + (sv&&pp ? mini('Stock Valorizado / Punto de Pedido', (sv/pp).toFixed(2)+'x') : '') };
+      bar('Consumo 3M', nf(c3), c3/mxc*100, 'var(--accent)')
+      + bar('Consumo 6M', nf(c6), c6/mxc*100, 'var(--sub)')
+      + '<div style="height:8px"></div>'
+      + bar('Stock Valorizado', fmtM(sv), sv/mxs*100, 'var(--green)')
+      + bar('Punto de Pedido', nf(pp), pp/mxs*100, 'var(--yellow)')
+      + mini('Consumo 3M − 6M', nf(c3-c6))
+      + mini('Holgura sobre punto de pedido', fmtM(sv-pp)) };
+  }
+  if (tipo === 'cuentas_por_cobrar') {
+    const mo = parseVal(s.mora), pv = parseVal(s.cxcVencer), vt = parseVal(s.ventas);
+    return { t:'Desglose — cartera vs meta', h:
+      bar('Morosidad', s.mora, mo/Math.max(mo,20)*100, 'var(--yellow)')
+      + bar('Meta', '15%', 15/Math.max(mo,20)*100, 'var(--green)')
+      + mini('Brecha sobre meta', (mo-15).toFixed(1)+' pts')
+      + mini('CxC por vencer', s.cxcVencer)
+      + mini('CxC por vencer / venta del mes', (pv/vt*100).toFixed(1)+'%')
+      + `<div class="nd" style="margin-top:8px">El modelo no expone el tramo de vencimiento (30/60/90) ni el saldo total de cartera, así que no se puede abrir más sin capturarlo con Copiar consulta.</div>` };
+  }
+  if (tipo === 'sop_inventario') {
+    const inv = parseVal(s.kv('sop_inventario','Inventario Total'));
+    const sv  = parseVal(s.kv('compras','Stock Valorizado'));
+    const vt  = parseVal(s.ventas);
+    const mxv = Math.max(inv, sv, vt) || 1;
+    return { t:'Desglose — inventario en contexto', h:
+      bar('Inventario S&OP', fmtM(inv), inv/mxv*100, 'var(--accent)')
+      + bar('Stock Valorizado', fmtM(sv), sv/mxv*100, 'var(--yellow)')
+      + bar('Venta del mes', fmtM(vt), vt/mxv*100, 'var(--green)')
+      + mini('Inventario / venta del mes', (inv/vt).toFixed(2)+'x')
+      + mini('Inventario vs Stock Valorizado', ((inv/sv-1)*100).toFixed(1)+'%') };
+  }
+  if (tipo === 'margen_variable_pag2') {
+    const av = parseVal(s.avancePpto), vt = parseVal(s.ventas);
+    const ppto = vt/(av/100);
+    return { t:'Desglose — real vs presupuesto', h:
+      bar('Avance', s.avancePpto, av, 'var(--green)')
+      + bar('Meta', '100%', 100, 'var(--sub)')
+      + mini('Venta real del mes', s.ventas)
+      + mini('Presupuesto implícito (venta ÷ avance)', fmtM(ppto))
+      + mini('Brecha en soles', fmtM(ppto - vt))
+      + mini('Puntos por cerrar', (100-av).toFixed(1)+' pts') };
   }
   return { t:'Desglose', h:'<div class="nd">Este reporte no expone un desglose adicional en el modelo de Power BI — solo el agregado del mes.</div>' };
+}
+
+// Relaciones derivadas reales por reporte: cruzan KPIs que Power BI ya entrega
+// para que ninguna sección quede vacía cuando no hay serie mensual.
+function dxpDerivados(tipo, s) {
+  const mini = (l, v) => `<div class="stat-mini"><span>${l}</span><b>${v}</b></div>`;
+  const n = x => parseVal(x);
+  const ventas = n(s.ventas);
+  const g = (tp, l) => s.kv(tp, l);
+  const pctDe = (a, b) => (a != null && b) ? (a / b * 100).toFixed(1) + '%' : '—';
+  switch (tipo) {
+    case 'control_interno': {
+      const ev = n(s.ciEval);
+      const sat = n(g('control_interno','Satisfactorio')), obs = n(g('control_interno','Con Observaciones')), cri = n(s.ciCritico);
+      return mini('Satisfactorio / evaluados', pctDe(sat, ev))
+           + mini('Con Observaciones / evaluados', pctDe(obs, ev))
+           + mini('Crítico / evaluados', pctDe(cri, ev))
+           + mini('Calificación / Puntos Teóricos', `${g('control_interno','Calificación')} / ${g('control_interno','Puntos Totales')}`)
+           + mini('Planes cerrados / total', pctDe(n(g('control_interno','Planes de Acción Cerrados')), n(s.ciPlanes)));
+    }
+    case 'cuentas_por_cobrar':
+      return mini('Morosidad vs meta 15%', `${(n(s.mora)-15).toFixed(1)} pts sobre`)
+           + mini('CxC por vencer', s.cxcVencer)
+           + mini('CxC por vencer / venta del mes', pctDe(n(s.cxcVencer), ventas))
+           + mini('Venta del mes (referencia)', s.ventas);
+    case 'cuentas_por_pagar':
+      return mini('Refinanciado / CxP total', dxpPct(s.refPct))
+           + mini('CxP total / venta del mes', pctDe(n(s.cxpTotal), ventas) + ' (x' + (n(s.cxpTotal)/ventas).toFixed(2) + ')')
+           + mini('CxP promedio por proveedor', fmtM(n(s.cxpTotal)/n(s.proveedores)))
+           + mini('Proveedores activos', s.proveedores);
+    case 'compras': {
+      const sv = n(g('compras','Stock Valorizado')), pp = n(g('compras','Stock PP (Punto de Pedido)'));
+      const c3 = n(g('compras','Consumo Prom 3M')), c6 = n(g('compras','Consumo Prom 6M'));
+      return mini('Stock Valorizado / Punto de Pedido', (sv/pp).toFixed(2) + 'x')
+           + mini('Consumo Prom 3M vs 6M', ((c3/c6-1)*100).toFixed(2) + '%')
+           + mini('Stock Valorizado / venta del mes', pctDe(sv, ventas))
+           + mini('Inventario S&OP (referencia)', g('sop_inventario','Inventario Total'));
+    }
+    case 'consumo_materiales': {
+      const cp = n(g('consumo_materiales','Costo x TN Producida')), cv = n(g('consumo_materiales','Costo x TN Vendida'));
+      const pn = n(g('consumo_materiales','Producción Neta (KG)')), vn = n(g('consumo_materiales','Venta Neta (KG)'));
+      return mini('Costo x TN Producida vs Vendida', ((cp/cv-1)*100).toFixed(2) + '%')
+           + mini('Producción Neta / Venta Neta', (pn/vn).toFixed(2) + 'x')
+           + mini('Costo Total / venta del mes', pctDe(n(g('consumo_materiales','Costo Total')), ventas))
+           + mini('Costo Total', g('consumo_materiales','Costo Total'));
+    }
+    case 'productividad': {
+      const pt = n(g('productividad','Planilla Total'));
+      const pr = n(g('productividad','Producción Total (KG)')), ve = n(g('productividad','Venta Neta (KG)'));
+      const pp = n(g('productividad','Planilla S/. / KG Producido')), pv = n(g('productividad','Planilla S/. / KG Vendido'));
+      return mini('Planilla Total / venta del mes', pctDe(pt, ventas))
+           + mini('Venta Neta / Producción (KG)', (ve/pr).toFixed(3) + 'x')
+           + mini('Planilla/kg Vendido vs Producido', ((pv/pp-1)*100).toFixed(1) + '%')
+           + mini('Planilla Total', g('productividad','Planilla Total'));
+    }
+    case 'sop_inventario': {
+      const inv = n(g('sop_inventario','Inventario Total'));
+      return mini('Inventario / venta del mes', pctDe(inv, ventas) + ' (x' + (inv/ventas).toFixed(2) + ')')
+           + mini('Inventario vs Stock Valorizado (Compras)', `${g('sop_inventario','Inventario Total')} vs ${g('compras','Stock Valorizado')}`)
+           + mini('Venta del mes (referencia)', s.ventas);
+    }
+    case 'margen_variable_pag2':
+      return mini('Avance vs meta 100%', `${(100-n(s.avancePpto)).toFixed(1)} pts por cerrar`)
+           + mini('Venta del mes', s.ventas)
+           + mini('Presupuesto implícito (venta ÷ avance)', fmtM(ventas / (n(s.avancePpto)/100)))
+           + mini('Brecha en soles', fmtM(ventas/(n(s.avancePpto)/100) - ventas));
+    default: return '';
+  }
+}
+
+// Evidencia numérica de por qué una serie fue descartada + qué medidas del mismo
+// dataset sí varían (para no dejar la sección en un simple aviso de texto).
+function dxpEvidenciaPlana(cfg) {
+  const ds = (SERIES && SERIES.datasets && SERIES.datasets[cfg.ds]) || {};
+  const a = (ds[cfg.medida] || []).filter(x => x != null);
+  if (!a.length) return '';
+  const mn = Math.min(...a), mx = Math.max(...a), med = a.reduce((x,y)=>x+y,0)/a.length;
+  const varPct = med ? Math.abs((mx-mn)/med*100) : 0;
+  const f = v => Math.abs(v) >= 1e6 ? fmtM(v) : (Math.abs(v) < 1 ? (v*100).toFixed(2)+'%' : v.toLocaleString('es-PE',{maximumFractionDigits:2}));
+  const otras = Object.keys(ds).filter(k => k !== cfg.medida && dxpSerieOk(ds[k]));
+  const mini = (l,v) => `<div class="stat-mini"><span>${l}</span><b>${v}</b></div>`;
+  return `<div class="nd" style="margin-bottom:8px">Serie descartada: <b>${cfg.medida}</b> no filtra por fecha en el modelo — estas son las cifras que lo prueban.</div>`
+    + mini('Meses con dato', a.length)
+    + mini('Mínimo / Máximo', `${f(mn)} / ${f(mx)}`)
+    + mini('Variación total del período', varPct.toFixed(3) + '%')
+    + mini('Valores distintos', new Set(a.map(x=>Math.round(x/(med||1)*1e4))).size + ' en ' + a.length + ' meses')
+    + (otras.length ? mini('Sí varían en este dataset', otras.join(', ')) : '');
 }
 
 // Sección II — comparativo (MoM / YoY / acumulado) desde la serie confiable.
 function dxpComparativo(tipo, s) {
   const cfg = DXP_SERIE_CFG[tipo];
-  if (!cfg) return `<div class="nd">${DXP_SIN_SERIE_MOTIVO[tipo] || 'Sin serie mensual disponible para este reporte.'}</div>`;
+  const der = dxpDerivados(tipo, s);
+  if (!cfg) return (der || '') + (der ? '<div class="nd" style="margin-top:10px">' : '<div class="nd">') + (DXP_SIN_SERIE_MOTIVO[tipo] || 'Sin serie mensual disponible.') + '</div>';
   const arr = dxpSerie(cfg.ds, cfg.medida);
-  if (!arr) return `<div class="nd">Serie descartada: la medida <b>${cfg.medida}</b> devuelve prácticamente el mismo valor en todos los meses — no filtra por fecha en el modelo. Mostrarla como tendencia sería una línea recta falsa.</div>`;
+  if (!arr) return dxpEvidenciaPlana(cfg) + (der ? '<div style="height:10px"></div>' + der : '');
   const ps = s.ps, k = cfg.pct ? 100 : 1;
   const val = arr.map((v,i)=>({v,i})).filter(x=>x.v!=null);
   const act = val[val.length-1], prev = val[val.length-2];
@@ -4736,12 +4891,36 @@ function showDetail(empresa, tipo, label, archivo, desc) {
   const stripe = est === 'crit' ? 'var(--red)' : est === 'warn' ? 'var(--yellow)' : 'var(--green)';
   const nombre = DXP_NOMBRE[tipo] || label || tipo;
 
+  // Medidas que Power BI sí entrega en series.json pero que no vienen en
+  // summaries.json — se agregan como KPI real (con su período de origen).
+  const EXTRA_SERIE = {
+    mermas:            [{ ds:'mermas',     medida:'Merma',           label:'Merma (medida absoluta)', pct:true }],
+    cuentas_por_pagar: [{ ds:'cxp',        medida:'Refinanciamiento',label:'Refinanciamiento (serie)', money:true },
+                        { ds:'cxp',        medida:'Proveedores',     label:'Proveedores (serie)' }],
+    sop_inventario:    [{ ds:'inventario', medida:'Stock Total',     label:'Stock Total (kg)' }],
+    margen_variable:   [{ ds:'margen',     medida:'Venta Total',     label:'Venta Total (serie)', money:true }],
+    fill_rate:         [{ ds:'fill_rate',  medida:'ORDEN DE VENTA',  label:'Orden de Venta (serie)', money:true }],
+  };
+  const extras = (EXTRA_SERIE[tipo] || []).map(e => {
+    const a = (SERIES?.datasets?.[e.ds] || {})[e.medida];
+    if (!Array.isArray(a)) return null;
+    const v = a.map((x,i)=>({x,i})).filter(o=>o.x!=null);
+    if (!v.length) return null;
+    const u = v[v.length-1];
+    const val = e.pct ? (u.x*100).toFixed(2)+'%' : e.money ? fmtM(u.x) : u.x.toLocaleString('es-PE',{maximumFractionDigits:2});
+    return { label: e.label, valor: val, periodo: s.ps[u.i] };
+  }).filter(Boolean);
+
   const kpis = rd.kpis || [];
   const PREF = { margen_variable:'Margen variable', margen_variable_pag2:'Avance vs Ppto',
                  cuentas_por_pagar:'CxP Total', compras:'Stock Valorizado' };
   const hero = (PREF[tipo] && kpis.find(k => k.label === PREF[tipo])) || kpis[0] || {};
   const resto = kpis.filter(k => k !== hero);
   const cls = e => e === 'red' ? 'crit' : e === 'yellow' ? 'warn' : e === 'green' ? 'ok' : '';
+  // Los KPI que llegan como número crudo ("1825611") se muestran con separador
+  // de miles; el valor no cambia, solo su legibilidad.
+  const fmtKpi = v => (typeof v === 'string' && /^\d{4,}(\.\d+)?$/.test(v.trim()))
+    ? Number(v).toLocaleString('es-PE', { maximumFractionDigits: 2 }) : v;
   const brecha = (hero.meta && parseVal(hero.valor) != null && parseVal(hero.meta) != null)
     ? (parseVal(hero.valor) - parseVal(hero.meta)) : null;
 
@@ -4768,10 +4947,11 @@ function showDetail(empresa, tipo, label, archivo, desc) {
     <div class="roman-grid">
       <div>
         <div class="roman-h"><span class="rn">I</span>KPIs</div>
-        ${hero.valor ? `<div class="hero-l">${hero.label}</div><div class="hero-v" style="color:${stripe}">${hero.valor}</div>` : ''}
+        ${hero.valor ? `<div class="hero-l">${hero.label}</div><div class="hero-v" style="color:${stripe}">${fmtKpi(hero.valor)}</div>` : ''}
         ${hero.meta ? `<div class="kv"><span class="l">Meta</span><span class="v">${hero.meta}</span></div>` : ''}
         ${brecha != null ? `<div class="kv"><span class="l">Brecha</span><span class="v ${est}">${(brecha>=0?'+':'')+brecha.toFixed(2)} pts</span></div>` : ''}
-        ${resto.map(k => `<div class="kv"><span class="l">${k.label}</span><span class="v ${cls(k.estado)}">${k.valor}${k.meta?` <small>meta ${k.meta}</small>`:''}</span></div>`).join('')}
+        ${resto.map(k => `<div class="kv"><span class="l">${k.label}</span><span class="v ${cls(k.estado)}">${fmtKpi(k.valor)}${k.meta?` <small>meta ${k.meta}</small>`:''}</span></div>`).join('')}
+        ${extras.map(e => `<div class="kv"><span class="l">${e.label}</span><span class="v">${e.valor}<small>${fmtPeriodo(e.periodo)}</small></span></div>`).join('')}
         ${rd.alerta ? `<div class="nd" style="margin-top:12px">${rd.alerta}</div>` : ''}
       </div>
 
