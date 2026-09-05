@@ -425,6 +425,233 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .mck-cta { margin-top: 16px; }
 .mck-cta button { width: 100%; padding: 13px; background: var(--mk-ink); color: var(--mk-paper); border: none; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: var(--mk-body); }
 .mck-cta button:hover { opacity: .9; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DXP — Diagnóstico Ejecutivo PAUNO
+   Port literal del artifact aprobado (claude.ai/code/artifact/61ff1965...).
+   Todo va scoped bajo .dxp para no chocar con las clases viejas de la app.
+   ══════════════════════════════════════════════════════════════════════════ */
+.dxp{
+  --ink:#1B2430; --paper:#EEEEE8; --surface:#F7F7F3; --surface2:#E3E3DC;
+  --border:#D3D3CA; --sub:#6B7680; --accent:#2C6E63; --accent-soft:#DCE9E6;
+  --red:#B23A2F; --red-soft:#F5E1DE; --yellow:#966412; --yellow-soft:#F2E7D2;
+  --green:#3D7A4B; --green-soft:#DEEBE0;
+  --fd:'Fraunces',Georgia,serif; --fb:'IBM Plex Sans',system-ui,sans-serif; --fm:'IBM Plex Mono',ui-monospace,monospace;
+  background:var(--paper); color:var(--ink); font-family:var(--fb);
+  font-size:13.5px; line-height:1.5;
+  margin:-16px -14px -24px; padding:26px 18px 80px; min-height:100%;
+}
+@media (min-width:768px){ .dxp{ margin:-24px -32px -32px; padding:26px 32px 80px; } }
+.dxp *{box-sizing:border-box}
+.dxp .wrap{max-width:1320px;margin:0 auto}
+.dxp .view{display:none}
+.dxp .view.active{display:block}
+
+/* Masthead */
+.dxp .masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:18px}
+.dxp .mast-left{cursor:pointer}
+.dxp .eyebrow{font-family:var(--fm);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sub)}
+.dxp h1{font-family:var(--fd);font-weight:600;font-size:clamp(24px,3.6vw,34px);margin:2px 0 0;text-wrap:balance;color:var(--ink);letter-spacing:0}
+.dxp .meta-block{text-align:right;font-family:var(--fm);font-size:11px;color:var(--sub)}
+.dxp .meta-block b{color:var(--ink);font-weight:600}
+.dxp .back-link{font-family:var(--fm);font-size:11px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:none;border:none;padding:0;margin-bottom:10px}
+.dxp .back-link:hover{text-decoration:underline}
+
+/* Tabs */
+.dxp .top-tabs{display:flex;gap:4px;margin:14px 0 22px;border-bottom:1px solid var(--border)}
+.dxp .tt{font-family:var(--fm);font-size:11.5px;letter-spacing:.03em;background:none;border:none;border-bottom:2px solid transparent;padding:9px 4px;margin-right:22px;color:var(--sub);cursor:pointer;text-transform:uppercase}
+.dxp .tt:hover{color:var(--ink)}
+.dxp .tt.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+
+/* Resumen ejecutivo */
+.dxp .exec-summary{border:1.5px solid var(--ink);background:var(--surface);padding:26px 28px;margin-bottom:6px}
+.dxp .exec-eyebrow{font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);margin-bottom:8px}
+.dxp .exec-verdict{font-family:var(--fd);font-size:clamp(18px,2.4vw,23px);font-weight:600;line-height:1.35;text-wrap:balance;margin-bottom:18px}
+.dxp .exec-verdict b{color:var(--red)}
+.dxp .exec-verdict .g{color:var(--green)}
+.dxp .exec-findings{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+.dxp .ef{background:var(--surface);padding:14px 16px;cursor:pointer;transition:background .15s}
+.dxp .ef:hover{background:var(--surface2)}
+.dxp .ef-n{font-family:var(--fm);font-size:9.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;justify-content:space-between}
+.dxp .ef-n .arrow{color:var(--accent);opacity:0;transition:opacity .15s}
+.dxp .ef:hover .arrow{opacity:1}
+.dxp .ef-txt{font-size:12.5px;line-height:1.5}
+.dxp .ef-txt b{font-family:var(--fm)}
+@media (max-width:760px){ .dxp .exec-findings{grid-template-columns:1fr} }
+
+/* Banner calidad de dato */
+.dxp .note-banner{margin:18px 0 20px;padding:11px 15px;background:var(--yellow-soft);border:1px solid var(--yellow);font-size:12px;color:var(--ink);display:flex;gap:9px;align-items:flex-start;line-height:1.6}
+.dxp .note-banner .tag{font-family:var(--fm);font-weight:600;color:var(--yellow);flex-shrink:0}
+.dxp .note-banner.crit{background:var(--red-soft);border-color:var(--red)}
+.dxp .note-banner.crit .tag{color:var(--red)}
+.dxp .note-banner code{font-family:var(--fm);font-size:11.5px}
+
+/* Section labels */
+.dxp .section-label{display:flex;align-items:baseline;gap:10px;margin:30px 0 12px}
+.dxp .section-label .num{font-family:var(--fm);font-size:11px;color:var(--accent);font-weight:600}
+.dxp .section-label h2{font-family:var(--fd);font-size:18px;font-weight:600;margin:0;color:var(--ink);letter-spacing:0}
+.dxp .section-label .rule{flex:1;height:1px;background:var(--border)}
+
+/* Mapa de causalidad */
+.dxp .causal-wrap{border:1px solid var(--border);background:var(--surface);padding:22px 24px}
+.dxp .flow-chain{display:flex;align-items:stretch;gap:0;margin-bottom:18px;flex-wrap:wrap}
+.dxp .flow-chain:last-child{margin-bottom:0}
+.dxp .flow-box{border:1px solid var(--border);background:var(--paper);padding:11px 14px;min-width:150px;flex:1}
+.dxp .flow-box.crit{border-color:var(--red);background:var(--red-soft)}
+.dxp .flow-box.warn{border-color:var(--yellow);background:var(--yellow-soft)}
+.dxp .flow-box .fb-l{font-size:9.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.dxp .flow-box .fb-v{font-family:var(--fm);font-size:17px;font-weight:600}
+.dxp .flow-box .fb-sub{font-size:10px;color:var(--sub);margin-top:3px;line-height:1.4}
+.dxp .flow-arrow{display:flex;align-items:center;justify-content:center;padding:0 10px;color:var(--sub);font-size:18px;flex-shrink:0}
+@media (max-width:760px){ .dxp .flow-chain{flex-direction:column} .dxp .flow-arrow{transform:rotate(90deg);padding:6px 0} }
+
+/* Heatmap */
+.dxp .heatmap{display:grid;grid-template-columns:repeat(11,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+.dxp .hm-cell{background:var(--surface);padding:10px 6px;text-align:center;transition:transform .1s;cursor:pointer}
+.dxp .hm-cell:hover{transform:scale(1.04);z-index:1;position:relative}
+.dxp .hm-cell .hm-n{font-family:var(--fm);font-size:8.5px;color:var(--sub)}
+.dxp .hm-cell .hm-dot{width:20px;height:20px;border-radius:50%;margin:5px auto 4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:var(--fm)}
+.dxp .hm-cell .hm-dot.crit{background:var(--red)} .dxp .hm-cell .hm-dot.warn{background:var(--yellow)} .dxp .hm-cell .hm-dot.ok{background:var(--green)}
+.dxp .hm-cell .hm-lbl{font-size:8px;color:var(--sub);line-height:1.2;height:20px;overflow:hidden}
+@media (max-width:900px){ .dxp .heatmap{grid-template-columns:repeat(4,1fr)} }
+@media (max-width:480px){ .dxp .heatmap{grid-template-columns:repeat(3,1fr)} }
+
+/* Roadmap CTA + columnas */
+.dxp .roadmap-cta{border:1px solid var(--border);background:var(--surface);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px;cursor:pointer;flex-wrap:wrap}
+.dxp .roadmap-cta:hover{background:var(--surface2)}
+.dxp .roadmap-cta .txt b{font-family:var(--fd);font-size:15px}
+.dxp .roadmap-cta .txt span{display:block;font-size:11.5px;color:var(--sub);margin-top:2px}
+.dxp .roadmap-cta .go{font-family:var(--fm);font-size:11px;color:var(--accent);white-space:nowrap}
+.dxp .roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.dxp .rm-col{border:1px solid var(--border);background:var(--surface)}
+.dxp .rm-col-h{padding:12px 16px;border-bottom:2px solid var(--stripe);display:flex;justify-content:space-between;align-items:baseline}
+.dxp .rm-col-h b{font-family:var(--fd);font-size:16px}
+.dxp .rm-col-h span{font-family:var(--fm);font-size:9.5px;color:var(--sub)}
+.dxp .rm-item{padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.dxp .rm-item:last-child{border-bottom:none}
+.dxp .rm-item:hover{background:var(--surface2)}
+.dxp .rm-item-top{display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.dxp .rm-item-title{font-weight:600;font-size:12px}
+.dxp .rm-item-src{font-family:var(--fm);font-size:8.5px;color:var(--accent);text-transform:uppercase}
+.dxp .rm-item-impact{font-family:var(--fm);font-size:10.5px;color:var(--sub);margin-top:4px;line-height:1.4}
+@media (max-width:900px){ .dxp .roadmap{grid-template-columns:1fr} }
+
+/* Holding strip */
+.dxp .holding-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border)}
+.dxp .hs-cell{background:var(--surface);padding:14px 16px}
+.dxp .hs-label{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em}
+.dxp .hs-val{font-family:var(--fm);font-size:21px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+.dxp .hs-delta{font-family:var(--fm);font-size:10.5px;margin-top:3px}
+
+/* Grilla de reportes */
+.dxp .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.dxp .rcard{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--stripe,var(--border));cursor:pointer;transition:box-shadow .15s,transform .15s;display:flex;flex-direction:column}
+.dxp .rcard:hover{box-shadow:0 3px 14px rgba(0,0,0,.08);transform:translateY(-1px)}
+.dxp .rcard.crit{--stripe:var(--red)} .dxp .rcard.warn{--stripe:var(--yellow)} .dxp .rcard.ok{--stripe:var(--green)}
+.dxp .rcard-head{padding:13px 15px 8px;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.dxp .rcard-num{font-family:var(--fm);font-size:9.5px;color:var(--sub)}
+.dxp .rcard-title{font-weight:600;font-size:14px;margin-top:2px;display:flex;align-items:center;gap:6px;font-family:var(--fb)}
+.dxp .rcard-title .arrow{opacity:0;transition:opacity .15s;color:var(--accent);font-size:12px}
+.dxp .rcard:hover .arrow{opacity:1}
+.dxp .pill{font-family:var(--fm);font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;white-space:nowrap;flex-shrink:0}
+.dxp .pill.crit{background:var(--red-soft);color:var(--red)} .dxp .pill.warn{background:var(--yellow-soft);color:var(--yellow)} .dxp .pill.ok{background:var(--green-soft);color:var(--green)}
+.dxp .rcard-kpi{padding:0 15px 10px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--border)}
+.dxp .rcard-kpi .v{font-family:var(--fm);font-size:22px;font-weight:600}
+.dxp .rcard-kpi .meta{font-size:10px;color:var(--sub)}
+.dxp .rcard-body{padding:10px 15px 13px;font-size:11.5px;color:var(--sub);flex:1;line-height:1.5}
+.dxp .rcard-body b{color:var(--ink)}
+
+/* Legend + footer */
+.dxp .legend{display:flex;gap:16px;flex-wrap:wrap;margin:30px 0 4px;font-size:10.5px;color:var(--sub)}
+.dxp .legend span{display:inline-flex;align-items:center;gap:6px}
+.dxp .dot{width:8px;height:8px;border-radius:50%}
+.dxp .dot.crit{background:var(--red)} .dxp .dot.warn{background:var(--yellow)} .dxp .dot.ok{background:var(--green)}
+.dxp .deck-footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-family:var(--fm);font-size:9.5px;color:var(--sub);letter-spacing:.03em;text-transform:uppercase}
+.dxp .deck-footer .conf{color:var(--red);font-weight:600}
+
+/* Detalle I–V dentro de .dxp */
+.dxp .detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;border-bottom:2px solid var(--stripe,var(--ink));padding-bottom:14px;margin-bottom:18px}
+.dxp .detail-title{font-family:var(--fd);font-weight:600;font-size:26px}
+.dxp .detail-sub{font-size:11.5px;color:var(--sub);margin-top:3px}
+.dxp .roman-grid{display:grid;grid-template-columns:320px 1fr 1fr;gap:16px;align-items:start}
+.dxp .roman-grid>div{background:var(--surface);border:1px solid var(--border);padding:22px 24px;min-width:0}
+.dxp .roman-grid>div:nth-child(1){grid-row:1 / 3;grid-column:1}
+.dxp .roman-grid>div:nth-child(2){grid-column:2;grid-row:1}
+.dxp .roman-grid>div:nth-child(3){grid-column:3;grid-row:1}
+.dxp .roman-grid>div:nth-child(4){grid-column:2;grid-row:2}
+.dxp .roman-grid>div:nth-child(5){grid-column:3;grid-row:2}
+.dxp .roman-h{font-family:var(--fm);font-size:11px;color:var(--accent);font-weight:600;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.dxp .roman-h .rn{background:var(--accent);color:var(--surface);width:19px;height:19px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.dxp .kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+.dxp .kv:last-child{border-bottom:none}
+.dxp .kv .l{color:var(--sub)}
+.dxp .kv .v{font-family:var(--fm);font-weight:600;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.dxp .kv .v.crit{color:var(--red)} .dxp .kv .v.warn{color:var(--yellow)} .dxp .kv .v.ok{color:var(--green)}
+.dxp .kv .v small{font-family:var(--fb);font-size:10px;color:var(--sub);font-weight:500;margin-left:4px}
+.dxp .hero-v{font-family:var(--fm);font-size:40px;font-weight:600;line-height:1;margin-bottom:4px}
+.dxp .hero-l{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.dxp .comp-line{display:flex;justify-content:space-between;font-family:var(--fm);font-size:12.5px;padding:4px 0}
+.dxp .comp-line .l{color:var(--sub);font-family:var(--fb)}
+.dxp .stat-mini{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:var(--sub)}
+.dxp .stat-mini b{color:var(--ink);font-family:var(--fm)}
+.dxp .nd{color:var(--sub);font-style:italic;font-size:12.5px;line-height:1.6}
+.dxp .bd-row{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0}
+.dxp .bd-row .name{width:96px;flex-shrink:0;color:var(--ink);font-size:12px}
+.dxp .bd-bar-track{flex:1;height:7px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.dxp .bd-bar-fill{height:100%;border-radius:2px}
+.dxp .bd-row .val{font-family:var(--fm);width:54px;text-align:right;flex-shrink:0;font-weight:600;font-size:12px}
+.dxp .palanca{border-bottom:1px solid var(--border);padding:10px 0;font-size:12.5px}
+.dxp .palanca:last-child{border-bottom:none}
+.dxp .palanca:first-child{padding-top:0}
+.dxp .palanca-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.dxp .palanca-nombre{font-weight:600}
+.dxp .pr{font-family:var(--fm);font-size:9px;font-weight:700;padding:2px 6px;text-transform:uppercase;flex-shrink:0}
+.dxp .pr.alta{background:var(--red-soft);color:var(--red)} .dxp .pr.media{background:var(--yellow-soft);color:var(--yellow)} .dxp .pr.baja{background:var(--surface2);color:var(--sub)}
+.dxp .palanca-impacto{font-family:var(--fm);color:var(--accent);font-size:11.5px;margin-top:4px;line-height:1.5}
+.dxp .vacio-item{display:flex;gap:8px;font-size:12.5px;padding:5px 0;color:var(--sub);line-height:1.5}
+.dxp .vacio-item .mk{color:var(--yellow);flex-shrink:0}
+.dxp .trend-panel{grid-column:1 / -1;background:var(--surface);border:1px solid var(--border);padding:22px 24px;margin-top:16px}
+.dxp .trend-panel-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.dxp .trend-panel-h .roman-h{margin-bottom:0}
+.dxp .trend-panel-h .src{font-size:10.5px;color:var(--sub)}
+.dxp .compare-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:18px}
+.dxp .cc{background:var(--surface);padding:14px 16px}
+.dxp .cc-label{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.dxp .cc-val{font-family:var(--fm);font-size:22px;font-weight:600;display:flex;align-items:baseline;gap:8px}
+.dxp .cc-sub{font-size:10.5px;color:var(--sub);margin-top:4px}
+.dxp .up-c{color:var(--green)} .dxp .down-c{color:var(--red)} .dxp .flat-c{color:var(--sub)}
+.dxp .chart-legend{display:flex;gap:18px;margin-bottom:6px;font-size:11px;flex-wrap:wrap}
+.dxp .chart-legend .lg{display:flex;align-items:center;gap:6px;color:var(--sub)}
+.dxp .chart-legend .sw{width:14px;height:3px;border-radius:2px;flex-shrink:0}
+.dxp .chart-big{width:100%;position:relative}
+.dxp .chart-big svg{display:block;width:100%;height:180px}
+.dxp .chart-axis-labels{display:flex;justify-content:space-between;font-family:var(--fm);font-size:10px;color:var(--sub);margin-top:6px}
+.dxp .chart-stats-row{display:flex;gap:24px;margin-top:14px;flex-wrap:wrap;font-size:11.5px}
+.dxp .chart-stats-row .item{color:var(--sub)}
+.dxp .chart-stats-row .item b{color:var(--ink);font-family:var(--fm)}
+.dxp .no-trend-box{grid-column:1 / -1;margin-top:16px;border:1.5px dashed var(--border);padding:22px 24px;display:flex;gap:14px;align-items:flex-start;background:var(--surface2)}
+.dxp .no-trend-box .icon{font-family:var(--fm);font-size:20px;color:var(--sub);flex-shrink:0;line-height:1}
+.dxp .no-trend-box .txt{font-size:12.5px;color:var(--sub);line-height:1.6}
+.dxp .no-trend-box .txt b{color:var(--ink)}
+.dxp .cta-ia{margin-top:16px}
+.dxp .cta-ia button{width:100%;padding:13px;background:var(--ink);color:var(--paper);border:none;font-weight:600;font-size:13px;cursor:pointer;font-family:var(--fb)}
+@media (max-width:980px){
+  .dxp .roman-grid{grid-template-columns:1fr 1fr}
+  .dxp .roman-grid>div:nth-child(1){grid-row:1;grid-column:1 / 3}
+  .dxp .roman-grid>div:nth-child(2){grid-column:1;grid-row:2}
+  .dxp .roman-grid>div:nth-child(3){grid-column:2;grid-row:2}
+  .dxp .roman-grid>div:nth-child(4){grid-column:1;grid-row:3}
+  .dxp .roman-grid>div:nth-child(5){grid-column:2;grid-row:3}
+}
+@media (max-width:640px){
+  .dxp .roman-grid{grid-template-columns:1fr;gap:12px}
+  .dxp .roman-grid>div{grid-column:1 !important;grid-row:auto !important;padding:18px}
+  .dxp .masthead{flex-direction:column;align-items:flex-start}
+  .dxp .meta-block{text-align:left}
+  .dxp .detail-title{font-size:21px}
+  .dxp .hero-v{font-size:32px}
+  .dxp .compare-cards{grid-template-columns:1fr}
+}
 .exec-eyebrow {
   font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
   text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 5px;
@@ -1247,14 +1474,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
       <!-- HOME -->
       <div id="screen-home" class="screen active">
-        <div id="exec-header-row"></div>
-        <div id="veredicto-row"></div>
-        <div id="dq-banner-row"></div>
-        <div id="causal-row"></div>
-        <div id="heatmap-row"></div>
-        <div id="roadmap-row"></div>
-        <div id="holding-strip-row"></div>
-        <div id="rcard-grid-row"></div>
+        <div class="dxp" id="dxp-home"></div>
       </div>
 
       <!-- PAUNO -->
@@ -2233,361 +2453,385 @@ function diagnosticoCompleto() {
   return { anioAct, anioAnt, hallazgos };
 }
 
-// Ordena hallazgos por severidad (rojos primero) y compone una síntesis de 1 frase para el CEO.
-function renderVeredicto() {
-  const el = document.getElementById('veredicto-row');
-  if (!el) return;
-  const d = diagnosticoCompleto();
-  if (!d || !d.hallazgos.length) { el.innerHTML = ''; return; }
+// ══════════════════════════════════════════════════════════════════════════
+//  DXP — Diagnóstico Ejecutivo PAUNO
+//  Reconstruye la pantalla Inicio con la MISMA estructura del artifact
+//  aprobado, pero alimentada con datos reales de summaries.json / series.json.
+// ══════════════════════════════════════════════════════════════════════════
 
-  const rojos = d.hallazgos.filter(h => h.sev === 'red');
-  const verdes = d.hallazgos.filter(h => h.sev !== 'red');
-  const peor = rojos[0] || d.hallazgos[0];
-  const ok = rojos.length === 0;
+const DXP_ORDEN = [
+  'control_interno','fill_rate','mermas','margen_variable','cuentas_por_cobrar',
+  'cuentas_por_pagar','consumo_materiales','compras','sop_inventario',
+  'productividad','margen_variable_pag2',
+];
+const DXP_NOMBRE = {
+  control_interno:'Control Interno', fill_rate:'Fill Rate', mermas:'Mermas',
+  margen_variable:'Margen Variable', cuentas_por_cobrar:'Cuentas x Cobrar',
+  cuentas_por_pagar:'Cuentas x Pagar', consumo_materiales:'Consumo Materiales',
+  compras:'Compras', sop_inventario:'S&OP Inventario', productividad:'Productividad',
+  margen_variable_pag2:'Avance vs Presupuesto',
+};
+const DXP_CORTO = {
+  control_interno:'Control Interno', fill_rate:'Fill Rate', mermas:'Mermas',
+  margen_variable:'Margen', cuentas_por_cobrar:'CxC', cuentas_por_pagar:'CxP',
+  consumo_materiales:'Consumo Mat.', compras:'Compras', sop_inventario:'S&OP Inv.',
+  productividad:'Productividad', margen_variable_pag2:'Avance Ppto',
+};
 
-  const frase = ok
-    ? `Los ${d.hallazgos.length} hallazgos analizados de ${d.anioAct} están en línea o mejor que ${d.anioAnt} — sin alertas críticas que requieran acción inmediata.`
-    : `De ${d.hallazgos.length} hallazgos analizados, <b>${rojos.length} están en rojo</b>. El más urgente: <b>${peor.titulo.charAt(0).toLowerCase()+peor.titulo.slice(1)}</b> (${peor.cifra}${peor.unidad?' '+peor.unidad:''})${verdes.length?`, mientras que ${verdes.length} indicador${verdes.length>1?'es':''} sí ${verdes.length>1?'muestran':'muestra'} mejora.`:'.'}`;
+// Calcula de una sola vez todas las cifras derivadas que usa el dashboard.
+function dxpStats() {
+  const rp = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
+  const kv = (t, l) => rp[t]?.kpis?.find(k => k.label === l)?.valor;
+  const s = { rp, kv };
 
-  el.innerHTML = `
-    <div class="veredicto-box">
-      <div class="veredicto-eyebrow">Veredicto — resumen ejecutivo</div>
-      <div class="veredicto-txt">${frase}</div>
-    </div>`;
-}
+  s.ventas       = kv('margen_variable','Ventas mes') || DATA.holding_ventas;
+  s.margenOf     = kv('margen_variable','Margen variable');
+  s.precioKg     = kv('margen_variable','Precio/kg');
+  s.costoKg      = kv('margen_variable','Costo/kg');
+  s.fillRate     = kv('fill_rate','Fill Rate');
+  s.ordenVenta   = kv('fill_rate','Orden de Venta');
+  s.facturacion  = kv('fill_rate','Facturación');
+  s.ventaPerdida = kv('fill_rate','Venta Perdida');
+  s.mermaTotal   = kv('mermas','Merma Total');
+  s.mora         = kv('cuentas_por_cobrar','Morosidad') || DATA.holding_mora;
+  s.cxcVencer    = kv('cuentas_por_cobrar','CxC por vencer');
+  s.cxpTotal     = kv('cuentas_por_pagar','CxP Total');
+  s.refinanciado = kv('cuentas_por_pagar','Refinanciado');
+  s.proveedores  = kv('cuentas_por_pagar','# Proveedores');
+  s.avancePpto   = kv('margen_variable_pag2','Avance vs Ppto');
 
-// Aviso de calidad de dato: cuenta en vivo cuántas de las 7 series históricas
-// de Power BI están excluidas por el detector de series planas (fetch_series.py).
-function renderDataQualityBanner() {
-  const el = document.getElementById('dq-banner-row');
-  if (!el) return;
+  // Control interno
+  const ci = l => rp.control_interno?.kpis?.find(k => k.label === l)?.valor;
+  s.ciCumpl = ci('% Cumplimiento'); s.ciEval = ci('Puntos de Control evaluados');
+  s.ciCritico = ci('Crítico'); s.ciCritPct = ci('% Puntos en estado Crítico');
+  s.ciPlanes = ci('Total Planes de Acción'); s.ciAtrasados = ci('Planes de Acción Atrasados');
+  const at = parseVal(s.ciAtrasados), tp = parseVal(s.ciPlanes);
+  s.ciAtrasPct = (at != null && tp) ? (at / tp * 100) : null;
+
+  // Mermas por UEN / planta
+  const uen = (rp.mermas?.por_uen || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma));
+  const pla = (rp.mermas?.por_planta || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma));
+  s.uenPeor = uen[0]; s.uenMejor = uen[uen.length-1];
+  s.plaPeor = pla[0]; s.plaMejor = pla[pla.length-1];
+  s.ratioUen = (s.uenPeor && s.uenMejor && parseVal(s.uenMejor.merma)) ? (parseVal(s.uenPeor.merma)/parseVal(s.uenMejor.merma)) : null;
+  s.ratioPla = (s.plaPeor && s.plaMejor && parseVal(s.plaMejor.merma)) ? (parseVal(s.plaPeor.merma)/parseVal(s.plaMejor.merma)) : null;
+
+  // Fill rate: % de venta perdida sobre el pedido
+  const ov = parseVal(s.ordenVenta), vp = parseVal(s.ventaPerdida), fa = parseVal(s.facturacion);
+  s.vpPct = (ov && vp) ? (vp/ov*100) : null;
+  s.faPct = (ov && fa) ? (fa/ov*100) : null;
+
+  // CxP refinanciado
+  const cx = parseVal(s.cxpTotal), rf = parseVal(s.refinanciado);
+  s.refPct = (cx && rf) ? (rf/cx*100) : null;
+
+  // ── Series ──
   const ds = (SERIES && SERIES.datasets) || {};
-  const sinSerie = (SERIES && SERIES.sin_serie) || {};
-  const confiables = Object.keys(ds).length;
-  const excluidas = Object.values(sinSerie).reduce((n, d) => n + (d.medidas_planas ? d.medidas_planas.length : 0), 0);
-  const totalDatasets = confiables + Object.keys(sinSerie).length;
-  if (!totalDatasets) { el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="dq-banner">
-      <span class="tag">HALLAZGO DE CALIDAD DE DATO — YA CORREGIDO EN EL PIPELINE</span>
-      <span>${excluidas ? `${excluidas} medida${excluidas>1?'s':''} histórica${excluidas>1?'s':''} de Power BI devolvía${excluidas>1?'n':''} el mismo valor repetido mes a mes — medida sin filtro de fecha.` : 'El pipeline'} <code>fetch_series.py</code> detecta esto automáticamente (valores distintos vs. meses con dato) y las excluye de <code>series.json</code> en vez de graficarlas como tendencia real. Solo <b>${confiables} de ${totalDatasets}</b> datasets con serie mensual quedan como confiables. Pendiente: repetir Copiar consulta en vivo sobre los descartados para conseguir la fórmula real.</span>
+  const ps = (SERIES && SERIES.periodos) || [];
+  s.ps = ps; s.ds = ds;
+  const M = ds.margen || {};
+  const pk = M['Precio x Kilo'], ck = M['Costo x Kilo'], vt = M['Venta Total'];
+  if (pk && ck) {
+    const mg = pk.map((p,i) => (p==null||ck[i]==null||!p) ? null : (p-ck[i])/p*100);
+    const val = mg.map((v,i)=>({v,i})).filter(x=>x.v!=null);
+    if (val.length) {
+      s.mgSerie = mg;
+      s.mgAct = val[val.length-1].v;
+      s.mgProm = val.reduce((a,b)=>a+b.v,0)/val.length;
+      const mx = val.reduce((a,b)=>b.v>a.v?b:a), mn = val.reduce((a,b)=>b.v<a.v?b:a);
+      s.mgMax = mx.v; s.mgMaxP = ps[mx.i]; s.mgMin = mn.v; s.mgMinP = ps[mn.i];
+      s.mgN = val.length;
+      s.mgSobreMeta = val.filter(x=>x.v>=52).length;
+      s.mgEsMin = (mn.i === val[val.length-1].i);
+    }
+    const ckv = ck.map((v,i)=>({v,i})).filter(x=>x.v!=null);
+    const pkv = pk.map((v,i)=>({v,i})).filter(x=>x.v!=null);
+    if (ckv.length>=2) { s.ckDelta = (ckv[ckv.length-1].v/ckv[0].v-1)*100; s.ckIni=ckv[0].v; s.ckFin=ckv[ckv.length-1].v; s.ckIniP=ps[ckv[0].i]; s.ckFinP=ps[ckv[ckv.length-1].i]; s.ckN=ckv.length; }
+    if (pkv.length>=2) { s.pkDelta = (pkv[pkv.length-1].v/pkv[0].v-1)*100; }
+  }
+  const fr = ds.fill_rate && ds.fill_rate['% Fill Rate'];
+  if (fr) { const v = fr.filter(x=>x!=null); s.frN = v.length; s.frBajoMeta = v.filter(x=>x<0.98).length; }
+  const mm = ds.mermas && ds.mermas['% Merma Total'];
+  if (mm) { const v = mm.filter(x=>x!=null); s.mmN = v.length; s.mmSobreMeta = v.filter(x=>x>0.02).length; }
+
+  s.dsConf = Object.keys(ds).length;
+  s.dsSin  = Object.keys((SERIES && SERIES.sin_serie) || {}).length;
+  s.dsTot  = s.dsConf + s.dsSin;
+
+  // YoY de ventas (acumulado comparable)
+  if (vt && ps.length) {
+    const aAct = ps[ps.length-1].slice(0,4), aAnt = String(parseInt(aAct)-1);
+    const comp = mesesComparables(vt, ps, aAnt, aAct);
+    if (comp.length) {
+      s.acumAct = sumaEn(vt, ps, aAct, comp);
+      s.acumAnt = sumaEn(vt, ps, aAnt, comp);
+      s.acumYoY = (s.acumAnt) ? (s.acumAct/s.acumAnt-1)*100 : null;
+      s.acumMeses = comp.length; s.anioAct = aAct; s.anioAnt = aAnt;
+    }
+  }
+  const yoy = DATA.yoy || {};
+  const vAct = parseVal(s.ventas);
+  s.ventasYoY = (yoy.ventas && vAct) ? (vAct - yoy.ventas)/yoy.ventas*100 : null;
+
+  // Conteo de estados
+  s.criticos = DXP_ORDEN.filter(t => rp[t]?.estado === 'red');
+  s.atencion = DXP_ORDEN.filter(t => rp[t]?.estado === 'yellow');
+  return s;
+}
+
+function dxpPct(v, dec) { return v == null ? '—' : v.toFixed(dec == null ? 1 : dec) + '%'; }
+function dxpSigno(v, dec) { return v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(dec == null ? 1 : dec) + '%'; }
+
+// ── Bloque: Resumen Ejecutivo (veredicto + 3 hallazgos) ────────────────────
+function dxpExecSummary(s) {
+  const partes = [];
+  if (s.ventasYoY != null) partes.push(`Ventas crecen <span class="g">${dxpSigno(s.ventasYoY)} YoY</span> (${s.ventas})`);
+  const duros = [];
+  if (s.ckDelta != null) duros.push(`<b>Costo/kg subió ${dxpSigno(s.ckDelta,0)} en ${s.ckN} meses</b> mientras el precio ${s.pkDelta!=null&&s.pkDelta<0?'cayó':'no lo compensó'}`);
+  if (s.vpPct != null) duros.push(`<b>1 de cada ${(100/s.vpPct).toFixed(0)} soles pedidos se pierde</b> por Fill Rate`);
+  const cierre = s.mgEsMin ? ' — la utilidad de este mes es la más baja de los últimos ' + s.mgN + '.' : '.';
+  const verdict = (partes.length ? partes[0] + ', pero el crecimiento se está comiendo a sí mismo: ' : '')
+    + duros.join(', y ') + cierre;
+
+  const findings = [];
+  if (s.mgAct != null) findings.push({
+    n:'Hallazgo 1 · Margen', tipo:'margen_variable',
+    txt:`Margen implícito <b>${dxpPct(s.mgAct,2)}</b> — ${s.mgEsMin?'mínimo':'dentro'} de ${s.mgN} meses. Costo/kg <b>${dxpSigno(s.ckDelta,0)}</b>, precio/kg <b>${dxpSigno(s.pkDelta,1)}</b> en el mismo período.`
+  });
+  if (s.frBajoMeta != null) findings.push({
+    n:'Hallazgo 2 · Fill Rate', tipo:'fill_rate',
+    txt:`<b>${s.frBajoMeta}/${s.frN} meses</b> bajo meta 98%. Venta Perdida <b>${s.ventaPerdida||'—'}</b> — ${dxpPct(s.vpPct)} de todo lo pedido.`
+  });
+  if (s.ciAtrasPct != null) findings.push({
+    n:'Hallazgo 3 · Gobierno interno', tipo:'control_interno',
+    txt:`<b>${dxpPct(s.ciAtrasPct)}</b> de los planes de acción de auditoría están atrasados — por eso el cumplimiento no sube aunque se detectan los problemas.`
+  });
+
+  return `
+    <div class="exec-summary">
+      <div class="exec-eyebrow">Resumen Ejecutivo · para CEO</div>
+      <div class="exec-verdict">${verdict}</div>
+      ${findings.length ? `<div class="exec-findings">${findings.map(f => `
+        <div class="ef" onclick="dxpOpen('${f.tipo}')">
+          <div class="ef-n">${f.n}<span class="arrow">→</span></div>
+          <div class="ef-txt">${f.txt}</div>
+        </div>`).join('')}</div>` : ''}
     </div>`;
 }
 
-// Vista de calor: 1 fila con el estado de cada reporte de PAUNO, clic → abre el reporte.
-function renderHeatmap() {
-  const el = document.getElementById('heatmap-row');
-  if (!el) return;
-  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
-  const ORDEN = [
-    'control_interno','fill_rate','mermas','margen_variable','cuentas_por_cobrar',
-    'cuentas_por_pagar','consumo_materiales','compras','sop_inventario',
-    'productividad','margen_variable_pag2',
-  ];
-  const NOMBRE_CORTO = {
-    control_interno: 'C. Interno', fill_rate: 'Fill Rate', mermas: 'Mermas',
-    margen_variable: 'Margen', cuentas_por_cobrar: 'CxC', cuentas_por_pagar: 'CxP',
-    consumo_materiales: 'Consumo', compras: 'Compras', sop_inventario: 'Inventario',
-    productividad: 'Product.', margen_variable_pag2: 'Avance Ppto',
-  };
-  const celdas = ORDEN.map((tipo, i) => {
-    const rd = rpts[tipo];
-    if (!rd) return '';
-    const est = rd.estado === 'yellow' ? 'yellow' : (rd.estado === 'red' ? 'red' : 'green');
-    const nombre = NOMBRE_CORTO[tipo] || tipo;
-    const kpi = (rd.kpis || [])[0];
-    const marca = est === 'red' ? '!' : est === 'yellow' ? '·' : '✓';
-    return `<div class="hm-cell" onclick="showTab('pauno')" title="${kpi ? kpi.label+': '+kpi.valor : ''}">
+// ── Bloque: aviso de calidad de dato ───────────────────────────────────────
+function dxpNoteBanner(s) {
+  if (!s.dsTot) return '';
+  const planas = Object.values((SERIES && SERIES.sin_serie) || {})
+    .reduce((n,d) => n + ((d.medidas_planas||[]).length), 0);
+  return `
+    <div class="note-banner crit">
+      <span class="tag">HALLAZGO DE CALIDAD DE DATO — YA CORREGIDO EN EL PIPELINE</span>
+      <span>${s.dsSin} de ${s.dsTot} datasets históricos de Power BI ${planas?`(${planas} medida${planas>1?'s':''} plana${planas>1?'s':''}) `:''}devolvían el mismo valor repetido mes a mes — medida sin filtro de fecha.
+      <code>fetch_series.py</code> ahora detecta esto automáticamente (valores distintos vs meses con dato) y las excluye de
+      <code>series.json</code> en vez de graficarlas como tendencia real. Solo <b>${s.dsConf}</b> quedan como series confiables.
+      Pendiente: repetir Copiar consulta en vivo sobre los descartados para conseguir la fórmula real (la detección automática identifica el síntoma, no reemplaza la corrección de origen).</span>
+    </div>`;
+}
+
+// ── Bloque: mapa de causalidad ─────────────────────────────────────────────
+function dxpCausal(s) {
+  const ch = [];
+  if (s.uenPeor && s.ckDelta != null && s.mgAct != null) ch.push([
+    {c:'crit', l:'Merma — peor UEN/Planta', v:`${s.uenPeor.uen} ${s.uenPeor.merma}${s.plaPeor?' · '+s.plaPeor.planta+' '+s.plaPeor.merma:''}`,
+     s:`${s.ratioUen?s.ratioUen.toFixed(1)+'x':''}${s.ratioPla?' y '+s.ratioPla.toFixed(1)+'x':''} vs mejor referencia interna`},
+    {c:'crit', l:`Costo x Kilo (${s.ckN} meses)`, v:dxpSigno(s.ckDelta,1), s:`S/${s.ckIni.toFixed(2)} (${fmtPeriodo(s.ckIniP)}) → S/${s.ckFin.toFixed(2)} (${fmtPeriodo(s.ckFinP)})`},
+    {c:'crit', l:'Margen implícito', v:dxpPct(s.mgAct,2), s:`${s.mgEsMin?'Mínimo histórico':'Actual'} · meta 52%`},
+  ]);
+  if (s.fillRate && s.ventaPerdida && s.facturacion) ch.push([
+    {c:'crit', l:'Fill Rate', v:s.fillRate, s:`${s.frBajoMeta}/${s.frN} meses bajo meta 98%`},
+    {c:'crit', l:'Venta Perdida', v:s.ventaPerdida, s:`${dxpPct(s.vpPct)} de la Orden de Venta (${s.ordenVenta})`},
+    {c:'warn', l:'Facturación real', v:s.facturacion, s:`${dxpPct(s.faPct)} de lo pedido — techo de ventas autoimpuesto`},
+  ]);
+  if (s.ciAtrasados && s.ciCritico && s.ciCumpl) ch.push([
+    {c:'warn', l:'Planes de acción atrasados', v:`${s.ciAtrasados} / ${s.ciPlanes}`, s:`${dxpPct(s.ciAtrasPct)} de los planes correctivos`},
+    {c:'crit', l:'Puntos en estado Crítico', v:`${s.ciCritico} / ${s.ciEval}`, s:`${s.ciCritPct||''} del total — no bajan porque no se cierran los planes`},
+    {c:'crit', l:'% Cumplimiento', v:s.ciCumpl, s:`Estancado ${(85-parseVal(s.ciCumpl)).toFixed(1)} pts bajo meta 85%`},
+  ]);
+  if (!ch.length) return '';
+  const box = b => `<div class="flow-box ${b.c}"><div class="fb-l">${b.l}</div><div class="fb-v">${b.v}</div><div class="fb-sub">${b.s}</div></div>`;
+  return `
+    <div class="section-label"><span class="num">◆</span><h2>De dónde viene el problema — mapa de causalidad</h2><span class="rule"></span></div>
+    <div class="causal-wrap">${ch.map(c => `<div class="flow-chain">${c.map((b,i)=>box(b)+(i<c.length-1?'<div class="flow-arrow">→</div>':'')).join('')}</div>`).join('')}</div>`;
+}
+
+// ── Bloque: heatmap ────────────────────────────────────────────────────────
+function dxpHeatmap(s) {
+  const cells = DXP_ORDEN.map((t,i) => {
+    const rd = s.rp[t]; if (!rd) return '';
+    const est = rd.estado === 'red' ? 'crit' : rd.estado === 'yellow' ? 'warn' : 'ok';
+    const k0 = (rd.kpis||[])[0];
+    const n = k0 ? parseVal(k0.valor) : null;
+    const marca = est === 'ok' ? '✓' : (n != null && n < 1000 ? Math.round(n) : '!');
+    return `<div class="hm-cell" onclick="dxpOpen('${t}')" title="${k0?k0.label+': '+k0.valor:''}">
       <div class="hm-n">${String(i+1).padStart(2,'0')}</div>
       <div class="hm-dot ${est}">${marca}</div>
-      <div class="hm-lbl">${nombre}</div>
+      <div class="hm-lbl">${DXP_CORTO[t]||t}</div>
     </div>`;
   }).join('');
-  el.innerHTML = `<div class="heatmap-strip">${celdas}</div>`;
+  return `
+    <div class="section-label"><span class="num">◆</span><h2>Vista de calor — ${DXP_ORDEN.length} reportes</h2><span class="rule"></span></div>
+    <div class="heatmap">${cells}</div>`;
 }
 
-// Mapa de causalidad: 3 cadenas reales (hallazgo → causa → efecto) armadas
-// directamente desde los KPIs de cada reporte, sin depender de diagnosticoCompleto.
-// Grilla de 11 tarjetas de reporte (formato "rcard" del modelo aprobado) — clic abre el dashboard I-V.
-// "Holding — este mes": 5 celdas con datos reales (ventas, mora, conteo de estados, series confiables).
-function renderHoldingStrip() {
-  const el = document.getElementById('holding-strip-row');
-  if (!el) return;
-  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
-  const ORDEN = ['control_interno','fill_rate','mermas','margen_variable','cuentas_por_cobrar','cuentas_por_pagar','consumo_materiales','compras','sop_inventario','productividad','margen_variable_pag2'];
-  const NOMBRE_CORTO = { control_interno:'Control Interno', fill_rate:'Fill Rate', mermas:'Mermas', margen_variable:'Margen', cuentas_por_cobrar:'CxC', cuentas_por_pagar:'CxP', margen_variable_pag2:'Avance Ppto' };
-  const criticos = ORDEN.filter(t => rpts[t]?.estado === 'red');
-  const atencion = ORDEN.filter(t => rpts[t]?.estado === 'yellow');
-  const confiables = Object.keys((SERIES && SERIES.datasets) || {}).length;
-  const totalDs = confiables + Object.keys((SERIES && SERIES.sin_serie) || {}).length;
-  const yoy = DATA.yoy || {};
-  const ventaAct = parseVal(DATA.holding_ventas);
-  const yoyDelta = (yoy.ventas && ventaAct) ? ((ventaAct - yoy.ventas) / yoy.ventas * 100) : null;
-
-  el.innerHTML = `
-    <div class="hstrip-head"><span class="hstrip-head-t">Holding — este mes</span><div class="hstrip-head-line"></div></div>
-    <div class="hstrip">
-      <div class="hstrip-cell"><div class="hstrip-l">Ventas</div><div class="hstrip-v">${DATA.holding_ventas||'—'}</div><div class="hstrip-d" style="color:${yoyDelta==null?'var(--mk-sub)':yoyDelta>=0?'var(--mk-green)':'var(--mk-red)'}">${yoyDelta==null?'—':(yoyDelta>=0?'▲ +':'▼ ')+yoyDelta.toFixed(1)+'% YoY'}</div></div>
-      <div class="hstrip-cell"><div class="hstrip-l">Mora consolidada</div><div class="hstrip-v" style="color:var(--mk-yellow)">${DATA.holding_mora||'—'}</div><div class="hstrip-d">meta 15%</div></div>
-      <div class="hstrip-cell"><div class="hstrip-l">Reportes en Crítico</div><div class="hstrip-v" style="color:var(--mk-red)">${criticos.length} / ${ORDEN.length}</div><div class="hstrip-d">${criticos.map(t=>NOMBRE_CORTO[t]||t).join(', ')||'—'}</div></div>
-      <div class="hstrip-cell"><div class="hstrip-l">Reportes en Atención</div><div class="hstrip-v" style="color:var(--mk-yellow)">${atencion.length} / ${ORDEN.length}</div><div class="hstrip-d">${atencion.map(t=>NOMBRE_CORTO[t]||t).join(', ')||'—'}</div></div>
-      <div class="hstrip-cell"><div class="hstrip-l">Series confiables</div><div class="hstrip-v">${confiables} / ${totalDs}</div><div class="hstrip-d">de datasets con serie mensual</div></div>
+// ── Bloque: holding strip ──────────────────────────────────────────────────
+function dxpHolding(s) {
+  return `
+    <div class="section-label"><span class="num">◆</span><h2>Holding — este mes</h2><span class="rule"></span></div>
+    <div class="holding-strip">
+      <div class="hs-cell"><div class="hs-label">Ventas</div><div class="hs-val">${s.ventas||'—'}</div><div class="hs-delta" style="color:${s.ventasYoY==null?'var(--sub)':s.ventasYoY>=0?'var(--green)':'var(--red)'}">${s.ventasYoY==null?'—':(s.ventasYoY>=0?'▲ ':'▼ ')+dxpSigno(s.ventasYoY)+' YoY'}</div></div>
+      <div class="hs-cell"><div class="hs-label">Mora consolidada</div><div class="hs-val" style="color:var(--yellow)">${s.mora||'—'}</div><div class="hs-delta" style="color:var(--sub)">meta 15%</div></div>
+      <div class="hs-cell"><div class="hs-label">Reportes en Crítico</div><div class="hs-val" style="color:var(--red)">${s.criticos.length} / ${DXP_ORDEN.length}</div><div class="hs-delta" style="color:var(--sub)">${s.criticos.map(t=>DXP_CORTO[t]).join(', ')||'—'}</div></div>
+      <div class="hs-cell"><div class="hs-label">Reportes en Atención</div><div class="hs-val" style="color:var(--yellow)">${s.atencion.length} / ${DXP_ORDEN.length}</div><div class="hs-delta" style="color:var(--sub)">${s.atencion.map(t=>DXP_CORTO[t]).join(', ')||'—'}</div></div>
+      <div class="hs-cell"><div class="hs-label">Series confiables</div><div class="hs-val">${s.dsConf} / ${s.dsTot}</div><div class="hs-delta" style="color:var(--sub)">datasets con serie mensual</div></div>
     </div>`;
 }
 
-function renderReportCards() {
-  const el = document.getElementById('rcard-grid-row');
-  if (!el) return;
-  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
-  const ORDEN = [
-    'control_interno','fill_rate','mermas','margen_variable','cuentas_por_cobrar',
-    'cuentas_por_pagar','consumo_materiales','compras','sop_inventario',
-    'productividad','margen_variable_pag2',
-  ];
-  const cards = ORDEN.map((tipo, i) => {
-    const rd = rpts[tipo];
-    if (!rd || !(rd.kpis || []).length) return '';
-    const est = rd.estado === 'yellow' ? 'warn' : (rd.estado === 'red' ? 'crit' : 'ok');
-    const pillTxt = est === 'crit' ? 'Crítico' : est === 'warn' ? 'Atención' : 'Sin alerta';
-    const nombre = REPORTE_LABEL[tipo] || tipo;
-    const k0 = rd.kpis[0];
-    const k1 = rd.kpis[1];
-    const cfg = REPORTES_CONFIG.PAUNO?.find(r => r.tipo === tipo);
-    const click = cfg ? `showDetail('PAUNO','${tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')`
-                       : `showDetail('PAUNO','${tipo}','${nombre}','','')`;
-    const body = rd.alerta
-      ? rd.alerta
-      : (k1 ? `${k1.label}: <b>${k1.valor}</b>` : `${k0.label}: <b>${k0.valor}</b>`);
-    return `<div class="rcard ${est}" onclick="${click}">
-      <div class="rcard-head2">
-        <div><div class="rcard-num">${String(i+1).padStart(2,'0')}</div><div class="rcard-title">${nombre}<span class="arrow">→</span></div></div>
-        <span class="badge ${est==='crit'?'red':est==='warn'?'amber':'green'}">${pillTxt}</span>
+// ── Bloque: grilla de 11 tarjetas ──────────────────────────────────────────
+function dxpCards(s) {
+  const resumen = {
+    control_interno: () => `<b>${s.ciCritico||'—'} pts críticos</b> (${s.ciCritPct||'—'} del total) · <b>${s.ciAtrasados||'—'} planes atrasados</b> de ${s.ciPlanes||'—'} (${dxpPct(s.ciAtrasPct)})`,
+    fill_rate: () => `<b>${s.frBajoMeta}/${s.frN} meses</b> bajo meta · Venta Perdida <b>${s.ventaPerdida||'—'}</b> (${dxpPct(s.vpPct)} del pedido)`,
+    mermas: () => `${s.uenPeor?`${s.uenPeor.uen} <b>${s.ratioUen?s.ratioUen.toFixed(1)+'x':''}</b> peor que ${s.uenMejor.uen}`:''}${s.plaPeor?` · ${s.plaPeor.planta} <b>${s.ratioPla?s.ratioPla.toFixed(1)+'x':''}</b> peor que ${s.plaMejor.planta}`:''}`,
+    margen_variable: () => `Margen implícito <b>${dxpPct(s.mgAct,2)}</b> — ${s.mgEsMin?'mínimo histórico':'dentro'} de ${s.mgN} meses`,
+    cuentas_por_cobrar: () => `CxC por vencer <b>${s.cxcVencer||'—'}</b> · sin serie histórica`,
+    cuentas_por_pagar: () => `<b>${dxpPct(s.refPct)}</b> refinanciado (${s.refinanciado||'—'}) · ${s.proveedores||'—'} proveedores`,
+    consumo_materiales: () => `Costo x TN Producida/Vendida — validados por Copiar consulta`,
+    compras: () => `Consumo Prom 3M/6M casi plano — <b>a validar</b> si es bug`,
+    sop_inventario: () => `Composición Dead Stock <b>no incluida</b> en esta corrida`,
+    productividad: () => `Sin meta formal definida · sin serie histórica`,
+    margen_variable_pag2: () => `Serie <b>plana en la mayoría de meses</b> — posible bug de filtro`,
+  };
+  const cards = DXP_ORDEN.map((t,i) => {
+    const rd = s.rp[t]; if (!rd || !(rd.kpis||[]).length) return '';
+    const est = rd.estado === 'red' ? 'crit' : rd.estado === 'yellow' ? 'warn' : 'ok';
+    const lbl = est === 'crit' ? 'Crítico' : est === 'warn' ? 'Atención' : 'Sin alerta';
+    const PREF = { margen_variable:'Margen variable', margen_variable_pag2:'Avance vs Ppto',
+                   cuentas_por_pagar:'CxP Total', compras:'Stock Valorizado' };
+    const k0 = (PREF[t] && rd.kpis.find(k => k.label === PREF[t])) || rd.kpis[0];
+    let body = ''; try { body = resumen[t] ? resumen[t]() : ''; } catch(e) { body = ''; }
+    if (!body) body = rd.alerta || `${k0.label}: <b>${k0.valor}</b>`;
+    return `<div class="rcard ${est}" onclick="dxpOpen('${t}')">
+      <div class="rcard-head">
+        <div><div class="rcard-num">${String(i+1).padStart(2,'0')}</div><div class="rcard-title">${DXP_NOMBRE[t]||t}<span class="arrow">→</span></div></div>
+        <span class="pill ${est}">${lbl}</span>
       </div>
-      <div class="rcard-kpi2"><span class="v" style="color:${est==='crit'?'var(--mk-red)':est==='warn'?'var(--mk-yellow)':'var(--mk-ink)'}">${k0.valor}</span><span class="meta">${k0.label}${k0.meta?' · meta '+k0.meta:''}</span></div>
-      <div class="rcard-body2">${body}</div>
+      <div class="rcard-kpi"><span class="v" style="color:${est==='crit'?'var(--red)':est==='warn'?'var(--yellow)':'var(--ink)'}">${k0.valor}</span><span class="meta">${k0.label}${k0.meta?' · meta '+k0.meta:''}</span></div>
+      <div class="rcard-body">${body}</div>
     </div>`;
   }).join('');
-  if (!cards) { el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="rcard-head-row"><span class="rcard-head-t">Reportes — clic para abrir dashboard completo</span><div class="rcard-head-line"></div></div>
-    <div class="rcard-grid">${cards}</div>`;
+  return `
+    <div class="section-label"><span class="num">◆</span><h2>Reportes — clic para abrir dashboard completo</h2><span class="rule"></span></div>
+    <div class="grid">${cards}</div>`;
 }
 
-function renderCausalMap() {
-  const el = document.getElementById('causal-row');
-  if (!el) return;
-  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
-  const kv = (tipo, lbl) => rpts[tipo]?.kpis?.find(k => k.label === lbl)?.valor;
-
-  const chains = [];
-
-  // Cadena 1: Merma (peor UEN/Planta) → Costo/kg → Margen
-  const mermaRd = rpts.mermas || {};
-  const peorUen = (mermaRd.por_uen || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma))[0];
-  const peorPlanta = (mermaRd.por_planta || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma))[0];
-  const costoKg = kv('margen_variable','Costo/kg');
-  const margenV = kv('margen_variable','Margen variable');
-  if ((peorUen || peorPlanta) && costoKg && margenV) {
-    chains.push([
-      { cls:'crit', l:'Merma — peor UEN/Planta', v:`${peorUen?peorUen.uen+' '+peorUen.merma:''}${peorUen&&peorPlanta?' · ':''}${peorPlanta?peorPlanta.planta+' '+peorPlanta.merma:''}`, sub:'sobre el resto de la operación' },
-      { cls:'crit', l:'Costo x Kilo', v: costoKg, sub:'insumo directo del margen' },
-      { cls:'crit', l:'Margen Variable', v: margenV, sub:'meta ≥52%' },
-    ]);
-  }
-
-  // Cadena 2: Fill Rate → Venta Perdida → Facturación
-  const fillRate = kv('fill_rate','Fill Rate');
-  const ventaPerdida = kv('fill_rate','Venta Perdida');
-  const facturacion = kv('fill_rate','Facturación');
-  if (fillRate && ventaPerdida && facturacion) {
-    chains.push([
-      { cls:'crit', l:'Fill Rate', v: fillRate, sub:'meta 98%' },
-      { cls:'crit', l:'Venta Perdida', v: ventaPerdida, sub:'pedidos no despachados' },
-      { cls:'warn', l:'Facturación real', v: facturacion, sub:'techo de ventas autoimpuesto' },
-    ]);
-  }
-
-  // Cadena 3: Planes de Acción atrasados → Puntos Críticos → % Cumplimiento
-  const ciRd = rpts.control_interno || {};
-  const ciKv = lbl => (ciRd.kpis || []).find(k => k.label === lbl)?.valor;
-  const atrasados = ciKv('Planes de Acción Atrasados');
-  const totalPlanes = ciKv('Total Planes de Acción');
-  const critico = ciKv('Crítico');
-  const puntosEval = ciKv('Puntos de Control evaluados');
-  const cumplimiento = ciKv('% Cumplimiento');
-  if (atrasados && critico && cumplimiento) {
-    chains.push([
-      { cls:'warn', l:'Planes de Acción atrasados', v:`${atrasados} / ${totalPlanes||'—'}`, sub:'planes correctivos sin cerrar' },
-      { cls:'crit', l:'Puntos en estado Crítico', v:`${critico} / ${puntosEval||'—'}`, sub:'no bajan porque no se cierran los planes' },
-      { cls:'crit', l:'% Cumplimiento', v: cumplimiento, sub:'meta 85%' },
-    ]);
-  }
-
-  if (!chains.length) { el.innerHTML = ''; return; }
-
-  const box = b => `<div class="flow-box ${b.cls}"><div class="fb-l">${b.l}</div><div class="fb-v">${b.v}</div><div class="fb-sub">${b.sub}</div></div>`;
-  const chainHtml = c => `<div class="flow-chain">${c.map((b,i) => box(b) + (i < c.length-1 ? '<div class="flow-arrow">→</div>' : '')).join('')}</div>`;
-
-  el.innerHTML = `
-    <div class="causal-head"><span class="causal-head-t">De dónde viene el problema</span><div class="causal-head-line"></div></div>
-    <div class="causal-wrap">${chains.map(chainHtml).join('')}</div>`;
-}
-
-// Consolida las "palancas" de cada hallazgo real en un plan de acción por horizonte de tiempo.
-function renderRoadmap() {
-  const el = document.getElementById('roadmap-row');
-  if (!el) return;
+// ── Bloque: Plan de acción (CTA en resumen + vista completa) ───────────────
+function dxpRoadmapData() {
   const d = diagnosticoCompleto();
-  if (!d || !d.hallazgos.length) { el.innerHTML = ''; return; }
-
-  const ahora = d.hallazgos.filter(h => h.sev === 'red');
-  const despues = d.hallazgos.filter(h => h.sev !== 'red');
-
-  const col = (items, titulo, cls, sub) => !items.length ? '' : `
-    <div class="roadmap-col">
-      <div class="roadmap-col-h ${cls}"><span>${titulo}</span><span>${sub}</span></div>
-      ${items.map(h => `
-        <div class="rm-item">
-          <div class="rm-item-top"><span>${h.titulo}</span><span class="rm-item-area">${h.area}</span></div>
-          <div class="rm-item-txt">${h.palanca}</div>
-        </div>`).join('')}
-    </div>`;
-
-  el.innerHTML = `
-    <div class="roadmap-head">
-      <span class="roadmap-head-t">Plan de acción</span>
-      <div class="roadmap-head-line"></div>
-    </div>
-    <div class="roadmap-cols">
-      ${col(ahora, 'Actuar ahora', 'red', `${ahora.length}`)}
-      ${col(despues, 'Sostener / monitorear', 'green', `${despues.length}`)}
+  if (!d || !d.hallazgos.length) return null;
+  return { ahora: d.hallazgos.filter(h => h.sev === 'red'), luego: d.hallazgos.filter(h => h.sev !== 'red') };
+}
+function dxpRoadmapCTA() {
+  const r = dxpRoadmapData(); if (!r) return '';
+  const n = r.ahora.length + r.luego.length;
+  return `
+    <div class="section-label"><span class="num">◆</span><h2>Próximos pasos</h2><span class="rule"></span></div>
+    <div class="roadmap-cta" onclick="dxpTab('roadmap')">
+      <div class="txt"><b>Plan de Acción — palancas priorizadas</b><span>${n} acciones consolidadas de los ${DXP_ORDEN.length} reportes, con área responsable e impacto cuantificado</span></div>
+      <div class="go">Ver plan completo →</div>
     </div>`;
 }
-
-function renderDiagnostico() {
-  const el = document.getElementById('diagnostico-row');
-  if (!el) return;
-  const d = diagnosticoCompleto();
-  if (!d || !d.hallazgos.length) { el.innerHTML = ''; return; }
-
-  el.innerHTML = `
-    <div class="diag-head">
-      <span class="diag-head-t">Diagnóstico ${d.anioAct} vs ${d.anioAnt}</span>
-      <span class="diag-head-n">${d.hallazgos.length} hallazgos</span>
-      <div class="diag-head-line"></div>
-    </div>
-    <div class="diag-list">
-      ${d.hallazgos.map((h,i) => `
-        <div class="diag-card ${h.sev}">
-          <div class="diag-top">
-            <span class="diag-num">${String(i+1).padStart(2,'0')}</span>
-            <div class="diag-tit-wrap">
-              <div class="diag-titulo">${h.titulo}</div>
-              ${h.periodo ? `<div class="diag-periodo">${h.periodo}</div>` : ''}
-            </div>
-            <span class="diag-cifra ${h.sev}">${h.cifra}${h.unidad?`<i>${h.unidad}</i>`:''}<em>${h.sub}</em></span>
-          </div>
-          <div class="diag-cuerpo">${h.cuerpo}</div>
-          <div class="diag-impacto">${h.impacto}</div>
-          <div class="diag-pie">
-            <span class="diag-palanca">${h.palanca}</span>
-            <span class="mc-tag accent">${h.area}</span>
-          </div>
-        </div>`).join('')}
+function dxpRoadmapView() {
+  const r = dxpRoadmapData();
+  if (!r) return '<div class="nd">Sin plan de acción disponible — falta serie histórica para derivar palancas.</div>';
+  const col = (items, titulo, stripe, sub) => !items.length ? '' : `
+    <div class="rm-col" style="--stripe:${stripe}">
+      <div class="rm-col-h"><b>${titulo}</b><span>${sub}</span></div>
+      ${items.map(h => `<div class="rm-item">
+        <div class="rm-item-top"><span class="rm-item-title">${h.titulo}</span><span class="rm-item-src">${h.area}</span></div>
+        <div class="rm-item-impact">${h.palanca}</div>
+      </div>`).join('')}
     </div>`;
+  return `
+    <div class="detail-head" style="--stripe:var(--accent)">
+      <div><div class="detail-title">Plan de Acción</div><div class="detail-sub">Palancas consolidadas de los ${DXP_ORDEN.length} reportes, priorizadas por severidad</div></div>
+      <span class="pill ok">${r.ahora.length + r.luego.length} acciones</span>
+    </div>
+    <div class="roadmap">
+      ${col(r.ahora, 'Actuar ahora', 'var(--red)', `${r.ahora.length}`)}
+      ${col(r.luego, 'Sostener / monitorear', 'var(--green)', `${r.luego.length}`)}
+    </div>
+    <div class="deck-footer"><span>PAUNO — Diagnóstico Ejecutivo</span><span class="conf">Confidencial · Uso interno</span><span>Plan de Acción</span></div>`;
 }
 
+// ── Navegación interna del dashboard ───────────────────────────────────────
+function dxpTab(tab) {
+  const root = document.getElementById('dxp-home'); if (!root) return;
+  root.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const v = root.querySelector('#dxp-view-' + tab); if (v) v.classList.add('active');
+  root.querySelectorAll('.tt').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const ctx = root.querySelector('#dxp-context');
+  if (ctx) ctx.textContent = tab === 'roadmap' ? 'Plan de Acción' : `Resumen · ${DXP_ORDEN.length} reportes`;
+  const sc = document.getElementById('screens-container'); if (sc) sc.scrollTop = 0;
+}
+function dxpOpen(tipo) {
+  const cfg = REPORTES_CONFIG.PAUNO?.find(r => r.tipo === tipo);
+  showDetail('PAUNO', tipo, cfg ? cfg.label : (DXP_NOMBRE[tipo]||tipo), cfg ? cfg.archivo : '', cfg ? (cfg.desc||'') : '');
+}
+
+// ── Render principal ───────────────────────────────────────────────────────
 function renderHome() {
-  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
-  const fechaStr = DATA.fecha || '—';
+  const root = document.getElementById('dxp-home');
+  if (!root || !DATA) return;
+  const s = dxpStats();
+  const MESES_LARGO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let mesTitulo = DATA.fecha || '';
+  if (SERIES && SERIES.periodos && SERIES.periodos.length) {
+    const p = SERIES.periodos[SERIES.periodos.length-1];       // "2026-08"
+    mesTitulo = MESES_LARGO[parseInt(p.slice(5,7),10)-1] + ' ' + p.slice(0,4);
+  }
 
-  let nRed = 0, nYel = 0;
-  Object.values(rpts).forEach(r => {
-    if (r.estado === 'red') nRed++; else if (r.estado === 'yellow') nYel++;
-  });
-
-  const titular = nRed > 0
-    ? `${nRed} alerta${nRed>1?'s':''} crítica${nRed>1?'s':''} · ${nYel} en atención`
-    : nYel > 0 ? `${nYel} área${nYel>1?'s':''} en atención` : 'Operación bajo control';
-
-  const hayserie = !!(SERIES && SERIES.periodos && SERIES.periodos.length);
-  const rango = hayserie
-    ? `${fmtPeriodo(SERIES.periodos[0])} → ${fmtPeriodo(SERIES.periodos[SERIES.periodos.length-1])}`
-    : null;
-
-  // Cuántos KPIs tienen serie mensual real vs cuántos son totales estáticos
-  let conSerie = 0, sinSerie = 0;
-  Object.values(rpts).forEach(r => (r.kpis || []).forEach(k => {
-    if (!KPI_SOURCE[k.label]) return;
-    const a = analizar(k.label);
-    if (a && !a.estatica) conSerie++; else sinSerie++;
-  }));
-
-  document.getElementById('exec-header-row').innerHTML = `
-    <div class="exec-header">
-      <div class="exec-eyebrow">PAUNO · Actualización diaria 7:00 AM · ${fechaStr}</div>
-      <div class="exec-title">${titular}</div>
-      <div class="exec-pills">
-        ${nRed?`<span class="epill red">${nRed} Crítico</span>`:''}
-        ${nYel?`<span class="epill amber">${nYel} Atención</span>`:''}
-        <span class="epill muted">${hayserie ? 'Serie '+rango : 'Serie histórica pendiente'}</span>
-        ${conSerie ? `<span class="epill muted">${conSerie} KPI con serie${sinSerie?` · ${sinSerie} sin serie`:''}</span>` : ''}
-        <span class="epill muted">Toca un KPI → análisis completo</span>
+  root.innerHTML = `
+  <div class="wrap">
+    <div class="masthead">
+      <div class="mast-left" onclick="dxpTab('resumen')">
+        <div class="eyebrow">Holding · Diagnóstico Ejecutivo</div>
+        <h1>PAUNO — ${mesTitulo}</h1>
       </div>
-    </div>`;
+      <div class="meta-block">
+        Fuente: Power BI (DAX, Copiar consulta)<br>
+        <span id="dxp-context">Resumen · ${DXP_ORDEN.length} reportes</span>
+      </div>
+    </div>
 
-  const ORDEN = [
-    'margen_variable','margen_variable_pag2','fill_rate',
-    'cuentas_por_cobrar','cuentas_por_pagar',
-    'mermas','compras','sop_inventario',
-    'consumo_materiales','productividad','control_interno',
-  ];
+    <div class="top-tabs">
+      <button class="tt active" data-tab="resumen" onclick="dxpTab('resumen')">Resumen</button>
+      <button class="tt" data-tab="roadmap" onclick="dxpTab('roadmap')">Plan de Acción</button>
+    </div>
 
-  let html = '';
-  ORDEN.forEach(tipo => {
-    const rd = rpts[tipo];
-    if (!rd) return;
-    const kpis = rd.kpis || [];
-    const est = rd.estado || 'grey';
-    if (!kpis.length && est === 'grey' && !rd.live_connection) return;
+    <div class="view active" id="dxp-view-resumen">
+      ${dxpExecSummary(s)}
+      ${dxpNoteBanner(s)}
+      ${dxpCausal(s)}
+      ${dxpHeatmap(s)}
+      ${dxpRoadmapCTA()}
+      ${dxpHolding(s)}
+      ${dxpCards(s)}
+      <div class="legend">
+        <span><span class="dot crit"></span>Crítico — fuera de meta, acción inmediata</span>
+        <span><span class="dot warn"></span>Atención — desviación relevante, monitorear</span>
+        <span><span class="dot ok"></span>Sin alerta / en línea</span>
+      </div>
+      <div class="deck-footer"><span>PAUNO — Diagnóstico Ejecutivo · ${mesTitulo}</span><span class="conf">Confidencial · Uso interno</span><span>Resumen</span></div>
+    </div>
 
-    const nombre = REPORTE_LABEL[tipo] || tipo;
-    const bar = est === 'grey' ? 'grey' : est === 'yellow' ? 'amber' : est;
-    const badge = bar;
-
-    let cuerpo;
-    if (rd.live_connection) {
-      cuerpo = `<div class="area-nota">Este reporte usa conexión en vivo (DirectQuery). Las medidas DAX aún no están publicadas en el modelo — se requiere crearlas en Power BI Desktop para leerlas por API.</div>`;
-    } else if (!kpis.length) {
-      cuerpo = `<div class="area-nota">Sin medidas disponibles en el dataset.</div>`;
-    } else {
-      cuerpo = `<div class="krows">${kpis.map(filaKPI).join('')}</div>`;
-    }
-
-    html += `
-      <div class="area-card" onclick="showTab('pauno')">
-        <div class="area-inner">
-          <div class="area-bar ${bar}"></div>
-          <div class="area-body">
-            <div class="area-hdr">
-              <span class="area-name">${nombre}</span>
-              <span class="badge ${badge}">${semLabel(est)}</span>
-              <span class="area-caret">›</span>
-            </div>
-            ${rd.alerta ? `<div class="area-alrt ${bar}">${rd.alerta}</div>` : ''}
-            ${cuerpo}
-          </div>
-        </div>
-      </div>`;
-  });
-
-  renderVeredicto();
-  renderDataQualityBanner();
-  renderCausalMap();
-  renderHeatmap();
-  renderRoadmap();
-  renderHoldingStrip();
-  renderReportCards();
+    <div class="view" id="dxp-view-roadmap">${dxpRoadmapView()}</div>
+  </div>`;
 }
 
 function renderAgendaSection(id, title, color, items) {
