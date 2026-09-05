@@ -11,6 +11,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Juanito Garcia</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 :root {
   --bg:     #ffffff;
@@ -261,25 +262,111 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .exec-header { background: var(--navy2); padding: 13px 18px 12px; margin: -16px -14px 14px; }
 @media (min-width: 768px) { .exec-header { margin: -24px -32px 16px; padding: 15px 32px 14px; } }
 
-/* Dashboards de detalle por reporte (McKinsey I-V) — responsive
-   iPhone: 1 columna apilada (por defecto, sin media query)
-   iPad (≥768px): 2 columnas
-   MacBook (≥1180px): I ocupa una columna fija a la izquierda, II-V en grilla 2x2 a la derecha */
-.mck-wrap { max-width: 1180px; margin: 0 auto; }
+/* ══════════════════════════════════════════════════════════════════════
+   Dashboards de detalle por reporte — sistema visual McKinsey estandarizado
+   Responsive: iPhone = 1 columna · iPad (≥768px) = 2 columnas ·
+   MacBook (≥1180px) = I fija a la izquierda + II-V en grilla 2x2
+   ══════════════════════════════════════════════════════════════════════ */
+.mck-wrap {
+  max-width: 1180px; margin: 0 auto;
+  --mk-ink:#1B2430; --mk-paper:#EEEEE8; --mk-surface:#F7F7F3; --mk-surface2:#E3E3DC;
+  --mk-border:#D3D3CA; --mk-sub:#6B7680; --mk-accent:#2C6E63; --mk-accent-soft:#DCE9E6;
+  --mk-red:#B23A2F; --mk-red-soft:#F5E1DE; --mk-yellow:#966412; --mk-yellow-soft:#F2E7D2;
+  --mk-green:#3D7A4B; --mk-green-soft:#DEEBE0;
+  --mk-display:'Fraunces',Georgia,serif; --mk-body:'IBM Plex Sans',system-ui,sans-serif; --mk-mono:'IBM Plex Mono',ui-monospace,monospace;
+  background: var(--mk-paper); color: var(--mk-ink); font-family: var(--mk-body);
+  font-size: 13.5px; line-height: 1.5; padding: 16px 14px 40px; margin: -16px -16px 0;
+}
+@media (min-width: 768px) { .mck-wrap { padding: 22px 24px 50px; margin: -22px -24px 0; } }
+
+.mck-back { font-family: var(--mk-mono); font-size: 11px; color: var(--mk-accent); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; margin-bottom: 14px; }
+.mck-back:hover { text-decoration: underline; }
+.mck-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--mk-stripe, var(--mk-ink)); padding-bottom: 14px; margin-bottom: 18px; }
+.mck-title { font-family: var(--mk-display); font-weight: 600; font-size: clamp(20px,3vw,26px); text-wrap: balance; }
+.mck-sub { font-size: 11.5px; color: var(--mk-sub); margin-top: 4px; }
+.mck-pill { font-family: var(--mk-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; white-space: nowrap; }
+.mck-pill.crit { background: var(--mk-red-soft); color: var(--mk-red); }
+.mck-pill.warn { background: var(--mk-yellow-soft); color: var(--mk-yellow); }
+.mck-pill.ok   { background: var(--mk-green-soft); color: var(--mk-green); }
+
 .mck-grid { display: flex; flex-direction: column; gap: 14px; }
-.mck-sec { min-width: 0; }
+.mck-sec { min-width: 0; background: var(--mk-surface); border: 1px solid var(--mk-border); padding: 18px 20px; }
 @media (min-width: 768px) {
   .mck-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: start; }
   .mck-sec[data-n="I"] { grid-column: 1 / -1; }
 }
 @media (min-width: 1180px) {
-  .mck-grid { grid-template-columns: 300px repeat(2, 1fr); grid-auto-rows: min-content; }
+  .mck-grid { grid-template-columns: 320px repeat(2, 1fr); grid-auto-rows: min-content; }
   .mck-sec[data-n="I"] { grid-column: 1; grid-row: 1 / span 2; }
   .mck-sec[data-n="II"] { grid-column: 2; grid-row: 1; }
   .mck-sec[data-n="III"] { grid-column: 3; grid-row: 1; }
   .mck-sec[data-n="IV"] { grid-column: 2; grid-row: 2; }
   .mck-sec[data-n="V"] { grid-column: 3; grid-row: 2; }
 }
+
+.mck-h { font-family: var(--mk-mono); font-size: 10.5px; color: var(--mk-accent); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.mck-h .rn { background: var(--mk-accent); color: var(--mk-surface); width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9.5px; flex-shrink: 0; }
+
+.mck-hero-l { font-size: 10.5px; color: var(--mk-sub); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+.mck-hero-v { font-family: var(--mk-mono); font-size: 38px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+.mck-kv { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--mk-border); font-size: 13px; }
+.mck-kv:last-child { border-bottom: none; }
+.mck-kv .l { color: var(--mk-sub); }
+.mck-kv .v { font-family: var(--mk-mono); font-weight: 600; text-align: right; white-space: nowrap; }
+.mck-kv .v.crit { color: var(--mk-red); } .mck-kv .v.warn { color: var(--mk-yellow); } .mck-kv .v.ok { color: var(--mk-green); }
+.mck-kv .v small { font-size: 10px; color: var(--mk-sub); font-weight: 500; margin-left: 4px; font-family: var(--mk-body); }
+
+.mck-nd { color: var(--mk-sub); font-style: italic; font-size: 12px; line-height: 1.6; }
+.mck-stat { display: flex; justify-content: space-between; font-size: 11.5px; padding: 3px 0; color: var(--mk-sub); }
+.mck-stat b { color: var(--mk-ink); font-family: var(--mk-mono); }
+.mck-comp { display: flex; justify-content: space-between; font-family: var(--mk-mono); font-size: 12px; padding: 3px 0; }
+.mck-comp .l { color: var(--mk-sub); font-family: var(--mk-body); }
+
+.mck-bd-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 3.5px 0; }
+.mck-bd-row .name { width: 90px; flex-shrink: 0; color: var(--mk-ink); font-size: 11.5px; }
+.mck-bd-track { flex: 1; height: 6px; background: var(--mk-surface2); border-radius: 2px; overflow: hidden; }
+.mck-bd-fill { height: 100%; border-radius: 2px; }
+.mck-bd-row .val { font-family: var(--mk-mono); width: 52px; text-align: right; flex-shrink: 0; font-weight: 600; font-size: 11.5px; }
+
+.mck-palanca { border-bottom: 1px solid var(--mk-border); padding: 10px 0; font-size: 12px; }
+.mck-palanca:first-child { padding-top: 0; } .mck-palanca:last-child { border-bottom: none; }
+.mck-palanca-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.mck-palanca-nombre { font-weight: 600; }
+.mck-pr { font-family: var(--mk-mono); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; flex-shrink: 0; }
+.mck-pr.alta { background: var(--mk-red-soft); color: var(--mk-red); }
+.mck-pr.media { background: var(--mk-yellow-soft); color: var(--mk-yellow); }
+.mck-pr.baja { background: var(--mk-surface2); color: var(--mk-sub); }
+.mck-palanca-impacto { font-family: var(--mk-mono); color: var(--mk-accent); font-size: 11px; margin-top: 4px; line-height: 1.5; }
+
+.mck-vacio { display: flex; gap: 8px; font-size: 12px; padding: 5px 0; color: var(--mk-sub); line-height: 1.5; }
+.mck-vacio .mk { color: var(--mk-yellow); flex-shrink: 0; }
+
+/* Panel de tendencia grande: MoM/Acumulado/YoY + gráfico con leyenda y ejes */
+.mck-trend { grid-column: 1 / -1; background: var(--mk-surface); border: 1px solid var(--mk-border); padding: 18px 20px; }
+.mck-trend-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+.mck-trend-h .src { font-size: 10.5px; color: var(--mk-sub); }
+.mck-cc-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--mk-border); border: 1px solid var(--mk-border); margin-bottom: 16px; }
+.mck-cc { background: var(--mk-surface); padding: 12px 14px; }
+.mck-cc-l { font-size: 9.5px; color: var(--mk-sub); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+.mck-cc-v { font-family: var(--mk-mono); font-size: 20px; font-weight: 600; display: flex; align-items: baseline; gap: 6px; }
+.mck-cc-sub { font-size: 10px; color: var(--mk-sub); margin-top: 3px; }
+.mck-up { color: var(--mk-green); } .mck-down { color: var(--mk-red); } .mck-flat { color: var(--mk-sub); }
+.mck-legend { display: flex; gap: 16px; margin-bottom: 8px; font-size: 10.5px; flex-wrap: wrap; }
+.mck-legend .lg { display: flex; align-items: center; gap: 6px; color: var(--mk-sub); }
+.mck-legend .sw { width: 13px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+.mck-chart svg { display: block; width: 100%; height: 180px; }
+.mck-chart-x { display: flex; justify-content: space-between; font-family: var(--mk-mono); font-size: 9.5px; color: var(--mk-sub); margin-top: 6px; }
+.mck-chart-stats { display: flex; gap: 22px; margin-top: 12px; flex-wrap: wrap; font-size: 11px; }
+.mck-chart-stats .item { color: var(--mk-sub); }
+.mck-chart-stats .item b { color: var(--mk-ink); font-family: var(--mk-mono); }
+.mck-notrend { grid-column: 1 / -1; border: 1.5px dashed var(--mk-border); padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start; background: var(--mk-surface2); }
+.mck-notrend .icon { font-family: var(--mk-mono); font-size: 18px; color: var(--mk-sub); flex-shrink: 0; }
+.mck-notrend .txt { font-size: 11.5px; color: var(--mk-sub); line-height: 1.6; }
+.mck-notrend .txt b { color: var(--mk-ink); }
+
+.mck-cta { margin-top: 16px; }
+.mck-cta button { width: 100%; padding: 13px; background: var(--mk-ink); color: var(--mk-paper); border: none; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: var(--mk-body); }
+.mck-cta button:hover { opacity: .9; }
 .exec-eyebrow {
   font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
   text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 5px;
@@ -2978,18 +3065,14 @@ function renderMcKinseyArea(empresa, tipo) {
 
   const mcSection = (n, title, content) => `
     <div class="mck-sec" data-n="${n}">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${n}</div>
-        <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)">${title}</div>
-      </div>
-      <div style="padding:14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);height:100%">${content}</div>
+      <div class="mck-h"><span class="rn">${n}</span>${title}</div>
+      ${content}
     </div>`;
 
-  const rowKpi = (lbl, val, meta, col) => `
-    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:11px;color:var(--sub)">${lbl}</span>
-      <span style="font-size:13px;font-weight:700;color:${col||'var(--text)'};">${val}${meta?` <span style="font-size:10px;font-weight:400;color:var(--sub)">meta ${meta}</span>`:''}</span>
-    </div>`;
+  const rowKpi = (lbl, val, meta, col) => {
+    const cls = col === 'var(--red)' ? 'crit' : col === 'var(--yellow)' ? 'warn' : col === 'var(--green)' ? 'ok' : '';
+    return `<div class="mck-kv"><span class="l">${lbl}</span><span class="v ${cls}">${val}${meta?` <small>meta ${meta}</small>`:''}</span></div>`;
+  };
 
   const yoyBlock = (valorActual, valorYoY, labelMetrica, fmt, motivoPendiente) => {
     if (valorYoY === null || valorYoY === undefined) {
@@ -3476,47 +3559,27 @@ function renderMcKinseyArea(empresa, tipo) {
 
   const { titulo, I, II, III, IV, V, chatMsg } = areaConfig;
 
-  const prioColors = {'ALTA':'var(--red)','MEDIA':'var(--yellow)','BAJA':'var(--sub)'};
-  const ivHtml = (Array.isArray(IV) ? IV : []).map((p, i) => `
-    <div style="display:flex;gap:10px;padding:10px;${i>0?'border-top:1px solid var(--border)':''}">
-      <span style="padding:2px 7px;border-radius:10px;background:${p.col}22;color:${p.col};font-size:9px;font-weight:800;height:fit-content;white-space:nowrap;flex-shrink:0">${p.prioridad}</span>
-      <div>
-        <div style="font-weight:700;font-size:12px">${p.palanca}</div>
-        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-top:2px">${p.impacto}</div>
-        <div style="font-size:11px;color:var(--sub);margin-top:4px">${p.accion}</div>
-      </div>
-    </div>`).join('');
+  const prClass = {'ALTA':'alta','MEDIA':'media','BAJA':'baja'};
+  const ivHtml = (Array.isArray(IV) ? IV : []).map(p => `
+    <div class="mck-palanca">
+      <div class="mck-palanca-top"><span class="mck-palanca-nombre">${p.palanca}</span><span class="mck-pr ${prClass[p.prioridad]||'media'}">${p.prioridad}</span></div>
+      <div class="mck-palanca-impacto">${p.impacto}</div>
+      <div class="mck-nd" style="margin-top:4px">${p.accion}</div>
+    </div>`).join('') || `<div class="mck-nd">Sin palancas identificadas para este reporte todavía.</div>`;
 
-  const vHtml = (Array.isArray(V) ? V : []).map(d => `
-    <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--yellow)">○</span>
-      <span style="font-size:11px;color:var(--sub)">${d}</span>
-    </div>`).join('');
+  const vHtml = (Array.isArray(V) ? V : []).map(d => `<div class="mck-vacio"><span class="mk">▸</span>${d}</div>`).join('');
 
   return `
-    <!-- HEADLINE KPI badge -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px;background:var(--accent)11;border-radius:10px;border:1px solid var(--accent)33">
-      <div style="flex:1">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--accent);text-transform:uppercase">${titulo}</div>
-        <div style="font-size:12px;color:var(--sub);margin-top:2px">Análisis ejecutivo — Agosto 2026 · Fuente: Power BI</div>
-      </div>
-      <div style="font-size:11px;font-weight:700;color:${rd.estado==='red'?'var(--red)':rd.estado==='yellow'?'var(--yellow)':'var(--green)'}">
-        ${rd.estado==='red'?'🚨 CRÍTICO':rd.estado==='yellow'?'⚡ ALERTA':'✓ OK'}
-      </div>
-    </div>
-
     <div class="mck-grid">
     ${mcSection('I', 'Diagnóstico — ¿Dónde estamos?', I)}
     ${mcSection('II', `Comparativo YoY — Agosto ${yearYoY} vs 2026`, II)}
     ${mcSection('III', 'Análisis Acumulado y Waterfall', III)}
     ${mcSection('IV', 'Palancas de Gestión — So What?', ivHtml)}
-    ${mcSection('V', 'Datos Necesarios para Análisis Completo', `<div>${vHtml}</div><div style="margin-top:8px;font-size:10px;padding:6px;background:rgba(234,179,8,.08);border-radius:4px;color:var(--sub)">Estos datos están en Power BI — requieren habilitarlos en el scraper con medidas filtradas por período.</div>`)}
+    ${mcSection('V', 'Datos Necesarios para Análisis Completo', `${vHtml}<div class="mck-nd" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--mk-border)">Estos datos están en Power BI — requieren habilitarlos en el scraper con medidas filtradas por período.</div>`)}
     </div>
 
-    <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-      <button data-msg="${(chatMsg||'').replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">
-        💬 Analizar con Juanito (IA)
-      </button>
+    <div class="mck-cta">
+      <button data-msg="${(chatMsg||'').replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Analizar con Juanito (IA)</button>
     </div>`;
 }
 
@@ -3553,42 +3616,29 @@ function renderVentasMcKinsey(empresa) {
 
   const mcSection = (n, title, content) => `
     <div class="mck-sec" data-n="${n}">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${n}</div>
-        <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)">${title}</div>
-      </div>
-      <div style="padding:14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);height:100%">${content}</div>
+      <div class="mck-h"><span class="rn">${n}</span>${title}</div>
+      ${content}
     </div>`;
 
-  const row2 = (lbl, val, sub, color) => `
-    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:11px;color:var(--sub)">${lbl}</span>
-      <span style="font-size:13px;font-weight:700;color:${color||'var(--text)'};">${val}${sub?` <span style="font-size:10px;font-weight:400;color:var(--sub)">${sub}</span>`:''}</span>
+  const row2 = (lbl, val, sub, color) => {
+    const cls = color === 'var(--red)' ? 'crit' : color === 'var(--yellow)' ? 'warn' : color === 'var(--green)' ? 'ok' : '';
+    return `<div class="mck-kv"><span class="l">${lbl}</span><span class="v ${cls}">${val}${sub?` <small>${sub}</small>`:''}</span></div>`;
+  };
+
+  const heroCard = (label, val, sub, color, filled) => `
+    <div style="padding:14px 16px;background:${filled?'var(--mk-ink)':'var(--mk-surface)'};border:1px solid ${filled?'var(--mk-ink)':'var(--mk-border)'}">
+      <div style="font-family:var(--mk-mono);font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:${filled?'rgba(255,255,255,.65)':'var(--mk-sub)'}">${label}</div>
+      <div style="font-family:var(--mk-mono);font-size:26px;font-weight:600;margin-top:5px;color:${filled?'var(--mk-paper)':color||'var(--mk-ink)'}">${val}</div>
+      <div style="font-size:10px;color:${filled?'rgba(255,255,255,.5)':'var(--mk-sub)'};margin-top:3px">${sub}</div>
     </div>`;
 
   let html = `
   <!-- HEADLINE KPI — 4 tarjetas: Ventas / Margen / Avance / Brecha -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-    <div style="padding:14px;background:var(--accent);border-radius:10px;text-align:center">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.7);text-transform:uppercase">Ventas Agosto 2026</div>
-      <div style="font-size:26px;font-weight:900;color:#fff;margin-top:4px">${ventaV || '—'}</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">Dato real — Power BI</div>
-    </div>
-    <div style="padding:14px;background:${colMargen}22;border:1px solid ${colMargen}44;border-radius:10px;text-align:center">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:${colMargen};text-transform:uppercase">Margen Variable</div>
-      <div style="font-size:26px;font-weight:900;color:${colMargen};margin-top:4px">${margenV || '—'}</div>
-      <div style="font-size:10px;color:var(--sub);margin-top:2px">meta ≥52%${margenV ? '' : ' · requiere workflow'}</div>
-    </div>
-    <div style="padding:14px;background:${col}22;border:1px solid ${col}44;border-radius:10px;text-align:center">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:${col};text-transform:uppercase">Avance vs Ppto</div>
-      <div style="font-size:26px;font-weight:900;color:${col};margin-top:4px">${avanceV || '—'}</div>
-      <div style="font-size:10px;color:var(--sub);margin-top:2px">meta 100%</div>
-    </div>
-    <div style="padding:14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;text-align:center">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--red);text-transform:uppercase">Brecha vs Plan</div>
-      <div style="font-size:26px;font-weight:900;color:var(--red);margin-top:4px">${gap ? fmtM(gap) : '—'}</div>
-      <div style="font-size:10px;color:var(--sub);margin-top:2px">${avance ? (100-avance).toFixed(1)+'pp' : ''} por cerrar</div>
-    </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--mk-border);border:1px solid var(--mk-border);margin-bottom:16px">
+    ${heroCard('Ventas Agosto 2026', ventaV || '—', 'Dato real — Power BI', null, true)}
+    ${heroCard('Margen Variable', margenV || '—', `meta ≥52%${margenV ? '' : ' · requiere workflow'}`, colMargen)}
+    ${heroCard('Avance vs Ppto', avanceV || '—', 'meta 100%', col)}
+    ${heroCard('Brecha vs Plan', gap ? fmtM(gap) : '—', `${avance ? (100-avance).toFixed(1)+'pp' : ''} por cerrar`, 'var(--mk-red)')}
   </div>
 
   <div class="mck-grid">
@@ -3607,9 +3657,7 @@ function renderVentasMcKinsey(empresa) {
         ${row2('Avance vs Presupuesto', avanceV||'—', 'meta 100%', col)}
         ${row2('Presupuesto implícito mensual', ppto ? fmtM(ppto) : '—', '(= real ÷ avance)', 'var(--sub)')}
         ${row2('Brecha absoluta', gap ? fmtM(gap) : '—', 'faltante vs plan', 'var(--red)')}
-        ${!margenV ? `<div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(234,179,8,.06);border-radius:6px">
-          ⚠️ Margen Variable no disponible aún — el scraper encontró solo Venta Total. Ejecutar workflow con candidatos actualizados para descubrir "R. MARGEN" o "% Margen Variable".
-        </div>` : ''}
+        ${!margenV ? `<div class="mck-nd" style="margin-top:8px">Margen Variable no disponible aún — el scraper encontró solo Venta Total. Ejecutar workflow con candidatos actualizados para descubrir "R. MARGEN" o "% Margen Variable".</div>` : ''}
       </div>
     </div>
   `)}
@@ -3754,6 +3802,60 @@ function renderVentasMcKinsey(empresa) {
       </div>
     </div>
   `)}
+
+  ${(() => {
+    const ds = SERIES?.datasets?.margen;
+    if (!ds || !ds['Venta Total']) return `<div class="mck-notrend"><span class="icon">⊗</span><span class="txt"><b>Sin gráfico de tendencia.</b> La serie mensual de Ventas/Margen todavía no está disponible en <code>series.json</code>.</span></div>`;
+    const ps = SERIES.periodos;
+    const vt = ds['Venta Total'], pk = ds['Precio x Kilo'], ck = ds['Costo x Kilo'];
+    const idxAct = vt.length - 1, idxPrev = idxAct - 1;
+    const momPct = (vt[idxPrev] ? (vt[idxAct]/vt[idxPrev]-1)*100 : null);
+    const anioAct = ps[idxAct].slice(0,4), anioAnt = String(parseInt(anioAct)-1);
+    const comp = mesesComparables(vt, ps, anioAnt, anioAct);
+    const acumB = comp.length ? sumaEn(vt, ps, anioAct, comp) : null;
+    const acumA = comp.length ? sumaEn(vt, ps, anioAnt, comp) : null;
+    const yoyAcumPct = (acumA && acumB) ? (acumB/acumA-1)*100 : null;
+    // Puntos del gráfico (0-700 x, 0-180 y) normalizados sobre su propio rango
+    const toPts = (arr) => {
+      const vals = arr.map((v,i)=>({v,i})).filter(p=>p.v!=null);
+      if (vals.length < 2) return null;
+      const mn = Math.min(...vals.map(p=>p.v)), mx = Math.max(...vals.map(p=>p.v));
+      const rng = (mx-mn) || 1;
+      const n = arr.length - 1;
+      return vals.map(p => `${(p.i/n*700).toFixed(1)},${(180-(p.v-mn)/rng*176-2).toFixed(1)}`).join(' ');
+    };
+    const ventaPts = toPts(vt), costoPts = ck ? toPts(ck) : null;
+    const ckValid = ck ? ck.filter(v=>v!=null) : [];
+    const ckDelta = ckValid.length>=2 ? ((ckValid[ckValid.length-1]/ckValid[0]-1)*100) : null;
+    const pkValid = pk ? pk.filter(v=>v!=null) : [];
+    const pkDelta = pkValid.length>=2 ? ((pkValid[pkValid.length-1]/pkValid[0]-1)*100) : null;
+    return `
+    <div class="mck-trend">
+      <div class="mck-trend-h"><div class="mck-h" style="margin-bottom:0"><span class="rn">II</span>Tendencia mensual — Ventas y Costo/kg</div><span class="src">Fuente: series.json · ${vt.length} puntos (${fmtPeriodo(ps[0])}→${fmtPeriodo(ps[idxAct])})</span></div>
+      <div class="mck-cc-row">
+        <div class="mck-cc"><div class="mck-cc-l">MoM · vs ${fmtPeriodo(ps[idxPrev])}</div><div class="mck-cc-v ${momPct==null?'mck-flat':momPct>=0?'mck-up':'mck-down'}">${momPct==null?'—':(momPct>=0?'▲ +':'▼ ')+momPct.toFixed(2)+'%'}</div><div class="mck-cc-sub">${fmtM(vt[idxPrev])} → ${fmtM(vt[idxAct])}</div></div>
+        <div class="mck-cc"><div class="mck-cc-l">Acumulado ${comp.length?comp.length+' meses '+anioAct:'—'}</div><div class="mck-cc-v mck-up">${acumB?fmtM(acumB):'—'}</div><div class="mck-cc-sub">${comp.length?comp.map(m=>fmtPeriodo(anioAct+'-'+m)).join(', '):'sin meses comparables'}</div></div>
+        <div class="mck-cc"><div class="mck-cc-l">YoY Acumulado · vs ${anioAnt}</div><div class="mck-cc-v ${yoyAcumPct==null?'mck-flat':yoyAcumPct>=0?'mck-up':'mck-down'}">${yoyAcumPct==null?'—':(yoyAcumPct>=0?'▲ +':'▼ ')+yoyAcumPct.toFixed(2)+'%'}</div><div class="mck-cc-sub">${acumA&&acumB?fmtM(acumA)+' → '+fmtM(acumB):'sin dato'}</div></div>
+      </div>
+      <div class="mck-legend">
+        <span class="lg"><span class="sw" style="background:var(--mk-accent)"></span>Ventas (S/, escala propia)</span>
+        ${costoPts?'<span class="lg"><span class="sw" style="background:var(--mk-red)"></span>Costo x Kilo (S/, escala propia)</span>':''}
+      </div>
+      <div class="mck-chart"><svg viewBox="0 0 700 180" preserveAspectRatio="none">
+        <line x1="0" y1="4" x2="700" y2="4" stroke="var(--mk-border)" stroke-dasharray="2,4"/>
+        <line x1="0" y1="61" x2="700" y2="61" stroke="var(--mk-border)" stroke-dasharray="2,4"/>
+        <line x1="0" y1="119" x2="700" y2="119" stroke="var(--mk-border)" stroke-dasharray="2,4"/>
+        <line x1="0" y1="176" x2="700" y2="176" stroke="var(--mk-border)"/>
+        ${ventaPts?`<polyline points="${ventaPts}" fill="none" stroke="var(--mk-accent)" stroke-width="2" opacity=".65" vector-effect="non-scaling-stroke"/>`:''}
+        ${costoPts?`<polyline points="${costoPts}" fill="none" stroke="var(--mk-red)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`:''}
+      </svg></div>
+      <div class="mck-chart-x"><span>${fmtPeriodo(ps[0])}</span><span>${fmtPeriodo(ps[Math.floor(ps.length/2)])}</span><span>${fmtPeriodo(ps[idxAct])} (actual)</span></div>
+      <div class="mck-chart-stats">
+        ${ckDelta!=null?`<span class="item">Costo/kg: <b style="color:${ckDelta>=0?'var(--mk-red)':'var(--mk-green)'}">${ckDelta>=0?'+':''}${ckDelta.toFixed(1)}%</b> (${fmtPeriodo(ps[ps.length-ck.filter(v=>v!=null).length])}→actual)</span>`:''}
+        ${pkDelta!=null?`<span class="item">Precio/kg: <b style="color:${pkDelta>=0?'var(--mk-green)':'var(--mk-red)'}">${pkDelta>=0?'+':''}${pkDelta.toFixed(1)}%</b> (mismo período)</span>`:''}
+      </div>
+    </div>`;
+  })()}
   </div>`;
 
   return html;
