@@ -1097,6 +1097,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           <iframe id="pbi-iframe" src="" allowFullScreen="true" frameborder="0"></iframe>
         </div>
       </div>
+      <script>var REPORTES_SCREEN_HTML = document.getElementById('screen-reportes').innerHTML;</script>
 
     </div>
   </div>
@@ -3890,17 +3891,37 @@ Para preguntas directas: 2-3 párrafos sin headers. Responde en español. CEO de
 }
 const JUANITO_SYSTEM_PROMPT = null; // reemplazado por buildSystemPrompt()
 
+// Nombre de la tarjeta en "Reportes" → tipo real con análisis McKinsey (cfg/REPORTE_LABEL).
+// Solo se mapean los que tienen datos reales verificados — el resto sigue abriendo el
+// embed nativo de Power BI para no mostrar un análisis equivocado con datos de otro reporte.
+const REPORTE_NOMBRE_A_TIPO = {
+  'Cuentas por Cobrar':  'cuentas_por_cobrar',
+  'Cuentas por Pagar':   'cuentas_por_pagar',
+  'Margen Variable':     'margen_variable',
+  'Mermas':              'mermas',
+  'Compras':             'compras',
+  'Inventario S&OP':     'sop_inventario',
+  'Control Interno':     'control_interno',
+  'Materiales Indirectos': 'consumo_materiales',
+  'Productividad':       'productividad',
+};
+
 function initReportes() {
   ['PAUNO','AMAUTA','NEOPACK'].forEach(emp => {
     const grid = document.getElementById('grid-' + emp.toLowerCase());
     if (!grid) return;
-    grid.innerHTML = REPORTES_PBI[emp].map(r =>
-      `<div class="reporte-card" onclick="openPbi('${r.url}','${emp} — ${r.nombre}')">
+    grid.innerHTML = REPORTES_PBI[emp].map(r => {
+      const tipo = emp === 'PAUNO' ? REPORTE_NOMBRE_A_TIPO[r.nombre] : null;
+      const rd = tipo ? (DATA.empresas?.[emp]?.reportes || {})[tipo] : null;
+      const click = (tipo && rd)
+        ? `showDetail('${emp}','${tipo}','${r.nombre}','','')`
+        : `openPbi('${r.url}','${emp} — ${r.nombre}')`;
+      return `<div class="reporte-card" onclick="${click}">
         <div class="reporte-card-icon">${r.icon}</div>
         <div class="reporte-card-nombre">${r.nombre}</div>
         <div class="reporte-card-empresa">${emp}</div>
-      </div>`
-    ).join('');
+      </div>`;
+    }).join('');
   });
 }
 
@@ -3912,9 +3933,15 @@ function openPbi(url, titulo) {
 }
 
 function closePbi() {
-  document.getElementById('pbi-iframe').src = '';
-  document.getElementById('pbi-viewer').style.display = 'none';
-  document.getElementById('reportes-list').style.display = 'block';
+  // El detalle McKinsey (showDetail) reemplaza el contenido de #screen-reportes
+  // por completo, así que estos elementos pueden no existir si el usuario navega
+  // de vuelta a "Reportes" sin pasar por el botón "← Volver" (que restaura el HTML original).
+  const iframe = document.getElementById('pbi-iframe');
+  const viewer = document.getElementById('pbi-viewer');
+  const lista = document.getElementById('reportes-list');
+  if (iframe) iframe.src = '';
+  if (viewer) viewer.style.display = 'none';
+  if (lista) lista.style.display = 'block';
 }
 
 function showTab(tab) {
@@ -3928,7 +3955,15 @@ function showTab(tab) {
   document.getElementById('top-badge').textContent = DATA?.fecha || '';
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('screens-container').scrollTop = 0;
-  if (tab === 'reportes') { closePbi(); initReportes(); }
+  if (tab === 'reportes') {
+    // showDetail() reemplaza TODO el contenido de #screen-reportes al abrir un
+    // dashboard McKinsey desde esta pestaña — hay que restaurar la estructura
+    // original (grid + visor de Power BI) antes de poder usarla de nuevo.
+    const scr = document.getElementById('screen-reportes');
+    if (scr && !document.getElementById('reportes-list')) scr.innerHTML = REPORTES_SCREEN_HTML;
+    closePbi();
+    initReportes();
+  }
   if (tab === 'juanito') { initJuanitoChat(); }
 }
 
