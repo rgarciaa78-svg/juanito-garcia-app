@@ -260,6 +260,26 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* Cabecera ejecutiva */
 .exec-header { background: var(--navy2); padding: 13px 18px 12px; margin: -16px -14px 14px; }
 @media (min-width: 768px) { .exec-header { margin: -24px -32px 16px; padding: 15px 32px 14px; } }
+
+/* Dashboards de detalle por reporte (McKinsey I-V) — responsive
+   iPhone: 1 columna apilada (por defecto, sin media query)
+   iPad (≥768px): 2 columnas
+   MacBook (≥1180px): I ocupa una columna fija a la izquierda, II-V en grilla 2x2 a la derecha */
+.mck-wrap { max-width: 1180px; margin: 0 auto; }
+.mck-grid { display: flex; flex-direction: column; gap: 14px; }
+.mck-sec { min-width: 0; }
+@media (min-width: 768px) {
+  .mck-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: start; }
+  .mck-sec[data-n="I"] { grid-column: 1 / -1; }
+}
+@media (min-width: 1180px) {
+  .mck-grid { grid-template-columns: 300px repeat(2, 1fr); grid-auto-rows: min-content; }
+  .mck-sec[data-n="I"] { grid-column: 1; grid-row: 1 / span 2; }
+  .mck-sec[data-n="II"] { grid-column: 2; grid-row: 1; }
+  .mck-sec[data-n="III"] { grid-column: 3; grid-row: 1; }
+  .mck-sec[data-n="IV"] { grid-column: 2; grid-row: 2; }
+  .mck-sec[data-n="V"] { grid-column: 3; grid-row: 2; }
+}
 .exec-eyebrow {
   font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
   text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 5px;
@@ -2956,12 +2976,12 @@ function renderMcKinseyArea(empresa, tipo) {
   const yearYoY = periodoYoY.split('-')[0];
 
   const mcSection = (n, title, content) => `
-    <div style="margin-bottom:14px">
+    <div class="mck-sec" data-n="${n}">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${n}</div>
         <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)">${title}</div>
       </div>
-      <div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">${content}</div>
+      <div style="padding:14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);height:100%">${content}</div>
     </div>`;
 
   const rowKpi = (lbl, val, meta, col) => `
@@ -3484,11 +3504,13 @@ function renderMcKinseyArea(empresa, tipo) {
       </div>
     </div>
 
+    <div class="mck-grid">
     ${mcSection('I', 'Diagnóstico — ¿Dónde estamos?', I)}
     ${mcSection('II', `Comparativo YoY — Agosto ${yearYoY} vs 2026`, II)}
     ${mcSection('III', 'Análisis Acumulado y Waterfall', III)}
     ${mcSection('IV', 'Palancas de Gestión — So What?', ivHtml)}
     ${mcSection('V', 'Datos Necesarios para Análisis Completo', `<div>${vHtml}</div><div style="margin-top:8px;font-size:10px;padding:6px;background:rgba(234,179,8,.08);border-radius:4px;color:var(--sub)">Estos datos están en Power BI — requieren habilitarlos en el scraper con medidas filtradas por período.</div>`)}
+    </div>
 
     <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
       <button data-msg="${(chatMsg||'').replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">
@@ -3529,12 +3551,12 @@ function renderVentasMcKinsey(empresa) {
   const proySepDic = venta ? venta * 4 : null;
 
   const mcSection = (n, title, content) => `
-    <div style="margin-bottom:14px">
+    <div class="mck-sec" data-n="${n}">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${n}</div>
         <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)">${title}</div>
       </div>
-      <div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">${content}</div>
+      <div style="padding:14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);height:100%">${content}</div>
     </div>`;
 
   const row2 = (lbl, val, sub, color) => `
@@ -3568,6 +3590,7 @@ function renderVentasMcKinsey(empresa) {
     </div>
   </div>
 
+  <div class="mck-grid">
   <!-- SECCIÓN I: DIAGNÓSTICO -->
   ${mcSection('I','Diagnóstico — ¿Dónde estamos?',`
     <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
@@ -3729,7 +3752,8 @@ function renderVentasMcKinsey(empresa) {
         Datos en Power BI — requieren activar medidas en el scraper con filtros de período y dimensión UEN.
       </div>
     </div>
-  `)}`;
+  `)}
+  </div>`;
 
   return html;
 }
@@ -3767,13 +3791,15 @@ function showDetail(empresa, tipo, label, archivo, desc) {
   }
 
   document.getElementById('screen-' + currentTab).innerHTML =
-    `<div style="display:flex;align-items:center;gap:10px;padding:12px 0 16px;cursor:pointer" onclick="goBack()">
+    `<div class="mck-wrap">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 0 16px;cursor:pointer" onclick="goBack()">
       <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--accent);stroke-width:2.5;fill:none"><polyline points="15 18 9 12 15 6"/></svg>
       <span style="font-size:13px;font-weight:700;color:var(--accent)">← ${empresa}</span>
     </div>
     <div style="font-size:20px;font-weight:800;margin-bottom:4px">${tituloDetalle}</div>
     <div style="font-size:11px;color:var(--sub);margin-bottom:16px">Marco McKinsey — Agosto 2026 · Fuente: Power BI</div>
-    ${mcHtml}`;
+    ${mcHtml}
+    </div>`;
   return;
 }
 
