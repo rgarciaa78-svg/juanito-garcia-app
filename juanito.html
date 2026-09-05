@@ -431,6 +431,25 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .hm-lbl { font-family: var(--mk-mono); font-size: 8px; color: var(--mk-sub); line-height: 1.2; height: 18px; overflow: hidden; }
 
 /* Plan de acción 30/60/90 */
+/* Mapa de causalidad — cadenas hallazgo → causa → efecto */
+.causal-head { display: flex; align-items: center; gap: 8px; margin: 22px 14px 12px; }
+.causal-head-t { font-family: var(--mk-mono); font-size: 10.5px; font-weight: 700; color: var(--mk-navy); text-transform: uppercase; letter-spacing: 1.1px; }
+.causal-head-line { flex: 1; height: 1px; background: var(--mk-border); }
+.causal-wrap { margin: 0 14px; border: 1px solid var(--mk-border); background: #fff; padding: 18px 16px; }
+.flow-chain { display: flex; align-items: stretch; gap: 0; margin-bottom: 16px; flex-wrap: wrap; }
+.flow-chain:last-child { margin-bottom: 0; }
+.flow-box { border: 1px solid var(--mk-border); background: var(--mk-surface2); padding: 10px 13px; min-width: 140px; flex: 1; }
+.flow-box.crit { border-color: var(--mk-red); background: var(--mk-red-soft); }
+.flow-box.warn { border-color: var(--mk-yellow); background: var(--mk-yellow-soft); }
+.flow-box .fb-l { font-family: var(--mk-mono); font-size: 9px; color: var(--mk-sub); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.flow-box .fb-v { font-family: var(--mk-mono); font-size: 16px; font-weight: 600; color: var(--mk-ink); }
+.flow-box .fb-sub { font-size: 9.5px; color: var(--mk-sub); margin-top: 3px; line-height: 1.4; }
+.flow-arrow { display: flex; align-items: center; justify-content: center; padding: 0 8px; color: var(--mk-sub); font-size: 16px; flex-shrink: 0; }
+@media (max-width: 700px) {
+  .flow-chain { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); padding: 4px 0; }
+}
+
 .roadmap-head { display: flex; align-items: center; gap: 8px; margin: 22px 14px 12px; }
 .roadmap-head-t { font-family: var(--mk-mono); font-size: 10.5px; font-weight: 700; color: var(--mk-navy); text-transform: uppercase; letter-spacing: 1.1px; }
 .roadmap-head-line { flex: 1; height: 1px; background: var(--mk-border); }
@@ -1155,6 +1174,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div id="screen-home" class="screen active">
         <div id="exec-header-row"></div>
         <div id="veredicto-row"></div>
+        <div id="causal-row"></div>
         <div id="heatmap-row"></div>
         <div id="diagnostico-row"></div>
         <div id="roadmap-row"></div>
@@ -2179,7 +2199,7 @@ function renderHeatmap() {
     consumo_materiales: 'Consumo', compras: 'Compras', sop_inventario: 'Inventario',
     productividad: 'Product.', margen_variable_pag2: 'Avance Ppto',
   };
-  const celdas = ORDEN.map(tipo => {
+  const celdas = ORDEN.map((tipo, i) => {
     const rd = rpts[tipo];
     if (!rd) return '';
     const est = rd.estado === 'yellow' ? 'yellow' : (rd.estado === 'red' ? 'red' : 'green');
@@ -2187,11 +2207,74 @@ function renderHeatmap() {
     const kpi = (rd.kpis || [])[0];
     const marca = est === 'red' ? '!' : est === 'yellow' ? '·' : '✓';
     return `<div class="hm-cell" onclick="showTab('pauno')" title="${kpi ? kpi.label+': '+kpi.valor : ''}">
+      <div class="hm-n">${String(i+1).padStart(2,'0')}</div>
       <div class="hm-dot ${est}">${marca}</div>
       <div class="hm-lbl">${nombre}</div>
     </div>`;
   }).join('');
   el.innerHTML = `<div class="heatmap-strip">${celdas}</div>`;
+}
+
+// Mapa de causalidad: 3 cadenas reales (hallazgo → causa → efecto) armadas
+// directamente desde los KPIs de cada reporte, sin depender de diagnosticoCompleto.
+function renderCausalMap() {
+  const el = document.getElementById('causal-row');
+  if (!el) return;
+  const rpts = (DATA.empresas && DATA.empresas.PAUNO && DATA.empresas.PAUNO.reportes) || {};
+  const kv = (tipo, lbl) => rpts[tipo]?.kpis?.find(k => k.label === lbl)?.valor;
+
+  const chains = [];
+
+  // Cadena 1: Merma (peor UEN/Planta) → Costo/kg → Margen
+  const mermaRd = rpts.mermas || {};
+  const peorUen = (mermaRd.por_uen || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma))[0];
+  const peorPlanta = (mermaRd.por_planta || []).slice().sort((a,b) => parseVal(b.merma) - parseVal(a.merma))[0];
+  const costoKg = kv('margen_variable','Costo/kg');
+  const margenV = kv('margen_variable','Margen variable');
+  if ((peorUen || peorPlanta) && costoKg && margenV) {
+    chains.push([
+      { cls:'crit', l:'Merma — peor UEN/Planta', v:`${peorUen?peorUen.uen+' '+peorUen.merma:''}${peorUen&&peorPlanta?' · ':''}${peorPlanta?peorPlanta.planta+' '+peorPlanta.merma:''}`, sub:'sobre el resto de la operación' },
+      { cls:'crit', l:'Costo x Kilo', v: costoKg, sub:'insumo directo del margen' },
+      { cls:'crit', l:'Margen Variable', v: margenV, sub:'meta ≥52%' },
+    ]);
+  }
+
+  // Cadena 2: Fill Rate → Venta Perdida → Facturación
+  const fillRate = kv('fill_rate','Fill Rate');
+  const ventaPerdida = kv('fill_rate','Venta Perdida');
+  const facturacion = kv('fill_rate','Facturación');
+  if (fillRate && ventaPerdida && facturacion) {
+    chains.push([
+      { cls:'crit', l:'Fill Rate', v: fillRate, sub:'meta 98%' },
+      { cls:'crit', l:'Venta Perdida', v: ventaPerdida, sub:'pedidos no despachados' },
+      { cls:'warn', l:'Facturación real', v: facturacion, sub:'techo de ventas autoimpuesto' },
+    ]);
+  }
+
+  // Cadena 3: Planes de Acción atrasados → Puntos Críticos → % Cumplimiento
+  const ciRd = rpts.control_interno || {};
+  const ciKv = lbl => (ciRd.kpis || []).find(k => k.label === lbl)?.valor;
+  const atrasados = ciKv('Planes de Acción Atrasados');
+  const totalPlanes = ciKv('Total Planes de Acción');
+  const critico = ciKv('Crítico');
+  const puntosEval = ciKv('Puntos de Control evaluados');
+  const cumplimiento = ciKv('% Cumplimiento');
+  if (atrasados && critico && cumplimiento) {
+    chains.push([
+      { cls:'warn', l:'Planes de Acción atrasados', v:`${atrasados} / ${totalPlanes||'—'}`, sub:'planes correctivos sin cerrar' },
+      { cls:'crit', l:'Puntos en estado Crítico', v:`${critico} / ${puntosEval||'—'}`, sub:'no bajan porque no se cierran los planes' },
+      { cls:'crit', l:'% Cumplimiento', v: cumplimiento, sub:'meta 85%' },
+    ]);
+  }
+
+  if (!chains.length) { el.innerHTML = ''; return; }
+
+  const box = b => `<div class="flow-box ${b.cls}"><div class="fb-l">${b.l}</div><div class="fb-v">${b.v}</div><div class="fb-sub">${b.sub}</div></div>`;
+  const chainHtml = c => `<div class="flow-chain">${c.map((b,i) => box(b) + (i < c.length-1 ? '<div class="flow-arrow">→</div>' : '')).join('')}</div>`;
+
+  el.innerHTML = `
+    <div class="causal-head"><span class="causal-head-t">De dónde viene el problema</span><div class="causal-head-line"></div></div>
+    <div class="causal-wrap">${chains.map(chainHtml).join('')}</div>`;
 }
 
 // Consolida las "palancas" de cada hallazgo real en un plan de acción por horizonte de tiempo.
@@ -2344,6 +2427,7 @@ function renderHome() {
 
   document.getElementById('kpi-exec-grid').innerHTML = html;
   renderVeredicto();
+  renderCausalMap();
   renderHeatmap();
   renderDiagnostico();
   renderRoadmap();
