@@ -1695,7 +1695,33 @@ def build_margen(found):
         kpis.append({"label": "Costo Total", "valor": fmt_soles(costo_total_val)})
 
     alerta = f"Margen {fmt_pct(margen_pct)} — bajo meta 52%" if sem != "green" and margen_pct else None
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}, ventas_val, margen_pct
+    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Clientes que más venta concentran, con su margen. El reporte trae 173
+    # líneas; en el dashboard entran las de mayor venta, que es donde una
+    # caída de margen pesa de verdad.
+    cli = found.get("__por_cliente") or []
+    limpios = []
+    for c in cli:
+        v = to_float(c.get("venta"))
+        nombre = (c.get("cliente") or "").strip()
+        if not nombre or v is None or v <= 0:
+            continue
+        limpios.append((nombre, v, to_float(c.get("margen")),
+                        to_float(c.get("margen_caida"))))
+    if limpios:
+        limpios.sort(key=lambda t: -t[1])
+        total_v = sum(t[1] for t in limpios) or None
+        res["por_cliente"] = [{
+            "cliente": n,
+            "venta": fmt_soles(v),
+            "pct_venta": round(v / total_v * 100, 1) if total_v else None,
+            "margen": (f"{(mg * 100 if abs(mg) <= 1 else mg):.1f}%"
+                       if mg is not None else "—"),
+            "caida": (f"{(ca * 100 if abs(ca) <= 1 else ca):.1f}%"
+                      if ca is not None else None),
+        } for n, v, mg, ca in limpios[:12]]
+    return res, ventas_val, margen_pct
 
 def build_mermas(found):
     ate_val  = found.get("% Merma Ate") or found.get("Merma Ate") or found.get("Merma Planta Ate")
@@ -3117,6 +3143,26 @@ def main():
                 if planta_merma:
                     empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
                     print(f"  Mermas Planta: {planta_merma}")
+
+        # ── Margen por cliente (pestaña "R. ORDEN DE VENTA" del reporte 3).
+        # Responde de qué cliente viene la caída de margen, no solo de qué
+        # unidad de negocio.
+        if empresa == "PAUNO":
+            try:
+                cli = desglose_desde_captura(
+                    token, ws_id, [ids.get("margen")],
+                    "ORDENES DE VENTA EN EL SISTEMA POR CLIENTE",
+                    {"cliente": "[cliente]",
+                     "margen": "[v__Margen_Venta__]",
+                     "margen_caida": "[v__MARGEN_CAIDA__]",
+                     "venta": "[SumMonto_Neto_Venta]",
+                     "costo": "[SumCOSTO_TOTAL]"})
+                if cli:
+                    scanned.setdefault("margen", {})["__por_cliente"] = cli
+            except Exception as e:
+                print(f"    ✗ margen por cliente: {e}")
+                DIAGNOSTICO.append({"consulta": "margen_cliente", "http": 0,
+                                    "error": repr(e)[:300]})
 
         # ── Compras: faltantes y necesidad de compra, desde las capturas del
         # Analizador (pestaña "ANALISIS DE COMPRA" del reporte 5).

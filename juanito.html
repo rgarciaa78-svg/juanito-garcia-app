@@ -4771,6 +4771,24 @@ function dxpDesglose(tipo, s) {
     return { t:'Avance vs presupuesto — por canal', h };
   }
   if (tipo === 'margen_variable') {
+    // Margen por cliente: de la pestaña "R. ORDEN DE VENTA" del reporte 3.
+    // Va antes que el desglose por UEN porque una caída de margen suele
+    // concentrarse en pocos clientes, no repartirse por unidad.
+    const cli = s.rp.margen_variable?.por_cliente || [];
+    if (cli.length) {
+      const mxv = Math.max(...cli.map(c => parseVal(c.venta) || 0)) || 1;
+      return { t:'Margen por cliente — dónde se concentra la venta', h:
+        cli.map(c => bar(
+            `${c.cliente}${c.margen ? ` · ${c.margen}` : ''}`,
+            `${c.venta}${c.pct_venta != null ? ` · ${c.pct_venta}%` : ''}`,
+            (parseVal(c.venta) || 0) / mxv * 100,
+            col(parseFloat(c.margen) < 40 ? 'red'
+                : parseFloat(c.margen) < 48 ? 'yellow' : 'green'))).join('')
+        + (cli.some(c => c.caida)
+           ? mini('Mayor caída de margen',
+                  cli.slice().sort((a, b) => parseFloat(b.caida || 0) - parseFloat(a.caida || 0))[0].cliente)
+           : '') };
+    }
     const u = s.rp.margen_variable.por_uen || [];
     const mx = Math.max(...u.map(x=>parseVal(x.margen)||0)) || 1;
     return { t:'Desglose — Margen por UEN', h:
@@ -6247,6 +6265,7 @@ function construirContexto() {
         por_canal: rd.por_canal,
         cumplimiento_produccion: rd.cumplimiento_produccion,
         faltantes: rd.faltantes,
+        por_cliente: rd.por_cliente,
         necesidad_compra: rd.necesidad_compra,
         por_marca: rd.por_marca,
         por_grupo: rd.por_grupo,
