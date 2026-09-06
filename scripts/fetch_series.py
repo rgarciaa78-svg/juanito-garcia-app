@@ -323,6 +323,34 @@ MERMAS_MEDIDAS = [
 ]
 
 
+def _q_mermas_plantas(anio):
+    """Merma mensual por planta, agrupando por 'Tabla Mermas'[almacen].
+
+    Confirmado con Copiar consulta (2026-09-06) sobre el visual "PLANTA ATE":
+    las plantas NO tienen medida propia — usan la medida base
+    '% Merma total' con un filtro de columna:
+
+        TREATAS({"Lacteos Producción"}, 'Tabla Mermas'[almacen])
+
+    Por eso el sondeo de medidas por nombre no las encontraba. Y el título
+    del visual ("PLANTA ATE") no coincide con el valor de la columna
+    ("Lacteos Producción"), así que tampoco se pueden deducir.
+
+    En vez de pedir una captura por planta, se agrupa por [almacen]
+    manteniendo los otros 6 filtros: el modelo devuelve todas las plantas
+    con su nombre exacto. Mismo recurso que se usó con el aging de CxC,
+    donde el total agrupado cuadró al peso con las tarjetas individuales.
+    """
+    base = _q_mermas(anio)
+    # Se inserta [almacen] como columna de agrupación y se quitan las medidas
+    # con sufijo de planta (LACTEOS), que solo aplican al visual de ATE.
+    base = base.replace(
+        "\t\t\t'Calendario'[Año],\n\t\t\t'Calendario'[MES],\n",
+        "\t\t\t'Calendario'[Año],\n\t\t\t'Calendario'[MES],\n\t\t\t'Tabla Mermas'[almacen],\n",
+    )
+    return base
+
+
 def _q_mermas(anio):
     """Consulta del gráfico "PAUNO" de MERMA MENSUAL POR PLANTA, tal cual la
     genera Power BI (Copiar consulta, 2026-09-06), con el año del segmentador
@@ -513,6 +541,39 @@ def serie_mermas_exacta(token, ds_id, periodos):
     return out or None
 
 
+def serie_mermas_plantas(token, ds_id, periodos):
+    """Series mensuales de % Merma por planta (columna [almacen]).
+
+    Los nombres de planta salen del modelo, no de los títulos de los visuales.
+    """
+    anios = sorted({a for a, _ in periodos})
+    por_planta = {}
+    for anio in anios:
+        for r in dax(token, ds_id, _q_mermas_plantas(anio), f"mermas-plantas-{anio}") or []:
+            alm = r.get("Tabla Mermas[almacen]") or r.get("[almacen]")
+            mes = r.get("Calendario[MES]") or r.get("[MES]")
+            if isinstance(mes, str):
+                mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+            val = r.get("[v__Merma_total]", r.get("v__Merma_total"))
+            if not alm or mes is None or val is None:
+                continue
+            try:
+                por_planta.setdefault(str(alm), {})[(int(anio), int(mes))] = float(val)
+            except (TypeError, ValueError):
+                pass
+
+    out = {}
+    for alm in sorted(por_planta):
+        serie = [por_planta[alm].get(p) for p in periodos]
+        if any(x is not None for x in serie):
+            out[f"% Merma {alm}"] = serie
+            print(f"    [% Merma {alm}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    if not out:
+        print("    ✗ sin plantas — [almacen] no devolvió filas")
+    return out
+
+
 def serie_mermas_segmentos(token, ds_id, periodos):
     """Series mensuales de % Merma por unidad de negocio.
 
@@ -602,6 +663,8 @@ def main():
                 # Segmentos (B&D, TIGO, MAQUILA, plantas...): mismo bloque de
                 # filtros menos el de TIPO DE BASE, con la medida por segmento.
                 resultado["mermas"].update(serie_mermas_segmentos(token, mermas_id, periodos))
+                # Plantas: la medida base filtrada por 'Tabla Mermas'[almacen]
+                resultado["mermas"].update(serie_mermas_plantas(token, mermas_id, periodos))
                 print()
             else:
                 print("    Sin filas\n")
