@@ -2417,7 +2417,12 @@ def main():
       '{cal_tbl}'[{cal_col}]
     )
   ))"""
-                    rows = dax(token, ws_id, ds_c, q, f"treatas_{cal_tbl[:6]}_{cal_col[:4]}")
+                    # registrar=False: esto prueba nombres de tabla de fecha a
+                    # ver cuál existe. Que la mayoría falle es su forma de
+                    # trabajar, no un problema — y anotarlas llenaba el
+                    # diagnóstico de ruido que la app descarga en cada visita.
+                    rows = dax(token, ws_id, ds_c, q,
+                               f"treatas_{cal_tbl[:6]}_{cal_col[:4]}", registrar=False)
                     if rows:
                         v = rows[0].get("[v]") or rows[0].get("v")
                         if v is not None:
