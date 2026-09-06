@@ -778,7 +778,7 @@ def dax_control_resultado_acumulado(token, ws_id, dataset_id, empresa="Pauno", l
     }
 
 
-def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated"):
+def dax_prev_month(token, ws_id, dataset_id, measure_name, date_tbl, date_col, label="dated", registrar=True):
     """Ejecuta medida filtrada al mes anterior completo."""
     q = f"""EVALUATE
 ROW("v",
@@ -787,7 +787,7 @@ ROW("v",
     FILTER(ALL('{date_tbl}'), YEAR('{date_tbl}'[{date_col}]) = {PREV_YEAR} && MONTH('{date_tbl}'[{date_col}]) = {PREV_MONTH})
   )
 )"""
-    rows = dax(token, ws_id, dataset_id, q, label)
+    rows = dax(token, ws_id, dataset_id, q, label, registrar=registrar)
     if rows:
         return rows[0].get("[v]") or rows[0].get("v")
     return None
@@ -1024,7 +1024,7 @@ def get_token():
 DIAGNOSTICO = []
 
 
-def dax(token, ws_id, dataset_id, query, label="query"):
+def dax(token, ws_id, dataset_id, query, label="query", registrar=True):
     """Ejecuta una consulta DAX cruda. Retorna lista de filas o []."""
     import time
     url = f"https://api.powerbi.com/v1.0/myorg/groups/{ws_id}/datasets/{dataset_id}/executeQueries"
@@ -1040,12 +1040,13 @@ def dax(token, ws_id, dataset_id, query, label="query"):
                 continue
             if r.status_code != 200:
                 print(f"    [dax:{label}] {r.status_code} {r.text[:120]}")
-                DIAGNOSTICO.append({"consulta": label, "http": r.status_code,
-                                    "error": r.text[:600]})
+                if registrar:
+                    DIAGNOSTICO.append({"consulta": label, "http": r.status_code,
+                                        "error": r.text[:600]})
                 return []
             tables = r.json().get("results", [{}])[0].get("tables", [])
             filas = tables[0].get("rows", []) if tables else []
-            if not filas:
+            if not filas and registrar:
                 DIAGNOSTICO.append({"consulta": label, "http": 200,
                                     "error": "sin filas (la consulta corrió pero no devolvió datos)"})
             return filas
@@ -1092,7 +1093,11 @@ def scan_dataset(token, ws_id, dataset_id, ds_key, cache=None):
 
     def get_val(name):
         if date_ctx:
-            v = dax_prev_month(token, ws_id, dataset_id, name, date_ctx[0], date_ctx[1], f"{ds_key}_{name[:15]}")
+            # registrar=False: el sondeo prueba nombres a ver cuáles existen;
+            # que la mayoría falle es lo esperado, no un diagnóstico útil, y
+            # además inflaba summaries.json (61 KB de ruido que carga la app).
+            v = dax_prev_month(token, ws_id, dataset_id, name, date_ctx[0], date_ctx[1],
+                               f"{ds_key}_{name[:15]}", registrar=False)
             if v is not None:
                 return v, True
         return try_measure(token, ws_id, dataset_id, name)
@@ -2480,6 +2485,8 @@ def main():
                         print(f"    ✓ CxC aging [{seg}]: {v:,.0f}")
             except Exception as e:
                 print(f"    ✗ CxC aging: {e}")
+                DIAGNOSTICO.append({"consulta": "cxc_aging", "http": 0,
+                                    "error": f"excepcion en Python: {e!r}"})
 
         # ── CxC
         if scanned.get("cxc"):
@@ -2511,6 +2518,8 @@ def main():
                           f"mayor {top[0][0]} {top[0][2]:,.0f}")
             except Exception as e:
                 print(f"    ✗ CxP top proveedores: {e}")
+                DIAGNOSTICO.append({"consulta": "cxp_top15", "http": 0,
+                                    "error": f"excepcion en Python: {e!r}"})
 
         # ── CxP
         if scanned.get("cxp"):
@@ -2701,6 +2710,8 @@ def main():
                     print(f"    ✗ reporte S&OP: HTTP {rr.status_code}")
             except Exception as e:
                 print(f"    ✗ S&OP clasificación: {e}")
+                DIAGNOSTICO.append({"consulta": "sop_clasificacion", "http": 0,
+                                    "error": f"excepcion en Python: {e!r}"})
 
         # ── Inventario
         if scanned.get("inventario"):
@@ -2815,6 +2826,8 @@ def main():
                     print(f"    ✗ reporte FILLRATE: HTTP {r.status_code}")
             except Exception as e:
                 print(f"    ✗ Fill Rate por marca: {e}")
+                DIAGNOSTICO.append({"consulta": "fillrate", "http": 0,
+                                    "error": f"excepcion en Python: {e!r}"})
 
         # ── Fill Rate (dataset dedicado 12. Calculo de Provisiones)
         if scanned.get("fill_rate"):
