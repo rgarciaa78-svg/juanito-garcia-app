@@ -258,12 +258,19 @@ ROW(
 
 def dax_consumo_venta_neta_kg(token, ws_id, dataset_id, label="consumo_ventaneta"):
     """'Venta Neta (KG)' del reporte '14. Consumo Materiales indirectos de producción'.
-    No es medida, es la columna 'Maestra de Facturacion (Total)'[Peso total KG]
-    (con G — distinta de [Peso total K] sin G que usa Productividad) con SUM directo.
+
+    Es la columna 'Maestra de Facturacion (Total)'[Peso total K] con SUM
+    directo, no una medida.
+
+    Antes se usaba [Peso total KG], con G, bajo el supuesto de que era una
+    columna distinta de la que usa Productividad. El diagnóstico del
+    2026-09-06 mostró que esa no existe ("Column 'Peso total KG' cannot be
+    found"), y la consulta capturada del visual de Productividad confirma que
+    la buena es [Peso total K], sin G. Era una sola columna, no dos.
     """
     return _dax_consumo_filtro_venta(
         token, ws_id, dataset_id,
-        "SUM('Maestra de Facturacion (Total)'[Peso total KG])", label)
+        "SUM('Maestra de Facturacion (Total)'[Peso total K])", label)
 
 
 def dax_consumo_costo_x_tn_vendida(token, ws_id, dataset_id, label="consumo_costotnvend"):
@@ -2514,6 +2521,12 @@ def build_avance(found):
             # muestra la misma cifra, así que se publica tal cual pero sin
             # semáforo verde y con la advertencia al lado.
             sospechoso = pct > 150
+            # Se descartan los KPIs del sondeo genérico: su '% Avance' es la
+            # medida plana que nunca respondió al filtro de fecha, y publicaba
+            # 1.3% junto al 239% de la tabla del reporte. Dos avances distintos
+            # para lo mismo es peor que uno solo con su advertencia.
+            res["kpis"] = [k for k in res["kpis"]
+                           if "avance" not in k["label"].lower()]
             res["kpis"] = [
                 {"label": "Presupuesto del mes", "valor": fmt_soles(ppto)},
                 {"label": "Facturado", "valor": fmt_soles(fact)},
