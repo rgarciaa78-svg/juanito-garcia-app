@@ -37,13 +37,42 @@
             {
               "label": "CxC por vencer",
               "valor": "S/3.25M"
+            },
+            {
+              "label": "CxC Total",
+              "valor": "S/4.52M"
+            },
+            {
+              "label": "CxC Vencido",
+              "valor": "S/946,144",
+              "meta": "20.9% de cartera",
+              "estado": "red"
             }
           ],
           "tramos": [
             {
-              "label": "Por vencer",
-              "valor": "S/3.25M",
-              "estado": "green"
+              "label": "Por Vencer",
+              "valor": "S/3.57M",
+              "estado": "green",
+              "pct": 79.1
+            },
+            {
+              "label": "0 a 15 días",
+              "valor": "S/226,121",
+              "estado": "yellow",
+              "pct": 5.0
+            },
+            {
+              "label": "16 a 30 días",
+              "valor": "S/277,775",
+              "estado": "yellow",
+              "pct": 6.1
+            },
+            {
+              "label": "Más de 30 días",
+              "valor": "S/442,248",
+              "estado": "red",
+              "pct": 9.8
             }
           ]
         },
