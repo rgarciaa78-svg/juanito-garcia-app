@@ -318,14 +318,33 @@ def main():
         for med, vals in serie.items():
             con_dato = sum(1 for v in vals if v is not None)
             no_nulos = [v for v in vals if v is not None]
-            distintos = len({round(v, 6) for v in no_nulos}) if no_nulos else 0
-            es_plana = con_dato >= 3 and distintos <= max(2, con_dato // 7)
+            # Misma regla que usa el dashboard en el navegador (3 pruebas):
+            media = (sum(no_nulos) / len(no_nulos)) if no_nulos else 0
+            # 1) pocos valores distintos (redondeo RELATIVO: el ruido de coma
+            #    flotante no debe partir un mismo valor en dos buckets)
+            distintos = len({round(v / media * 1e4) for v in no_nulos}) if media else 0
+            pocas_variantes = con_dato >= 3 and distintos <= max(2, con_dato // 7)
+            # 2) amplitud relativa < 1% => ruido, no tendencia
+            amplitud = (max(no_nulos) - min(no_nulos)) / media if (no_nulos and media) else 0
+            plana_por_amplitud = con_dato >= 3 and abs(amplitud) < 0.01
+            # 3) valor congelado: una misma cifra ocupa más de la mitad de los meses
+            moda = 0
+            if no_nulos and media:
+                conteo = {}
+                for v in no_nulos:
+                    k = round(v / media * 1e4)
+                    conteo[k] = conteo.get(k, 0) + 1
+                moda = max(conteo.values())
+            congelada = con_dato >= 3 and moda > len(no_nulos) / 2
+            es_plana = pocas_variantes or plana_por_amplitud or congelada
             estado = "PLANA — no confiable" if es_plana else "OK"
             print(f"    [{med}]: {con_dato}/{len(vals)} meses con dato, {distintos} valores distintos → {estado}")
             if es_plana:
                 sin_serie.setdefault(ds_key, {"medidas": [], "tablas": [tbl], "columnas_fecha": [f"{tbl}[{col}]"]})
                 sin_serie[ds_key].setdefault("medidas_planas", []).append({
                     "medida": med, "valores_distintos": distintos, "meses_con_dato": con_dato,
+                    "amplitud_relativa_pct": round(abs(amplitud) * 100, 4),
+                    "repeticiones_del_valor_mas_comun": moda,
                     "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — "
                               "posible relación inactiva o la medida ignora el filtro de fecha (confirmado con "
                               "Copiar consulta solo en Control Interno; para las demás falta validar en vivo).",
