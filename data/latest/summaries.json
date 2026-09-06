@@ -379,8 +379,8 @@
               "estado": "red"
             },
             {
-              "label": "No atendido (mes)",
-              "valor": "S/199",
+              "label": "Pedidos no atendidos (mes)",
+              "valor": "199",
               "estado": "red"
             }
           ],
@@ -389,73 +389,65 @@
               "grupo": "SPSA",
               "valor": "92.5%",
               "estado": "yellow",
-              "soles": "S/129",
-              "soles_num": 129.37232
+              "pedidos": "129"
             },
             {
               "grupo": "CENCOSUD",
               "valor": "96.4%",
               "estado": "green",
-              "soles": "S/62",
-              "soles_num": 61.63875
+              "pedidos": "62"
             },
             {
               "grupo": "TOTTUS",
               "valor": "99.8%",
               "estado": "green",
-              "soles": "S/4",
-              "soles_num": 3.9733799999999997
+              "pedidos": "4"
             },
             {
               "grupo": "LIMA",
               "valor": "99.9%",
               "estado": "green",
-              "soles": "S/2",
-              "soles_num": 1.7859158000000002
+              "pedidos": "2"
             },
             {
               "grupo": "CENTRO SUR",
               "valor": "100.0%",
               "estado": "green",
-              "soles": "S/1",
-              "soles_num": 0.68025
+              "pedidos": "1"
             },
             {
               "grupo": "AJE",
               "valor": "100.0%",
               "estado": "green",
-              "soles": "S/1",
-              "soles_num": 0.55504
+              "pedidos": "1"
             },
             {
               "grupo": "NORTE",
               "valor": "100.0%",
               "estado": "green",
-              "soles": "S/0",
-              "soles_num": 0.4582
+              "pedidos": "0"
             },
             {
               "grupo": "OXXO",
               "valor": "100.0%",
               "estado": "green",
-              "soles": "S/0",
-              "soles_num": 0.1824
+              "pedidos": "0"
             }
           ],
           "por_marca": [
             {
               "marca": "MAQUILA",
-              "valor": "S/118",
+              "valor": "118",
               "pct": 59.1
             },
             {
               "marca": "TIGO",
-              "valor": "S/76",
+              "valor": "76",
               "pct": 38.1
             },
             {
               "marca": "B&D",
-              "valor": "S/5",
+              "valor": "5",
               "pct": 2.7
             }
           ]

@@ -3683,18 +3683,18 @@ function renderMcKinseyArea(empresa, tipo) {
                 <div style="height:100%;width:${Math.min(100, parseVal(g.valor) || 0)}%;background:${cVar(g.estado)}"></div>
               </div>
               <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm);color:${cVar(g.estado)}">${g.valor}</div>
-              ${g.soles ? `<div style="flex:0 0 auto;font-size:10px;font-family:var(--fm);color:var(--sub)">${g.soles} sin atender</div>` : ''}
+              ${g.pedidos ? `<div style="flex:0 0 auto;font-size:10px;font-family:var(--fm);color:var(--sub)">${g.pedidos} pedidos sin atender</div>` : ''}
             </div>`).join('')}
           </div>` : '';
           if (!pm.length) return bloqueGrupo;
           return bloqueGrupo + `<div style="margin-top:12px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">No atendido este mes, por marca</div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">Pedidos no atendidos este mes, por marca</div>
             ${pm.map(m => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
               <div style="flex:0 0 88px;font-size:11px;font-weight:600">${m.marca}</div>
               <div style="flex:1 1 100px;min-width:80px;height:14px;background:var(--surface2);border-radius:3px;overflow:hidden">
                 <div style="height:100%;width:${m.pct != null ? Math.min(100, m.pct) : 0}%;background:var(--red)"></div>
               </div>
-              <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm)">${m.valor}${m.pct != null ? ` · ${m.pct}%` : ''}</div>
+              <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm)">${m.valor} pedidos${m.pct != null ? ` · ${m.pct}%` : ''}</div>
             </div>`).join('')}
           </div>`;
         })() : 'Sin datos de OV.',

@@ -1900,8 +1900,13 @@ def build_fill_rate(found):
             item = {"grupo": g, "valor": f"{pct:.1f}%",
                     "estado": "red" if pct < 85 else "yellow" if pct < 95 else "green"}
             if g in soles:
-                item["soles"] = fmt_soles(soles[g])
-                item["soles_num"] = soles[g]
+                # CONTEO de pedidos, no dinero. El visual se titula "SOLES NO
+                # ATENDIDOS POR GRUPO" pero la medida es 'PEDIDOS NO ATENDIDOS'
+                # y devuelve una cantidad de pedidos (confirmado por el usuario,
+                # 2026-09-06). Formatearlo con fmt_soles ponía un "S/" a un
+                # conteo: la app decía "S/129" donde son 129 pedidos.
+                item["pedidos"] = f"{soles[g]:,.0f}"
+                item["pedidos_num"] = soles[g]
             res_g.append(item)
         res["por_grupo"] = res_g
 
@@ -1919,11 +1924,12 @@ def build_fill_rate(found):
                   f"{suma:,.0f} — el desglose no cuadra con el total")
         res["por_marca"] = [{
             "marca": m,
-            "valor": fmt_soles(v),
+            "valor": f"{v:,.0f}",          # pedidos, no soles
             "pct": round(v / total * 100, 1) if total else None,
         } for m, v in marcas]
         if total:
-            res["kpis"].append({"label": "No atendido (mes)", "valor": fmt_soles(total),
+            res["kpis"].append({"label": "Pedidos no atendidos (mes)",
+                                "valor": f"{total:,.0f}",
                                 "estado": "red" if total > 0 else "green"})
     return res
 
