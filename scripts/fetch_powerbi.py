@@ -1801,6 +1801,33 @@ def dax_fillrate_no_atendido(token, ws, dataset_id, label="fillrate_total"):
     return None
 
 
+def dax_fillrate_por_grupo(token, ws, dataset_id, label="fillrate_grupo"):
+    """% Fill Rate del mes actual por cliente/grupo.
+
+    Confirmado con Copiar consulta (2026-09-06) sobre el gráfico de barras
+    de la izquierda del reporte FILLRATE. El ORDER BY del original es
+    ascendente por [FILLRATE]: el reporte muestra primero al peor atendido,
+    y aquí se respeta ese orden porque es el accionable.
+    """
+    q = ("DEFINE\n"
+         "\tVAR __DS0FilterTable = \n"
+         "\t\tTREATAS({\"MES_ACTUAL\"}, 'CALENDARIO'[FIL_MES_ACTUAL])\n\n"
+         "\tVAR __DS0Core = \n"
+         "\t\tSUMMARIZECOLUMNS('PEDIDOS'[GRUPO], __DS0FilterTable, "
+         "\"FILLRATE\", '0_MEDIDAS'[FILLRATE])\n\n"
+         "EVALUATE\n\t__DS0Core\n\n"
+         "ORDER BY\n\t[FILLRATE], 'PEDIDOS'[GRUPO]")
+    rows = dax(token, ws, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        g = r.get("PEDIDOS[GRUPO]") or r.get("[GRUPO]")
+        v = to_float(r.get("[FILLRATE]") or r.get("FILLRATE"))
+        if g and v is not None:
+            out.append((str(g), v))
+    out.sort(key=lambda t: t[1])          # peor atendido primero
+    return out
+
+
 def build_fill_rate(found):
     # '% Fill Rate' SÍ responde al filtro de mes; '% FILLRATE' devuelve el acumulado
     # histórico igual en todos los meses. Se prefiere la que refleja el mes en curso.
@@ -1831,6 +1858,16 @@ def build_fill_rate(found):
     res = {"estado": sem, "alerta": alerta, "kpis": kpis}
 
     # Desglose por marca del mes actual (ver dax_fillrate_por_marca)
+    # Clientes peor atendidos del mes (ver dax_fillrate_por_grupo)
+    grupos = found.get("__por_grupo") or []
+    if grupos:
+        res_g = []
+        for g, v in grupos:
+            pct = v * 100 if abs(v) <= 1 else v
+            res_g.append({"grupo": g, "valor": f"{pct:.1f}%",
+                          "estado": "red" if pct < 85 else "yellow" if pct < 95 else "green"})
+        res["por_grupo"] = res_g
+
     marcas = found.get("__por_marca") or []
     if marcas:
         suma = sum(v for _, v in marcas)
@@ -2405,6 +2442,11 @@ def main():
                     if tot is not None:
                         scanned.setdefault("fill_rate", {})["__no_atendido_total"] = tot
                         print(f"    ✓ Fill Rate no atendido (mes): {tot:,.0f}")
+                    grupos = dax_fillrate_por_grupo(token, WS_FILLRATE, fr_ds)
+                    if grupos:
+                        scanned.setdefault("fill_rate", {})["__por_grupo"] = grupos
+                        peor = grupos[0]
+                        print(f"    ✓ Fill Rate peor cliente: {peor[0]} {peor[1]:.3f}")
                     marcas = dax_fillrate_por_marca(token, WS_FILLRATE, fr_ds)
                     if marcas:
                         scanned.setdefault("fill_rate", {})["__por_marca"] = marcas

@@ -3672,9 +3672,21 @@ function renderMcKinseyArea(empresa, tipo) {
         </div>` + (() => {
           // Desglose por marca del mes en curso — filtro FIL_MES_ACTUAL del
           // visual "SOLES NO ATENDIDOS POR GRUPO" (Copiar consulta 2026-09-06)
+          const pg = rp.fill_rate?.por_grupo || [];
           const pm = rp.fill_rate?.por_marca || [];
-          if (!pm.length) return '';
-          return `<div style="margin-top:12px">
+          const cVar = s => s === 'red' ? 'var(--red)' : s === 'yellow' ? 'var(--yellow)' : 'var(--green)';
+          const bloqueGrupo = pg.length ? `<div style="margin-top:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">Fill Rate por cliente — peor primero</div>
+            ${pg.map(g => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+              <div style="flex:0 0 88px;font-size:11px;font-weight:600">${g.grupo}</div>
+              <div style="flex:1 1 100px;min-width:80px;height:14px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${Math.min(100, parseVal(g.valor) || 0)}%;background:${cVar(g.estado)}"></div>
+              </div>
+              <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm);color:${cVar(g.estado)}">${g.valor}</div>
+            </div>`).join('')}
+          </div>` : '';
+          if (!pm.length) return bloqueGrupo;
+          return bloqueGrupo + `<div style="margin-top:12px">
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">No atendido este mes, por marca</div>
             ${pm.map(m => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
               <div style="flex:0 0 88px;font-size:11px;font-weight:600">${m.marca}</div>
@@ -5913,6 +5925,7 @@ function construirContexto() {
         por_uen: rd.por_uen,
         por_canal: rd.por_canal,
         por_marca: rd.por_marca,
+        por_grupo: rd.por_grupo,
         por_categoria: rd.por_categoria
         // excluimos tendencia_* para reducir tamaño
       };
