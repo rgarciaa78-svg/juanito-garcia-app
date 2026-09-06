@@ -232,15 +232,15 @@
             },
             {
               "label": "Stock Valorizado",
-              "valor": "S/5.99M"
+              "valor": "S/5.92M"
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10690300"
+              "valor": "10729953"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10505736"
+              "valor": "10525562"
             }
           ]
         },
@@ -250,7 +250,7 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/6.71M"
+              "valor": "S/6.62M"
             }
           ]
         },
@@ -381,14 +381,14 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "red",
-          "alerta": "Avance 1.2% vs presupuesto",
+          "estado": "yellow",
+          "alerta": "Avance 63.0% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "1.2%",
+              "valor": "63.0%",
               "meta": "100%",
-              "estado": "red"
+              "estado": "yellow"
             }
           ]
         }
