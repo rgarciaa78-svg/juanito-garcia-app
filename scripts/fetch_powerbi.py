@@ -1424,7 +1424,24 @@ def build_cxp(found):
 
     alerta = f"CxP {dias:.0f}d — revisar flujo" if dias and dias > 60 else (
              f"Refinanciado {fmt_soles(refin_val)} — gestionar" if refin and total and refin/total > 0.30 else None)
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}, dias
+    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Top 15 proveedores por deuda pendiente (ver dax_cxp_top_proveedores).
+    # Campos 'nombre' y 'monto': son los que ya consume juanito.html.
+    top = found.get("__top_proveedores") or []
+    if top:
+        tot = sum(v for _, _, v in top) or None
+        res["proveedores_criticos"] = [{
+            "nombre": n,
+            "categoria": c,
+            "monto": fmt_soles(v),
+            "pct": round(v / tot * 100, 1) if tot else None,
+        } for n, c, v in top[:15]]
+        if tot:
+            res["kpis"].append({
+                "label": "Top 15 proveedores", "valor": fmt_soles(tot),
+                "meta": "deuda concentrada"})
+    return res, dias
 
 def build_margen(found):
     margen_val = (found.get("% Margen") or found.get("R. MARGEN") or found.get("R. Margen") or
@@ -1650,24 +1667,7 @@ def build_compras(found):
 
     alerta = f"Ratio {ratio:.1f}% — {interp}" if sem != "green" and ratio else (
              f"Faltantes: {int(to_float(faltantes_val) or 0)} ítems" if faltantes_val and to_float(faltantes_val) else None)
-    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
-
-    # Top 15 proveedores por deuda pendiente (ver dax_cxp_top_proveedores)
-    top = found.get("__top_proveedores") or []
-    if top:
-        tot = sum(v for _, _, v in top) or None
-        # Campos 'nombre' y 'monto': son los que ya consume juanito.html
-        res["proveedores_criticos"] = [{
-            "nombre": n,
-            "categoria": c,
-            "monto": fmt_soles(v),
-            "pct": round(v / tot * 100, 1) if tot else None,
-        } for n, c, v in top[:15]]
-        if tot:
-            res["kpis"].append({
-                "label": "Top 15 proveedores", "valor": fmt_soles(tot),
-                "meta": "deuda concentrada"})
-    return res, ratio
+    return {"estado": sem, "alerta": alerta, "kpis": kpis}, ratio
 
 def build_inventario(found):
     # ── Clasificación por categoría, de la matriz "CLASIFICACION DE INVENTARIO"
