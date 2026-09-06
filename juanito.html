@@ -449,6 +449,25 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .dxp .view.active{display:block}
 
 /* Masthead */
+
+.dxp .otras-grid{ display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:12px }
+.dxp .otra-card{ border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--surface) }
+.dxp .otra-t{ font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px }
+.dxp .otra-svg{ width:100%;height:44px;display:block }
+.dxp .otra-v{ font-family:var(--fm);font-size:13px;font-weight:800;color:var(--ink);margin-top:4px }
+.dxp .otra-v span{ font-family:var(--fb);font-size:10px;font-weight:400;color:var(--sub);margin-left:5px }
+.dxp .seg-panel{ margin-top:14px;border:1px solid var(--border);border-radius:10px;background:var(--surface);overflow:hidden }
+.dxp .seg-cab{ background:var(--navy);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px }
+.dxp .seg-bloque{ padding:12px;border-bottom:1px solid var(--border) }
+.dxp .seg-bloque:last-child{ border-bottom:0 }
+.dxp .seg-titulo{ font-size:11px;font-weight:700;color:var(--ink);margin-bottom:6px }
+.dxp .seg-svg{ width:100%;height:130px;display:block;background:var(--surface2);border-radius:6px }
+.dxp .seg-leyenda{ display:flex;flex-wrap:wrap;gap:10px;margin-top:8px }
+.dxp .seg-item{ display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--sub) }
+.dxp .seg-item i{ width:10px;height:3px;border-radius:2px;display:inline-block }
+.dxp .seg-item b{ font-family:var(--fm);color:var(--ink) }
+.dxp .seg-pie{ font-size:10px;color:var(--sub);margin-top:6px }
+@media (max-width:640px){ .dxp .seg-svg{ height:104px } }
 .dxp .masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;background:var(--navy);color:#fff;padding:22px 24px;margin:-26px -18px 18px}
 @media (min-width:768px){ .dxp .masthead{ margin:-26px -32px 20px; padding:26px 32px } }
 .dxp .masthead .eyebrow{color:rgba(255,255,255,.6)}
@@ -4967,6 +4986,152 @@ function dxpComparativo(tipo, s) {
 }
 
 // Panel de tendencia grande (idéntico al de Margen en el artifact).
+
+// Panel de segmentos: grafica TODAS las series del dataset de un reporte, no
+// solo la principal. Nace de una carencia concreta — se estaban trayendo 10
+// series de Mermas y 7 de Compras, y la app graficaba una sola de cada una,
+// así que era imposible ver de qué unidad de negocio o planta viene un
+// problema sin abrir Power BI.
+//
+// Las series se agrupan por su prefijo (todas las "% Merma …" juntas, todas
+// las "% Ratio …" juntas) para que se comparen entre sí en la misma escala.
+function dxpGrupoSeries(ds) {
+  const todas = (SERIES && SERIES.datasets && SERIES.datasets[ds]) || {};
+  const grupos = {};
+  Object.keys(todas).forEach(k => {
+    if (!dxpSerieOk(todas[k])) return;
+    // El prefijo es lo que va antes del primer espacio tras el símbolo, si el
+    // nombre sigue el patrón "<métrica> <segmento>"; si no, va en su propio
+    // grupo.
+    const m = k.match(/^(% [A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s+(.+)$/);
+    const g = m ? m[1] : k;
+    const etq = m ? m[2] : k;
+    (grupos[g] = grupos[g] || []).push({ etq, arr: todas[k], clave: k });
+  });
+  // Solo interesan los grupos con más de una serie: ahí está la comparación.
+  Object.keys(grupos).forEach(g => { if (grupos[g].length < 2) delete grupos[g]; });
+  return grupos;
+}
+
+function dxpPanelSegmentos(tipo, s) {
+  const cfg = DXP_SERIE_CFG[tipo];
+  if (!cfg) return '';
+  const grupos = dxpGrupoSeries(cfg.ds);
+  const nombres = Object.keys(grupos);
+  if (!nombres.length) return '';
+
+  const per = (SERIES && SERIES.periodos) || [];
+  const PAL = ['#0F2A4A', '#B23A2F', '#3D7A4B', '#966412', '#5F6B7A', '#7A4B8C'];
+
+  const bloques = nombres.map(g => {
+    const series = grupos[g].slice().sort((a, b) => {
+      const ua = dxpUltimo(a.arr), ub = dxpUltimo(b.arr);
+      return (ub ? ub.v : 0) - (ua ? ua.v : 0);
+    });
+    // Escala común a todo el grupo: es lo que permite comparar de un vistazo.
+    let mn = Infinity, mx = -Infinity;
+    series.forEach(x => x.arr.forEach(v => {
+      if (v == null) return;
+      if (v < mn) mn = v;
+      if (v > mx) mx = v;
+    }));
+    const rg = (mx - mn) || 1;
+    const W = 560, H = 130, PADX = 4;
+    const n = per.length - 1 || 1;
+    const linea = arr => arr.map((v, i) => v == null ? null
+        : `${PADX + i / n * (W - PADX * 2)},${H - 10 - (v - mn) / rg * (H - 26)}`)
+      .filter(Boolean).join(' ');
+
+    const esPct = /^%/.test(g);
+    const fmt = v => esPct ? (v * 100).toFixed(2) + '%'
+                           : (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(2) + 'M'
+                              : v.toLocaleString('es-PE', { maximumFractionDigits: 0 }));
+
+    return `<div class="seg-bloque">
+      <div class="seg-titulo">${g} — comparación por segmento</div>
+      <svg viewBox="0 0 ${W} ${H}" class="seg-svg" preserveAspectRatio="none" role="img"
+           aria-label="Evolución mensual de ${g} por segmento">
+        ${series.map((x, i) => `<polyline points="${linea(x.arr)}" fill="none"
+          stroke="${PAL[i % PAL.length]}" stroke-width="1.8" vector-effect="non-scaling-stroke"/>`).join('')}
+      </svg>
+      <div class="seg-leyenda">
+        ${series.map((x, i) => {
+          const u = dxpUltimo(x.arr);
+          return `<span class="seg-item">
+            <i style="background:${PAL[i % PAL.length]}"></i>${x.etq}
+            <b>${u ? fmt(u.v) : '—'}</b></span>`;
+        }).join('')}
+      </div>
+      <div class="seg-pie">Último mes con dato: ${(() => {
+        const u = dxpUltimo(series[0].arr);
+        return u ? per[u.i] : '—';
+      })()} · escala común a todas las líneas del grupo</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="seg-panel">
+    <div class="seg-cab">Desglose por segmento — de dónde viene el número</div>
+    ${bloques}
+  </div>`;
+}
+
+// Series del dataset que no aparecen ni en el panel principal ni agrupadas por
+// segmento. Sin esto quedaban invisibles: se traían de Power BI y nadie las
+// veía (producción en kg, planilla, cantidades de compra y consumo, etc.).
+function dxpOtrasSeries(tipo) {
+  const cfg = DXP_SERIE_CFG[tipo];
+  if (!cfg) return '';
+  const todas = (SERIES && SERIES.datasets && SERIES.datasets[cfg.ds]) || {};
+  const grupos = dxpGrupoSeries(cfg.ds);
+  const yaVistas = new Set([cfg.medida, cfg.extra].filter(Boolean));
+  Object.values(grupos).forEach(g => g.forEach(x => yaVistas.add(x.clave)));
+
+  const per = (SERIES && SERIES.periodos) || [];
+  const restantes = Object.keys(todas)
+    .filter(k => !yaVistas.has(k) && dxpSerieOk(todas[k]));
+  if (!restantes.length) return '';
+
+  const W = 240, H = 44;
+  const spark = arr => {
+    const v = arr.filter(x => x != null);
+    const mn = Math.min(...v), mx = Math.max(...v), rg = (mx - mn) || 1;
+    const n = arr.length - 1 || 1;
+    return arr.map((x, i) => x == null ? null
+        : `${i / n * W},${H - 4 - (x - mn) / rg * (H - 8)}`).filter(Boolean).join(' ');
+  };
+  const fmt = (k, v) => /^%/.test(k) ? (v * 100).toFixed(2) + '%'
+      : (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(2) + 'M'
+         : v.toLocaleString('es-PE', { maximumFractionDigits: 0 }));
+
+  return `<div class="seg-panel">
+    <div class="seg-cab">Otras series de este reporte</div>
+    <div class="otras-grid">
+      ${restantes.map(k => {
+        const u = dxpUltimo(todas[k]);
+        return `<div class="otra-card">
+          <div class="otra-t">${k}</div>
+          <svg viewBox="0 0 ${W} ${H}" class="otra-svg" preserveAspectRatio="none" role="img"
+               aria-label="Evolución mensual de ${k}">
+            <polyline points="${spark(todas[k])}" fill="none" stroke="var(--navy)"
+                      stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="otra-v">${u ? fmt(k, u.v) : '—'}
+            <span>${u ? per[u.i] : ''}</span></div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// Último valor no nulo de una serie, con su posición.
+function dxpUltimo(arr) {
+  if (!Array.isArray(arr)) return null;
+  for (let i = arr.length - 1; i >= 0; i--)
+    if (arr[i] != null) return { v: arr[i], i };
+  return null;
+}
+
+
 function dxpTrendPanel(tipo, s) {
   const cfg = DXP_SERIE_CFG[tipo];
   const motivo = DXP_SIN_SERIE_MOTIVO[tipo];
@@ -5145,6 +5310,8 @@ function showDetail(empresa, tipo, label, archivo, desc) {
       </div>
 
       ${dxpTrendPanel(tipo, s)}
+      ${dxpPanelSegmentos(tipo, s)}
+      ${dxpOtrasSeries(tipo)}
     </div>
 
     <div class="cta-ia"><button data-msg="${chat.replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Analizar con Juanito (IA)</button></div>
