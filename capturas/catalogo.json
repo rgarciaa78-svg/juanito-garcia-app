@@ -900,5 +900,448 @@
       "producto"
     ],
     "probablemente_implementada": false
+  },
+  {
+    "visual": "Eficiencia de Costo de compra  de materiales  (Operación)",
+    "tipo_visual": "lineChart",
+    "filas": 14,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"MATERIA PRIMA\",\r\n\t\t\t\t\"REPUESTOS\",\r\n\t\t\t\t\"SERVICIO DE MANTENIMIENTO Y/O REPARACION\",\r\n\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\"ENVASES Y EMBALAJES\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Calendario'[Año],\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes],\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t\"v_ratio\", 'KARDEX TOTAL'[%ratio]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'Calendario'[Año],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Calendario'[Año],\r\n\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes],\r\n\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes]",
+    "hash": "4db75af70c3b",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "Calendario",
+      "KARDEX TOTAL",
+      "LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b",
+      "Maestra de Productos"
+    ],
+    "campos": [
+      "%ratio",
+      "Año",
+      "Date",
+      "Mes",
+      "NroMes",
+      "data.categoria_producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Segmentación de datos",
+    "tipo_visual": "slicer",
+    "filas": 101,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tVALUES('Maestra de Productos'[Empresa de compra]),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(101, __DS0Core, 'Maestra de Productos'[Empresa de compra], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Maestra de Productos'[Empresa de compra]",
+    "hash": "a0908a1b7b3c",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Productos"
+    ],
+    "campos": [
+      "Date",
+      "Empresa de compra"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Tarjeta",
+    "tipo_visual": "cardVisual",
+    "filas": 1,
+    "dax": "DEFINE VAR __DS0FilterTable = \r\n\tFILTER(\r\n\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t\"FechaHoraLima\", IGNORE('Fecha de Actualización (2)'[FechaHoraLima])\r\n\t)",
+    "hash": "1e613d61b458",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "Calendario",
+      "Fecha de Actualización (2)"
+    ],
+    "campos": [
+      "Date",
+      "FechaHoraLima"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "ANALISIS DE MATERIALES ( PLANIFICACION Y COMPRA)",
+    "tipo_visual": "pivotTable",
+    "filas": 501,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"ENVASES Y EMBALAJES\",\r\n\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\"PROD. EN PROCESO\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Productos'[data.codigo_producto])),\r\n\t\t\tAND(\r\n\t\t\t\tNOT(SEARCH(\"INT\", 'Maestra de Productos'[data.codigo_producto], 1, 0) >= 1),\r\n\t\t\t\tNOT(SEARCH(\"MQP\", 'Maestra de Productos'[data.codigo_producto], 1, 0) >= 1)\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __ValueFilterDM6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tSUMMARIZECOLUMNS(\r\n\t\t\t\t\t'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\t\t'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\t\t'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t\t\t'Maestra de Productos'[data.nombre_producto],\r\n\t\t\t\t\t__DS0FilterTable,\r\n\t\t\t\t\t__DS0FilterTable2,\r\n\t\t\t\t\t__DS0FilterTable3,\r\n\t\t\t\t\t\"Consumo_Prom_3M\", 'KARDEX TOTAL'[Consumo Prom 3M],\r\n\t\t\t\t\t\"Consumo_Prom_6M\", 'KARDEX TOTAL'[Consumo Prom 6M],\r\n\t\t\t\t\t\"Consumo_Mes_Ant\", 'KARDEX TOTAL'[Consumo Mes Ant],\r\n\t\t\t\t\t\"Alc__Mes\", 'KARDEX TOTAL'[Alc. Mes],\r\n\t\t\t\t\t\"Alc__Dias\", 'KARDEX TOTAL'[Alc. Dias],\r\n\t\t\t\t\t\"Forescast\", 'SALDO ACTUAL'[Forescast],\r\n\t\t\t\t\t\"Forecast_Mes_Actual\", 'SALDO ACTUAL'[Forecast Mes Actual],\r\n\t\t\t\t\t\"Forecast_Mes_Actual_1\", 'SALDO ACTUAL'[Forecast Mes Actual+1],\r\n\t\t\t\t\t\"Forecast_Mes_Actual_2\", 'SALDO ACTUAL'[Forecast Mes Actual+2],\r\n\t\t\t\t\t\"Stock\", 'SALDO ACTUAL'[Stock],\r\n\t\t\t\t\t\"Stock_Valorizado\", 'SALDO ACTUAL'[Stock Valorizado],\r\n\t\t\t\t\t\"Costo_Uni\", 'SALDO ACTUAL'[Costo Uni],\r\n\t\t\t\t\t\"AverageLead_Time\", CALCULATE(AVERAGE('CATEGORIZ'[Lead Time])),\r\n\t\t\t\t\t\"Pendiente_Compra\", 'Pendientes de OC'[Pendiente Compra],\r\n\t\t\t\t\t\"Stock_PP\", 'Boom Nivel 4'[Stock PP],\r\n\t\t\t\t\t\"Forecast_Mes_Actual_3\", 'SALDO ACTUAL'[Forecast Mes Actual+3]\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t[Consumo_Prom_6M] > 1\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\t'Maestra de Productos'[data.categoria_producto], \"IsGrandTotalRowTotal\",\r\n\t\t\t\t'CATEGORIZ'[CATEGORÍA], \"IsDM0Total\",\r\n\t\t\t\t'Maestra de Productos'[data.codigo_producto], \"IsDM2Total\",\r\n\t\t\t\t'Maestra de Productos'[data.nombre_producto], \"IsDM4Total\"\r\n\t\t\t),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__ValueFilterDM6,\r\n\t\t\t\"Stock_Valorizado\", 'SALDO ACTUAL'[Stock Valorizado],\r\n\t\t\t\"Consumo_Prom_3M\", 'KARDEX TOTAL'[Consumo Prom 3M],\r\n\t\t\t\"Consumo_Prom_6M\", 'KARDEX TOTAL'[Consumo Prom 6M],\r\n\t\t\t\"Consumo_Mes_Ant\", 'KARDEX TOTAL'[Consumo Mes Ant],\r\n\t\t\t\"Alc__Mes\", 'KARDEX TOTAL'[Alc. Mes],\r\n\t\t\t\"Alc__Dias\", 'KARDEX TOTAL'[Alc. Dias],\r\n\t\t\t\"Forescast\", 'SALDO ACTUAL'[Forescast],\r\n\t\t\t\"Forecast_Mes_Actual\", 'SALDO ACTUAL'[Forecast Mes Actual],\r\n\t\t\t\"Forecast_Mes_Actual_1\", 'SALDO ACTUAL'[Forecast Mes Actual+1],\r\n\t\t\t\"Forecast_Mes_Actual_2\", 'SALDO ACTUAL'[Forecast Mes Actual+2],\r\n\t\t\t\"Stock\", 'SALDO ACTUAL'[Stock],\r\n\t\t\t\"Costo_Uni\", 'SALDO ACTUAL'[Costo Uni],\r\n\t\t\t\"AverageLead_Time\", CALCULATE(AVERAGE('CATEGORIZ'[Lead Time])),\r\n\t\t\t\"Pendiente_Compra\", 'Pendientes de OC'[Pendiente Compra],\r\n\t\t\t\"Stock_PP\", 'Boom Nivel 4'[Stock PP],\r\n\t\t\t\"Forecast_Mes_Actual_3\", 'SALDO ACTUAL'[Forecast Mes Actual+3]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM0 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(\r\n\t\t\t\t\tKEEPFILTERS(__DS0Core),\r\n\t\t\t\t\tAND(AND([IsDM0Total] = TRUE, [IsDM2Total] = TRUE), [IsDM4Total] = TRUE)\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'Maestra de Productos'[data.categoria_producto]\", 'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\"SortBy_DM0_0\", [Stock_Valorizado]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM2 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(KEEPFILTERS(__DS0Core), AND([IsDM2Total] = TRUE, [IsDM4Total] = TRUE))\r\n\t\t\t),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'Maestra de Productos'[data.categoria_producto]\", 'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\"IsDM0Total\", [IsDM0Total],\r\n\t\t\t\"'CATEGORIZ'[CATEGORÍA]\", 'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\"SortBy_DM2_0\", [Stock_Valorizado]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM4 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(FILTER(KEEPFILTERS(__DS0Core), [IsDM4Total] = TRUE)),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'Maestra de Productos'[data.categoria_producto]\", 'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\"IsDM0Total\", [IsDM0Total],\r\n\t\t\t\"'CATEGORIZ'[CATEGORÍA]\", 'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\"IsDM2Total\", [IsDM2Total],\r\n\t\t\t\"'Maestra de Productos'[data.codigo_producto]\", 'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t\"SortBy_DM4_0\", [Stock_Valorizado]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumns = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t\t\t__DS0Core,\r\n\t\t\t\t\t__DS0CoreTableByDM0\r\n\t\t\t\t),\r\n\t\t\t\t__DS0CoreTableByDM2\r\n\t\t\t),\r\n\t\t\t__DS0CoreTableByDM4\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t501,\r\n\t\t\t__DS0PrimaryWithSortColumns,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t1,\r\n\t\t\t[SortBy_DM0_0],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t1,\r\n\t\t\t[IsDM0Total],\r\n\t\t\t1,\r\n\t\t\t[SortBy_DM2_0],\r\n\t\t\t0,\r\n\t\t\t'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t1,\r\n\t\t\t[IsDM2Total],\r\n\t\t\t1,\r\n\t\t\t[SortBy_DM4_0],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t1,\r\n\t\t\t[IsDM4Total],\r\n\t\t\t1,\r\n\t\t\t[Stock_Valorizado],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Productos'[data.nombre_producto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal],\r\n\t[SortBy_DM0_0] DESC,\r\n\t'Maestra de Productos'[data.categoria_producto],\r\n\t[IsDM0Total],\r\n\t[SortBy_DM2_0] DESC,\r\n\t'CATEGORIZ'[CATEGORÍA],\r\n\t[IsDM2Total],\r\n\t[SortBy_DM4_0] DESC,\r\n\t'Maestra de Productos'[data.codigo_producto],\r\n\t[IsDM4Total],\r\n\t[Stock_Valorizado] DESC,\r\n\t'Maestra de Productos'[data.nombre_producto]",
+    "hash": "5d4ae053fba4",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "Boom Nivel 4",
+      "CATEGORIZ",
+      "Calendario",
+      "KARDEX TOTAL",
+      "Maestra de Productos",
+      "Pendientes de OC",
+      "SALDO ACTUAL"
+    ],
+    "campos": [
+      "Alc. Dias",
+      "Alc. Mes",
+      "CATEGORÍA",
+      "Consumo Mes Ant",
+      "Consumo Prom 3M",
+      "Consumo Prom 6M",
+      "Costo Uni",
+      "Date",
+      "Forecast Mes Actual",
+      "Forecast Mes Actual+1",
+      "Forecast Mes Actual+2",
+      "Forecast Mes Actual+3",
+      "Forescast",
+      "Lead Time",
+      "Pendiente Compra",
+      "Stock",
+      "Stock PP",
+      "Stock Valorizado",
+      "data.categoria_producto",
+      "data.codigo_producto",
+      "data.nombre_producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "LISTADO DE PRODUCTOS FALTANES EN EXPLOCIÓN DE MATERIALES",
+    "tipo_visual": "pivotTable",
+    "filas": 14,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"ENVASES Y EMBALAJES\",\r\n\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\"SUMINISTROS\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __ValueFilterDM10 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tSUMMARIZECOLUMNS(\r\n\t\t\t\t\t'CATEGORIZ'[PLANTA],\r\n\t\t\t\t\t'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\t\t'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\t\t'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t\t\t'Maestra de Productos'[data.nombre_producto],\r\n\t\t\t\t\t'CATEGORIZ'[Lead Time],\r\n\t\t\t\t\t__DS0FilterTable,\r\n\t\t\t\t\t__DS0FilterTable2,\r\n\t\t\t\t\t\"SumFALTANTES_BOOM_SEMNANAL\", CALCULATE(SUM('Tabla Explosión de Materiales'[FALTANTES BOOM SEMNANAL])),\r\n\t\t\t\t\t\"SumRequerimiento_Total_Boom\", CALCULATE(SUM('Tabla Explosión de Materiales'[Requerimiento Total Boom])),\r\n\t\t\t\t\t\"Stock\", 'SALDO ACTUAL'[Stock],\r\n\t\t\t\t\t\"Stock_Producción\", 'SALDO ACTUAL'[Stock Producción],\r\n\t\t\t\t\t\"Pendiente_Compra\", 'Pendientes de OC'[Pendiente Compra],\r\n\t\t\t\t\t\"Consumo_Prom_6M\", IGNORE('KARDEX TOTAL'[Consumo Prom 6M])\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\tAND([Consumo_Prom_6M] > 1, [SumFALTANTES_BOOM_SEMNANAL] < 0)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'CATEGORIZ'[PLANTA],\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\t'Maestra de Productos'[data.categoria_producto], \"IsDM0Total\",\r\n\t\t\t\t'CATEGORIZ'[CATEGORÍA], \"IsDM1Total\",\r\n\t\t\t\t'Maestra de Productos'[data.codigo_producto], \"IsDM2Total\",\r\n\t\t\t\t'Maestra de Productos'[data.nombre_producto], \"IsDM3Total\"\r\n\t\t\t),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__ValueFilterDM10,\r\n\t\t\t\"SumFALTANTES_BOOM_SEMNANAL\", CALCULATE(SUM('Tabla Explosión de Materiales'[FALTANTES BOOM SEMNANAL])),\r\n\t\t\t\"SumRequerimiento_Total_Boom\", CALCULATE(SUM('Tabla Explosión de Materiales'[Requerimiento Total Boom])),\r\n\t\t\t\"Stock\", 'SALDO ACTUAL'[Stock],\r\n\t\t\t\"Stock_Producción\", 'SALDO ACTUAL'[Stock Producción],\r\n\t\t\t\"Pendiente_Compra\", 'Pendientes de OC'[Pendiente Compra]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM0 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(\r\n\t\t\t\t\tKEEPFILTERS(__DS0Core),\r\n\t\t\t\t\tAND(\r\n\t\t\t\t\t\tAND(AND([IsDM0Total] = TRUE, [IsDM1Total] = TRUE), [IsDM2Total] = TRUE),\r\n\t\t\t\t\t\t[IsDM3Total] = TRUE\r\n\t\t\t\t\t)\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t\"'CATEGORIZ'[PLANTA]\", 'CATEGORIZ'[PLANTA],\r\n\t\t\t\"SortBy_DM0_0\", [SumFALTANTES_BOOM_SEMNANAL]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM1 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(\r\n\t\t\t\t\tKEEPFILTERS(__DS0Core),\r\n\t\t\t\t\tAND(\r\n\t\t\t\t\t\tAND(AND([IsDM0Total] = FALSE, [IsDM1Total] = TRUE), [IsDM2Total] = TRUE),\r\n\t\t\t\t\t\t[IsDM3Total] = TRUE\r\n\t\t\t\t\t)\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t\"'CATEGORIZ'[PLANTA]\", 'CATEGORIZ'[PLANTA],\r\n\t\t\t\"IsDM0Total\", [IsDM0Total],\r\n\t\t\t\"'Maestra de Productos'[data.categoria_producto]\", 'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\"SortBy_DM1_0\", [SumFALTANTES_BOOM_SEMNANAL]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM2 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(\r\n\t\t\t\t\tKEEPFILTERS(__DS0Core),\r\n\t\t\t\t\tAND(\r\n\t\t\t\t\t\tAND(AND([IsDM0Total] = FALSE, [IsDM1Total] = FALSE), [IsDM2Total] = TRUE),\r\n\t\t\t\t\t\t[IsDM3Total] = TRUE\r\n\t\t\t\t\t)\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t\"'CATEGORIZ'[PLANTA]\", 'CATEGORIZ'[PLANTA],\r\n\t\t\t\"IsDM0Total\", [IsDM0Total],\r\n\t\t\t\"'Maestra de Productos'[data.categoria_producto]\", 'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\"IsDM1Total\", [IsDM1Total],\r\n\t\t\t\"'CATEGORIZ'[CATEGORÍA]\", 'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\"SortBy_DM2_0\", [SumFALTANTES_BOOM_SEMNANAL]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM3 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(\r\n\t\t\t\t\tKEEPFILTERS(__DS0Core),\r\n\t\t\t\t\tAND(\r\n\t\t\t\t\t\tAND(AND([IsDM0Total] = FALSE, [IsDM1Total] = FALSE), [IsDM2Total] = FALSE),\r\n\t\t\t\t\t\t[IsDM3Total] = TRUE\r\n\t\t\t\t\t)\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t\"'CATEGORIZ'[PLANTA]\", 'CATEGORIZ'[PLANTA],\r\n\t\t\t\"IsDM0Total\", [IsDM0Total],\r\n\t\t\t\"'Maestra de Productos'[data.categoria_producto]\", 'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\"IsDM1Total\", [IsDM1Total],\r\n\t\t\t\"'CATEGORIZ'[CATEGORÍA]\", 'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\"IsDM2Total\", [IsDM2Total],\r\n\t\t\t\"'Maestra de Productos'[data.codigo_producto]\", 'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t\"SortBy_DM3_0\", [SumFALTANTES_BOOM_SEMNANAL]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumns = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t\t\t\t__DS0Core,\r\n\t\t\t\t\t\t__DS0CoreTableByDM0\r\n\t\t\t\t\t),\r\n\t\t\t\t\t__DS0CoreTableByDM1\r\n\t\t\t\t),\r\n\t\t\t\t__DS0CoreTableByDM2\r\n\t\t\t),\r\n\t\t\t__DS0CoreTableByDM3\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumnsOutputTotals = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(\r\n\t\t\t\t\tKEEPFILTERS(__DS0PrimaryWithSortColumns),\r\n\t\t\t\t\tAND(\r\n\t\t\t\t\t\tAND(AND([IsDM0Total] = FALSE, [IsDM1Total] = FALSE), [IsDM2Total] = FALSE),\r\n\t\t\t\t\t\t[IsDM3Total] = FALSE\r\n\t\t\t\t\t)\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t\"'CATEGORIZ'[PLANTA]\", 'CATEGORIZ'[PLANTA],\r\n\t\t\t\"SortBy_DM0_0\", [SortBy_DM0_0],\r\n\t\t\t\"'Maestra de Productos'[data.categoria_producto]\", 'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t\"SortBy_DM1_0\", [SortBy_DM1_0],\r\n\t\t\t\"'CATEGORIZ'[CATEGORÍA]\", 'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\"SortBy_DM2_0\", [SortBy_DM2_0],\r\n\t\t\t\"'Maestra de Productos'[data.codigo_producto]\", 'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t\"SortBy_DM3_0\", [SortBy_DM3_0],\r\n\t\t\t\"'Maestra de Productos'[data.nombre_producto]\", 'Maestra de Productos'[data.nombre_producto],\r\n\t\t\t\"SumFALTANTES_BOOM_SEMNANAL\", [SumFALTANTES_BOOM_SEMNANAL],\r\n\t\t\t\"SumRequerimiento_Total_Boom\", [SumRequerimiento_Total_Boom],\r\n\t\t\t\"Stock\", [Stock],\r\n\t\t\t\"Stock_Producción\", [Stock_Producción],\r\n\t\t\t\"Pendiente_Compra\", [Pendiente_Compra]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t501,\r\n\t\t\t__DS0PrimaryWithSortColumnsOutputTotals,\r\n\t\t\t[SortBy_DM0_0],\r\n\t\t\t1,\r\n\t\t\t'CATEGORIZ'[PLANTA],\r\n\t\t\t1,\r\n\t\t\t[SortBy_DM1_0],\r\n\t\t\t1,\r\n\t\t\t'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t1,\r\n\t\t\t[SortBy_DM2_0],\r\n\t\t\t1,\r\n\t\t\t'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t1,\r\n\t\t\t[SortBy_DM3_0],\r\n\t\t\t1,\r\n\t\t\t'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t1,\r\n\t\t\t[SumFALTANTES_BOOM_SEMNANAL],\r\n\t\t\t1,\r\n\t\t\t'Maestra de Productos'[data.nombre_producto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[SortBy_DM0_0],\r\n\t'CATEGORIZ'[PLANTA],\r\n\t[SortBy_DM1_0],\r\n\t'Maestra de Productos'[data.categoria_producto],\r\n\t[SortBy_DM2_0],\r\n\t'CATEGORIZ'[CATEGORÍA],\r\n\t[SortBy_DM3_0],\r\n\t'Maestra de Productos'[data.codigo_producto],\r\n\t[SumFALTANTES_BOOM_SEMNANAL],\r\n\t'Maestra de Productos'[data.nombre_producto]",
+    "hash": "e5fb535d0000",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "CATEGORIZ",
+      "Calendario",
+      "KARDEX TOTAL",
+      "Maestra de Productos",
+      "Pendientes de OC",
+      "SALDO ACTUAL",
+      "Tabla Explosión de Materiales"
+    ],
+    "campos": [
+      "CATEGORÍA",
+      "Consumo Prom 6M",
+      "Date",
+      "FALTANTES BOOM SEMNANAL",
+      "Lead Time",
+      "PLANTA",
+      "Pendiente Compra",
+      "Requerimiento Total Boom",
+      "Stock",
+      "Stock Producción",
+      "data.categoria_producto",
+      "data.codigo_producto",
+      "data.nombre_producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "NECESIDAD DE COMPRA ",
+    "tipo_visual": "pivotTable",
+    "filas": 431,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"ENVASES Y EMBALAJES\",\r\n\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\"SUMINISTROS\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __ValueFilterDM7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tSUMMARIZECOLUMNS(\r\n\t\t\t\t\t'CATEGORIZ'[PLANTA],\r\n\t\t\t\t\t'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t\t\t'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t\t\t'Maestra de Productos'[data.nombre_producto],\r\n\t\t\t\t\t__DS0FilterTable,\r\n\t\t\t\t\t__DS0FilterTable2,\r\n\t\t\t\t\t\"Stock\", 'SALDO ACTUAL'[Stock],\r\n\t\t\t\t\t\"Pendiente_Compra\", 'Pendientes de OC'[Pendiente Compra],\r\n\t\t\t\t\t\"Req_Forecast_Trimestral\", 'FORESCAST 2026'[Req Forecast Trimestral],\r\n\t\t\t\t\t\"Consumo_Prom_3M\", 'KARDEX TOTAL'[Consumo Prom 3M],\r\n\t\t\t\t\t\"Momento_de_Compra\", 'Pendientes de OC'[Momento de Compra],\r\n\t\t\t\t\t\"ultima_Empresa_de_Compra\", 'Pendientes de OC'[ultima Empresa de Compra],\r\n\t\t\t\t\t\"Color_Momento_de_Compra\", IGNORE('FORESCAST 2026'[Color Momento de Compra]),\r\n\t\t\t\t\t\"Solicitud_Compra\", IGNORE('Pendientes de OC'[Solicitud Compra])\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\tAND([Consumo_Prom_3M] <> 0, SEARCH(\"comprar\", [Solicitud_Compra], 1, 0) >= 1)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\t'CATEGORIZ'[PLANTA], \"IsGrandTotalRowTotal\",\r\n\t\t\t\t'CATEGORIZ'[CATEGORÍA], \"IsDM1Total\",\r\n\t\t\t\t'Maestra de Productos'[data.codigo_producto], \"IsDM3Total\",\r\n\t\t\t\t'Maestra de Productos'[data.nombre_producto], \"IsDM5Total\"\r\n\t\t\t),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__ValueFilterDM7,\r\n\t\t\t\"Stock\", 'SALDO ACTUAL'[Stock],\r\n\t\t\t\"Pendiente_Compra\", 'Pendientes de OC'[Pendiente Compra],\r\n\t\t\t\"Req_Forecast_Trimestral\", 'FORESCAST 2026'[Req Forecast Trimestral],\r\n\t\t\t\"Consumo_Prom_3M\", 'KARDEX TOTAL'[Consumo Prom 3M],\r\n\t\t\t\"Momento_de_Compra\", 'Pendientes de OC'[Momento de Compra],\r\n\t\t\t\"ultima_Empresa_de_Compra\", 'Pendientes de OC'[ultima Empresa de Compra],\r\n\t\t\t\"Color_Momento_de_Compra\", IGNORE('FORESCAST 2026'[Color Momento de Compra])\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t502,\r\n\t\t\t__DS0Core,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t'CATEGORIZ'[PLANTA],\r\n\t\t\t1,\r\n\t\t\t[IsDM1Total],\r\n\t\t\t0,\r\n\t\t\t'CATEGORIZ'[CATEGORÍA],\r\n\t\t\t1,\r\n\t\t\t[IsDM3Total],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Productos'[data.codigo_producto],\r\n\t\t\t1,\r\n\t\t\t[IsDM5Total],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Productos'[data.nombre_producto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC,\r\n\t'CATEGORIZ'[PLANTA],\r\n\t[IsDM1Total] DESC,\r\n\t'CATEGORIZ'[CATEGORÍA],\r\n\t[IsDM3Total] DESC,\r\n\t'Maestra de Productos'[data.codigo_producto],\r\n\t[IsDM5Total] DESC,\r\n\t'Maestra de Productos'[data.nombre_producto]",
+    "hash": "12652f8e67ff",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "CATEGORIZ",
+      "Calendario",
+      "FORESCAST 2026",
+      "KARDEX TOTAL",
+      "Maestra de Productos",
+      "Pendientes de OC",
+      "SALDO ACTUAL"
+    ],
+    "campos": [
+      "CATEGORÍA",
+      "Color Momento de Compra",
+      "Consumo Prom 3M",
+      "Date",
+      "Momento de Compra",
+      "PLANTA",
+      "Pendiente Compra",
+      "Req Forecast Trimestral",
+      "Solicitud Compra",
+      "Stock",
+      "data.categoria_producto",
+      "data.codigo_producto",
+      "data.nombre_producto",
+      "ultima Empresa de Compra"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "CONSUMO DE MATERIALES",
+    "tipo_visual": "pivotTable",
+    "filas": 1301,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"MATERIA PRIMA\",\r\n\t\t\t\t\"PROD. EN PROCESO\",\r\n\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\"ENVASES Y EMBALAJES\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Maestra de Productos'[COD-PROD],\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año], \"IsGrandTotalColumnTotal\",\r\n\t\t\t\tROLLUPGROUP(\r\n\t\t\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes],\r\n\t\t\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes]\r\n\t\t\t\t), \"IsDM1Total\"\r\n\t\t\t),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t\"Consumo_CANT_10_92_93\", 'KARDEX TOTAL'[Consumo CANT 10,92,93]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t101,\r\n\t\t\tSUMMARIZE(__DS0Core, 'Maestra de Productos'[COD-PROD]),\r\n\t\t\t'Maestra de Productos'[COD-PROD],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0SecondaryBase = \r\n\t\tSUMMARIZE(\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año],\r\n\t\t\t[IsGrandTotalColumnTotal],\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes],\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes],\r\n\t\t\t[IsDM1Total]\r\n\t\t)\r\n\r\n\tVAR __DS0Secondary = \r\n\t\tTOPN(\r\n\t\t\t102,\r\n\t\t\t__DS0SecondaryBase,\r\n\t\t\t[IsGrandTotalColumnTotal],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año],\r\n\t\t\t1,\r\n\t\t\t[IsDM1Total],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0BodyLimited = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0PrimaryWindowed,\r\n\t\t\tSUBSTITUTEWITHINDEX(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t\"ColumnIndex\",\r\n\t\t\t\t__DS0Secondary,\r\n\t\t\t\t[IsGrandTotalColumnTotal],\r\n\t\t\t\tASC,\r\n\t\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año],\r\n\t\t\t\tASC,\r\n\t\t\t\t[IsDM1Total],\r\n\t\t\t\tASC,\r\n\t\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes],\r\n\t\t\t\tASC,\r\n\t\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes],\r\n\t\t\t\tASC\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0Secondary\r\n\r\nORDER BY\r\n\t[IsGrandTotalColumnTotal],\r\n\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año],\r\n\t[IsDM1Total],\r\n\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes],\r\n\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes]\r\n\r\nEVALUATE\r\n\t__DS0BodyLimited\r\n\r\nORDER BY\r\n\t'Maestra de Productos'[COD-PROD], [ColumnIndex]",
+    "hash": "3193d5dd3296",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "Calendario",
+      "KARDEX TOTAL",
+      "LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b",
+      "Maestra de Productos"
+    ],
+    "campos": [
+      "Año",
+      "COD-PROD",
+      "Consumo CANT 10,92,93",
+      "Date",
+      "Mes",
+      "NroMes",
+      "data.categoria_producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Eficiencia de Costo de compra  de materiales  (Operación)",
+    "tipo_visual": "pivotTable",
+    "filas": 84,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Productos'[data.categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Productos'[data.categoria_producto] IN {\"Activo Fijo\",\r\n\t\t\t\t\t\"ACUERDOS COMERCIALES\",\r\n\t\t\t\t\t\"All\",\r\n\t\t\t\t\t\"All / Deliveries\",\r\n\t\t\t\t\t\"Beneficio Social no remunerativos\",\r\n\t\t\t\t\t\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"DESCUENTO POR PRONTO PAGO\",\r\n\t\t\t\t\t\"DESCUENTOS COMERCIALES\",\r\n\t\t\t\t\t\"DIFERENCIA DE PRECIOS\",\r\n\t\t\t\t\t\"HERRAMIENTAS / BATERIA\",\r\n\t\t\t\t\t\"HERRAMIENTAS / CARGADOR\",\r\n\t\t\t\t\t\"HERRAMIENTAS / DISPENSADOR\",\r\n\t\t\t\t\t\"HERRAMIENTAS / TRASLAPE\",\r\n\t\t\t\t\t\"MAQUINA\",\r\n\t\t\t\t\t\"MAQUINA / MAQ. ENVOLVEDORA\",\r\n\t\t\t\t\t\"MAQUINA / MAQ. ENZUNCHADORA AUTOMATICA\",\r\n\t\t\t\t\t\"MAQUINA / MAQ. ENZUNCHADORA MANUAL\",\r\n\t\t\t\t\t\"MAQUINA / MAQUINA\",\r\n\t\t\t\t\t\"MERCADERIAS SALSAS PACKS\",\r\n\t\t\t\t\t\"MERCADERIAS SALSAS PACKS / CINTA DE EMBALAJE\",\r\n\t\t\t\t\t\"MERCADERIAS SALSAS PACKS / RAFIA\",\r\n\t\t\t\t\t\"POLIESTER\",\r\n\t\t\t\t\t\"POLIESTER / POLIESTER\",\r\n\t\t\t\t\t\"POLIPROPILENO / POLIPROPILENO\",\r\n\t\t\t\t\t\"PROD. EN PROCESO\",\r\n\t\t\t\t\t\"PT DERIVADOS LACTEOS\",\r\n\t\t\t\t\t\"PT SALSAS\",\r\n\t\t\t\t\t\"PT YOGURTS\",\r\n\t\t\t\t\t\"REPUESTOS / MESSERSI\",\r\n\t\t\t\t\t\"REPUESTOS / NACIONAL\",\r\n\t\t\t\t\t\"REPUESTOS / ROBOPAC\",\r\n\t\t\t\t\t\"REPUESTOS / SIGNODE\",\r\n\t\t\t\t\t\"REPUESTOS / SORSA\",\r\n\t\t\t\t\t\"SERVICIO DE MANTENIMIENTO Y/O REPARACION\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"STRETCH FILM\",\r\n\t\t\t\t\t\"STRETCH FILM / AUTOMATICO\",\r\n\t\t\t\t\t\"STRETCH FILM / MANUAL\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('Maestra de Productos'[data.categoria_producto], \"IsGrandTotalRowTotal\"),\r\n\t\t\t'Calendario'[Año],\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes],\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t\"v_ratio\", 'KARDEX TOTAL'[%ratio],\r\n\t\t\t\"Consumo_CANT_10_92_93\", 'KARDEX TOTAL'[Consumo CANT 10,92,93],\r\n\t\t\t\"compra_mensual_Cant_2\", 'KARDEX TOTAL'[compra mensual Cant 2]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t101,\r\n\t\t\tSUMMARIZE(__DS0Core, 'Maestra de Productos'[data.categoria_producto], [IsGrandTotalRowTotal]),\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t1,\r\n\t\t\t'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t0\r\n\t\t)\r\n\r\n\tVAR __DS0SecondaryBase = \r\n\t\tSUMMARIZE(\r\n\t\t\t__DS0Core,\r\n\t\t\t'Calendario'[Año],\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes],\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes]\r\n\t\t)\r\n\r\n\tVAR __DS0Secondary = \r\n\t\tTOPN(\r\n\t\t\t102,\r\n\t\t\t__DS0SecondaryBase,\r\n\t\t\t'Calendario'[Año],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0BodyLimited = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0PrimaryWindowed,\r\n\t\t\tSUBSTITUTEWITHINDEX(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t\"ColumnIndex\",\r\n\t\t\t\t__DS0Secondary,\r\n\t\t\t\t'Calendario'[Año],\r\n\t\t\t\tASC,\r\n\t\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes],\r\n\t\t\t\tASC,\r\n\t\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes],\r\n\t\t\t\tASC\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0Secondary\r\n\r\nORDER BY\r\n\t'Calendario'[Año],\r\n\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[NroMes],\r\n\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes]\r\n\r\nEVALUATE\r\n\t__DS0BodyLimited\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal],\r\n\t'Maestra de Productos'[data.categoria_producto] DESC,\r\n\t[ColumnIndex]",
+    "hash": "a5e2b0c1992a",
+    "archivo": "05-compras__analisis-de-compra.json",
+    "tablas": [
+      "Calendario",
+      "KARDEX TOTAL",
+      "LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b",
+      "Maestra de Productos"
+    ],
+    "campos": [
+      "%ratio",
+      "Año",
+      "Consumo CANT 10,92,93",
+      "Date",
+      "Mes",
+      "NroMes",
+      "compra mensual Cant 2",
+      "data.categoria_producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Segmentación de datos",
+    "tipo_visual": "slicer",
+    "filas": 8,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"MATERIA PRIMA\",\r\n\t\t\t\t\"MERCADERIAS SALSAS PACKS\",\r\n\t\t\t\t\"PROD. EN PROCESO\",\r\n\t\t\t\t\"PT DERIVADOS LACTEOS\",\r\n\t\t\t\t\"PT SALSAS\",\r\n\t\t\t\t\"PT YOGURTS\",\r\n\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\"ENVASES Y EMBALAJES\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(KEEPFILTERS(VALUES('SALDO ACTUAL'[Saldo Soles])), 'SALDO ACTUAL'[Saldo Soles] > 0)\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tVALUES('Maestra de Productos'[data.categoria_producto]),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable2)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(101, __DS0Core, 'Maestra de Productos'[data.categoria_producto], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Maestra de Productos'[data.categoria_producto]",
+    "hash": "56e29064dc99",
+    "archivo": "11-planificaciones__evolucion-inventario.json",
+    "tablas": [
+      "Maestra de Productos",
+      "SALDO ACTUAL"
+    ],
+    "campos": [
+      "Saldo Soles",
+      "data.categoria_producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "EVOLUCIÓN DE INVENTARIO (S/. MM)",
+    "tipo_visual": "lineStackedColumnComboChart",
+    "filas": 15,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Mes Año])),\r\n\t\t\tNOT('Calendario'[Mes Año] IN {\"Jun 2025\"})\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año],\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes],\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t\"Consumo_Acumulado_Total_S__saldo\", 'KARDEX TOTAL'[Consumo Acumulado Total S/ saldo],\r\n\t\t\t\"Días_Rotación\", 'KARDEX TOTAL'[Días Rotación]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Año],\r\n\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[NroMes],\r\n\t'LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b'[Mes]",
+    "hash": "c571f00af337",
+    "archivo": "11-planificaciones__evolucion-inventario.json",
+    "tablas": [
+      "Calendario",
+      "KARDEX TOTAL",
+      "LocalDateTable_6fcf1fbb-6d6b-449d-a1a9-27a4eaf7528b"
+    ],
+    "campos": [
+      "Año",
+      "Consumo Acumulado Total S/ saldo",
+      "Días Rotación",
+      "Mes",
+      "Mes Año",
+      "NroMes"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "CLASIFICACIÓN DE INVENTARIO (S/.MM)",
+    "tipo_visual": "pivotTable",
+    "filas": 30,
+    "dax": "DEFINE\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\tROLLUPGROUP('SALDO ACTUAL'[RANGO], 'SALDO ACTUAL'[Clasificación ALC Meses .]), \"IsGrandTotalRowTotal\"\r\n\t\t\t),\r\n\t\t\tROLLUPADDISSUBTOTAL('SALDO ACTUAL'[Grupo Inventario], \"IsGrandTotalColumnTotal\"),\r\n\t\t\t\"A2\", CALCULATE(\r\n\t\t\t\tDIVIDE(SUM('SALDO ACTUAL'[Saldo Soles]), CALCULATE(\r\n\t\t\t\t\tSUM('SALDO ACTUAL'[Saldo Soles]),\r\n\t\t\t\t\tALLSELECTED('SALDO ACTUAL'[RANGO]),\r\n\t\t\t\t\tALLSELECTED('SALDO ACTUAL'[Clasificación ALC Meses .])\r\n\t\t\t\t))\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t101,\r\n\t\t\tSUMMARIZE(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t'SALDO ACTUAL'[RANGO],\r\n\t\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t\t'SALDO ACTUAL'[Clasificación ALC Meses .]\r\n\t\t\t),\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t1,\r\n\t\t\t'SALDO ACTUAL'[RANGO],\r\n\t\t\t1,\r\n\t\t\t'SALDO ACTUAL'[Clasificación ALC Meses .],\r\n\t\t\t0\r\n\t\t)\r\n\r\n\tVAR __DS0SecondaryBase = \r\n\t\tSUMMARIZE(__DS0Core, 'SALDO ACTUAL'[Grupo Inventario], [IsGrandTotalColumnTotal])\r\n\r\n\tVAR __DS0Secondary = \r\n\t\tTOPN(\r\n\t\t\t102,\r\n\t\t\t__DS0SecondaryBase,\r\n\t\t\t[IsGrandTotalColumnTotal],\r\n\t\t\t1,\r\n\t\t\t'SALDO ACTUAL'[Grupo Inventario],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0BodyLimited = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0PrimaryWindowed,\r\n\t\t\tSUBSTITUTEWITHINDEX(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t\"ColumnIndex\",\r\n\t\t\t\t__DS0Secondary,\r\n\t\t\t\t[IsGrandTotalColumnTotal],\r\n\t\t\t\tASC,\r\n\t\t\t\t'SALDO ACTUAL'[Grupo Inventario],\r\n\t\t\t\tASC\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0Secondary\r\n\r\nORDER BY\r\n\t[IsGrandTotalColumnTotal], 'SALDO ACTUAL'[Grupo Inventario]\r\n\r\nEVALUATE\r\n\t__DS0BodyLimited\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal],\r\n\t'SALDO ACTUAL'[RANGO],\r\n\t'SALDO ACTUAL'[Clasificación ALC Meses .] DESC,\r\n\t[ColumnIndex]",
+    "hash": "97c90f861c6f",
+    "archivo": "11-planificaciones__evolucion-inventario.json",
+    "tablas": [
+      "SALDO ACTUAL"
+    ],
+    "campos": [
+      "Clasificación ALC Meses .",
+      "Grupo Inventario",
+      "RANGO",
+      "Saldo Soles"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Segmentación de datos",
+    "tipo_visual": "slicer",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Año])),\r\n\t\t\tNOT('Calendario'[Año] IN {2024,\r\n\t\t\t\t2027,\r\n\t\t\t\t2028,\r\n\t\t\t\t2029,\r\n\t\t\t\t2030,\r\n\t\t\t\tBLANK(),\r\n\t\t\t\t2023})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({7}, 'Calendario'[Mes Nº])\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tVALUES('Calendario'[Año]),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable2)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(101, __DS0Core, 'Calendario'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Calendario'[Año]",
+    "hash": "94a14d301f1d",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario"
+    ],
+    "campos": [
+      "Año",
+      "Mes Nº"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Segmentación de datos",
+    "tipo_visual": "slicer",
+    "filas": 12,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes])),\r\n\t\t\tNOT('LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Mes] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tVALUES('Calendario'[Mes Nº]),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(101, __DS0Core, 'Calendario'[Mes Nº], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Calendario'[Mes Nº]",
+    "hash": "0145a50c7bac",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b"
+    ],
+    "campos": [
+      "Mes",
+      "Mes Nº"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MERMA ACUMULADA DEL MES",
+    "tipo_visual": "pivotTable",
+    "filas": 3,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\r\n\t\t\tNOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Lacteos Producción\",\r\n\t\t\t\"Salsas Producción\"}, 'Tabla Mermas'[almacen])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({7}, 'Calendario'[Mes Nº])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('Tabla Mermas'[almacen], \"IsGrandTotalRowTotal\"),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t\"v__MERMAS__TABLA_MERMAS\", 'Tabla Mermas'[% MERMAS -TABLA MERMAS],\r\n\t\t\t\"Meta__\", 'Tabla Mermas'[Meta %]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(502, __DS0Core, [IsGrandTotalRowTotal], 0, 'Tabla Mermas'[almacen], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC, 'Tabla Mermas'[almacen]",
+    "hash": "c704605981db",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario",
+      "Tabla Mermas"
+    ],
+    "campos": [
+      "% MERMAS -TABLA MERMAS",
+      "Mes Nº",
+      "Meta %",
+      "TIPO DE BASE",
+      "almacen"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "SETIEMBRE AL 05 SETIEMBRE",
+    "tipo_visual": "pivotTable",
+    "filas": 11,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\r\n\t\t\tNOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Lacteos Producción\",\r\n\t\t\t\"Salsas Producción\"}, 'Tabla Mermas'[almacen])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({7}, 'Calendario'[Mes Nº])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('Tabla Mermas'[Turno], \"IsGrandTotalRowTotal\"),\r\n\t\t\t'Tabla Mermas'[almacen],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t\"v__MERMAS__TABLA_MERMAS\", 'Tabla Mermas'[% MERMAS -TABLA MERMAS]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t102,\r\n\t\t\tSUMMARIZE(__DS0Core, 'Tabla Mermas'[Turno], [IsGrandTotalRowTotal]),\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t'Tabla Mermas'[Turno],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0SecondaryBase = \r\n\t\tSUMMARIZE(__DS0Core, 'Tabla Mermas'[almacen])\r\n\r\n\tVAR __DS0Secondary = \r\n\t\tTOPN(102, __DS0SecondaryBase, 'Tabla Mermas'[almacen], 1)\r\n\r\n\tVAR __DS0BodyLimited = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0PrimaryWindowed,\r\n\t\t\tSUBSTITUTEWITHINDEX(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t\"ColumnIndex\",\r\n\t\t\t\t__DS0Secondary,\r\n\t\t\t\t'Tabla Mermas'[almacen],\r\n\t\t\t\tASC\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t\"Fecha\", IGNORE('Medidas'[Fecha])\r\n\t)\r\n\r\nEVALUATE\r\n\t__DS0Secondary\r\n\r\nORDER BY\r\n\t'Tabla Mermas'[almacen]\r\n\r\nEVALUATE\r\n\t__DS0BodyLimited\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC, 'Tabla Mermas'[Turno], [ColumnIndex]",
+    "hash": "8334cb2f7031",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario",
+      "Medidas",
+      "Tabla Mermas"
+    ],
+    "campos": [
+      "% MERMAS -TABLA MERMAS",
+      "Fecha",
+      "Mes Nº",
+      "TIPO DE BASE",
+      "Turno",
+      "almacen"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "SETIEMBRE AL 05 SETIEMBRE",
+    "tipo_visual": "pivotTable",
+    "filas": 15,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"PT DERIVADOS LACTEOS\",\r\n\t\t\t\t\"PT SALSAS\",\r\n\t\t\t\t\"PT YOGURTS\",\r\n\t\t\t\t\"MERCADERIAS SALSAS PACKS\"},\r\n\t\t\t'Maestra de Kardex (Total)'[categoria_hijo]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[Turno])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[Turno] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({7}, 'Calendario'[Mes Nº])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('Maestra de Kardex (Total)'[Turno], \"IsGrandTotalRowTotal\"),\r\n\t\t\t'Maestra de Kardex (Total)'[categoria_hijo],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t\"Producción__KG__Odoo\", 'Medidas'[Producción (KG) Odoo]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t102,\r\n\t\t\tSUMMARIZE(__DS0Core, 'Maestra de Kardex (Total)'[Turno], [IsGrandTotalRowTotal]),\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Kardex (Total)'[Turno],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0SecondaryBase = \r\n\t\tSUMMARIZE(__DS0Core, 'Maestra de Kardex (Total)'[categoria_hijo])\r\n\r\n\tVAR __DS0Secondary = \r\n\t\tTOPN(102, __DS0SecondaryBase, 'Maestra de Kardex (Total)'[categoria_hijo], 1)\r\n\r\n\tVAR __DS0BodyLimited = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0PrimaryWindowed,\r\n\t\t\tSUBSTITUTEWITHINDEX(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t\"ColumnIndex\",\r\n\t\t\t\t__DS0Secondary,\r\n\t\t\t\t'Maestra de Kardex (Total)'[categoria_hijo],\r\n\t\t\t\tASC\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t\"Fecha\", IGNORE('Medidas'[Fecha])\r\n\t)\r\n\r\nEVALUATE\r\n\t__DS0Secondary\r\n\r\nORDER BY\r\n\t'Maestra de Kardex (Total)'[categoria_hijo]\r\n\r\nEVALUATE\r\n\t__DS0BodyLimited\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC, 'Maestra de Kardex (Total)'[Turno], [ColumnIndex]",
+    "hash": "58d293cd5c56",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "Medidas"
+    ],
+    "campos": [
+      "Fecha",
+      "Mes Nº",
+      "Producción (KG) Odoo",
+      "Turno",
+      "categoria_hijo"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "FACTURACION AL 05 SETIEMBRE",
+    "tipo_visual": "pivotTable",
+    "filas": 5,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Exl Cliente x Vendedor'[Canal])),\r\n\t\t\tNOT('Exl Cliente x Vendedor'[Canal] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({7}, 'Calendario'[Mes Nº])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('Exl Cliente x Vendedor'[Canal], \"IsGrandTotalRowTotal\"),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t\"SumMonto_Neto_Factura\", CALCULATE(SUM('Maestra de Facturacion (Total)'[Monto_Neto_Factura])),\r\n\t\t\t\"SumCUOTA_DIRECTORIO\", CALCULATE(SUM('Exl PPTO'[CUOTA DIRECTORIO])),\r\n\t\t\t\"PPTO_Acumulado_Hasta_Ayer\", 'Exl PPTO Semanal'[PPTO Acumulado Hasta Ayer],\r\n\t\t\t\"v_Av_vs_PPTO_AL_DIA\", 'Maestra de Facturacion (Total)'[%Av vs PPTO AL DIA],\r\n\t\t\t\"SumMonto_Neto_Pendiente\", CALCULATE(SUM('Exl A Maestra de Ordenes de Venta'[Monto Neto Pendiente])),\r\n\t\t\t\"VENTA_TOTAL\", 'Maestra de Facturacion (Total)'[VENTA TOTAL]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t502,\r\n\t\t\t__DS0Core,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t[SumMonto_Neto_Factura],\r\n\t\t\t0,\r\n\t\t\t'Exl Cliente x Vendedor'[Canal],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t\"FACTURACION_AL\", IGNORE('Medidas'[FACTURACION AL])\r\n\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC,\r\n\t[SumMonto_Neto_Factura] DESC,\r\n\t'Exl Cliente x Vendedor'[Canal]",
+    "hash": "60f2fadf1a5d",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario",
+      "Exl A Maestra de Ordenes de Venta",
+      "Exl Cliente x Vendedor",
+      "Exl PPTO",
+      "Exl PPTO Semanal",
+      "Maestra de Facturacion (Total)",
+      "Medidas"
+    ],
+    "campos": [
+      "%Av vs PPTO AL DIA",
+      "CUOTA DIRECTORIO",
+      "Canal",
+      "FACTURACION AL",
+      "Mes Nº",
+      "Monto Neto Pendiente",
+      "Monto_Neto_Factura",
+      "PPTO Acumulado Hasta Ayer",
+      "VENTA TOTAL"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "SETIEMBRE AL 05 SETIEMBRE",
+    "tipo_visual": "pivotTable",
+    "filas": 6,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"MERCADERIAS SALSAS PACKS\",\r\n\t\t\t\t\"PT DERIVADOS LACTEOS\",\r\n\t\t\t\t\"PT SALSAS\",\r\n\t\t\t\t\"PT YOGURTS\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Sí\"}, 'Calendario'[Hasta ayer])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({7}, 'Calendario'[Mes Nº])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('Maestra de Productos'[data.categoria_producto], \"IsGrandTotalRowTotal\"),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t\"SumPeso_Producido\", CALCULATE(SUM('Orden de Fabricacion'[Peso Producido])),\r\n\t\t\t\"SumPeso_a_Producir\", CALCULATE(SUM('Orden de Fabricacion'[Peso a Producir])),\r\n\t\t\t\"CUMPLIMIENTO_GENERAL_PESO\", 'Orden de Fabricacion'[CUMPLIMIENTO GENERAL PESO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t502,\r\n\t\t\t__DS0Core,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t\"Fecha\", IGNORE('Medidas'[Fecha])\r\n\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC, 'Maestra de Productos'[data.categoria_producto]",
+    "hash": "774b5fb9bb9b",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Productos",
+      "Medidas",
+      "Orden de Fabricacion"
+    ],
+    "campos": [
+      "CUMPLIMIENTO GENERAL PESO",
+      "Fecha",
+      "Hasta ayer",
+      "Mes Nº",
+      "Peso Producido",
+      "Peso a Producir",
+      "data.categoria_producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "CUMPLIMIENTO DE PROGRAMA DE PRODUCCION DIARIO (05 SETIEMBRE)",
+    "tipo_visual": "pivotTable",
+    "filas": 6,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"MERCADERIAS SALSAS PACKS\",\r\n\t\t\t\t\"PT DERIVADOS LACTEOS\",\r\n\t\t\t\t\"PT SALSAS\",\r\n\t\t\t\t\"PT YOGURTS\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Sí\"}, 'Calendario'[Es ayer])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('Maestra de Productos'[data.categoria_producto], \"IsGrandTotalRowTotal\"),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t\"SumPeso_Producido\", CALCULATE(SUM('Orden de Fabricacion'[Peso Producido])),\r\n\t\t\t\"SumPeso_a_Producir\", CALCULATE(SUM('Orden de Fabricacion'[Peso a Producir])),\r\n\t\t\t\"CUMPLIMIENTO_GENERAL_PESO\", 'Orden de Fabricacion'[CUMPLIMIENTO GENERAL PESO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t502,\r\n\t\t\t__DS0Core,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t'Maestra de Productos'[data.categoria_producto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t\"Medida_Cumplimiento\", IGNORE('Medidas'[Medida Cumplimiento])\r\n\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC, 'Maestra de Productos'[data.categoria_producto]",
+    "hash": "3e0d2b8cd658",
+    "archivo": "11-planificaciones__resumen2.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Productos",
+      "Medidas",
+      "Orden de Fabricacion"
+    ],
+    "campos": [
+      "CUMPLIMIENTO GENERAL PESO",
+      "Es ayer",
+      "Medida Cumplimiento",
+      "Peso Producido",
+      "Peso a Producir",
+      "data.categoria_producto"
+    ],
+    "probablemente_implementada": false
   }
 ]

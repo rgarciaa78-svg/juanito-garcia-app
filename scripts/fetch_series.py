@@ -1739,6 +1739,23 @@ def dax_crudo(token, dataset_id, query, label):
         return []
 
 
+def dataset_de_captura(token, entrada, candidatos):
+    """Averigua contra qué dataset corre una consulta capturada, probándola.
+
+    Las exportaciones no dicen de qué modelo salieron, y deducirlo por las
+    tablas que mencionan es adivinar. Se prueba en cada candidato y se queda
+    el primero que devuelve filas: si la tabla no existe, Power BI responde
+    error y se pasa al siguiente.
+    """
+    for ds in candidatos:
+        if not ds:
+            continue
+        tablas = dax_crudo(token, ds, entrada["dax"], f"sonda:{ds[:8]}")
+        if tablas and tablas[-1]:
+            return ds, tablas
+    return None, None
+
+
 def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
                         prefijo, catalogo=None):
     """Series mensuales a partir de una consulta EXPORTADA del Analizador.
@@ -1772,7 +1789,9 @@ def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
 
     por_dim = {}
     for f in filas:
-        dim = busca(f, f"[{col_dim}]")
+        # col_dim None: la consulta no abre por ninguna dimensión (una sola
+        # línea en el tiempo), así que todas las filas van al mismo grupo.
+        dim = busca(f, f"[{col_dim}]") if col_dim else ""
         val = busca(f, f"[{col_medida}]")
         anio = busca(f, "[Año]")
         mes = busca(f, "[NroMes]")
@@ -1792,8 +1811,9 @@ def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
         serie = [por_dim[dim].get(p) for p in periodos]
         n = sum(1 for x in serie if x is not None)
         if n >= 3:
-            out[f"{prefijo} {dim}"] = serie
-            print(f"    [{prefijo} {dim}]: {n}/{len(serie)} meses")
+            etiqueta = f"{prefijo} {dim}".strip()
+            out[etiqueta] = serie
+            print(f"    [{etiqueta}]: {n}/{len(serie)} meses")
     if not out:
         print(f"    · '{visual}': sin series utilizables "
               f"(dim={col_dim}, medida={col_medida})")
@@ -2101,15 +2121,41 @@ def main():
     cat_visuales = cargar_catalogo()
     if cat_visuales and DATASET_IDS.get("margen"):
         print(f"── capturas del Analizador ({len(cat_visuales)} visuales en catálogo)")
-        for visual, dim, medida, prefijo in (
-            ("COSTO UNITARIO",  "Categoria", "C__Unit",         "Costo unitario"),
-            ("PRECIO UNITARIO", "Canal",     "Precio_unitario", "Precio unitario"),
-        ):
+        # (visual, dimensión, alias de la medida, prefijo, dataset destino,
+        #  datasets candidatos donde puede vivir la consulta)
+        CAPTURAS = [
+            ("COSTO UNITARIO",  "Categoria", "C__Unit", "Costo unitario",
+             "margen", ["margen"]),
+            ("PRECIO UNITARIO", "Canal", "Precio_unitario", "Precio unitario",
+             "margen", ["margen"]),
+            # Le da a S&OP su primera serie mensual: hasta ahora ese reporte
+            # tenía KPIs pero ninguna tendencia.
+            ("EVOLUCIÓN DE INVENTARIO (S/. MM)", None, "Días_Rotación",
+             "Días de rotación", "inventario",
+             ["compras", "inventario", "planificacion"]),
+            ("EVOLUCIÓN DE INVENTARIO (S/. MM)", None,
+             "Consumo_Acumulado_Total_S__saldo", "Consumo acumulado",
+             "inventario", ["compras", "inventario", "planificacion"]),
+        ]
+        resuelto = {}
+        for visual, dim, medida, prefijo, destino, candidatos in CAPTURAS:
+            entrada = cat_visuales.get(visual)
+            if not entrada:
+                print(f"    · '{visual}': no está en el catálogo")
+                continue
+            ds = resuelto.get(visual)
+            if ds is None:
+                ds, _ = dataset_de_captura(
+                    token, entrada, [DATASET_IDS.get(c) for c in candidatos])
+                if not ds:
+                    print(f"    ✗ '{visual}': no corre en {candidatos}")
+                    continue
+                resuelto[visual] = ds
             try:
-                s = serie_desde_captura(token, DATASET_IDS["margen"], periodos,
-                                        visual, dim, medida, prefijo, cat_visuales)
+                s = serie_desde_captura(token, ds, periodos, visual, dim,
+                                        medida, prefijo, cat_visuales)
                 if s:
-                    resultado.setdefault("margen", {}).update(s)
+                    resultado.setdefault(destino, {}).update(s)
             except Exception as e:
                 print(f"    ✗ {visual}: {e}")
         print()
