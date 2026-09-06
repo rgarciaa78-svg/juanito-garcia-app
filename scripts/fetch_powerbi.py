@@ -1391,13 +1391,18 @@ def dax_cxp_aging(token, ws, dataset_id, label="cxp_aging"):
     del TOP 15 sí incluye BLANK() — son universos distintos y por eso cada
     una lleva su propia lista.
 
-    En vez de repetir la consulta una vez por tramo adivinando las etiquetas
-    de los vencidos, se agrupa por [ESTADO VIGENCIA] manteniendo los otros
-    cinco filtros: el modelo devuelve los nombres exactos. Mismo recurso que
-    se usó con el aging de CxC, donde el agrupado cuadró al peso con las
-    tarjetas individuales.
+    Los tramos vencidos NO viven en [ESTADO VIGENCIA]: esa columna solo
+    distingue "Vigente" de "No Vigente". El detalle está en [RANGO], con
+    valores como "1. 0 a 7 días" y "2. 8 a 15 días" — confirmado con la
+    consulta de la tarjeta "VENCIDO Menor a 15 días", que filtra
+    [ESTADO VIGENCIA]="No Vigente" y agrupa dos rangos. Por eso se agrupa
+    por AMBAS columnas: por una sola habría devuelto dos filas.
 
-    Devuelve [(estado, importe), ...] de mayor a menor.
+    Las tarjetas del reporte suman varios rangos ("Menor a 15 días" son los
+    rangos 1 y 2). Aquí se publican los rangos tal como están en el modelo,
+    que es más fino y no obliga a replicar ese agrupamiento.
+
+    Devuelve [(etiqueta, importe), ...] de mayor a menor.
     """
     filtros = (
         "\tVAR __DS0FilterTable = \n"
@@ -1417,6 +1422,7 @@ def dax_cxp_aging(token, ws, dataset_id, label="cxp_aging"):
         "EVALUATE\n"
         "\tSUMMARIZECOLUMNS(\n"
         "\t\t'CUENTAS CONTABLES'[ESTADO VIGENCIA],\n"
+        "\t\t'CUENTAS CONTABLES'[RANGO],\n"
         "\t\t__DS0FilterTable,\n"
         "\t\t__DS0FilterTable2,\n"
         "\t\t__DS0FilterTable3,\n"
@@ -1432,9 +1438,18 @@ def dax_cxp_aging(token, ws, dataset_id, label="cxp_aging"):
     out = []
     for r in rows or []:
         est = (r.get("CUENTAS CONTABLES[ESTADO VIGENCIA]") or r.get("[ESTADO VIGENCIA]"))
+        rango = (r.get("CUENTAS CONTABLES[RANGO]") or r.get("[RANGO]"))
         v = to_float(r.get("[SumIMPORTE_NETO__42_]") or r.get("SumIMPORTE_NETO__42_"))
-        if est and v is not None:
-            out.append((str(est), v))
+        if not est or v is None:
+            continue
+        # Lo vigente se etiqueta por su estado; lo vencido, por su rango de
+        # días, que es la información útil. El prefijo numérico del rango
+        # ("1. ", "2. ") solo ordena, así que se retira.
+        if "no vigente" in str(est).lower() and rango:
+            etiqueta = re.sub(r"^\s*\d+\.\s*", "", str(rango)).strip()
+        else:
+            etiqueta = str(est)
+        out.append((etiqueta, v))
     out.sort(key=lambda t: -t[1])
     return out
 
@@ -1498,12 +1513,15 @@ def build_cxp(found):
     if aging:
         tot_ag = sum(v for _, v in aging) or None
         def color(nombre):
+            # Las etiquetas vencidas son rangos de días ("0 a 7 días",
+            # "31 a 90 días"): se lee el primer número del rango para
+            # decidir el semáforo, en vez de buscar textos sueltos.
             n = nombre.lower()
             if "vigente" in n:
                 return "green"
-            if "90" in n or "31" in n:
-                return "red"
-            return "yellow"
+            m = re.search(r"(\d+)", n)
+            dias = int(m.group(1)) if m else 0
+            return "red" if dias >= 31 else "yellow"
         res["tramos"] = [{
             "label": est,
             "valor": fmt_soles(v),

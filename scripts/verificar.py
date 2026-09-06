@@ -95,9 +95,8 @@ def test_construccion(fp):
          lambda: fp.build_cxp({
              "Cuentas x Pagar": 16810000, "Refinanciamiento": 6960000, "Proveedores": 139,
              "__top_proveedores": [("E & M S.R.L.", "LECHE", 5175254.0)],
-             "__aging_cxp": [("Vigente", 6467432.0),
-                             ("Vencido Menor a 15 dias", 1054715.0),
-                             ("Vencido 31 a 90 dias", 1300005.0)]}),
+             "__aging_cxp": [("Vigente", 6467432.0), ("0 a 7 días", 600000.0),
+                             ("8 a 15 días", 454715.0), ("31 a 90 días", 1300005.0)]}),
          ["CxP Total", "Refinanciado", "# Proveedores", "Top 15 proveedores",
           "CxP Vencido"],
          ["proveedores_criticos", "tramos"]),
