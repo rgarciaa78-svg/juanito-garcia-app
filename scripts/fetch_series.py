@@ -53,6 +53,9 @@ DATASET_IDS = {
     "planificacion":  "30074d92-7ec1-4762-82f2-1cb29c15dcfe",
     "consumo":        "c972c8cb-e5fc-4b60-8f5e-265a78e1e796",
     "fill_rate":      "7f4ebe22-5e90-4e35-973b-4af3c58497e5",
+    # 13. Productividad por funcionario. No estaba registrado aquí, así que
+    # este reporte nunca tuvo serie mensual pese a tener dataset propio.
+    "productividad":  "a042ba6a-c82c-4fc1-bf95-b9e84bd15fc6",
 }
 
 # Pares (tabla, columna) de fecha a probar, en orden de probabilidad
@@ -1536,6 +1539,139 @@ def serie_consumo(token, ds_id, periodos, medidas):
     return out
 
 
+PRODUCTIVIDAD_LOCALDATE = "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987"
+
+# Filtros del visual "PLANILLA (S/.) ENTRE KG PRODUCIDO" del reporte
+# '13. Reporte de productividad por funcionario' (Copiar consulta, 2026-09-06).
+#
+# Ocho filtros. Los cuatro primeros acotan qué gasto cuenta como planilla
+# operativa ('Exl Cuenta Contables'), y los tres siguientes son las mismas
+# exclusiones de facturación que usa el reporte de Margen. El octavo es la
+# ventana móvil desde el 31/07/2025.
+#
+# 'Calendario'[MesActual] = "Otros" excluye el mes en curso: el reporte no
+# grafica el mes incompleto en esta serie.
+_PRODUCTIVIDAD_FILTROS = """	VAR __DS0FilterTable =
+		TREATAS({"Otros"}, 'Calendario'[MesActual])
+
+	VAR __DS0FilterTable2 =
+		TREATAS({"AMBAS",
+			"GASTO DE PERSONAL OPERATIVO"}, 'Exl Cuenta Contables'[CLASIFICACION])
+
+	VAR __DS0FilterTable3 =
+		TREATAS({"GASTO DE PERSONAL"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])
+
+	VAR __DS0FilterTable4 =
+		TREATAS({"Gasto de Personal Operativo"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])
+
+	VAR __DS0FilterTable5 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),
+			NOT(
+				'Maestra de Facturacion (Total)'[categoria_producto] IN {"BONIFICACION Y REBATES",
+					"CHATARRA",
+					"INTERESES",
+					"MATERIA PRIMA",
+					"SERVICIOS",
+					"SUMINISTROS",
+					BLANK()}
+			)
+		)
+
+	VAR __DS0FilterTable6 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),
+			NOT(
+				'Maestra de Facturacion (Total)'[producto] IN {"PAVO C/M C/ASA EP CONG (8 KG)",
+					"ALIMENTACION COMERCIAL"}
+			)
+		)
+
+	VAR __DS0FilterTable7 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),
+			NOT('Maestra de Facturacion (Total)'[estado] IN {"Cancelado"})
+		)
+
+	VAR __DS0FilterTable8 =
+		FILTER(
+			KEEPFILTERS(VALUES('Calendario'[Date])),
+			'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))
+		)
+"""
+
+PRODUCTIVIDAD_MEDIDAS = [
+    ("SUM_PROD",       "Producción (kg)",   "IGNORE('Maestra de Kardex (Total)'[SUM PROD])"),
+    ("GASTO_TOTAL",    "Planilla (S/)",     "IGNORE('Exl Cuenta Contables'[GASTO TOTAL])"),
+    ("PROD_OPERATIVA", "Planilla / kg producido", "'Exl Cuenta Contables'[PROD OPERATIVA]"),
+]
+
+
+def _q_productividad():
+    """Serie mensual de productividad: planilla, producción y su ratio.
+
+    Copiar consulta 2026-09-06. Solo se quita el TOPN(1001), que limita filas
+    sin cambiar valores. No lleva filtro de año — [Año] es columna de
+    agrupación — así que una sola consulta cubre todo el histórico.
+    """
+    ld = PRODUCTIVIDAD_LOCALDATE
+    usados = "".join(f"\t\t__DS0FilterTable{'' if i == 1 else i},\n" for i in range(1, 9))
+    medidas = "".join(f'\t\t"{alias}", {expr},\n'
+                      for alias, _etq, expr in PRODUCTIVIDAD_MEDIDAS).rstrip(",\n") + "\n"
+    return (
+        "DEFINE\n"
+        + _PRODUCTIVIDAD_FILTROS
+        + "\nEVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        f"\t\t'{ld}'[Año],\n"
+        "\t\t'Calendario'[Mes Corto],\n"
+        "\t\t'Calendario'[Mes Numero],\n"
+        + usados + medidas +
+        "\t)\n\n"
+        f"ORDER BY\n\t'{ld}'[Año], 'Calendario'[Mes Numero]"
+    )
+
+
+def serie_productividad(token, ds_id, periodos):
+    """Series mensuales del reporte de productividad por funcionario."""
+    filas = dax(token, ds_id, _q_productividad(), "productividad")
+    if not filas:
+        return {}
+    ld = PRODUCTIVIDAD_LOCALDATE
+    mapas = {etq: {} for _a, etq, _e in PRODUCTIVIDAD_MEDIDAS}
+    for r in filas:
+        anio = r.get(f"{ld}[Año]") or r.get("[Año]")
+        mes = r.get("Calendario[Mes Numero]") or r.get("[Mes Numero]")
+        if isinstance(mes, str):
+            mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+        if mes is None:
+            corto = str(r.get("Calendario[Mes Corto]") or "").strip().lower()[:3]
+            mes = MESES_CORTOS.get(corto)
+        if anio is None or mes is None:
+            continue
+        try:
+            per = (int(anio), int(mes))
+        except (TypeError, ValueError):
+            continue
+        for alias, etq, _e in PRODUCTIVIDAD_MEDIDAS:
+            v = r.get(f"[{alias}]", r.get(alias))
+            if v is None:
+                continue
+            try:
+                mapas[etq][per] = float(v)
+            except (TypeError, ValueError):
+                pass
+
+    out = {}
+    for _a, etq, _e in PRODUCTIVIDAD_MEDIDAS:
+        serie = [mapas[etq].get(p) for p in periodos]
+        if any(x is not None for x in serie):
+            out[etq] = serie
+            print(f"    [{etq}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    return out
+
+
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
@@ -1816,6 +1952,18 @@ def main():
             ])
             if s:
                 resultado.setdefault("consumo", {}).update(s)
+            print()
+        except Exception as e:
+            print(f"    ✗ {e}\n")
+
+    # ── Productividad por funcionario
+    prod_id = DATASET_IDS.get("productividad")
+    if prod_id:
+        print("── productividad (consulta exacta de 'PLANILLA ENTRE KG PRODUCIDO')")
+        try:
+            s = serie_productividad(token, prod_id, periodos)
+            if s:
+                resultado.setdefault("productividad", {}).update(s)
             print()
         except Exception as e:
             print(f"    ✗ {e}\n")
