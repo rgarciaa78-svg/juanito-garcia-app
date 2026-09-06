@@ -462,6 +462,36 @@ def medidas_mermas_variantes(token, ds_id):
         sufijo = str(nombre)[len("% Merma total"):].strip()
         if sufijo:                       # el sin sufijo ya lo trae la de planta
             out.append((str(nombre), sufijo))
+    if out:
+        return sorted(out, key=lambda t: t[1])
+
+    # INFO.MEASURES devolvió vacío (DMV bloqueada para esta cuenta, visto el
+    # 2026-09-06). Se prueban candidatos: los títulos de los visuales del
+    # reporte, más variantes de mayúsculas. Esto NO inventa cifras — una
+    # medida inexistente hace fallar la consulta y se descarta sin dato.
+    # 'B&D' es el único confirmado por Copiar consulta; el resto se acepta
+    # solo si el modelo responde.
+    print("    · INFO.MEASURES vacía — probando nombres contra el modelo")
+    candidatos = [
+        "B&D",                                    # confirmado por captura
+        "TIGO", "Tigo",
+        "MAQUILA", "Maquila",
+        "PLANTA ATE", "Planta Ate", "ATE",
+        "PLANTA PACHACAMAC", "Planta Pachacamac", "PACHACAMAC",
+        "PLANTA TERCEROS", "Planta Terceros", "TERCEROS",
+    ]
+    vistos = set()
+    for suf in candidatos:
+        if suf.upper() in vistos:
+            continue
+        nombre = f"% Merma total {suf}"
+        q = ("EVALUATE ROW(\"v\", CALCULATE('Tabla Mermas'[" + nombre + "], "
+             "TREATAS({2026}, 'Calendario'[Año])))")
+        r = dax(token, ds_id, q, f"probe {suf}", retries=1)
+        if r:                                     # existe y responde
+            vistos.add(suf.upper())
+            out.append((nombre, suf))
+            print(f"      ✓ existe: {nombre}")
     return sorted(out, key=lambda t: t[1])
 
 
