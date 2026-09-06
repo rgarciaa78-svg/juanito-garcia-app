@@ -1880,8 +1880,14 @@ def dax_fillrate_medida_mes(token, ws, dataset_id, medida, alias, label="fillrat
 def build_fill_rate(found):
     # '% Fill Rate' SÍ responde al filtro de mes; '% FILLRATE' devuelve el acumulado
     # histórico igual en todos los meses. Se prefiere la que refleja el mes en curso.
-    fill_val = (found.get("% Fill Rate") or found.get("% FILLRATE") or found.get("% FillRate") or
-                found.get("Fill Rate") or found.get("Tasa Atención") or found.get("Tasa Atencion"))
+    # La tarjeta del reporte manda. La sonda genérica traía '% Fill Rate'
+    # sin los filtros del visual y daba 83.5% donde el reporte muestra 88%.
+    # El resto queda solo como respaldo si la tarjeta no responde.
+    fill_val = found.get("__fillrate_card")
+    if fill_val is None:
+        fill_val = (found.get("% Fill Rate") or found.get("% FILLRATE") or
+                    found.get("% FillRate") or found.get("Fill Rate") or
+                    found.get("Tasa Atención") or found.get("Tasa Atencion"))
     fill_pct = to_float(fill_val)
     if fill_pct and abs(fill_pct) < 1: fill_pct *= 100
     sem = sem_thresh(fill_pct, red_below=85, yellow_below=95)
@@ -2512,6 +2518,11 @@ def main():
                     if venta_mes is not None:
                         scanned.setdefault("fill_rate", {})["__venta_mes"] = venta_mes
                         print(f"    ✓ Fill Rate venta del mes: {venta_mes:,.2f}")
+                    fr_card = dax_fillrate_medida_mes(
+                        token, WS_FILLRATE, fr_ds, "FILLRATE", "FILLRATE")
+                    if fr_card is not None:
+                        scanned.setdefault("fill_rate", {})["__fillrate_card"] = fr_card
+                        print(f"    ✓ Fill Rate (tarjeta): {fr_card:.4f}")
                     tot = dax_fillrate_no_atendido(token, WS_FILLRATE, fr_ds)
                     if tot is not None:
                         scanned.setdefault("fill_rate", {})["__no_atendido_total"] = tot
