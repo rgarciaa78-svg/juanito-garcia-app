@@ -377,6 +377,86 @@
               "label": "Venta Perdida",
               "valor": "S/31.37M",
               "estado": "red"
+            },
+            {
+              "label": "No atendido (mes)",
+              "valor": "S/199",
+              "estado": "red"
+            }
+          ],
+          "por_grupo": [
+            {
+              "grupo": "SPSA",
+              "valor": "92.5%",
+              "estado": "yellow",
+              "soles": "S/129",
+              "soles_num": 129.37232
+            },
+            {
+              "grupo": "CENCOSUD",
+              "valor": "96.4%",
+              "estado": "green",
+              "soles": "S/62",
+              "soles_num": 61.63875
+            },
+            {
+              "grupo": "TOTTUS",
+              "valor": "99.8%",
+              "estado": "green",
+              "soles": "S/4",
+              "soles_num": 3.9733799999999997
+            },
+            {
+              "grupo": "LIMA",
+              "valor": "99.9%",
+              "estado": "green",
+              "soles": "S/2",
+              "soles_num": 1.7859158000000002
+            },
+            {
+              "grupo": "CENTRO SUR",
+              "valor": "100.0%",
+              "estado": "green",
+              "soles": "S/1",
+              "soles_num": 0.68025
+            },
+            {
+              "grupo": "AJE",
+              "valor": "100.0%",
+              "estado": "green",
+              "soles": "S/1",
+              "soles_num": 0.55504
+            },
+            {
+              "grupo": "NORTE",
+              "valor": "100.0%",
+              "estado": "green",
+              "soles": "S/0",
+              "soles_num": 0.4582
+            },
+            {
+              "grupo": "OXXO",
+              "valor": "100.0%",
+              "estado": "green",
+              "soles": "S/0",
+              "soles_num": 0.1824
+            }
+          ],
+          "por_marca": [
+            {
+              "marca": "MAQUILA",
+              "valor": "S/118",
+              "pct": 59.1
+            },
+            {
+              "marca": "TIGO",
+              "valor": "S/76",
+              "pct": 38.1
+            },
+            {
+              "marca": "B&D",
+              "valor": "S/5",
+              "pct": 2.7
             }
           ]
         },
