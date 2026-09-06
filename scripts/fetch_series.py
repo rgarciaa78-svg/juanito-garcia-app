@@ -1051,6 +1051,166 @@ def serie_fillrate(token, ds_id, periodos):
     return out
 
 
+COMPRAS_LOCALDATE = "LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b"
+
+# Filtro del visual "Eficiencia de Costo de compra de materiales", tal cual lo
+# genera Power BI (Copiar consulta, 2026-09-06). Excluye 39 categorías —
+# servicios, maquinaria, repuestos por marca, productos terminados, descuentos
+# y acuerdos comerciales — de modo que solo quedan los insumos que realmente se
+# compran y se consumen: ENVASES Y EMBALAJES, MATERIA PRIMA, SUMINISTROS y
+# REPUESTOS. Va literal: quitar o agrupar cualquiera cambia el ratio.
+_COMPRAS_FILTROS = """	VAR __DS0FilterTable =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Productos'[data.categoria_producto])),
+			NOT(
+				'Maestra de Productos'[data.categoria_producto] IN {"Activo Fijo",
+					"ACUERDOS COMERCIALES",
+					"All",
+					"All / Deliveries",
+					"Beneficio Social no remunerativos",
+					"BONIFICACION Y REBATES",
+					"CHATARRA",
+					"DESCUENTO POR PRONTO PAGO",
+					"DESCUENTOS COMERCIALES",
+					"DIFERENCIA DE PRECIOS",
+					"HERRAMIENTAS / BATERIA",
+					"HERRAMIENTAS / CARGADOR",
+					"HERRAMIENTAS / DISPENSADOR",
+					"HERRAMIENTAS / TRASLAPE",
+					"MAQUINA",
+					"MAQUINA / MAQ. ENVOLVEDORA",
+					"MAQUINA / MAQ. ENZUNCHADORA AUTOMATICA",
+					"MAQUINA / MAQ. ENZUNCHADORA MANUAL",
+					"MAQUINA / MAQUINA",
+					"MERCADERIAS SALSAS PACKS",
+					"MERCADERIAS SALSAS PACKS / CINTA DE EMBALAJE",
+					"MERCADERIAS SALSAS PACKS / RAFIA",
+					"POLIESTER",
+					"POLIESTER / POLIESTER",
+					"POLIPROPILENO / POLIPROPILENO",
+					"PROD. EN PROCESO",
+					"PT DERIVADOS LACTEOS",
+					"PT SALSAS",
+					"PT YOGURTS",
+					"REPUESTOS / MESSERSI",
+					"REPUESTOS / NACIONAL",
+					"REPUESTOS / ROBOPAC",
+					"REPUESTOS / SIGNODE",
+					"REPUESTOS / SORSA",
+					"SERVICIO DE MANTENIMIENTO Y/O REPARACION",
+					"SERVICIOS",
+					"STRETCH FILM",
+					"STRETCH FILM / AUTOMATICO",
+					"STRETCH FILM / MANUAL",
+					BLANK()}
+			)
+		)
+
+	VAR __DS0FilterTable2 =
+		FILTER(
+			KEEPFILTERS(VALUES('Calendario'[Date])),
+			'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))
+		)
+"""
+
+
+def _q_compras_ratio():
+    """Ratio compra/consumo mensual por categoría de insumo.
+
+    Copiar consulta 2026-09-06 sobre la tabla "Eficiencia de Costo de compra de
+    materiales (Operación)". Del original se conservan los dos filtros y las
+    tres medidas textuales; se quita la maquinaria de subtotales
+    (ROLLUPADDISSUBTOTAL / NATURALLEFTOUTERJOIN / SUBSTITUTEWITHINDEX), que
+    pinta la fila Total del visual sin alterar las celdas.
+
+    La fila Total se recompone sumando las categorías, que es exactamente lo
+    que hace el reporte: en agosto muestra Cant Compra 6,451,354.92 y Cant
+    Consumo 5,964,494.95, cuyo cociente es el 92.45% de su columna Ratio.
+
+    No lleva filtro de año: el propio [Año] es columna de agrupación, así que
+    una sola consulta cubre 2025 y 2026.
+    """
+    ld = COMPRAS_LOCALDATE
+    return (
+        "DEFINE\n"
+        + _COMPRAS_FILTROS
+        + "\nEVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'Maestra de Productos'[data.categoria_producto],\n"
+        "\t\t'Calendario'[Año],\n"
+        f"\t\t'{ld}'[NroMes],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t__DS0FilterTable2,\n"
+        "\t\t\"v_ratio\", 'KARDEX TOTAL'[%ratio],\n"
+        "\t\t\"Consumo_CANT_10_92_93\", 'KARDEX TOTAL'[Consumo CANT 10,92,93],\n"
+        "\t\t\"compra_mensual_Cant_2\", 'KARDEX TOTAL'[compra mensual Cant 2]\n"
+        "\t)\n\n"
+        f"ORDER BY\n\t'Calendario'[Año], '{ld}'[NroMes]"
+    )
+
+
+def serie_compras_ratio(token, ds_id, periodos):
+    """Series mensuales de ratio consumo/compra, total y por categoría.
+
+    Ratio > 100% significa que se consumió más de lo comprado (se está
+    jalando inventario); < 100% que se compró de más. Por eso se publican
+    también las cantidades: el ratio solo dice la dirección, no el tamaño.
+    """
+    filas = dax(token, ds_id, _q_compras_ratio(), "compras-ratio")
+    if not filas:
+        return {}
+
+    ld = COMPRAS_LOCALDATE
+    por_cat, tot_cons, tot_comp = {}, {}, {}
+    for r in filas:
+        cat = (r.get("Maestra de Productos[data.categoria_producto]")
+               or r.get("[data.categoria_producto]"))
+        anio = r.get("Calendario[Año]") or r.get("[Año]")
+        mes = r.get(f"{ld}[NroMes]") or r.get("[NroMes]")
+        if cat is None or anio is None or mes is None:
+            continue
+        try:
+            per = (int(anio), int(mes))
+        except (TypeError, ValueError):
+            continue
+        cons = r.get("[Consumo_CANT_10_92_93]", r.get("Consumo_CANT_10_92_93"))
+        comp = r.get("[compra_mensual_Cant_2]", r.get("compra_mensual_Cant_2"))
+        ratio = r.get("[v_ratio]", r.get("v_ratio"))
+        if ratio is not None:
+            try:
+                por_cat.setdefault(str(cat), {})[per] = float(ratio)
+            except (TypeError, ValueError):
+                pass
+        # La compra viene en negativo en el modelo (salida de caja): se toma
+        # el valor absoluto para poder sumarla con el consumo.
+        for val, acum in ((cons, tot_cons), (comp, tot_comp)):
+            if val is None:
+                continue
+            try:
+                acum[per] = acum.get(per, 0.0) + abs(float(val))
+            except (TypeError, ValueError):
+                pass
+
+    out = {}
+    total = [(tot_cons.get(p) / tot_comp[p]) if tot_comp.get(p) else None
+             for p in periodos]
+    if any(x is not None for x in total):
+        out["% Ratio Consumo/Compra"] = total
+        print(f"    [% Ratio Consumo/Compra]: "
+              f"{sum(1 for x in total if x is not None)}/{len(total)} meses")
+    for etiqueta, acum in (("Consumo (cant)", tot_cons), ("Compra (cant)", tot_comp)):
+        serie = [acum.get(p) for p in periodos]
+        if any(x is not None for x in serie):
+            out[etiqueta] = serie
+    for cat in sorted(por_cat):
+        serie = [por_cat[cat].get(p) for p in periodos]
+        if sum(1 for x in serie if x is not None) >= 3:
+            out[f"% Ratio {cat}"] = serie
+            print(f"    [% Ratio {cat}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    return out
+
+
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
@@ -1290,11 +1450,25 @@ def main():
     except Exception as e:
         print(f"    ✗ {e}\n")
 
+    # ── Compras: ratio consumo/compra con los filtros reales del visual
+    compras_id = DATASET_IDS.get("compras")
+    if compras_id:
+        print("── compras (consulta exacta de 'Eficiencia de Costo de compra')")
+        try:
+            s = serie_compras_ratio(token, compras_id, periodos)
+            if s:
+                resultado["compras"] = s
+            print()
+        except Exception as e:
+            print(f"    ✗ {e}\n")
+
     for ds_key, medidas_dict in cache.items():
         ds_id = DATASET_IDS.get(ds_key)
         if not ds_id:
             continue
         if ds_key == "fill_rate" and "fill_rate" in resultado:
+            continue
+        if ds_key == "compras" and "compras" in resultado:
             continue
         if ds_key == "mermas" and "mermas" in resultado:
             # ya resuelto con la consulta exacta; la genérica solo añadiría
