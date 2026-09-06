@@ -706,14 +706,87 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "yellow",
-          "alerta": "Avance 63.0% vs presupuesto",
+          "estado": "red",
+          "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
           "kpis": [
             {
-              "label": "Avance vs Ppto",
-              "valor": "63.0%",
-              "meta": "100%",
+              "label": "Presupuesto del mes",
+              "valor": "S/7.83M"
+            },
+            {
+              "label": "Facturado",
+              "valor": "S/18.75M"
+            },
+            {
+              "label": "Avance vs presupuesto",
+              "valor": "239.4%",
+              "meta": "revisar — el visual no filtra año",
               "estado": "yellow"
+            },
+            {
+              "label": "Avance vs Ppto",
+              "valor": "1.3%",
+              "meta": "100%",
+              "estado": "red"
+            },
+            {
+              "label": "Cumplimiento producción (ayer)",
+              "valor": "70%",
+              "meta": "100% del programa del día",
+              "estado": "red"
+            },
+            {
+              "label": "Pendiente de facturar",
+              "valor": "S/333,047"
+            }
+          ],
+          "cumplimiento_produccion": [
+            {
+              "categoria": "MERCADERIAS SALSAS PACKS",
+              "programado": "3,859,392",
+              "producido": "2,911,111",
+              "pct": 75.4
+            },
+            {
+              "categoria": "PT DERIVADOS LACTEOS",
+              "programado": "99,207",
+              "producido": "62,631",
+              "pct": 63.1
+            },
+            {
+              "categoria": "PT SALSAS",
+              "programado": "9,778,850",
+              "producido": "5,430,159",
+              "pct": 55.5
+            },
+            {
+              "categoria": "PT YOGURTS",
+              "programado": "14,362,346",
+              "producido": "11,324,185",
+              "pct": 78.8
+            }
+          ],
+          "por_canal": [
+            {
+              "canal": "MODERNO",
+              "ppto": "S/5.87M",
+              "facturado": "S/14.13M",
+              "pendiente": "S/295,290",
+              "avance": 240.8
+            },
+            {
+              "canal": "TRADICIONAL",
+              "ppto": "S/1.69M",
+              "facturado": "S/3.88M",
+              "pendiente": "S/11,921",
+              "avance": 229.3
+            },
+            {
+              "canal": "HORECA",
+              "ppto": "S/270,000",
+              "facturado": "S/739,192",
+              "pendiente": "S/25,836",
+              "avance": 273.8
             }
           ]
         }
@@ -726,5 +799,12 @@
     "fill_rate": 0.8647581189382418,
     "mermas": 0.04987907894946126,
     "avance": 0.6295519287006067
-  }
+  },
+  "diagnostico": [
+    {
+      "consulta": "consumo_ventaneta",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (5, 9) Column '<oii>Peso total KG</oii>' in table '<oii>Maestra de Facturacion (Total)</oii>' cannot be found or may not be used in this expression.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803780\"}}]}}}"
+    }
+  ]
 }

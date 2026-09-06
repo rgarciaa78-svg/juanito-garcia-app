@@ -29,6 +29,7 @@
     "cxp": "Calendario[Date]",
     "margen": "Calendario[Date]",
     "inventario": "Calendario[Date]",
+    "fill_rate": "Calendario[Date]",
     "planificacion": "Calendario[Date]"
   },
   "sin_serie": {
@@ -100,6 +101,81 @@
       "tablas": [],
       "columnas_fecha": [],
       "esquema_rest_error": "HTTP 404"
+    },
+    "fill_rate": {
+      "medidas": [],
+      "tablas": [
+        "Calendario"
+      ],
+      "columnas_fecha": [
+        "Calendario[Date]"
+      ],
+      "medidas_planas": [
+        {
+          "medida": "% FILLRATE",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        },
+        {
+          "medida": "ORDEN DE VENTA",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        },
+        {
+          "medida": "FACTURACION",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        },
+        {
+          "medida": "VENTA PERDIDA",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        },
+        {
+          "medida": "% FillRate",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        },
+        {
+          "medida": "Orden de Venta",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        },
+        {
+          "medida": "Facturacion",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        },
+        {
+          "medida": "Venta Perdida",
+          "valores_distintos": 1,
+          "meses_con_dato": 20,
+          "amplitud_relativa_pct": 0.0,
+          "repeticiones_del_valor_mas_comun": 20,
+          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
+        }
+      ]
     },
     "planificacion": {
       "medidas": [],
@@ -456,52 +532,6 @@
         7397630.06,
         7320997.01,
         7689608.92
-      ]
-    },
-    "fill_rate": {
-      "% Fill Rate": [
-        0.8398276393223179,
-        0.9125612278822115,
-        0.9121751250482996,
-        0.8843832226713652,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "Pedidos no atendidos": [
-        889.261831265083,
-        484.6073184512757,
-        510.740902492534,
-        198.90772579999998,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
       ]
     },
     "compras": {
@@ -906,6 +936,30 @@
         0.5253017297925876,
         0.5423033339736576,
         0.04266413030017015
+      ]
+    },
+    "fill_rate": {
+      "% Fill Rate": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        0.9071913775125008,
+        0.8647581189382418,
+        0.8587793556447606,
+        0.8596148471491724,
+        0.7161381717585181,
+        0.764854126670638,
+        0.7837711332842261,
+        0.7736376749830337,
+        0.7789456333909168,
+        0.8092002244775067,
+        0.8479145525761872,
+        0.8870282505288788,
+        0.8169486535399267,
+        0.8351125169010986
       ]
     }
   }
