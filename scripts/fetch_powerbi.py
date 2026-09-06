@@ -1781,6 +1781,26 @@ def dax_fillrate_por_marca(token, ws, dataset_id, label="fillrate_marca"):
     return out
 
 
+def dax_fillrate_no_atendido(token, ws, dataset_id, label="fillrate_total"):
+    """Total de pedidos no atendidos del mes actual (la tarjeta del reporte).
+
+    Confirmado con Copiar consulta (2026-09-06). Mismo filtro de mes que el
+    desglose por marca, pero sin agrupar. Se usa este valor como KPI en vez
+    de sumar las marcas: es el número que muestra la tarjeta.
+    """
+    q = ("DEFINE VAR __DS0FilterTable = \n"
+         "\tTREATAS({\"MES_ACTUAL\"}, 'CALENDARIO'[FIL_MES_ACTUAL])\n\n"
+         "EVALUATE\n"
+         "\tSUMMARIZECOLUMNS(\n"
+         "\t\t__DS0FilterTable,\n"
+         "\t\t\"PEDIDOS_NO_ATENDIDOS\", IGNORE('0_MEDIDAS'[PEDIDOS NO ATENDIDOS])\n"
+         "\t)")
+    rows = dax(token, ws, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get("[PEDIDOS_NO_ATENDIDOS]") or rows[0].get("PEDIDOS_NO_ATENDIDOS"))
+    return None
+
+
 def build_fill_rate(found):
     # '% Fill Rate' SÍ responde al filtro de mes; '% FILLRATE' devuelve el acumulado
     # histórico igual en todos los meses. Se prefiere la que refleja el mes en curso.
@@ -1813,7 +1833,16 @@ def build_fill_rate(found):
     # Desglose por marca del mes actual (ver dax_fillrate_por_marca)
     marcas = found.get("__por_marca") or []
     if marcas:
-        total = sum(v for _, v in marcas) or None
+        suma = sum(v for _, v in marcas)
+        # El total viene de la tarjeta del reporte; la suma de marcas solo se
+        # usa si esa consulta falló. Si ambas existen y difieren, se avisa:
+        # significaría que el desglose no cubre toda la venta no atendida.
+        total = found.get("__no_atendido_total")
+        if total is None:
+            total = suma or None
+        elif suma and abs(total - suma) > max(1.0, abs(total) * 0.005):
+            print(f"    ⚠ Fill Rate: tarjeta {total:,.0f} vs suma de marcas "
+                  f"{suma:,.0f} — el desglose no cuadra con el total")
         res["por_marca"] = [{
             "marca": m,
             "valor": fmt_soles(v),
@@ -2372,6 +2401,10 @@ def main():
                     headers={"Authorization": f"Bearer {token}"}, timeout=25)
                 if r.ok:
                     fr_ds = r.json().get("datasetId")
+                    tot = dax_fillrate_no_atendido(token, WS_FILLRATE, fr_ds)
+                    if tot is not None:
+                        scanned.setdefault("fill_rate", {})["__no_atendido_total"] = tot
+                        print(f"    ✓ Fill Rate no atendido (mes): {tot:,.0f}")
                     marcas = dax_fillrate_por_marca(token, WS_FILLRATE, fr_ds)
                     if marcas:
                         scanned.setdefault("fill_rate", {})["__por_marca"] = marcas
