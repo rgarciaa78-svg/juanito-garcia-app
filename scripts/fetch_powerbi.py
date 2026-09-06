@@ -1450,8 +1450,14 @@ def dax_cxp_aging(token, ws, dataset_id, label="cxp_aging"):
         else:
             etiqueta = str(est)
         out.append((etiqueta, v))
-    out.sort(key=lambda t: -t[1])
-    return out
+
+    # [RANGO] también subdivide lo vigente (por antigüedad de la factura), así
+    # que "Vigente" vuelve en varias filas. Se consolidan: el reporte muestra
+    # un solo VIGENTE, y su suma coincide con la tarjeta.
+    agrupado = {}
+    for etiqueta, v in out:
+        agrupado[etiqueta] = agrupado.get(etiqueta, 0.0) + v
+    return sorted(agrupado.items(), key=lambda t: -t[1])
 
 
 def build_cxp(found):
