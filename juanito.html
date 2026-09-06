@@ -2080,9 +2080,10 @@ function origenVariacion(label, an) {
     if (pv && pv.yoy) add('Cartera relacionada',
       `La cartera por vencer varió ${pct(pv.yoy.var)} contra ${fmtPeriodo(pv.yoy.periodo)}.`);
     add('Siguiente nivel — quién debe',
-      `El modelo no expone los <strong>tramos de vencimiento</strong> (0-15, 16-30, +30 días) ni la ` +
-      `dimensión de cliente. Sin eso no se sabe si la mora se concentra en pocos clientes grandes ` +
-      `—negociable— o está dispersa en la cartera —problema de proceso de cobranza—.`);
+      `Los <strong>tramos de vencimiento</strong> sí están en el modelo y ya se muestran en la sección III ` +
+      `(<code>'DATA_FACTURACION'[O_SEGMENTO]</code>). Lo que falta es la <strong>dimensión de cliente</strong>: ` +
+      `sin ella no se sabe si la mora se concentra en pocos clientes grandes —negociable— o está dispersa ` +
+      `en la cartera —problema de proceso de cobranza—.`);
     return B;
   }
 
@@ -3700,15 +3701,33 @@ function renderMcKinseyArea(empresa, tipo) {
           'DATA_FACTURACION'[% MOROSIDAD])</code> — sin ningún filtro de año, mes ni fecha. El reporte
           solo guarda el valor de hoy, no un histórico por período. No hay forma de obtener "cómo estaba
           la mora en agosto 2025" desde esta tarjeta porque nunca se calculó ni se guardó para esa fecha.`),
-        III: pvenc ? `<div style="padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;text-align:center;margin-bottom:8px">
-            <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:4px">CxC por vencer</div>
-            <div style="font-size:22px;font-weight:800;color:var(--red)">${fmtM(pvenc)}</div>
+        III: (() => {
+          const tr = rp.cuentas_por_cobrar?.tramos || [];
+          if (!tr.length) return pvenc ? `<div style="padding:12px;background:var(--red-soft);border:1px solid var(--border);border-radius:8px;text-align:center">
+              <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:4px">CxC por vencer</div>
+              <div style="font-size:22px;font-weight:800;color:var(--red)">${fmtM(pvenc)}</div>
+            </div>` : 'Sin desglose de tramos disponible.';
+          const tot = tr.reduce((a, t) => a + (parseVal(t.valor) || 0), 0);
+          const venc = tr.filter(t => !/vencer/i.test(t.label))
+                         .reduce((a, t) => a + (parseVal(t.valor) || 0), 0);
+          const cVar = s => s === 'red' ? 'var(--red)' : s === 'yellow' ? 'var(--yellow)' : 'var(--green)';
+          return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            ${tr.map(t => `<div style="flex:1 1 120px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em">${t.label}</div>
+              <div style="font-size:18px;font-weight:800;color:${cVar(t.estado)};font-family:var(--fm)">${t.valor}</div>
+              ${t.pct != null ? `<div style="font-size:10px;color:var(--sub)">${t.pct}% de cartera</div>
+              <div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:5px;overflow:hidden">
+                <div style="height:100%;width:${Math.min(100, t.pct)}%;background:${cVar(t.estado)}"></div></div>` : ''}
+            </div>`).join('')}
           </div>
-          <div style="font-size:11px;color:var(--sub);padding:8px;background:rgba(0,0,0,.04);border-radius:6px">
-            No hay desglose por tramo de días (0-30 / 31-60 / 61-90 / &gt;90) confirmado con nombre de medida
-            exacto todavía — sin eso no se puede proyectar cuánto de este monto pasa a mora crítica el próximo
-            mes sin inventar una tasa de deterioro que Power BI no está entregando.
-          </div>` : 'Sin desglose de tramos disponible.',
+          <div style="font-size:11px;color:var(--sub);padding:8px;background:var(--surface2);border-radius:6px;line-height:1.5">
+            Cartera pendiente total <strong>${fmtM(tot)}</strong>, de la cual <strong>${fmtM(venc)}</strong>
+            (${(venc / tot * 100).toFixed(1)}%) ya está vencida. Fuente:
+            <code>SUM('DATA_FACTURACION'[Total_fact])</code> agrupado por <code>[O_SEGMENTO]</code>
+            con filtro <code>[CXC]="Pendiente"</code> — patrón confirmado con Copiar consulta (2026-09-06)
+            sobre la tarjeta "MAS DE 30 DIAS".
+          </div>`;
+        })(),
         IV: [
           {palanca:'Cobranza activa clientes >60 días', impacto: pvenc ? `Recuperar ${fmtM(pvenc)} en cartera vencida` : 'Reducir mora a <5%', accion:'Identificar top 5 clientes por monto vencido. Gerencia Comercial llama esta semana con acuerdo de pago.', prioridad:'ALTA', col:'var(--red)'},
           {palanca:'Bloqueo de crédito clientes morosos', impacto:'Detener acumulación de deuda', accion:'Clientes con >60 días vencidos no reciben despacho hasta regularizar situación.', prioridad:'ALTA', col:'var(--red)'},

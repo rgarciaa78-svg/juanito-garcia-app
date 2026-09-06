@@ -4,7 +4,7 @@ JUANITO — Power BI Data Fetcher v3
 Estrategia: scan de medidas reales → query con nombres confirmados.
 """
 
-import os, json, requests, datetime, sys
+import os, json, re, requests, datetime, sys
 from pathlib import Path
 
 try:
@@ -633,6 +633,48 @@ def dax_planes_accion(token, ws_id, dataset_id, medida, empresa="Pauno", label="
     return None
 
 
+def dax_cxc_aging(token, ws_id, dataset_id, label="cxc_aging"):
+    """Tramos de antigüedad (aging) de Cuentas por Cobrar.
+
+    Confirmado con Copiar consulta el 2026-09-06 sobre la tarjeta
+    "MAS DE 30 DIAS" del reporte '1. Cuentas por cobrar':
+
+        DEFINE
+          VAR __DS0FilterTable  = TREATAS({"4. Más de 30 días"}, 'DATA_FACTURACION'[O_SEGMENTO])
+          VAR __DS0FilterTable2 = TREATAS({"Pendiente"},         'DATA_FACTURACION'[CXC])
+        EVALUATE SUMMARIZECOLUMNS(__DS0FilterTable, __DS0FilterTable2,
+          "SumTotal_fact", IGNORE(CALCULATE(SUM('DATA_FACTURACION'[Total_fact]))))
+
+    En vez de repetir esa consulta 4 veces adivinando los nombres de los
+    otros 3 tramos, agrupamos POR [O_SEGMENTO] manteniendo el mismo filtro
+    CXC="Pendiente" y la misma suma. Así Power BI devuelve las etiquetas
+    exactas — no las inventamos — y de paso el total de la cartera pendiente.
+
+    Devuelve [(segmento, monto), ...] en el orden que da el modelo
+    (los segmentos vienen numerados "1. ", "2. "... así que ordenan solos).
+    """
+    q = (
+        "DEFINE\n"
+        '\tVAR __DS0FilterTable = \n'
+        '\t\tTREATAS({"Pendiente"}, \'DATA_FACTURACION\'[CXC])\n\n'
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'DATA_FACTURACION'[O_SEGMENTO],\n"
+        "\t\t__DS0FilterTable,\n"
+        '\t\t"SumTotal_fact", IGNORE(CALCULATE(SUM(\'DATA_FACTURACION\'[Total_fact])))\n'
+        "\t)"
+    )
+    rows = dax(token, ws_id, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        seg = r.get("DATA_FACTURACION[O_SEGMENTO]") or r.get("[O_SEGMENTO]") or r.get("O_SEGMENTO")
+        val = to_float(r.get("[SumTotal_fact]") or r.get("SumTotal_fact"))
+        if seg is not None and val is not None:
+            out.append((str(seg), val))
+    out.sort(key=lambda t: t[0])
+    return out
+
+
 def dax_control_interno_sum(token, ws_id, dataset_id, columna, empresa="Pauno", label="control_interno_sum"):
     """Suma de una columna (no medida) de 'Pauno Registro de Ejecuciones'.
 
@@ -1117,11 +1159,30 @@ def build_cxc(found):
     alerta = razon if sem != "green" else None
 
     tramos = []
-    for label, key in [("Por vencer", "Por Vencer"), ("0-15d", "0-15 días"), ("16-30d", "16-30 días"), ("+30d", "+30 días")]:
-        v = found.get(key) or found.get(key.replace(" días", "d"))
-        if v is not None:
-            s = "green" if "vencer" in label.lower() else ("yellow" if "15" in label else "red")
-            tramos.append({"label": label, "valor": fmt_soles(v), "estado": s})
+    # Aging real desde 'DATA_FACTURACION'[O_SEGMENTO] (ver dax_cxc_aging).
+    # Las etiquetas vienen del modelo tal cual ("1. Por vencer", "4. Más de
+    # 30 días", ...) — solo les quitamos el prefijo numérico de ordenamiento.
+    aging = found.get("__aging") or []
+    total_aging = sum(v for _, v in aging) or None
+    for seg, v in aging:
+        limpio = re.sub(r"^\s*\d+\.\s*", "", seg).strip()
+        low = limpio.lower()
+        if "vencer" in low:       s = "green"
+        elif "más de" in low or "mas de" in low or "+" in low: s = "red"
+        else:                     s = "yellow"
+        item = {"label": limpio, "valor": fmt_soles(v), "estado": s}
+        if total_aging:
+            item["pct"] = round(v / total_aging * 100, 1)
+        tramos.append(item)
+
+    if total_aging is not None and not any(k["label"] == "CxC Total" for k in kpis):
+        kpis.append({"label": "CxC Total", "valor": fmt_soles(total_aging)})
+    if total_aging:
+        venc = sum(v for seg, v in aging if "vencer" not in seg.lower())
+        if venc:
+            kpis.append({"label": "CxC Vencido", "valor": fmt_soles(venc),
+                         "meta": f"{venc/total_aging*100:.1f}% de cartera",
+                         "estado": "red" if sem == "red" else "yellow"})
 
     result = {"estado": sem, "alerta": alerta, "kpis": kpis}
     if tramos: result["tramos"] = tramos
@@ -1926,6 +1987,18 @@ def main():
         # Combinamos planificacion con inventario (avance vs ppto)
         if scanned.get("planificacion"):
             scanned.setdefault("inventario", {}).update(scanned["planificacion"])
+
+        # ── CxC: aging real (tramos de antigüedad) desde 'DATA_FACTURACION'
+        cxc_ds_id = DATASET_IDS.get(empresa, {}).get("cxc")
+        if cxc_ds_id:
+            try:
+                aging = dax_cxc_aging(token, ws_id, cxc_ds_id)
+                if aging:
+                    scanned.setdefault("cxc", {})["__aging"] = aging
+                    for seg, v in aging:
+                        print(f"    ✓ CxC aging [{seg}]: {v:,.0f}")
+            except Exception as e:
+                print(f"    ✗ CxC aging: {e}")
 
         # ── CxC
         if scanned.get("cxc"):
