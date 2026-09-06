@@ -1692,6 +1692,114 @@ def _serie_productividad_una(token, ds_id, periodos, lista, etiqueta):
     return out
 
 
+CATALOGO = Path("capturas/catalogo.json")
+
+
+def cargar_catalogo():
+    """Consultas exportadas del Analizador, indexadas por nombre de visual."""
+    if not CATALOGO.exists():
+        return {}
+    try:
+        filas = json.loads(CATALOGO.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"  · catálogo ilegible ({e})")
+        return {}
+    por_visual = {}
+    for f in filas:
+        # Si el mismo visual sale en varias pestañas, se queda el de más filas:
+        # suele ser el que trae el detalle completo.
+        v = f.get("visual")
+        if not v or not f.get("dax"):
+            continue
+        prev = por_visual.get(v)
+        if prev is None or (f.get("filas") or 0) > (prev.get("filas") or 0):
+            por_visual[v] = f
+    return por_visual
+
+
+def dax_crudo(token, dataset_id, query, label):
+    """Ejecuta DAX y devuelve TODAS las tablas del resultado.
+
+    Las consultas del Analizador traen dos EVALUATE: el primero es el eje
+    (los períodos) y el segundo el cuerpo con los datos. dax() se queda con la
+    primera tabla, que aquí es la equivocada.
+    """
+    ws = WS_POR_DATASET.get(dataset_id, WS_ID)
+    url = f"{PBI_BASE}/groups/{ws}/datasets/{dataset_id}/executeQueries"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    body = {"queries": [{"query": query}], "serializerSettings": {"includeNulls": True}}
+    try:
+        r = requests.post(url, json=body, headers=headers, timeout=90)
+        if r.status_code != 200:
+            print(f"      [{label}] HTTP {r.status_code}: {r.text[:180]}")
+            return []
+        return [t.get("rows", []) for t in r.json()["results"][0].get("tables", [])]
+    except Exception as e:
+        print(f"      [{label}] error: {e}")
+        return []
+
+
+def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
+                        prefijo, catalogo=None):
+    """Series mensuales a partir de una consulta EXPORTADA del Analizador.
+
+    Se envía el DAX exactamente como lo generó Power BI — sin reescribirlo.
+    Transcribir consultas a mano fue la fuente de varios errores en este
+    proyecto (una medida con doble M, un filtro de más, un grupo de menos);
+    ejecutando la captura literal ese riesgo desaparece.
+
+    `col_dim` es la columna por la que se abre la serie (Categoria, Canal…) y
+    `col_medida` el alias de la medida en el resultado. El período se arma con
+    las columnas de la tabla de fechas automática que traen estas consultas.
+    """
+    cat = catalogo if catalogo is not None else cargar_catalogo()
+    entrada = cat.get(visual)
+    if not entrada:
+        print(f"    · '{visual}': no está en el catálogo — falta exportar esa pestaña")
+        return {}
+
+    tablas = dax_crudo(token, ds_id, entrada["dax"], f"captura:{visual}")
+    if not tablas:
+        return {}
+    # El cuerpo con los datos es la última tabla; la primera suele ser el eje.
+    filas = tablas[-1]
+
+    def busca(fila, sufijo):
+        for k, v in fila.items():
+            if k.endswith(sufijo):
+                return v
+        return None
+
+    por_dim = {}
+    for f in filas:
+        dim = busca(f, f"[{col_dim}]")
+        val = busca(f, f"[{col_medida}]")
+        anio = busca(f, "[Año]")
+        mes = busca(f, "[NroMes]")
+        if mes is None:
+            corto = busca(f, "[Mes]")
+            if isinstance(corto, str):
+                mes = MESES_CORTOS.get(corto.strip().lower()[:3])
+        if dim is None or val is None or anio is None or mes is None:
+            continue
+        try:
+            por_dim.setdefault(str(dim), {})[(int(anio), int(mes))] = float(val)
+        except (TypeError, ValueError):
+            continue
+
+    out = {}
+    for dim in sorted(por_dim):
+        serie = [por_dim[dim].get(p) for p in periodos]
+        n = sum(1 for x in serie if x is not None)
+        if n >= 3:
+            out[f"{prefijo} {dim}"] = serie
+            print(f"    [{prefijo} {dim}]: {n}/{len(serie)} meses")
+    if not out:
+        print(f"    · '{visual}': sin series utilizables "
+              f"(dim={col_dim}, medida={col_medida})")
+    return out
+
+
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
@@ -1987,6 +2095,24 @@ def main():
             print()
         except Exception as e:
             print(f"    ✗ {e}\n")
+
+    # ── Series desde las capturas exportadas del Analizador. La consulta va
+    # literal, sin transcribir: ver serie_desde_captura().
+    cat_visuales = cargar_catalogo()
+    if cat_visuales and DATASET_IDS.get("margen"):
+        print(f"── capturas del Analizador ({len(cat_visuales)} visuales en catálogo)")
+        for visual, dim, medida, prefijo in (
+            ("COSTO UNITARIO",  "Categoria", "C__Unit",         "Costo unitario"),
+            ("PRECIO UNITARIO", "Canal",     "Precio_unitario", "Precio unitario"),
+        ):
+            try:
+                s = serie_desde_captura(token, DATASET_IDS["margen"], periodos,
+                                        visual, dim, medida, prefijo, cat_visuales)
+                if s:
+                    resultado.setdefault("margen", {}).update(s)
+            except Exception as e:
+                print(f"    ✗ {visual}: {e}")
+        print()
 
     for ds_key, medidas_dict in cache.items():
         ds_id = DATASET_IDS.get(ds_key)

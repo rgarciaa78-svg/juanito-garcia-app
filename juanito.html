@@ -4998,16 +4998,31 @@ function dxpComparativo(tipo, s) {
 function dxpGrupoSeries(ds) {
   const todas = (SERIES && SERIES.datasets && SERIES.datasets[ds]) || {};
   const grupos = {};
-  Object.keys(todas).forEach(k => {
-    if (!dxpSerieOk(todas[k])) return;
-    // El prefijo es lo que va antes del primer espacio tras el símbolo, si el
-    // nombre sigue el patrón "<métrica> <segmento>"; si no, va en su propio
-    // grupo.
-    const m = k.match(/^(% [A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s+(.+)$/);
-    const g = m ? m[1] : k;
-    const etq = m ? m[2] : k;
-    (grupos[g] = grupos[g] || []).push({ etq, arr: todas[k], clave: k });
-  });
+  // El agrupamiento sale de los propios nombres, no de una lista fija: se
+  // busca el prefijo de palabras más largo que compartan al menos dos series
+  // ("% Merma", "Costo unitario"…) y el resto del nombre queda de etiqueta.
+  // Antes solo se reconocían las que empezaban con "%", así que series como
+  // "Costo unitario B&D" quedaban sueltas.
+  const claves = Object.keys(todas).filter(k => dxpSerieOk(todas[k]));
+  const asignada = {};
+  for (let n = 4; n >= 1; n--) {
+    const cubos = {};
+    claves.forEach(k => {
+      if (asignada[k]) return;
+      const w = k.split(/\s+/);
+      if (w.length <= n) return;               // el prefijo dejaría sin etiqueta
+      const pre = w.slice(0, n).join(' ');
+      (cubos[pre] = cubos[pre] || []).push(k);
+    });
+    Object.keys(cubos).forEach(pre => {
+      if (cubos[pre].length < 2) return;
+      cubos[pre].forEach(k => {
+        asignada[k] = true;
+        (grupos[pre] = grupos[pre] || []).push({
+          etq: k.slice(pre.length).trim(), arr: todas[k], clave: k });
+      });
+    });
+  }
   // Solo interesan los grupos con más de una serie: ahí está la comparación.
   Object.keys(grupos).forEach(g => { if (grupos[g].length < 2) delete grupos[g]; });
   return grupos;
