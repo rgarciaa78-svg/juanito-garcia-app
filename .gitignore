@@ -1,0 +1,5 @@
+
+# Exportaciones del Analizador de rendimiento: son insumo de trabajo, pesan
+# y se regeneran desde Power BI. El catálogo derivado sí se versiona.
+capturas/*.json
+!capturas/catalogo.json
