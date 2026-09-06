@@ -3683,6 +3683,7 @@ function renderMcKinseyArea(empresa, tipo) {
                 <div style="height:100%;width:${Math.min(100, parseVal(g.valor) || 0)}%;background:${cVar(g.estado)}"></div>
               </div>
               <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm);color:${cVar(g.estado)}">${g.valor}</div>
+              ${g.soles ? `<div style="flex:0 0 auto;font-size:10px;font-family:var(--fm);color:var(--sub)">${g.soles} sin atender</div>` : ''}
             </div>`).join('')}
           </div>` : '';
           if (!pm.length) return bloqueGrupo;
