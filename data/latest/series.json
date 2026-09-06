@@ -29,7 +29,6 @@
     "cxp": "Calendario[Date]",
     "margen": "Calendario[Date]",
     "inventario": "Calendario[Date]",
-    "fill_rate": "Calendario[Date]",
     "planificacion": "Calendario[Date]"
   },
   "sin_serie": {
@@ -102,81 +101,6 @@
       "columnas_fecha": [],
       "esquema_rest_error": "HTTP 404"
     },
-    "fill_rate": {
-      "medidas": [],
-      "tablas": [
-        "Calendario"
-      ],
-      "columnas_fecha": [
-        "Calendario[Date]"
-      ],
-      "medidas_planas": [
-        {
-          "medida": "% FILLRATE",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        },
-        {
-          "medida": "ORDEN DE VENTA",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        },
-        {
-          "medida": "FACTURACION",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        },
-        {
-          "medida": "VENTA PERDIDA",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        },
-        {
-          "medida": "% FillRate",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        },
-        {
-          "medida": "Orden de Venta",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        },
-        {
-          "medida": "Facturacion",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        },
-        {
-          "medida": "Venta Perdida",
-          "valores_distintos": 1,
-          "meses_con_dato": 20,
-          "amplitud_relativa_pct": 0.0,
-          "repeticiones_del_valor_mas_comun": 20,
-          "motivo": "La medida no varía por mes con el filtro CALCULATE+FILTER(ALL(Calendario)) — posible relación inactiva o la medida ignora el filtro de fecha (confirmado con Copiar consulta solo en Control Interno; para las demás falta validar en vivo)."
-        }
-      ]
-    },
     "planificacion": {
       "medidas": [],
       "tablas": [
@@ -238,7 +162,7 @@
         0.03673032007306785,
         0.020236060327500298,
         0.029542336839039122,
-        0.026491468106953266,
+        0.026491468106953273,
         0.018919726231535358,
         0.03497915067787605,
         0.025759143596316862,
@@ -260,7 +184,7 @@
         -36510.338946495045,
         -18853.709309844922,
         -30875.039130546924,
-        -33464.377757400114,
+        -33464.37775740012,
         -21427.884725082175,
         -43738.664389854865,
         -33758.62662880831,
@@ -366,13 +290,13 @@
         0.03707649405638417,
         0.055817364938530005,
         0.04109968220476587,
-        0.02641326971674582,
+        0.026413269716745815,
         0.10235876434968778,
-        0.015593855223950744,
+        0.015593855223950735,
         0.039226695462725156,
         0.04767687940287104,
         0.04108846831931922,
-        0.0716351372719337,
+        0.07163513727193369,
         0.04876804025938801,
         0.03411604271470903,
         0.038062619177753235
@@ -386,18 +310,18 @@
         null,
         null,
         0.03612592787963505,
-        0.03748276187941944,
+        0.03748276187941945,
         0.024893738161833743,
         0.029046343967311143,
-        0.027884283848955027,
+        0.027884283848955017,
         0.022069851648136126,
         0.03341265930007429,
-        0.028480984274655067,
+        0.028480984274655074,
         0.0312784523755594,
         0.04235360811203622,
         0.02925668422573003,
         0.024425239604228082,
-        0.034613269997630494
+        0.03461326999763048
       ],
       "% Merma Planta Pachacamac": [
         null,
@@ -532,6 +456,52 @@
         7397630.06,
         7320997.01,
         7689608.92
+      ]
+    },
+    "fill_rate": {
+      "% Fill Rate": [
+        0.8398276393223179,
+        0.9125612278822115,
+        0.9121751250482996,
+        0.8843832226713652,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "Pedidos no atendidos": [
+        889.261831265083,
+        484.6073184512757,
+        510.740902492534,
+        198.90772579999998,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     "compras": {
@@ -938,28 +908,50 @@
         0.04266413030017015
       ]
     },
-    "fill_rate": {
-      "% Fill Rate": [
+    "inventario": {
+      "Días de rotación": [
         null,
         null,
         null,
         null,
         null,
         null,
-        0.9071913775125008,
-        0.8647581189382418,
-        0.8587793556447606,
-        0.8596148471491724,
-        0.7161381717585181,
-        0.764854126670638,
-        0.7837711332842261,
-        0.7736376749830337,
-        0.7789456333909168,
-        0.8092002244775067,
-        0.8479145525761872,
-        0.8870282505288788,
-        0.8169486535399267,
-        0.8351125169010986
+        43.0,
+        34.0,
+        45.0,
+        44.0,
+        46.0,
+        45.0,
+        49.0,
+        54.0,
+        53.0,
+        67.0,
+        67.0,
+        79.0,
+        74.0,
+        63.0
+      ],
+      "Consumo acumulado": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        3489205.482020002,
+        3094657.0127830133,
+        4209191.277482003,
+        4517204.790233016,
+        4752317.684837997,
+        4709935.836435109,
+        5147009.088143051,
+        5654341.7304851115,
+        5726586.536824256,
+        7203643.6463621855,
+        7405257.1593263745,
+        8862521.331503332,
+        8422304.42832613,
+        7269103.851178825
       ]
     }
   }

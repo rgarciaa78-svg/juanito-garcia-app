@@ -308,7 +308,7 @@
             },
             {
               "label": "Venta Neta (KG)",
-              "valor": "1,308,398 KG",
+              "valor": "16,560,227 KG",
               "validado": true
             },
             {
@@ -348,7 +348,7 @@
             },
             {
               "uen": "TIGO",
-              "merma": "4.28%",
+              "merma": "4.30%",
               "estado": "red"
             },
             {
@@ -706,7 +706,7 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "red",
+          "estado": "yellow",
           "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
           "kpis": [
             {
@@ -722,12 +722,6 @@
               "valor": "239.4%",
               "meta": "revisar — el visual no filtra año",
               "estado": "yellow"
-            },
-            {
-              "label": "Avance vs Ppto",
-              "valor": "1.3%",
-              "meta": "100%",
-              "estado": "red"
             },
             {
               "label": "Cumplimiento producción (ayer)",
@@ -799,12 +793,5 @@
     "fill_rate": 0.8647581189382418,
     "mermas": 0.04987907894946126,
     "avance": 0.6295519287006067
-  },
-  "diagnostico": [
-    {
-      "consulta": "consumo_ventaneta",
-      "http": 400,
-      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (5, 9) Column '<oii>Peso total KG</oii>' in table '<oii>Maestra de Facturacion (Total)</oii>' cannot be found or may not be used in this expression.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803780\"}}]}}}"
-    }
-  ]
+  }
 }
