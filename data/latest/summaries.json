@@ -93,6 +93,103 @@
             {
               "label": "# Proveedores",
               "valor": "139"
+            },
+            {
+              "label": "Top 15 proveedores",
+              "valor": "S/12.05M",
+              "meta": "deuda concentrada"
+            }
+          ],
+          "proveedores_criticos": [
+            {
+              "nombre": "E & M S.R.L.",
+              "categoria": "LECHE DESCREMADA",
+              "monto": "S/5.18M",
+              "pct": 43.0
+            },
+            {
+              "nombre": "DIVERPLAST S.A.C.",
+              "categoria": "BOTELLAS",
+              "monto": "S/987,289",
+              "pct": 8.2
+            },
+            {
+              "nombre": "CORPORACION DE ALIMENTOS TIERRA BENDITA SOCIEDAD ANONIMA CERRADA",
+              "categoria": "GRANOLA",
+              "monto": "S/668,587",
+              "pct": 5.5
+            },
+            {
+              "nombre": "SAN MIGUEL INDUSTRIAS PET S.A.",
+              "categoria": "SOBRECOPAS, VASOS Y TAPAS",
+              "monto": "S/655,028",
+              "pct": 5.4
+            },
+            {
+              "nombre": "INTERLOOM S.A.C.",
+              "categoria": "AZUCAR BLANCA",
+              "monto": "S/644,536",
+              "pct": 5.3
+            },
+            {
+              "nombre": "SOCIEDAD GANADERA EL SEQUION S A",
+              "categoria": "LECHE FRESCA",
+              "monto": "S/638,391",
+              "pct": 5.3
+            },
+            {
+              "nombre": "GEKA CORP S.A.C",
+              "categoria": "ENVASES BALDES",
+              "monto": "S/505,203",
+              "pct": 4.2
+            },
+            {
+              "nombre": "TRUPAL S.A.",
+              "categoria": "CAJA CORRUGADA",
+              "monto": "S/453,108",
+              "pct": 3.8
+            },
+            {
+              "nombre": "CHR. HANSEN PERU S.A.",
+              "categoria": "CULTIVO CASEI",
+              "monto": "S/448,802",
+              "pct": 3.7
+            },
+            {
+              "nombre": "PROLABELS S.A.",
+              "categoria": "ETIQUETAS",
+              "monto": "S/346,929",
+              "pct": 2.9
+            },
+            {
+              "nombre": "QUIMERCO S.A.S. SUCURSAL DEL PERU",
+              "categoria": "ESPESANTE",
+              "monto": "S/343,177",
+              "pct": 2.8
+            },
+            {
+              "nombre": "ICATOM S.A.",
+              "categoria": "PASTA DE TOMATE",
+              "monto": "S/326,283",
+              "pct": 2.7
+            },
+            {
+              "nombre": "TRANSPORTES E INVERSIONES YAURI S.A.C.",
+              "categoria": "OT TRANSPORTE",
+              "monto": "S/313,166",
+              "pct": 2.6
+            },
+            {
+              "nombre": "INDUSTRIAS ALIMENTARIAS S.A.C.",
+              "categoria": "PULPA DE FRUTAS",
+              "monto": "S/282,244",
+              "pct": 2.3
+            },
+            {
+              "nombre": "PAPELERA DEL SUR S A",
+              "categoria": "CAJAS",
+              "monto": "S/260,981",
+              "pct": 2.2
             }
           ]
         },
