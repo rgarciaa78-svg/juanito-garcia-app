@@ -1860,6 +1860,23 @@ def dax_fillrate_soles_por_grupo(token, ws, dataset_id, label="fillrate_soles_gr
     return out
 
 
+def dax_fillrate_medida_mes(token, ws, dataset_id, medida, alias, label="fillrate_card"):
+    """Medida del mes actual del reporte FILLRATE (las tarjetas azules).
+
+    Patrón confirmado con Copiar consulta (2026-09-06) sobre las tarjetas:
+    filtro único 'CALENDARIO'[FIL_MES_ACTUAL] = "MES_ACTUAL", sin agrupar.
+    `medida` ej. "VENTA", "FILLRATE", "PEDIDOS NO ATENDIDOS".
+    """
+    q = ("DEFINE VAR __DS0FilterTable = \n"
+         "\tTREATAS({\"MES_ACTUAL\"}, 'CALENDARIO'[FIL_MES_ACTUAL])\n\n"
+         "EVALUATE\n"
+         f"\tSUMMARIZECOLUMNS(__DS0FilterTable, \"{alias}\", IGNORE('0_MEDIDAS'[{medida}]))")
+    rows = dax(token, ws, dataset_id, q, label)
+    if rows:
+        return to_float(rows[0].get(f"[{alias}]") or rows[0].get(alias))
+    return None
+
+
 def build_fill_rate(found):
     # '% Fill Rate' SÍ responde al filtro de mes; '% FILLRATE' devuelve el acumulado
     # histórico igual en todos los meses. Se prefiere la que refleja el mes en curso.
@@ -1890,6 +1907,15 @@ def build_fill_rate(found):
     res = {"estado": sem, "alerta": alerta, "kpis": kpis}
 
     # Desglose por marca del mes actual (ver dax_fillrate_por_marca)
+    # Venta del mes según la tarjeta del reporte. Se muestra SIN símbolo de
+    # moneda: la tarjeta se rotula "VENTA MILES" y todavía no está confirmado
+    # si el número está expresado en miles. Ya nos pasó con
+    # 'PEDIDOS NO ATENDIDOS', que resultó ser un conteo y no soles, así que
+    # aquí no se asume la unidad hasta tenerla confirmada.
+    vm = found.get("__venta_mes")
+    if vm is not None:
+        res["kpis"].append({"label": "Venta del mes (tarjeta)", "valor": f"{vm:,.0f}"})
+
     # Clientes peor atendidos del mes (ver dax_fillrate_por_grupo)
     grupos = found.get("__por_grupo") or []
     if grupos:
@@ -2481,6 +2507,11 @@ def main():
                     headers={"Authorization": f"Bearer {token}"}, timeout=25)
                 if r.ok:
                     fr_ds = r.json().get("datasetId")
+                    venta_mes = dax_fillrate_medida_mes(
+                        token, WS_FILLRATE, fr_ds, "VENTA", "VENTA")
+                    if venta_mes is not None:
+                        scanned.setdefault("fill_rate", {})["__venta_mes"] = venta_mes
+                        print(f"    ✓ Fill Rate venta del mes: {venta_mes:,.2f}")
                     tot = dax_fillrate_no_atendido(token, WS_FILLRATE, fr_ds)
                     if tot is not None:
                         scanned.setdefault("fill_rate", {})["__no_atendido_total"] = tot
