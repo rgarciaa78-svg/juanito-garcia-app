@@ -1778,14 +1778,30 @@ def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
     tablas = dax_crudo(token, ds_id, entrada["dax"], f"captura:{visual}")
     if not tablas:
         return {}
-    # El cuerpo con los datos es la última tabla; la primera suele ser el eje.
-    filas = tablas[-1]
 
     def busca(fila, sufijo):
         for k, v in fila.items():
             if k.endswith(sufijo):
                 return v
         return None
+
+    # No siempre el cuerpo es la última tabla: en los visuales de matriz
+    # jerárquica la última puede ser el nivel superior, sin la dimensión que
+    # interesa. Se elige la que traiga la medida (y la dimensión, si aplica).
+    filas, mejor_n = [], 0
+    for t in tablas:
+        if not t:
+            continue
+        n = (1 if busca(t[0], f"[{col_medida}]") is not None else 0)
+        if col_dim and busca(t[0], f"[{col_dim}]") is not None:
+            n += 1
+        if n > mejor_n or (n == mejor_n and n and len(t) > len(filas)):
+            filas, mejor_n = t, n
+    if not mejor_n:
+        disponibles = sorted(tablas[-1][0].keys()) if tablas[-1] else []
+        print(f"    · '{visual}': ninguna tabla trae [{col_medida}]"
+              f"{f' ni [{col_dim}]' if col_dim else ''}. Devueltas: {disponibles[:20]}")
+        return {}
 
     # Los visuales de matriz usan SUBSTITUTEWITHINDEX: cambian las columnas de
     # fecha por un [ColumnIndex] y publican el eje —los períodos en orden— en

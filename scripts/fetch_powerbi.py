@@ -1094,23 +1094,45 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
         print(f"    · '{visual}': no está en el catálogo de capturas")
         return []
 
-    filas = []
-    for ds in candidatos:
-        if not ds:
-            continue
-        tablas = _tablas_dax(token, ws, ds, entrada["dax"], f"captura:{visual}")
-        if tablas and tablas[-1]:
-            filas = tablas[-1]
-            break
-    if not filas:
-        print(f"    · '{visual}': ninguna de las bases candidatas devolvió filas")
-        return []
-
     def busca(fila, sufijo):
         for k, v in fila.items():
             if k.endswith(sufijo):
                 return v
         return None
+
+    # Estas consultas devuelven VARIAS tablas: el eje, los subtotales y el
+    # cuerpo. Quedarse con la última es un error — en los visuales de matriz
+    # jerárquica la última suele ser el nivel superior, sin la dimensión que
+    # interesa. Se elige la tabla que realmente contenga las columnas pedidas.
+    filas, todas = [], []
+    for ds in candidatos:
+        if not ds:
+            continue
+        tablas = _tablas_dax(token, ws, ds, entrada["dax"], f"captura:{visual}")
+        if not tablas:
+            continue
+        todas = tablas
+        mejor, mejor_n = None, 0
+        for t in tablas:
+            if not t:
+                continue
+            n = sum(1 for suf in columnas.values() if busca(t[0], suf) is not None)
+            if n > mejor_n or (n == mejor_n and mejor and len(t) > len(mejor)):
+                mejor, mejor_n = t, n
+        if mejor and mejor_n:
+            filas = mejor
+            break
+    if not filas:
+        # Sin esto el fallo es mudo: la consulta corre, no mapea nada y el
+        # desglose sale vacío sin explicación. Se deja constancia de qué
+        # columnas devolvió Power BI para poder corregir el mapa.
+        disponibles = sorted(todas[-1][0].keys()) if (todas and todas[-1]) else []
+        print(f"    · '{visual}': ninguna tabla trae las columnas pedidas")
+        DIAGNOSTICO.append({
+            "consulta": f"captura:{visual}", "http": 200,
+            "error": ("ninguna tabla del resultado contiene las columnas "
+                      f"{list(columnas.values())}. Devueltas: {disponibles[:25]}")})
+        return []
 
     out = []
     for f in filas:
