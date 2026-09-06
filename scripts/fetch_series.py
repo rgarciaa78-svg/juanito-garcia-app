@@ -1426,7 +1426,52 @@ _CONSUMO_FILTROS = """	VAR __DS0FilterTable =
 """
 
 
-def _q_consumo_mip(anio, medida_tbl, medida, alias):
+# Filtros del visual "MIP / TN PRODUCIDA" (Copiar consulta, 2026-09-06).
+#
+# Son los mismos cinco del visual de TN VENDIDA, pero en OTRO orden y con el
+# de cuenta_analitica escrito más simple: aquí es un solo NOT, mientras que
+# allá va envuelto en un AND con un NOT(IN {BLANK()}) previo que no cambia
+# nada. Equivalen, pero cada bloque se escribe como lo genera su propio
+# visual en vez de reutilizar el otro.
+_CONSUMO_FILTROS_PROD = """	VAR __DS0FilterTable =
+		TREATAS({__ANIO__}, 'Calendario'[Año])
+
+	VAR __DS0FilterTable2 =
+		FILTER(
+			KEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),
+			AND(
+				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo"},
+				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo",
+					"Gasto"}
+			)
+		)
+
+	VAR __DS0FilterTable3 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),
+			NOT('Maestra de Kardex (Total)'[categoria_hijo] IN {"ACUERDOS COMERCIALES"})
+		)
+
+	VAR __DS0FilterTable4 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),
+			NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})
+		)
+
+	VAR __DS0FilterTable5 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),
+			NOT(
+				'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),
+					"[941002] CONTROL INTERNO",
+					"ALMACEN ATE",
+					"ALMACEN PACHACAMAC"}
+			)
+		)
+"""
+
+
+def _q_consumo_mip(anio, medida_tbl, medida, alias, filtros=None):
     """Serie mensual de un ratio de MIP (materiales indirectos de planta).
 
     Copiar consulta 2026-09-06. Solo se quita el TOPN(1001), que limita filas
@@ -1436,7 +1481,7 @@ def _q_consumo_mip(anio, medida_tbl, medida, alias):
     ld = CONSUMO_LOCALDATE
     return (
         "DEFINE\n"
-        + _CONSUMO_FILTROS.replace("__ANIO__", str(anio))
+        + (filtros or _CONSUMO_FILTROS).replace("__ANIO__", str(anio))
         + "\nEVALUATE\n"
         "\tSUMMARIZECOLUMNS(\n"
         "\t\t'Calendario'[Mes Corto],\n"
@@ -1456,15 +1501,17 @@ def _q_consumo_mip(anio, medida_tbl, medida, alias):
 def serie_consumo(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de consumo de materiales indirectos.
 
-    `medidas` es una lista de (etiqueta, tabla, medida).
+    `medidas` es una lista de (etiqueta, tabla, medida, bloque_de_filtros).
+    Cada visual trae su propio bloque: los de TN vendida y TN producida
+    llevan los mismos cinco filtros pero escritos distinto.
     """
     anios = sorted({a for a, _ in periodos})
     out = {}
-    for etiqueta, tbl, medida in medidas:
+    for etiqueta, tbl, medida, filtros in medidas:
         alias = "v_" + re.sub(r"[^A-Za-z0-9]", "_", etiqueta)
         mapa = {}
         for anio in anios:
-            q = _q_consumo_mip(anio, tbl, medida, alias)
+            q = _q_consumo_mip(anio, tbl, medida, alias, filtros)
             for r in dax(token, ds_id, q, f"consumo-{etiqueta}-{anio}") or []:
                 mes = r.get("Calendario[Mes Numero]") or r.get("[Mes Numero]")
                 if isinstance(mes, str):
@@ -1492,7 +1539,9 @@ def serie_consumo(token, ds_id, periodos, medidas):
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
-    `medidas` es una lista de (etiqueta, tabla, medida).
+    `medidas` es una lista de (etiqueta, tabla, medida, bloque_de_filtros).
+    Cada visual trae su propio bloque: los de TN vendida y TN producida
+    llevan los mismos cinco filtros pero escritos distinto.
     """
     anios = sorted({a for a, _ in periodos})
     ld = MARGEN_LOCALDATE
@@ -1760,7 +1809,10 @@ def main():
         print("── consumo (consulta exacta de 'MIP / TN VENDIDA')")
         try:
             s = serie_consumo(token, consumo_id, periodos, [
-                ("MIP / TN Vendida", "Maestra de Kardex (Total)", "Ratio costo / kg"),
+                ("MIP / TN Vendida", "Maestra de Kardex (Total)",
+                 "Ratio costo / kg", _CONSUMO_FILTROS),
+                ("MIP / TN Producida", "Medidas",
+                 "Costo x ton producida", _CONSUMO_FILTROS_PROD),
             ])
             if s:
                 resultado.setdefault("consumo", {}).update(s)
