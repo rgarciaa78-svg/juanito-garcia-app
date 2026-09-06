@@ -101,6 +101,29 @@ def dax(token, dataset_id, query, label="q", retries=3):
     return None
 
 
+def _sanear_no_finitos(obj):
+    """Reemplaza Infinity/-Infinity/NaN por None dentro de listas y dicts.
+
+    Devuelve cuántos reemplazó. Necesario porque json.dumps los escribiría
+    literalmente y el JSON dejaría de ser parseable por el navegador.
+    """
+    import math
+    n = 0
+    if isinstance(obj, dict):
+        it = obj.items()
+    elif isinstance(obj, list):
+        it = enumerate(obj)
+    else:
+        return 0
+    for k, v in it:
+        if isinstance(v, float) and not math.isfinite(v):
+            obj[k] = None
+            n += 1
+        else:
+            n += _sanear_no_finitos(v)
+    return n
+
+
 def build_periodos():
     """Lista de (anio, mes) desde Ene-2025 hasta el mes anterior al actual."""
     hoy = datetime.date.today()
@@ -779,7 +802,24 @@ def main():
         "datasets": resultado,
     }
     path = OUTPUT_DIR / "series.json"
-    path.write_text(json.dumps(out, ensure_ascii=False, indent=2))
+    # json.dumps escribe Infinity/NaN, que NO son JSON válido: el navegador
+    # falla en JSON.parse y la app se queda sin NINGUNA serie. Aparecen de
+    # verdad — p.ej. '% Merma <almacén>' en meses sin producción divide entre
+    # cero — así que se convierten a null (mes sin dato) en vez de ocultarlos.
+    # allow_nan=False haría reventar el script; preferimos publicar el resto.
+    n_inf = _sanear_no_finitos(out)
+    if n_inf:
+        print(f"⚠ {n_inf} valores no finitos (Infinity/NaN) → null")
+    # Series que quedan con menos de 3 meses útiles no sirven para tendencia
+    for ds_key in list(out["datasets"]):
+        for med in list(out["datasets"][ds_key]):
+            vals = out["datasets"][ds_key][med]
+            if sum(1 for v in vals if v is not None) < 3:
+                del out["datasets"][ds_key][med]
+                print(f"⚠ [{ds_key}] {med}: <3 meses con dato — se descarta")
+        if not out["datasets"][ds_key]:
+            del out["datasets"][ds_key]
+    path.write_text(json.dumps(out, ensure_ascii=False, indent=2, allow_nan=False))
     print(f"Guardado: {path}")
     print(f"Datasets con serie: {list(resultado.keys())}")
 
