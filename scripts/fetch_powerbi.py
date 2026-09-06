@@ -1328,8 +1328,32 @@ def dax_cxp_top_proveedores(token, ws, dataset_id, label="cxp_top15"):
         v = to_float(r.get("[SumIMPORTE_NETO__42_]") or r.get("SumIMPORTE_NETO__42_"))
         if nom and v is not None:
             out.append((str(nom), str(cat or ""), v))
+
+    if not out:
+        # Respaldo: la corrida del 2026-09-06 devolvió vacío con la estructura
+        # de dos niveles. Aquí se agrupa directo por [contacto] con los mismos
+        # cinco filtros y se toman los quince mayores en Python. Da los mismos
+        # proveedores y montos; lo que se pierde es la apertura por categoría,
+        # porque esa venía de la consulta externa.
+        print(f"      [{label}] sin filas — probando agrupación simple")
+        q2 = (
+            "DEFINE\n" + filtros +
+            "EVALUATE\n"
+            "\tSUMMARIZECOLUMNS(\n"
+            "\t\t'CUENTAS CONTABLES'[contacto],\n"
+            + usados("\t\t") +
+            f"\t\t{MED}\n"
+            "\t)\n\n"
+            "ORDER BY\n\t[SumIMPORTE_NETO__42_] DESC"
+        )
+        for r in dax(token, ws, dataset_id, q2, label + "-simple") or []:
+            nom = r.get("CUENTAS CONTABLES[contacto]") or r.get("[contacto]")
+            v = to_float(r.get("[SumIMPORTE_NETO__42_]") or r.get("SumIMPORTE_NETO__42_"))
+            if nom and v is not None:
+                out.append((str(nom), "", v))
+
     out.sort(key=lambda t: -t[2])
-    return out
+    return out[:15]
 
 
 def build_cxp(found):
