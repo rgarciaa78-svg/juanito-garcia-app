@@ -1031,6 +1031,100 @@ def get_token():
 DIAGNOSTICO = []
 
 
+CATALOGO_CAPTURAS = Path("capturas/catalogo.json")
+_CATALOGO = None
+
+
+def catalogo_capturas():
+    """Consultas exportadas del Analizador, por nombre de visual.
+
+    Se cachea: el archivo se lee una vez aunque lo pidan varios reportes.
+    """
+    global _CATALOGO
+    if _CATALOGO is not None:
+        return _CATALOGO
+    _CATALOGO = {}
+    if CATALOGO_CAPTURAS.exists():
+        try:
+            for f in json.loads(CATALOGO_CAPTURAS.read_text(encoding="utf-8")):
+                v, dax = f.get("visual"), f.get("dax")
+                if not v or not dax:
+                    continue
+                prev = _CATALOGO.get(v)
+                if prev is None or (f.get("filas") or 0) > (prev.get("filas") or 0):
+                    _CATALOGO[v] = f
+        except Exception as e:
+            print(f"    · catálogo de capturas ilegible: {e}")
+    return _CATALOGO
+
+
+def _tablas_dax(token, ws, dataset_id, query, label):
+    """Como dax(), pero devuelve TODAS las tablas del resultado.
+
+    Las consultas del Analizador suelen traer dos EVALUATE (eje y cuerpo).
+    """
+    url = f"{PBI_BASE}/groups/{ws}/datasets/{dataset_id}/executeQueries"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    body = {"queries": [{"query": query}], "serializerSettings": {"includeNulls": True}}
+    try:
+        r = requests.post(url, json=body, headers=headers, timeout=90)
+        if r.status_code != 200:
+            DIAGNOSTICO.append({"consulta": label, "http": r.status_code,
+                                "error": r.text[:400]})
+            return []
+        return [t.get("rows", []) for t in r.json()["results"][0].get("tables", [])]
+    except Exception as e:
+        DIAGNOSTICO.append({"consulta": label, "http": 0, "error": repr(e)[:300]})
+        return []
+
+
+def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None):
+    """Ejecuta una consulta capturada y devuelve sus filas como diccionarios.
+
+    Se envía el DAX exportado SIN modificarlo: transcribir consultas a mano fue
+    la causa de varios errores en este proyecto.
+
+    `candidatos` son los datasets donde puede vivir la consulta — no se puede
+    saber de la exportación, así que se prueba hasta que una devuelve filas.
+    `columnas` mapea {nombre_de_salida: sufijo a buscar en la clave}, porque
+    Power BI devuelve las claves como "Tabla[Columna]" o "[Alias]".
+    """
+    entrada = catalogo_capturas().get(visual)
+    if not entrada:
+        print(f"    · '{visual}': no está en el catálogo de capturas")
+        return []
+
+    filas = []
+    for ds in candidatos:
+        if not ds:
+            continue
+        tablas = _tablas_dax(token, ws, ds, entrada["dax"], f"captura:{visual}")
+        if tablas and tablas[-1]:
+            filas = tablas[-1]
+            break
+    if not filas:
+        print(f"    · '{visual}': ninguna de las bases candidatas devolvió filas")
+        return []
+
+    def busca(fila, sufijo):
+        for k, v in fila.items():
+            if k.endswith(sufijo):
+                return v
+        return None
+
+    out = []
+    for f in filas:
+        fila = {nombre: busca(f, suf) for nombre, suf in columnas.items()}
+        # Las filas de subtotal del visual llegan con la dimensión vacía.
+        if all(v is None for v in fila.values()):
+            continue
+        out.append(fila)
+    if limite:
+        out = out[:limite]
+    print(f"    ✓ '{visual}': {len(out)} filas")
+    return out
+
+
 def dax(token, ws_id, dataset_id, query, label="query", registrar=True):
     """Ejecuta una consulta DAX cruda. Retorna lista de filas o []."""
     import time
@@ -1789,7 +1883,40 @@ def build_compras(found):
 
     alerta = f"Ratio {ratio:.1f}% — {interp}" if sem != "green" and ratio else (
              f"Faltantes: {int(to_float(faltantes_val) or 0)} ítems" if faltantes_val and to_float(faltantes_val) else None)
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}, ratio
+    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Materiales en quiebre según la explosión de materiales semanal.
+    # Es la lista más accionable del reporte: son pocos y hay que comprarlos.
+    falt = found.get("__faltantes") or []
+    if falt:
+        vivos = [f for f in falt if (to_float(f.get("faltante")) or 0) > 0]
+        vivos.sort(key=lambda f: -(to_float(f.get("faltante")) or 0))
+        res["faltantes"] = [{
+            "producto": (f.get("producto") or f.get("codigo") or "—"),
+            "categoria": f.get("categoria") or "",
+            "faltante": f"{to_float(f.get('faltante')) or 0:,.0f}",
+            "stock": f"{to_float(f.get('stock')) or 0:,.0f}",
+            "lead_time": f.get("lead_time"),
+        } for f in vivos[:12]]
+        if vivos:
+            res["kpis"].append({
+                "label": "Materiales en quiebre", "valor": str(len(vivos)),
+                "meta": "explosión de materiales", "estado": "red"})
+
+    # Necesidad de compra agrupada por urgencia: 431 líneas no se leen, pero
+    # "cuántos ítems hay en cada momento de compra" sí.
+    nec = found.get("__necesidad") or []
+    if nec:
+        por_momento = {}
+        for n in nec:
+            m = (n.get("momento") or "Sin clasificar").strip()
+            por_momento[m] = por_momento.get(m, 0) + 1
+        res["necesidad_compra"] = [
+            {"momento": m, "items": c}
+            for m, c in sorted(por_momento.items(), key=lambda kv: -kv[1])]
+        res["kpis"].append({"label": "Ítems con necesidad de compra",
+                            "valor": str(len(nec))})
+    return res, ratio
 
 def build_inventario(found):
     # ── Clasificación por categoría, de la matriz "CLASIFICACION DE INVENTARIO"
@@ -2990,6 +3117,41 @@ def main():
                 if planta_merma:
                     empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
                     print(f"  Mermas Planta: {planta_merma}")
+
+        # ── Compras: faltantes y necesidad de compra, desde las capturas del
+        # Analizador (pestaña "ANALISIS DE COMPRA" del reporte 5).
+        if empresa == "PAUNO":
+            cand = [ids.get("compras"), ids.get("planificacion"), ids.get("inventario")]
+            try:
+                falt = desglose_desde_captura(
+                    token, ws_id, cand,
+                    "LISTADO DE PRODUCTOS FALTANES EN EXPLOCIÓN DE MATERIALES",
+                    {"producto": "[data.nombre_producto]",
+                     "codigo": "[data.codigo_producto]",
+                     "categoria": "[CATEGORÍA]",
+                     "faltante": "[SumFALTANTES_BOOM_SEMNANAL]",
+                     "stock": "[Stock]",
+                     "lead_time": "[Lead_Time]"})
+                if falt:
+                    scanned.setdefault("compras", {})["__faltantes"] = falt
+            except Exception as e:
+                print(f"    ✗ faltantes: {e}")
+                DIAGNOSTICO.append({"consulta": "faltantes", "http": 0,
+                                    "error": repr(e)[:300]})
+            try:
+                nec = desglose_desde_captura(
+                    token, ws_id, cand, "NECESIDAD DE COMPRA ",
+                    {"producto": "[data.nombre_producto]",
+                     "categoria": "[CATEGORÍA]",
+                     "momento": "[Momento_de_Compra]",
+                     "solicitud": "[Solicitud_Compra]",
+                     "stock": "[Stock]"})
+                if nec:
+                    scanned.setdefault("compras", {})["__necesidad"] = nec
+            except Exception as e:
+                print(f"    ✗ necesidad de compra: {e}")
+                DIAGNOSTICO.append({"consulta": "necesidad_compra", "http": 0,
+                                    "error": repr(e)[:300]})
 
         # ── Compras
         if scanned.get("compras"):

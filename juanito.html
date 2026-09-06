@@ -4820,6 +4820,28 @@ function dxpDesglose(tipo, s) {
       + mini('Planilla Total', s.kv('productividad','Planilla Total')) };
   }
   if (tipo === 'compras') {
+    // Faltantes y necesidad de compra: lo accionable del reporte 5, desde la
+    // pestaña "ANALISIS DE COMPRA" (captura del Analizador).
+    const fal = s.rp.compras?.faltantes || [];
+    const nec = s.rp.compras?.necesidad_compra || [];
+    if (fal.length || nec.length) {
+      let h2 = '';
+      if (fal.length) {
+        const mxf = Math.max(...fal.map(f => parseVal(f.faltante) || 0)) || 1;
+        h2 += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--red);letter-spacing:.04em;margin-bottom:6px">Materiales en quiebre — comprar</div>`
+          + fal.map(f => bar(
+              `${f.producto}${f.lead_time != null ? ` · ${f.lead_time}d` : ''}`,
+              f.faltante, (parseVal(f.faltante) || 0) / mxf * 100, 'var(--red)')).join('');
+      }
+      if (nec.length) {
+        const mxn = Math.max(...nec.map(n => n.items)) || 1;
+        h2 += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin:12px 0 6px">Necesidad de compra — ítems por urgencia</div>`
+          + nec.map(n => bar(n.momento, String(n.items), n.items / mxn * 100,
+              /ahora|urgen|inmediat/i.test(n.momento) ? 'var(--red)'
+              : /program/i.test(n.momento) ? 'var(--yellow)' : 'var(--green)')).join('');
+      }
+      return { t:'Compras — qué falta y qué pedir', h: h2 };
+    }
     const c3 = parseVal(s.kv('compras','Consumo Prom 3M')), c6 = parseVal(s.kv('compras','Consumo Prom 6M'));
     const sv = parseVal(s.kv('compras','Stock Valorizado')), pp = parseVal(s.kv('compras','Stock PP (Punto de Pedido)'));
     const mxc = Math.max(c3, c6) || 1, mxs = Math.max(sv, pp) || 1;
@@ -6224,6 +6246,8 @@ function construirContexto() {
         por_uen: rd.por_uen,
         por_canal: rd.por_canal,
         cumplimiento_produccion: rd.cumplimiento_produccion,
+        faltantes: rd.faltantes,
+        necesidad_compra: rd.necesidad_compra,
         por_marca: rd.por_marca,
         por_grupo: rd.por_grupo,
         dead_por_categoria: rd.dead_por_categoria,
