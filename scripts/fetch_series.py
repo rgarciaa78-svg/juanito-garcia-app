@@ -415,12 +415,13 @@ def _q_mermas_segmento(anio, medida_tbl, medida, alias, tipo_base=False):
     """Consulta del gráfico "B&D" de MERMA MENSUAL POR UNIDAD DE NEGOCIO,
     tal cual la genera Power BI (Copiar consulta, 2026-09-06).
 
-    Mismo bloque de filtros que el de planta salvo uno: aquí NO va el filtro
-    de 'Tabla Mermas'[TIPO DE BASE]. Son 5 filtros, no 6 — la diferencia está
-    en la consulta original, no es un olvido.
+    El bloque de filtros varía según el visual: B&D usa 5 (sin TIPO DE BASE)
+    y MAQUILA usa 6 (con él). `tipo_base` selecciona cuál, y la numeración de
+    los VAR se ajusta sola. No es un patrón deducible — cada uno viene de su
+    Copiar consulta.
 
-    La medida cambia por segmento ('% Merma total B&D', etc.). Los nombres NO
-    se adivinan: se leen del modelo con medidas_mermas_variantes().
+    La medida también cambia por segmento y se pasa explícita: los nombres
+    están en SEGMENTOS_MERMAS, ninguno se adivina.
     """
     # Numeración de los VAR: sin TIPO DE BASE van 5 filtros (patrón B&D);
     # con él van 6 y todo corre un número (patrón MAQUILA). Se respeta el
