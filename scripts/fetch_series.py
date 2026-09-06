@@ -1374,6 +1374,121 @@ def serie_cxp_rotacion(token, ds_id, periodos):
     return out
 
 
+CONSUMO_LOCALDATE = "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987"
+
+# Filtros del visual "MIP / TN VENDIDA" del reporte '14. Consumo Materiales
+# indirectos de produccion' (Copiar consulta, 2026-09-06).
+#
+# El tercero es redundante tal como lo genera Power BI —pide TIPO DE OPERACION
+# en {"Costo"} Y ADEMÁS en {"Costo","Gasto"}, que equivale a solo "Costo"— pero
+# se deja textual: simplificarlo sería reescribir la consulta del reporte, y no
+# hay forma de comprobar desde aquí que el modelo lo interprete igual.
+#
+# __ANIO__ es el único parámetro (el segmentador del reporte).
+_CONSUMO_FILTROS = """	VAR __DS0FilterTable =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),
+			AND(
+				NOT('Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK()}),
+				NOT(
+					'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),
+						"[941002] CONTROL INTERNO",
+						"ALMACEN ATE",
+						"ALMACEN PACHACAMAC"}
+				)
+			)
+		)
+
+	VAR __DS0FilterTable2 =
+		TREATAS({__ANIO__}, 'Calendario'[Año])
+
+	VAR __DS0FilterTable3 =
+		FILTER(
+			KEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),
+			AND(
+				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo"},
+				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo",
+					"Gasto"}
+			)
+		)
+
+	VAR __DS0FilterTable4 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),
+			NOT('Maestra de Kardex (Total)'[categoria_hijo] IN {"ACUERDOS COMERCIALES"})
+		)
+
+	VAR __DS0FilterTable5 =
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),
+			NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})
+		)
+"""
+
+
+def _q_consumo_mip(anio, medida_tbl, medida, alias):
+    """Serie mensual de un ratio de MIP (materiales indirectos de planta).
+
+    Copiar consulta 2026-09-06. Solo se quita el TOPN(1001), que limita filas
+    sin cambiar valores. La medida va como parámetro porque el reporte tiene
+    varios visuales con los mismos filtros y distinta medida.
+    """
+    ld = CONSUMO_LOCALDATE
+    return (
+        "DEFINE\n"
+        + _CONSUMO_FILTROS.replace("__ANIO__", str(anio))
+        + "\nEVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'Calendario'[Mes Corto],\n"
+        "\t\t'Calendario'[Mes Numero],\n"
+        f"\t\t'{ld}'[Año],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t__DS0FilterTable2,\n"
+        "\t\t__DS0FilterTable3,\n"
+        "\t\t__DS0FilterTable4,\n"
+        "\t\t__DS0FilterTable5,\n"
+        f"\t\t\"{alias}\", '{medida_tbl}'[{medida}]\n"
+        "\t)\n\n"
+        f"ORDER BY\n\t'{ld}'[Año], 'Calendario'[Mes Numero]"
+    )
+
+
+def serie_consumo(token, ds_id, periodos, medidas):
+    """Series mensuales del reporte de consumo de materiales indirectos.
+
+    `medidas` es una lista de (etiqueta, tabla, medida).
+    """
+    anios = sorted({a for a, _ in periodos})
+    out = {}
+    for etiqueta, tbl, medida in medidas:
+        alias = "v_" + re.sub(r"[^A-Za-z0-9]", "_", etiqueta)
+        mapa = {}
+        for anio in anios:
+            q = _q_consumo_mip(anio, tbl, medida, alias)
+            for r in dax(token, ds_id, q, f"consumo-{etiqueta}-{anio}") or []:
+                mes = r.get("Calendario[Mes Numero]") or r.get("[Mes Numero]")
+                if isinstance(mes, str):
+                    mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+                if mes is None:
+                    corto = str(r.get("Calendario[Mes Corto]") or "").strip().lower()[:3]
+                    mes = MESES_CORTOS.get(corto)
+                v = r.get(f"[{alias}]", r.get(alias))
+                if mes is None or v is None:
+                    continue
+                try:
+                    mapa[(int(anio), int(mes))] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        serie = [mapa.get(p) for p in periodos]
+        if any(x is not None for x in serie):
+            out[etiqueta] = serie
+            print(f"    [{etiqueta}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+        else:
+            print(f"    ✗ {etiqueta}: sin datos ({medida})")
+    return out
+
+
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
@@ -1635,6 +1750,20 @@ def main():
             s = serie_cxp_rotacion(token, cxp_id, periodos)
             if s:
                 resultado.setdefault("cxp", {}).update(s)
+            print()
+        except Exception as e:
+            print(f"    ✗ {e}\n")
+
+    # ── Consumo de materiales indirectos (MIP)
+    consumo_id = DATASET_IDS.get("consumo")
+    if consumo_id:
+        print("── consumo (consulta exacta de 'MIP / TN VENDIDA')")
+        try:
+            s = serie_consumo(token, consumo_id, periodos, [
+                ("MIP / TN Vendida", "Maestra de Kardex (Total)", "Ratio costo / kg"),
+            ])
+            if s:
+                resultado.setdefault("consumo", {}).update(s)
             print()
         except Exception as e:
             print(f"    ✗ {e}\n")
