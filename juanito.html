@@ -2733,7 +2733,7 @@ function dxpCards(s) {
     compras: () => `Consumo Prom 3M/6M casi plano — <b>a validar</b> si es bug`,
     sop_inventario: () => `Composición Dead Stock <b>no incluida</b> en esta corrida`,
     productividad: () => `Sin meta formal definida · sin serie histórica`,
-    margen_variable_pag2: () => `Serie <b>plana en la mayoría de meses</b> — posible bug de filtro`,
+    margen_variable_pag2: () => `Avance por canal desde la tabla del reporte 11 — el visual no filtra año`,
   };
   const cards = DXP_ORDEN.map((t,i) => {
     const rd = s.rp[t]; if (!rd || !(rd.kpis||[]).length) return '';
@@ -4717,6 +4717,22 @@ function dxpDesglose(tipo, s) {
       + (s.rp.mermas.por_planta||[]).map(pl => bar(pl.planta, pl.merma, parseVal(pl.merma)/mx*100, col(pl.estado))).join('')
       + (s.ratioUen ? mini(`Ratio ${s.uenPeor.uen} / ${s.uenMejor.uen}`, s.ratioUen.toFixed(1)+'x') : '')
       + (s.ratioPla ? mini(`Ratio ${s.plaPeor.planta} / ${s.plaMejor.planta}`, s.ratioPla.toFixed(1)+'x') : '') };
+  }
+  if (tipo === 'margen_variable_pag2') {
+    // Avance por canal — tabla "FACTURACION AL ..." del reporte 11,
+    // pestaña RESUMEN 2 (Copiar consulta 2026-09-06)
+    const cs = s.rp.margen_variable_pag2?.por_canal || [];
+    if (!cs.length) return null;
+    const mx = Math.max(...cs.map(c => c.avance || 0)) || 1;
+    return { t:'Avance vs presupuesto — por canal', h:
+      cs.map(c => bar(c.canal,
+                      (c.avance != null ? c.avance.toFixed(1) + '%' : '—'),
+                      (c.avance || 0) / mx * 100,
+                      col(c.avance == null ? 'sub'
+                          : c.avance > 150 ? 'yellow'
+                          : c.avance >= 100 ? 'green'
+                          : c.avance >= 80 ? 'yellow' : 'red'))).join('')
+      + cs.map(c => mini(`${c.canal} — ppto ${c.ppto}`, `facturado ${c.facturado}`)).join('') };
   }
   if (tipo === 'margen_variable') {
     const u = s.rp.margen_variable.por_uen || [];

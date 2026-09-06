@@ -2323,6 +2323,73 @@ def build_fill_rate(found):
                                 "estado": "red" if total > 0 else "green"})
     return res
 
+def dax_avance_por_canal(token, ws, dataset_id, mes, label="avance_canal"):
+    """Avance de facturación vs presupuesto, por canal comercial.
+
+    Confirmado con Copiar consulta (2026-09-06) sobre la tabla
+    "FACTURACION AL 05 SETIEMBRE" del reporte '11. Reporte de Planificaciones',
+    pestaña RESUMEN 2.
+
+    Seis medidas de cinco tablas distintas:
+      · [Monto_Neto_Factura]        facturado
+      · [CUOTA DIRECTORIO]          presupuesto del mes
+      · [PPTO Acumulado Hasta Ayer] presupuesto proporcional al día
+      · [%Av vs PPTO AL DIA]        avance contra ese presupuesto al día
+      · [Monto Neto Pendiente]      pedidos aún sin facturar
+      · [VENTA TOTAL]               venta total
+
+    El único filtro de tiempo es 'Calendario'[Mes Nº] — NO hay filtro de año,
+    tal como lo genera el visual. El mes va como parámetro porque en el
+    reporte lo fija un segmentador.
+
+    Ojo con el título del visual: dice "AL 05 SETIEMBRE" pero la consulta
+    filtra el mes 7. El título es un cuadro de texto fijo, no sigue al
+    segmentador.
+
+    Se quita solo el ROLLUPADDISSUBTOTAL (la fila Total del visual, que se
+    recompone sumando) y el TOPN de presentación.
+    """
+    q = (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Exl Cliente x Vendedor'[Canal])),\n"
+        "\t\t\tNOT('Exl Cliente x Vendedor'[Canal] IN {BLANK()})\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0FilterTable2 = \n"
+        f"\t\tTREATAS({{{mes}}}, 'Calendario'[Mes Nº])\n\n"
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'Exl Cliente x Vendedor'[Canal],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t__DS0FilterTable2,\n"
+        "\t\t\"SumMonto_Neto_Factura\", CALCULATE(SUM('Maestra de Facturacion (Total)'[Monto_Neto_Factura])),\n"
+        "\t\t\"SumCUOTA_DIRECTORIO\", CALCULATE(SUM('Exl PPTO'[CUOTA DIRECTORIO])),\n"
+        "\t\t\"PPTO_Acumulado_Hasta_Ayer\", 'Exl PPTO Semanal'[PPTO Acumulado Hasta Ayer],\n"
+        "\t\t\"v_Av_vs_PPTO_AL_DIA\", 'Maestra de Facturacion (Total)'[%Av vs PPTO AL DIA],\n"
+        "\t\t\"SumMonto_Neto_Pendiente\", CALCULATE(SUM('Exl A Maestra de Ordenes de Venta'[Monto Neto Pendiente])),\n"
+        "\t\t\"VENTA_TOTAL\", 'Maestra de Facturacion (Total)'[VENTA TOTAL]\n"
+        "\t)\n\n"
+        "ORDER BY\n\t[SumMonto_Neto_Factura] DESC"
+    )
+    rows = dax(token, ws, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        canal = (r.get("Exl Cliente x Vendedor[Canal]") or r.get("[Canal]"))
+        if not canal:
+            continue
+        out.append({
+            "canal": str(canal),
+            "facturado": to_float(r.get("[SumMonto_Neto_Factura]")),
+            "ppto": to_float(r.get("[SumCUOTA_DIRECTORIO]")),
+            "ppto_al_dia": to_float(r.get("[PPTO_Acumulado_Hasta_Ayer]")),
+            "avance_al_dia": to_float(r.get("[v_Av_vs_PPTO_AL_DIA]")),
+            "pendiente": to_float(r.get("[SumMonto_Neto_Pendiente]")),
+            "venta_total": to_float(r.get("[VENTA_TOTAL]")),
+        })
+    return out
+
+
 def build_avance(found):
     avance_val = (found.get("Avance") or found.get("% Avance") or found.get("Avance PPTO") or
                   found.get("% Avance Presupuesto"))
@@ -2340,7 +2407,53 @@ def build_avance(found):
         kpis.append({"label": "Ventas reales", "valor": fmt_soles(real_val)})
 
     alerta = f"Avance {fmt_pct(avance_pct)} vs presupuesto" if sem != "green" and avance_pct else None
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}, avance_pct
+    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Avance por canal (ver dax_avance_por_canal). Sustituye a las medidas del
+    # sondeo genérico: estas vienen de la tabla del reporte, con su filtro.
+    canales = found.get("__avance_canal") or []
+    if canales:
+        ppto = sum(c["ppto"] or 0 for c in canales)
+        fact = sum(c["facturado"] or 0 for c in canales)
+        res["por_canal"] = [{
+            "canal": c["canal"],
+            "ppto": fmt_soles(c["ppto"]) if c["ppto"] is not None else "—",
+            "facturado": fmt_soles(c["facturado"]) if c["facturado"] is not None else "—",
+            "pendiente": fmt_soles(c["pendiente"]) if c["pendiente"] is not None else "—",
+            # Avance = facturado / presupuesto del mes. Es división directa de
+            # dos cifras del reporte, no una medida propia: la medida
+            # [%Av vs PPTO AL DIA] compara contra el presupuesto proporcional
+            # al día, que es otra cosa y en el reporte sale en 0.
+            "avance": (round(c["facturado"] / c["ppto"] * 100, 1)
+                       if c["ppto"] and c["facturado"] is not None else None),
+        } for c in canales]
+        if ppto:
+            pct = fact / ppto * 100
+            # La consulta del visual filtra 'Calendario'[Mes Nº] SIN filtro de
+            # año, así que un mismo mes de dos años distintos se suma contra un
+            # presupuesto de un solo mes. Por eso el avance sale por encima de
+            # 200%: no es sobrecumplimiento, es doble conteo. El reporte
+            # muestra la misma cifra, así que se publica tal cual pero sin
+            # semáforo verde y con la advertencia al lado.
+            sospechoso = pct > 150
+            res["kpis"] = [
+                {"label": "Presupuesto del mes", "valor": fmt_soles(ppto)},
+                {"label": "Facturado", "valor": fmt_soles(fact)},
+                {"label": "Avance vs presupuesto", "valor": f"{pct:.1f}%",
+                 "meta": "revisar — el visual no filtra año" if sospechoso else "100%",
+                 "estado": "yellow" if sospechoso else
+                           ("green" if fact >= ppto else
+                            "yellow" if fact >= ppto * 0.8 else "red")},
+            ] + res["kpis"]
+            if sospechoso:
+                res["alerta"] = (f"Avance {pct:.0f}% — la consulta del reporte filtra "
+                                 f"mes pero no año, así que suma el mismo mes de "
+                                 f"varios años contra un presupuesto mensual")
+        pend = sum(c["pendiente"] or 0 for c in canales)
+        if pend:
+            res["kpis"].append({"label": "Pendiente de facturar",
+                                "valor": fmt_soles(pend)})
+    return res, avance_pct
 
 # ─── Main ────────────────────────────────────────────────────────────────────
 
@@ -2960,6 +3073,27 @@ def main():
             if fr["kpis"]:
                 empresa_data["reportes"]["fill_rate"] = fr
                 print(f"  Fill Rate {fr['kpis'][0]['valor'] if fr['kpis'] else '—'}")
+
+        # ── Avance vs Presupuesto: tabla por canal del reporte 11,
+        # pestaña RESUMEN 2. El mes lo fija un segmentador; se pide el mes
+        # anterior completo, que es el corte que usa el resto del dashboard.
+        if empresa == "PAUNO":
+            try:
+                rr = requests.get(f"{PBI_BASE}/groups/{ws_id}/reports/{SOP_REPORT_ID}",
+                                  headers={"Authorization": f"Bearer {token}"}, timeout=25)
+                if rr.ok:
+                    ds_av = rr.json().get("datasetId")
+                    hoy = datetime.date.today()
+                    mes_ant = hoy.month - 1 or 12
+                    canales = dax_avance_por_canal(token, ws_id, ds_av, mes_ant)
+                    if canales:
+                        scanned.setdefault("inventario", {})["__avance_canal"] = canales
+                        print(f"    ✓ Avance por canal (mes {mes_ant}): "
+                              f"{len(canales)} canales")
+            except Exception as e:
+                print(f"    ✗ Avance por canal: {e}")
+                DIAGNOSTICO.append({"consulta": "avance_canal", "http": 0,
+                                    "error": f"excepcion en Python: {e!r}"})
 
         # ── Avance vs Presupuesto (planificacion mergeado en inventario)
         if scanned.get("inventario"):
