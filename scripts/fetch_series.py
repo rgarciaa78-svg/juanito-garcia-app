@@ -1787,22 +1787,51 @@ def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
                 return v
         return None
 
+    # Los visuales de matriz usan SUBSTITUTEWITHINDEX: cambian las columnas de
+    # fecha por un [ColumnIndex] y publican el eje —los períodos en orden— en
+    # la PRIMERA tabla del resultado. Sin reconstruir esa correspondencia el
+    # cuerpo no tiene fechas y no se puede armar ninguna serie.
+    eje = []
+    if filas and any(k.endswith("[ColumnIndex]") for k in filas[0]):
+        for f in (tablas[0] if len(tablas) > 1 else []):
+            a, m = busca(f, "[Año]"), busca(f, "[NroMes]")
+            if m is None:
+                corto = busca(f, "[Mes]")
+                if isinstance(corto, str):
+                    m = MESES_CORTOS.get(corto.strip().lower()[:3])
+            try:
+                eje.append((int(a), int(m)))
+            except (TypeError, ValueError):
+                eje.append(None)
+        if not eje:
+            print(f"    · '{visual}': usa ColumnIndex pero no vino el eje")
+            return {}
+
     por_dim = {}
     for f in filas:
         # col_dim None: la consulta no abre por ninguna dimensión (una sola
         # línea en el tiempo), así que todas las filas van al mismo grupo.
         dim = busca(f, f"[{col_dim}]") if col_dim else ""
         val = busca(f, f"[{col_medida}]")
-        anio = busca(f, "[Año]")
-        mes = busca(f, "[NroMes]")
-        if mes is None:
-            corto = busca(f, "[Mes]")
-            if isinstance(corto, str):
-                mes = MESES_CORTOS.get(corto.strip().lower()[:3])
-        if dim is None or val is None or anio is None or mes is None:
+        if eje:
+            idx = busca(f, "[ColumnIndex]")
+            per = eje[int(idx)] if isinstance(idx, (int, float)) and 0 <= idx < len(eje) else None
+        else:
+            anio, mes = busca(f, "[Año]"), busca(f, "[NroMes]")
+            if mes is None:
+                corto = busca(f, "[Mes]")
+                if isinstance(corto, str):
+                    mes = MESES_CORTOS.get(corto.strip().lower()[:3])
+            per = None
+            if anio is not None and mes is not None:
+                try:
+                    per = (int(anio), int(mes))
+                except (TypeError, ValueError):
+                    per = None
+        if dim is None or val is None or per is None:
             continue
         try:
-            por_dim.setdefault(str(dim), {})[(int(anio), int(mes))] = float(val)
+            por_dim.setdefault(str(dim), {})[per] = float(val)
         except (TypeError, ValueError):
             continue
 
