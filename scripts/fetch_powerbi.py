@@ -1177,11 +1177,25 @@ def build_cxc(found):
     kpis = []
     if mora_pct is not None:
         kpis.append({"label": "Morosidad", "valor": f"{mora_pct:.1f}%", "meta": "15%", "estado": sem})
-    if vencer_val is not None:
+    # El KPI "por vencer" se toma del aging cuando existe: la medida suelta
+    # 'Por Vencer' la descubrió el escáner y se consulta con un contexto de
+    # filtro que elegimos nosotros (el mes), no el que usa el reporte — por
+    # eso devuelve 3.15M sin filtro y 3.25M con filtro de mes, mientras el
+    # tramo "1. Por Vencer" del aging da 3.57M y es el único que cuadra:
+    # 3.57M + 946K vencido = 4.52M total, y 946K/4.52M = 20.9% ≈ 21.08%
+    # de la morosidad oficial. El aging viene de Copiar consulta; la medida
+    # suelta, no. Ver dax_cxc_aging().
+    aging_pre = found.get("__aging") or []
+    vencer_aging = next((v for seg, v in aging_pre if "vencer" in seg.lower()), None)
+    if vencer_aging is not None:
+        vencer_val = vencer_aging
+        kpis.append({"label": "CxC por vencer", "valor": fmt_soles(vencer_val),
+                     "meta": "aging confirmado"})
+    elif vencer_val is not None:
         kpis.append({"label": "CxC por vencer", "valor": fmt_soles(vencer_val)})
     if total_val is not None:
         kpis.append({"label": "CxC Total", "valor": fmt_soles(total_val)})
-    if vencido_val is not None:
+    if vencido_val is not None and not (found.get("__aging") or []):
         kpis.append({"label": "CxC Vencido", "valor": fmt_soles(vencido_val), "estado": "red" if sem == "red" else "yellow"})
 
     razon = f"Morosidad {fmt_pct(mora_pct)}" + (" — crítica" if sem=="red" else " — sobre meta" if sem=="yellow" else " — OK")
