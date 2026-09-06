@@ -346,32 +346,43 @@ MERMAS_MEDIDAS = [
 ]
 
 
-def _q_mermas_plantas(anio):
-    """Merma mensual por planta, agrupando por 'Tabla Mermas'[almacen].
+# Plantas. Cada entrada: (etiqueta, valor de [almacen], medida).
+#
+# Agrupar por [almacen] con la medida base NO sirve: el mapeo de almacén era
+# correcto, pero cada planta usa su propia medida. ATE usa '% Merma total' y
+# Pachacamac usa '% Merma total SALSAS' — con la base, Pachacamac daba cifras
+# que no coincidían con el reporte. Tercera vez que generalizar produce
+# números plausibles y equivocados, así que solo entra lo capturado.
+#
+# Falta PLANTA TERCEROS: sin su Copiar consulta no se sabe ni su almacén ni
+# su medida, y no se van a deducir.
+PLANTAS_MERMAS = [
+    # etiqueta,             almacen,               medida
+    ("Planta ATE",          "Lacteos Producción",  "% Merma total"),         # captura 2026-09-06
+    ("Planta Pachacamac",   "Salsas Producción",   "% Merma total SALSAS"),  # captura 2026-09-06
+]
 
-    Confirmado con Copiar consulta (2026-09-06) sobre el visual "PLANTA ATE":
-    las plantas NO tienen medida propia — usan la medida base
-    '% Merma total' con un filtro de columna:
 
-        TREATAS({"Lacteos Producción"}, 'Tabla Mermas'[almacen])
+def _q_mermas_planta(anio, almacen, medida, alias):
+    """Merma mensual de UNA planta: filtro de [almacen] + su medida propia.
 
-    Por eso el sondeo de medidas por nombre no las encontraba. Y el título
-    del visual ("PLANTA ATE") no coincide con el valor de la columna
-    ("Lacteos Producción"), así que tampoco se pueden deducir.
-
-    En vez de pedir una captura por planta, se agrupa por [almacen]
-    manteniendo los otros 6 filtros: el modelo devuelve todas las plantas
-    con su nombre exacto. Mismo recurso que se usó con el aging de CxC,
-    donde el total agrupado cuadró al peso con las tarjetas individuales.
+    Reproduce la consulta capturada de los visuales PLANTA ATE y PLANTA
+    PACHACAMAC (Copiar consulta, 2026-09-06). Son 7 filtros: los 6 del
+    gráfico total más TREATAS sobre 'Tabla Mermas'[almacen].
     """
     base = _q_mermas(anio)
-    # Se inserta [almacen] como columna de agrupación y se quitan las medidas
-    # con sufijo de planta (LACTEOS), que solo aplican al visual de ATE.
+    filtro = (f"\tVAR __DS0FilterTable7 = \n"
+              f"\t\tTREATAS({{\"{almacen}\"}}, 'Tabla Mermas'[almacen])\n\n")
+    base = base.replace("\tVAR __DS0Core = \n", filtro + "\tVAR __DS0Core = \n")
     base = base.replace(
-        "\t\t\t'Calendario'[Año],\n\t\t\t'Calendario'[MES],\n",
-        "\t\t\t'Calendario'[Año],\n\t\t\t'Calendario'[MES],\n\t\t\t'Tabla Mermas'[almacen],\n",
+        "\t\t\t__DS0FilterTable6,\n",
+        "\t\t\t__DS0FilterTable6,\n\t\t\t__DS0FilterTable7,\n",
     )
-    return base
+    # Se deja solo la medida de la planta: las del gráfico total (Desviacion
+    # Bases, consumo interno, destrucción) son las del agregado, no las suyas.
+    ini = base.index('\t\t\t"SumDesviacion_Bases"')
+    fin = base.index("\t\t)\n\nEVALUATE")
+    return base[:ini] + f"\t\t\t\"{alias}\", 'Tabla Mermas'[{medida}]\n" + base[fin:]
 
 
 def _q_mermas(anio):
@@ -565,55 +576,37 @@ def serie_mermas_exacta(token, ds_id, periodos):
 
 
 def serie_mermas_plantas(token, ds_id, periodos):
-    """Series mensuales de % Merma por planta (columna [almacen]).
+    """Series mensuales de % Merma por planta.
 
-    Los nombres de planta salen del modelo, no de los títulos de los visuales.
+    Solo las de PLANTAS_MERMAS: cada una con su almacén y su medida, ambos
+    confirmados por Copiar consulta. Ver la nota de esa constante.
     """
     anios = sorted({a for a, _ in periodos})
-    por_planta = {}
-    for anio in anios:
-        for r in dax(token, ds_id, _q_mermas_plantas(anio), f"mermas-plantas-{anio}") or []:
-            alm = r.get("Tabla Mermas[almacen]") or r.get("[almacen]")
-            mes = r.get("Calendario[MES]") or r.get("[MES]")
-            if isinstance(mes, str):
-                mes = MESES_CORTOS.get(mes.strip().lower()[:3])
-            val = r.get("[v__Merma_total]", r.get("v__Merma_total"))
-            if not alm or mes is None or val is None:
-                continue
-            try:
-                por_planta.setdefault(str(alm), {})[(int(anio), int(mes))] = float(val)
-            except (TypeError, ValueError):
-                pass
-
-    # Agrupar por [almacen] devuelve TODAS las bodegas del modelo, no solo las
-    # 4 que el reporte grafica. Las chicas (maquilas puntuales) producen muy
-    # poco: aparecen en 4-5 meses y con % disparados (115%, 32%) porque el
-    # denominador es mínimo — ruido, no gestión. Se exige cobertura de al
-    # menos el 80% de los meses; las del reporte la cumplen (13/13) y las
-    # chicas no. Criterio por dato, no lista fija: si mañana una maquila pasa
-    # a producir de forma continua, entra sola.
-    #
-    # El umbral se mide contra la MEJOR cobertura observada, no contra el
-    # total de períodos: el visual filtra Date >= 31/07/2025, así que ni la
-    # planta más completa llega a los 20 meses del dashboard (llega a 13).
-    # Usar len(periodos) cortaría también a las buenas.
-    series = {alm: [por_planta[alm].get(p) for p in periodos] for alm in por_planta}
-    mejor = max((sum(1 for x in s if x is not None) for s in series.values()),
-                default=0)
-    minimo = max(3, int(mejor * 0.8))
-    print(f"    · cobertura máxima {mejor} meses → umbral {minimo}")
     out = {}
-    for alm in sorted(series):
-        serie = series[alm]
-        con_dato = sum(1 for x in serie if x is not None)
-        if con_dato < minimo:
-            print(f"    · {alm}: {con_dato}/{len(serie)} meses — volumen "
-                  f"intermitente, se omite")
-            continue
-        out[f"% Merma {alm}"] = serie
-        print(f"    [% Merma {alm}]: {con_dato}/{len(serie)} meses")
-    if not out:
-        print("    ✗ sin plantas — [almacen] no devolvió filas")
+    for etiqueta, almacen, medida in PLANTAS_MERMAS:
+        alias = "v_" + re.sub(r"[^A-Za-z0-9]", "_", etiqueta)
+        por_periodo = {}
+        for anio in anios:
+            q = _q_mermas_planta(anio, almacen, medida, alias)
+            for r in dax(token, ds_id, q, f"mermas-{etiqueta}-{anio}") or []:
+                mes = r.get("Calendario[MES]") or r.get("[MES]")
+                if isinstance(mes, str):
+                    mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+                val = r.get(f"[{alias}]", r.get(alias))
+                if mes is None or val is None:
+                    continue
+                try:
+                    por_periodo[(int(anio), int(mes))] = float(val)
+                except (TypeError, ValueError):
+                    pass
+        serie = [por_periodo.get(pp) for pp in periodos]
+        if any(x is not None for x in serie):
+            out[f"% Merma {etiqueta}"] = serie
+            print(f"    [% Merma {etiqueta}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses "
+                  f"({almacen} / {medida})")
+        else:
+            print(f"    ✗ % Merma {etiqueta}: sin datos")
     return out
 
 
