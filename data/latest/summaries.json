@@ -381,14 +381,14 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "yellow",
-          "alerta": "Avance 63.0% vs presupuesto",
+          "estado": "red",
+          "alerta": "Avance 1.2% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "63.0%",
+              "valor": "1.2%",
               "meta": "100%",
-              "estado": "yellow"
+              "estado": "red"
             }
           ]
         }
