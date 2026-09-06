@@ -561,6 +561,178 @@ def _q_mermas_segmento(anio, medida_tbl, medida, alias, tipo_base=False):
     )
 
 
+MARGEN_LOCALDATE = "LocalDateTable_17f9bf1b-53ab-4dc5-bca5-92ec1d35bc75"
+
+# Bloque de filtros del visual "MARGEN VARIABLE PAUNO", tal cual lo genera
+# Power BI (Copiar consulta, 2026-09-06). Son ONCE filtros sobre CUATRO
+# tablas distintas: 'Exl A Maestra de Facturas de Venta', 'Maestra de
+# Facturacion (Total)', 'Maestra de Kardex (Total)' y 'OrdenxFactura'.
+#
+# Ojo: las exclusiones NO son las mismas en cada tabla. Por ejemplo
+# 'Exl A...' excluye {CHATARRA, SERVICIOS} y 'Maestra de Facturacion'
+# excluye {BONIFICACION Y REBATES, INTERESES, MATERIA PRIMA, SUMINISTROS,
+# SERVICIOS} — CHATARRA no está en esa segunda lista. Copiar una sobre otra
+# cambiaría el resultado, así que va literal.
+#
+# __ANIO__ es el único parámetro (el segmentador ANO del reporte).
+_MARGEN_FILTROS = """	VAR __DS0FilterTable = 
+		TREATAS({"VENTA BRUTA"}, 'Exl A Maestra de Facturas de Venta'[CATEGORIZACION])
+
+	VAR __DS0FilterTable2 = 
+		TREATAS({__ANIO__}, 'Calendario'[Año])
+
+	VAR __DS0FilterTable3 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[categoria_producto])),
+			NOT(
+				'Exl A Maestra de Facturas de Venta'[categoria_producto] IN {"CHATARRA",
+					"SERVICIOS",
+					BLANK()}
+			)
+		)
+
+	VAR __DS0FilterTable4 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[producto])),
+			NOT(
+				'Exl A Maestra de Facturas de Venta'[producto] IN {"PAVO C/M C/ASA EP CONG (8 KG)",
+					"ALIMENTACION COMERCIAL"}
+			)
+		)
+
+	VAR __DS0FilterTable5 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[estado])),
+			NOT('Exl A Maestra de Facturas de Venta'[estado] IN {"Cancelado"})
+		)
+
+	VAR __DS0FilterTable6 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),
+			NOT(
+				'Maestra de Facturacion (Total)'[categoria_producto] IN {BLANK(),
+					"BONIFICACION Y REBATES",
+					"INTERESES",
+					"MATERIA PRIMA",
+					"SUMINISTROS",
+					"SERVICIOS"}
+			)
+		)
+
+	VAR __DS0FilterTable7 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),
+			NOT('Maestra de Facturacion (Total)'[estado] IN {"Cancelado"})
+		)
+
+	VAR __DS0FilterTable8 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),
+			NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})
+		)
+
+	VAR __DS0FilterTable9 = 
+		FILTER(
+			KEEPFILTERS(VALUES('OrdenxFactura'[categoria_producto])),
+			NOT(
+				'OrdenxFactura'[categoria_producto] IN {BLANK(),
+					"BONIFICACION Y REBATES",
+					"CHATARRA",
+					"SERVICIOS"}
+			)
+		)
+
+	VAR __DS0FilterTable10 = 
+		FILTER(
+			KEEPFILTERS(VALUES('OrdenxFactura'[estado])),
+			NOT('OrdenxFactura'[estado] IN {"Cancelado"})
+		)
+
+	VAR __DS0FilterTable11 = 
+		FILTER(
+			KEEPFILTERS(VALUES('OrdenxFactura'[producto])),
+			NOT(
+				'OrdenxFactura'[producto] IN {"PAVO C/M C/ASA EP CONG (8 KG)",
+					"ALIMENTACION COMERCIAL"}
+			)
+		)
+"""
+
+_MARGEN_USADOS = "".join(
+    "\t\t\t__DS0FilterTable%s,\n" % ("" if i == 1 else i) for i in range(1, 12)
+)
+
+
+def _q_margen(anio, medida_tbl, medida, alias):
+    """Consulta del visual "MARGEN VARIABLE PAUNO" con los 11 filtros reales.
+
+    De la consulta original solo se conserva __DS0Core. Lo demás
+    (__DS0PrimaryWindowed, __DS0Secondary, NATURALLEFTOUTERJOIN,
+    SUBSTITUTEWITHINDEX) es la maquinaria que Power BI usa para pintar el eje
+    y la leyenda del gráfico: no cambia los valores, solo los ordena y los
+    empareja. Nosotros queremos las cifras, así que evaluamos el core.
+
+    Se mantienen las CINCO columnas de agrupación del original — las tres de
+    la tabla de fechas automática más 'Calendario'[Año]/[MES] — porque quitar
+    alguna cambiaría el contexto en que se evalúa la medida. Las filas del
+    producto cruzado que no corresponden salen en blanco y se descartan al
+    leer.
+    """
+    ld = MARGEN_LOCALDATE
+    return (
+        "DEFINE\n"
+        + _MARGEN_FILTROS.replace("__ANIO__", str(anio))
+        + "\n\tVAR __DS0Core = \n"
+        "\t\tSUMMARIZECOLUMNS(\n"
+        f"\t\t\t'{ld}'[Año],\n"
+        f"\t\t\t'{ld}'[Mes],\n"
+        f"\t\t\t'{ld}'[NroMes],\n"
+        "\t\t\t'Calendario'[MES],\n"
+        "\t\t\t'Calendario'[Año],\n"
+        + _MARGEN_USADOS
+        + f"\t\t\t\"{alias}\", '{medida_tbl}'[{medida}]\n"
+        "\t\t)\n\n"
+        "EVALUATE\n\t__DS0Core\n\n"
+        f"ORDER BY\n\t'{ld}'[Año], '{ld}'[NroMes]"
+    )
+
+
+def serie_margen(token, ds_id, periodos, medidas):
+    """Series mensuales del reporte de Margen.
+
+    `medidas` es una lista de (etiqueta, tabla, medida).
+    """
+    anios = sorted({a for a, _ in periodos})
+    ld = MARGEN_LOCALDATE
+    out = {}
+    for etiqueta, tbl, medida in medidas:
+        alias = "v_" + re.sub(r"[^A-Za-z0-9]", "_", etiqueta)
+        por_periodo = {}
+        for anio in anios:
+            q = _q_margen(anio, tbl, medida, alias)
+            for r in dax(token, ds_id, q, f"margen-{etiqueta}-{anio}") or []:
+                val = r.get(f"[{alias}]", r.get(alias))
+                if val is None:
+                    continue          # fila del producto cruzado sin dato
+                mes = r.get("Calendario[MES]") or r.get(f"{ld}[NroMes]")
+                if isinstance(mes, str):
+                    mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+                if mes is None:
+                    continue
+                try:
+                    por_periodo[(int(anio), int(mes))] = float(val)
+                except (TypeError, ValueError):
+                    pass
+        serie = [por_periodo.get(pp) for pp in periodos]
+        if any(x is not None for x in serie):
+            out[etiqueta] = serie
+            print(f"    [{etiqueta}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+        else:
+            print(f"    ✗ {etiqueta}: sin datos ({medida})")
+    return out
+
+
 def serie_mermas_exacta(token, ds_id, periodos):
     """Series mensuales de Mermas con los filtros reales del visual.
 
@@ -728,6 +900,22 @@ def main():
         except Exception as e:
             print(f"    ✗ {e}\n")
 
+    # ── Margen: consulta exacta del visual, con sus 11 filtros
+    margen_id = DATASET_IDS.get("margen")
+    if margen_id:
+        print("── margen (consulta exacta de 'MARGEN VARIABLE PAUNO')")
+        try:
+            s = serie_margen(token, margen_id, periodos, [
+                ("% Margen Variable", "Medidas Julito", "% Margen Contribución. %"),
+            ])
+            if s:
+                # La sonda genérica sigue aportando 'Costo x Kilo' y
+                # 'Venta Total'; estas se le suman sin pisarlas.
+                resultado.setdefault("margen", {}).update(s)
+            print()
+        except Exception as e:
+            print(f"    ✗ {e}\n")
+
     for ds_key, medidas_dict in cache.items():
         ds_id = DATASET_IDS.get(ds_key)
         if not ds_id:
@@ -824,7 +1012,12 @@ def main():
                 serie_confiable[med] = vals
 
         if serie_confiable:
-            resultado[ds_key] = serie_confiable
+            # update, no asignación: 'margen' ya trae la serie de la consulta
+            # exacta y asignar la pisaría. Las capturadas mandan, así que las
+            # de la sonda genérica solo rellenan lo que falta.
+            base = resultado.setdefault(ds_key, {})
+            for med, vals in serie_confiable.items():
+                base.setdefault(med, vals)
         print()
 
     out = {
