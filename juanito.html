@@ -3902,13 +3902,29 @@ function renderMcKinseyArea(empresa, tipo) {
           <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(0,0,0,.04);border-radius:6px">Stock como referencia de capital inmovilizado y capacidad de atención.</div>
         </div>`,
         II: yoyBlock(stockN, yoy.stock ?? null, 'Stock Total', v => fmtM(v)),
-        III: `<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub)">
-          Este dataset ("Rotación de inventario") solo expone <strong>Stock Total</strong> — ninguna medida de
-          rotación, días de cobertura ni dead stock está confirmada todavía, así que no se puede calcular
-          cuánto de ese stock está inmovilizado sin arriesgar una cifra inventada. Nota: el Stock Valorizado
-          que aparece en el reporte de Compras es un dataset distinto — no se combinan aquí porque no está
-          confirmado que midan el mismo universo de inventario.
-        </div>`,
+        III: (() => {
+          // Dead stock por categoría — matriz "CLASIFICACION DE INVENTARIO"
+          // de '11. Reporte de Planificaciones' (Copiar consulta 2026-09-06)
+          const dc = rp.sop_inventario?.dead_por_categoria || [];
+          if (!dc.length) return `<div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--sub);line-height:1.5">
+            La clasificación del inventario (Working / Exceso / Dead) proviene de
+            <code>'SALDO ACTUAL'[Clasificación ALC Meses]</code>, cruzada con la categoría de producto.
+            Todavía no llegó en este corte — ejecutar el workflow.
+          </div>`;
+          return `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">Inventario muerto, por categoría</div>
+          ${dc.map(c => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+            <div style="flex:0 0 130px;font-size:11px;font-weight:600">${c.categoria}</div>
+            <div style="flex:1 1 100px;min-width:80px;height:14px;background:var(--surface2);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${c.pct != null ? Math.min(100, c.pct) : 0}%;background:var(--red)"></div>
+            </div>
+            <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm);color:var(--red)">${c.valor}${c.pct != null ? ` · ${c.pct}%` : ''}</div>
+          </div>`).join('')}
+          <div style="font-size:11px;color:var(--sub);padding:8px;background:var(--surface2);border-radius:6px;line-height:1.5;margin-top:8px">
+            Fuente: <code>SUM('SALDO ACTUAL'[Saldo Soles])</code> por
+            <code>[Clasificación ALC Meses]</code> y categoría de producto — matriz
+            "CLASIFICACION DE INVENTARIO" del reporte 11 (Copiar consulta, 2026-09-06).
+          </div>`;
+        })(),
         IV: [
           {palanca:'Confirmar medidas de rotación', impacto:'Hoy no hay base para saber si el stock está sano o inmovilizado', accion:'Repetir Copiar consulta sobre las tarjetas de Días Inventario, Dead Stock y % Dead Stock del reporte real de Power BI.', prioridad:'ALTA', col:'var(--red)'},
           {palanca:'Alinear stock a demanda prevista', impacto:'Mejorar Fill Rate sin sobrestockear', accion:'S&OP semanal cruzando forecast de ventas con inventario disponible. Detectar gaps antes de que generen venta perdida.', prioridad:'MEDIA', col:'var(--yellow)'},
@@ -5927,6 +5943,7 @@ function construirContexto() {
         por_canal: rd.por_canal,
         por_marca: rd.por_marca,
         por_grupo: rd.por_grupo,
+        dead_por_categoria: rd.dead_por_categoria,
         por_categoria: rd.por_categoria
         // excluimos tendencia_* para reducir tamaño
       };

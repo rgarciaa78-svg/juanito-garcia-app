@@ -24,6 +24,10 @@ PBI_BASE  = "https://api.powerbi.com/v1.0/myorg"
 # El reporte FILLRATE vive en otro workspace (visto en su URL, 2026-09-06).
 # De él solo conocemos el id del reporte; el del dataset se resuelve por API.
 WS_FILLRATE = "dba94185-3df0-4310-b6b4-9c3b7bc30104"
+# '11. Reporte de Planificaciones' (S&OP). Está en el workspace normal, pero
+# su datasetId se resuelve por API igual que FILLRATE: solo conocemos el id
+# del reporte, tomado de su URL (2026-09-06).
+SOP_REPORT_ID = "85e24d53-5816-4e89-993b-91bc733fc5c4"
 FILLRATE_REPORT_ID = "9641c6b7-2524-4774-b3be-b0370687cd3d"
 
 OUTPUT_DIR = Path("data/latest")
@@ -1523,6 +1527,25 @@ def build_compras(found):
     return {"estado": sem, "alerta": alerta, "kpis": kpis}, ratio
 
 def build_inventario(found):
+    # ── Clasificación por categoría, de la matriz "CLASIFICACION DE INVENTARIO"
+    # (Copiar consulta 2026-09-06). Usa 'SALDO ACTUAL'[Clasificación ALC Meses],
+    # que es OTRA columna que la '[Clasificación Segun Consumo]' capturada el
+    # 2026-09-04: son dos clasificaciones distintas del mismo saldo, no la
+    # misma con otro nombre. Se prefiere la de la matriz porque es la que el
+    # reporte muestra hoy, y además trae la apertura por categoría.
+    clas = found.get("__clasificacion") or []
+    if clas:
+        agrupado = {}
+        for _cat, cla, soles, _pct in clas:
+            if soles is None:
+                continue
+            # Las clases vienen numeradas ("1. Working", "4. DEAD"): se quita
+            # el prefijo de orden para que calcen con los nombres esperados.
+            k = re.sub(r"^\s*\d+\.\s*", "", str(cla)).strip().upper()
+            agrupado[k] = agrupado.get(k, 0.0) + soles
+        found = dict(found)
+        found["_composicion"] = list(agrupado.items())
+
     # ── Composición confirmada con Copiar consulta (2026-09-04): lista de
     # (clasificación, saldo soles) desde 'SALDO ACTUAL'[Clasificación Segun
     # Consumo] — WORKING / EXCESO 1 / EXCESO 2 / DEAD. Tiene prioridad sobre
@@ -1582,7 +1605,23 @@ def build_inventario(found):
         kpis.append({"label": "Exceso 2 (5-12 meses)", "valor": fmt_soles(exceso2_val)})
 
     alerta = f"Dead Stock {dead_pct:.1f}% del inventario" if sem != "green" and dead_pct else None
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}
+    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Categorías con más inventario muerto — lo accionable del reporte
+    if clas:
+        dead_cat, dead_tot = {}, 0.0
+        for cat, cla, soles, _p in clas:
+            if soles and "dead" in str(cla).lower():
+                dead_cat[cat] = dead_cat.get(cat, 0.0) + soles
+                dead_tot += soles
+        if dead_cat:
+            top = sorted(dead_cat.items(), key=lambda kv: -kv[1])[:6]
+            res["dead_por_categoria"] = [{
+                "categoria": c,
+                "valor": fmt_soles(v),
+                "pct": round(v / dead_tot * 100, 1) if dead_tot else None,
+            } for c, v in top]
+    return res
 
 def build_control(found):
     """Dashboard de Control Interno ('8. Reporte de auditoría').
@@ -1875,6 +1914,57 @@ def dax_fillrate_medida_mes(token, ws, dataset_id, medida, alias, label="fillrat
     if rows:
         return to_float(rows[0].get(f"[{alias}]") or rows[0].get(alias))
     return None
+
+
+def dax_sop_clasificacion(token, ws, dataset_id, label="sop_clasificacion"):
+    """Clasificación del inventario (Working / Exceso / Dead) por categoría.
+
+    Confirmado con Copiar consulta (2026-09-06) sobre la matriz
+    "CLASIFICACION DE INVENTARIO" del reporte '11. Reporte de Planificaciones'.
+
+    Del original se conservan el filtro y la medida DM0_Sort TEXTUALES. Lo que
+    se quita es la maquinaria de subtotales (ROLLUPADDISSUBTOTAL,
+    NATURALLEFTOUTERJOIN, SUBSTITUTEWITHINDEX): sirve para pintar las filas de
+    Total del visual, no cambia las cifras de cada celda. Los totales se
+    recomponen sumando, que es lo que hace la matriz.
+
+    Se pide además el saldo absoluto en soles, que el visual no muestra pero
+    sale de la misma columna — así el % queda comprobable contra su origen.
+    """
+    q = (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Maestra de Productos'[data.categoria_producto])),\n"
+        "\t\t\tNOT('Maestra de Productos'[data.categoria_producto] IN {BLANK()})\n"
+        "\t\t)\n\n"
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'Maestra de Productos'[data.categoria_producto],\n"
+        "\t\t'SALDO ACTUAL'[Clasificación ALC Meses],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t\"Saldo_Soles\", CALCULATE(SUM('SALDO ACTUAL'[Saldo Soles])),\n"
+        "\t\t\"DM0_Sort\", CALCULATE(\n"
+        "\t\t\tDIVIDE(SUM('SALDO ACTUAL'[Saldo Soles]), CALCULATE(\n"
+        "\t\t\t\tSUM('SALDO ACTUAL'[Saldo Soles]),\n"
+        "\t\t\t\tALLSELECTED('Maestra de Productos'[data.categoria_producto]),\n"
+        "\t\t\t\tALLSELECTED('SALDO ACTUAL'[Clasificación ALC Meses])\n"
+        "\t\t\t))\n"
+        "\t\t)\n"
+        "\t)"
+    )
+    rows = dax(token, ws, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        cat = (r.get("Maestra de Productos[data.categoria_producto]")
+               or r.get("[data.categoria_producto]"))
+        cla = (r.get("SALDO ACTUAL[Clasificación ALC Meses]")
+               or r.get("[Clasificación ALC Meses]"))
+        soles = to_float(r.get("[Saldo_Soles]") or r.get("Saldo_Soles"))
+        pct = to_float(r.get("[DM0_Sort]") or r.get("DM0_Sort"))
+        if cat and cla:
+            out.append((str(cat), str(cla), soles, pct))
+    return out
 
 
 def build_fill_rate(found):
@@ -2432,6 +2522,25 @@ def main():
             if composicion:
                 scanned.setdefault("inventario", {})["_composicion"] = composicion
                 print(f"    ✓ Inventario [Composición]: {composicion}")
+
+        # ── S&OP: clasificación del inventario desde '11. Reporte de
+        # Planificaciones'. Su datasetId se resuelve desde el id del reporte.
+        if empresa == "PAUNO":
+            try:
+                rr = requests.get(f"{PBI_BASE}/groups/{ws_id}/reports/{SOP_REPORT_ID}",
+                                  headers={"Authorization": f"Bearer {token}"}, timeout=25)
+                if rr.ok:
+                    sop_ds = rr.json().get("datasetId")
+                    clas = dax_sop_clasificacion(token, ws_id, sop_ds)
+                    if clas:
+                        scanned.setdefault("inventario", {})["__clasificacion"] = clas
+                        tot = sum(v for _, _, v, _ in clas if v)
+                        print(f"    ✓ S&OP clasificación: {len(clas)} filas, "
+                              f"saldo total {tot:,.0f}")
+                else:
+                    print(f"    ✗ reporte S&OP: HTTP {rr.status_code}")
+            except Exception as e:
+                print(f"    ✗ S&OP clasificación: {e}")
 
         # ── Inventario
         if scanned.get("inventario"):
