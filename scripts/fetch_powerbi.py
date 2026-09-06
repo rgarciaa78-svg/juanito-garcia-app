@@ -21,6 +21,11 @@ PBI_SCOPE = "https://analysis.windows.net/powerbi/api/.default"
 TOKEN_URL = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token"
 PBI_BASE  = "https://api.powerbi.com/v1.0/myorg"
 
+# El reporte FILLRATE vive en otro workspace (visto en su URL, 2026-09-06).
+# De él solo conocemos el id del reporte; el del dataset se resuelve por API.
+WS_FILLRATE = "dba94185-3df0-4310-b6b4-9c3b7bc30104"
+FILLRATE_REPORT_ID = "9641c6b7-2524-4774-b3be-b0370687cd3d"
+
 OUTPUT_DIR = Path("data/latest")
 HIST_DIR   = Path("data/historico")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1743,6 +1748,39 @@ def build_productividad(found):
     alerta = f"Planilla/KG Producido S/{n_prod:.2f} — revisar eficiencia" if sem != "green" and n_prod else None
     return {"estado": sem, "alerta": alerta, "kpis": kpis}
 
+def dax_fillrate_por_marca(token, ws, dataset_id, label="fillrate_marca"):
+    """Pedidos no atendidos del MES ACTUAL, por marca.
+
+    Confirmado con Copiar consulta (2026-09-06) sobre el visual
+    "SOLES NO ATENDIDOS POR GRUPO" del reporte FILLRATE. No es una serie:
+    el filtro 'CALENDARIO'[FIL_MES_ACTUAL] = "MES_ACTUAL" lo acota al mes en
+    curso, así que es un desglose, no una tendencia.
+
+    Ese reporte vive en un workspace distinto al de los demás, por eso `ws`
+    va como parámetro en vez de usar el global.
+    """
+    q = ("DEFINE\n"
+         "\tVAR __DS0FilterTable = \n"
+         "\t\tTREATAS({\"MES_ACTUAL\"}, 'CALENDARIO'[FIL_MES_ACTUAL])\n\n"
+         "\tVAR __DS0Core = \n"
+         "\t\tSUMMARIZECOLUMNS(\n"
+         "\t\t\t'PEDIDOS'[MARCA],\n"
+         "\t\t\t__DS0FilterTable,\n"
+         "\t\t\t\"PEDIDOS_NO_ATENDIDOS\", '0_MEDIDAS'[PEDIDOS NO ATENDIDOS]\n"
+         "\t\t)\n\n"
+         "EVALUATE\n\t__DS0Core\n\n"
+         "ORDER BY\n\t[PEDIDOS_NO_ATENDIDOS] DESC, 'PEDIDOS'[MARCA]")
+    rows = dax(token, ws, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        marca = r.get("PEDIDOS[MARCA]") or r.get("[MARCA]")
+        val = to_float(r.get("[PEDIDOS_NO_ATENDIDOS]") or r.get("PEDIDOS_NO_ATENDIDOS"))
+        if marca and val is not None:
+            out.append((str(marca), val))
+    out.sort(key=lambda t: -t[1])
+    return out
+
+
 def build_fill_rate(found):
     # '% Fill Rate' SÍ responde al filtro de mes; '% FILLRATE' devuelve el acumulado
     # histórico igual en todos los meses. Se prefiere la que refleja el mes en curso.
@@ -1770,7 +1808,21 @@ def build_fill_rate(found):
         kpis.append({"label": "Venta Perdida", "valor": fmt_soles(vp), "estado": "red" if vp > 0 else "green"})
 
     alerta = f"Fill Rate {fmt_pct(fill_pct)} — bajo meta 98%" if sem != "green" and fill_pct else None
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}
+    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Desglose por marca del mes actual (ver dax_fillrate_por_marca)
+    marcas = found.get("__por_marca") or []
+    if marcas:
+        total = sum(v for _, v in marcas) or None
+        res["por_marca"] = [{
+            "marca": m,
+            "valor": fmt_soles(v),
+            "pct": round(v / total * 100, 1) if total else None,
+        } for m, v in marcas]
+        if total:
+            res["kpis"].append({"label": "No atendido (mes)", "valor": fmt_soles(total),
+                                "estado": "red" if total > 0 else "green"})
+    return res
 
 def build_avance(found):
     avance_val = (found.get("Avance") or found.get("% Avance") or found.get("Avance PPTO") or
@@ -2310,6 +2362,25 @@ def main():
             if r["kpis"]:
                 empresa_data["reportes"]["productividad"] = r
                 print(f"  Productividad {len(r['kpis'])} KPIs")
+
+        # ── Fill Rate: el reporte FILLRATE está en OTRO workspace, y de él
+        # solo conocíamos el id del reporte (de su URL), no el del dataset.
+        if empresa == "PAUNO":
+            try:
+                r = requests.get(
+                    f"{PBI_BASE}/groups/{WS_FILLRATE}/reports/{FILLRATE_REPORT_ID}",
+                    headers={"Authorization": f"Bearer {token}"}, timeout=25)
+                if r.ok:
+                    fr_ds = r.json().get("datasetId")
+                    marcas = dax_fillrate_por_marca(token, WS_FILLRATE, fr_ds)
+                    if marcas:
+                        scanned.setdefault("fill_rate", {})["__por_marca"] = marcas
+                        for m, v in marcas:
+                            print(f"    ✓ Fill Rate no atendido [{m}]: {v:,.0f}")
+                else:
+                    print(f"    ✗ reporte FILLRATE: HTTP {r.status_code}")
+            except Exception as e:
+                print(f"    ✗ Fill Rate por marca: {e}")
 
         # ── Fill Rate (dataset dedicado 12. Calculo de Provisiones)
         if scanned.get("fill_rate"):

@@ -3669,7 +3669,22 @@ function renderMcKinseyArea(empresa, tipo) {
           {label:'Venta Perdida', valSoles: vp, color:'var(--red)'},
         ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Acumulado YTD. Meta: facturar 98% de OV.
           ${ov && fac ? ` Para llegar a la meta faltarían <strong>${rec}</strong> de facturación adicional sobre el acumulado actual.` : ''}
-        </div>` : 'Sin datos de OV.',
+        </div>` + (() => {
+          // Desglose por marca del mes en curso — filtro FIL_MES_ACTUAL del
+          // visual "SOLES NO ATENDIDOS POR GRUPO" (Copiar consulta 2026-09-06)
+          const pm = rp.fill_rate?.por_marca || [];
+          if (!pm.length) return '';
+          return `<div style="margin-top:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">No atendido este mes, por marca</div>
+            ${pm.map(m => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+              <div style="flex:0 0 88px;font-size:11px;font-weight:600">${m.marca}</div>
+              <div style="flex:1 1 100px;min-width:80px;height:14px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${m.pct != null ? Math.min(100, m.pct) : 0}%;background:var(--red)"></div>
+              </div>
+              <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm)">${m.valor}${m.pct != null ? ` · ${m.pct}%` : ''}</div>
+            </div>`).join('')}
+          </div>`;
+        })() : 'Sin datos de OV.',
         IV: [
           {palanca:'Reducir Venta Perdida', impacto: vp ? `Recuperar hasta ${fmtM(vp)} en ventas YTD (equivale a ${rec} para llegar a meta 98%)` : 'Alto impacto en ingresos', accion:'Identificar los SKUs con mayor stockout. Priorizar reposición y revisar política de inventario de seguridad.', prioridad:fr<85?'ALTA':'MEDIA', col:fr<85?'var(--red)':'var(--yellow)'},
           {palanca:'Mejorar OTD logístico', impacto:'Reducir pedidos incompletos', accion:'Medir tiempo promedio de despacho. Pedidos no entregados a tiempo son venta perdida aunque el producto esté disponible.', prioridad:'MEDIA', col:'var(--yellow)'},
@@ -5897,6 +5912,7 @@ function construirContexto() {
         por_gerente: rd.por_gerente,
         por_uen: rd.por_uen,
         por_canal: rd.por_canal,
+        por_marca: rd.por_marca,
         por_categoria: rd.por_categoria
         // excluimos tendencia_* para reducir tamaño
       };
