@@ -1149,6 +1149,68 @@ def _q_compras_ratio():
     )
 
 
+def _q_compras_ratio_total():
+    """Ratio mensual total — consulta del GRÁFICO de línea "Eficiencia de
+    Costo de compra de materiales (Operación)" (Copiar consulta, 2026-09-06).
+
+    Ojo: el gráfico y la tabla del mismo reporte NO tienen el mismo alcance.
+    La tabla EXCLUYE 39 categorías (entre ellas SERVICIOS y SERVICIO DE
+    MANTENIMIENTO); el gráfico INCLUYE explícitamente seis, dos de las cuales
+    son justamente esas. Por eso el total no se deriva sumando las categorías
+    de la tabla: se pide con esta consulta, que es la que produce la línea
+    que ve el usuario.
+    """
+    ld = COMPRAS_LOCALDATE
+    return (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable =\n"
+        "\t\tTREATAS(\n"
+        "\t\t\t{\"MATERIA PRIMA\",\n"
+        "\t\t\t\t\"REPUESTOS\",\n"
+        "\t\t\t\t\"SERVICIO DE MANTENIMIENTO Y/O REPARACION\",\n"
+        "\t\t\t\t\"SERVICIOS\",\n"
+        "\t\t\t\t\"SUMINISTROS\",\n"
+        "\t\t\t\t\"ENVASES Y EMBALAJES\"},\n"
+        "\t\t\t'Maestra de Productos'[data.categoria_producto]\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0FilterTable2 =\n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\n"
+        "\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
+        "\t\t)\n\n"
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'Calendario'[Año],\n"
+        f"\t\t'{ld}'[NroMes],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t__DS0FilterTable2,\n"
+        "\t\t\"v_ratio\", 'KARDEX TOTAL'[%ratio]\n"
+        "\t)\n\n"
+        f"ORDER BY\n\t'Calendario'[Año], '{ld}'[NroMes]"
+    )
+
+
+def serie_compras_ratio_total(token, ds_id, periodos):
+    """Serie del ratio total, tal como la dibuja el gráfico del reporte."""
+    filas = dax(token, ds_id, _q_compras_ratio_total(), "compras-ratio-total")
+    if not filas:
+        return None
+    ld = COMPRAS_LOCALDATE
+    mapa = {}
+    for r in filas:
+        anio = r.get("Calendario[Año]") or r.get("[Año]")
+        mes = r.get(f"{ld}[NroMes]") or r.get("[NroMes]")
+        v = r.get("[v_ratio]", r.get("v_ratio"))
+        if anio is None or mes is None or v is None:
+            continue
+        try:
+            mapa[(int(anio), int(mes))] = float(v)
+        except (TypeError, ValueError):
+            pass
+    serie = [mapa.get(p) for p in periodos]
+    return serie if any(x is not None for x in serie) else None
+
+
 def serie_compras_ratio(token, ds_id, periodos):
     """Series mensuales de ratio consumo/compra, total y por categoría.
 
@@ -1192,12 +1254,22 @@ def serie_compras_ratio(token, ds_id, periodos):
                 pass
 
     out = {}
-    total = [(tot_cons.get(p) / tot_comp[p]) if tot_comp.get(p) else None
-             for p in periodos]
-    if any(x is not None for x in total):
+    # El total viene de la consulta del GRÁFICO, no de sumar las categorías de
+    # la tabla: sus filtros no coinciden (ver _q_compras_ratio_total).
+    total = serie_compras_ratio_total(token, ds_id, periodos)
+    if total:
         out["% Ratio Consumo/Compra"] = total
         print(f"    [% Ratio Consumo/Compra]: "
               f"{sum(1 for x in total if x is not None)}/{len(total)} meses")
+        # Contraste informativo contra el total derivado de la tabla. No se
+        # publica: sirve para detectar si alguna vez dejan de ser comparables.
+        deriv = [(tot_cons.get(p) / tot_comp[p]) if tot_comp.get(p) else None
+                 for p in periodos]
+        difs = [abs(a - b) for a, b in zip(total, deriv)
+                if a is not None and b is not None]
+        if difs and max(difs) > 0.01:
+            print(f"    · nota: gráfico vs tabla difieren hasta "
+                  f"{max(difs) * 100:.2f} pp (alcances distintos)")
     for etiqueta, acum in (("Consumo (cant)", tot_cons), ("Compra (cant)", tot_comp)):
         serie = [acum.get(p) for p in periodos]
         if any(x is not None for x in serie):
