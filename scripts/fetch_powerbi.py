@@ -664,13 +664,42 @@ def dax_cxc_aging(token, ws_id, dataset_id, label="cxc_aging"):
         '\t\t"SumTotal_fact", IGNORE(CALCULATE(SUM(\'DATA_FACTURACION\'[Total_fact])))\n'
         "\t)"
     )
-    rows = dax(token, ws_id, dataset_id, q, label)
     out = []
-    for r in rows or []:
-        seg = r.get("DATA_FACTURACION[O_SEGMENTO]") or r.get("[O_SEGMENTO]") or r.get("O_SEGMENTO")
-        val = to_float(r.get("[SumTotal_fact]") or r.get("SumTotal_fact"))
-        if seg is not None and val is not None:
-            out.append((str(seg), val))
+    try:
+        rows = dax(token, ws_id, dataset_id, q, label)
+        for r in rows or []:
+            seg = r.get("DATA_FACTURACION[O_SEGMENTO]") or r.get("[O_SEGMENTO]") or r.get("O_SEGMENTO")
+            val = to_float(r.get("[SumTotal_fact]") or r.get("SumTotal_fact"))
+            if seg is not None and val is not None:
+                out.append((str(seg), val))
+    except Exception as e:
+        print(f"    · aging agrupado falló ({e}) — uso las 4 consultas exactas")
+
+    if not out:
+        # Respaldo: las 4 tarjetas tal cual se capturaron con Copiar consulta
+        # el 2026-09-06. Estos nombres NO son inventados — cada uno se verificó
+        # individualmente contra su tarjeta en el reporte '1. Cuentas por cobrar'.
+        for seg in ("1. Por Vencer", "2. 0 a 15 días", "3. 16 a 30 días", "4. Más de 30 días"):
+            qs = (
+                "DEFINE\n"
+                f'\tVAR __DS0FilterTable = \n\t\tTREATAS({{"{seg}"}}, \'DATA_FACTURACION\'[O_SEGMENTO])\n\n'
+                '\tVAR __DS0FilterTable2 = \n\t\tTREATAS({"Pendiente"}, \'DATA_FACTURACION\'[CXC])\n\n'
+                "EVALUATE\n"
+                "\tSUMMARIZECOLUMNS(\n"
+                "\t\t__DS0FilterTable,\n"
+                "\t\t__DS0FilterTable2,\n"
+                '\t\t"SumTotal_fact", IGNORE(CALCULATE(SUM(\'DATA_FACTURACION\'[Total_fact])))\n'
+                "\t)"
+            )
+            try:
+                rows = dax(token, ws_id, dataset_id, qs, f"{label}:{seg}")
+                if rows:
+                    v = to_float(rows[0].get("[SumTotal_fact]") or rows[0].get("SumTotal_fact"))
+                    if v is not None:
+                        out.append((seg, v))
+            except Exception as e:
+                print(f"    ✗ aging [{seg}]: {e}")
+
     out.sort(key=lambda t: t[0])
     return out
 
