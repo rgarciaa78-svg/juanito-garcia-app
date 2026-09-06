@@ -95,9 +95,101 @@
               "valor": "139"
             },
             {
+              "label": "CxP Vencido",
+              "valor": "S/3.37M",
+              "meta": "34.3% de la deuda viva",
+              "estado": "red"
+            },
+            {
               "label": "Top 15 proveedores",
               "valor": "S/12.05M",
               "meta": "deuda concentrada"
+            }
+          ],
+          "tramos": [
+            {
+              "label": "Vigente",
+              "valor": "S/1.36M",
+              "pct": 13.8,
+              "estado": "green"
+            },
+            {
+              "label": "Vigente",
+              "valor": "S/1.18M",
+              "pct": 12.0,
+              "estado": "green"
+            },
+            {
+              "label": "Vigente",
+              "valor": "S/1.15M",
+              "pct": 11.7,
+              "estado": "green"
+            },
+            {
+              "label": "16 a 30 días",
+              "valor": "S/1.01M",
+              "pct": 10.3,
+              "estado": "yellow"
+            },
+            {
+              "label": "Vigente",
+              "valor": "S/985,532",
+              "pct": 10.0,
+              "estado": "green"
+            },
+            {
+              "label": "Vigente",
+              "valor": "S/828,594",
+              "pct": 8.4,
+              "estado": "green"
+            },
+            {
+              "label": "Vigente",
+              "valor": "S/673,344",
+              "pct": 6.8,
+              "estado": "green"
+            },
+            {
+              "label": "8 a 15 días",
+              "valor": "S/628,281",
+              "pct": 6.4,
+              "estado": "yellow"
+            },
+            {
+              "label": "31 a 45 días",
+              "valor": "S/538,152",
+              "pct": 5.5,
+              "estado": "red"
+            },
+            {
+              "label": "0 a 7 días",
+              "valor": "S/426,433",
+              "pct": 4.3,
+              "estado": "yellow"
+            },
+            {
+              "label": "Vigente",
+              "valor": "S/287,619",
+              "pct": 2.9,
+              "estado": "green"
+            },
+            {
+              "label": "61 a 90 días",
+              "valor": "S/281,235",
+              "pct": 2.9,
+              "estado": "red"
+            },
+            {
+              "label": "46 a 60 días",
+              "valor": "S/240,859",
+              "pct": 2.4,
+              "estado": "red"
+            },
+            {
+              "label": "Más de 91 días",
+              "valor": "S/239,759",
+              "pct": 2.4,
+              "estado": "red"
             }
           ],
           "proveedores_criticos": [
@@ -650,14 +742,14 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "yellow",
-          "alerta": "Avance 63.0% vs presupuesto",
+          "estado": "red",
+          "alerta": "Avance 1.3% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "63.0%",
+              "valor": "1.3%",
               "meta": "100%",
-              "estado": "yellow"
+              "estado": "red"
             }
           ]
         }
