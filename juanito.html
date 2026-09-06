@@ -3850,6 +3850,32 @@ function renderMcKinseyArea(empresa, tipo) {
           <div style="flex:1;min-width:140px">
             ${rowKpi('% Merma agosto 2026', kv('mermas','Merma Total')||'—', '<2%', col)}
             ${brecha ? rowKpi('Exceso sobre meta', '+'+brecha+'pp', null, 'var(--red)') : ''}
+            ${(() => {
+              // Este reporte no tiene tarjetas de KPI: son todos gráficos. Sus
+              // cifras se toman del último mes con dato de cada serie mensual,
+              // que viene de las consultas capturadas de esos mismos gráficos.
+              const sm = (SERIES?.datasets?.mermas) || {};
+              const per = SERIES?.periodos || [];
+              const ult = arr => {
+                for (let i = arr.length - 1; i >= 0; i--)
+                  if (arr[i] != null) return { v: arr[i], p: per[i] };
+                return null;
+              };
+              const filas = Object.keys(sm)
+                .filter(k => k.startsWith('% Merma ') && k !== '% Merma Total')
+                .map(k => ({ n: k.replace('% Merma ', ''), u: ult(sm[k]) }))
+                .filter(x => x.u)
+                .sort((a, b) => b.u.v - a.u.v);
+              if (!filas.length) return '';
+              const cF = v => v > 3 ? 'var(--red)' : v > 2 ? 'var(--yellow)' : 'var(--green)';
+              return `<div style="margin-top:10px">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:5px">Merma por unidad y planta — ${filas[0].u.p}</div>
+                ${filas.map(f => `<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:2px 0">
+                  <span>${f.n}</span>
+                  <b style="font-family:var(--fm);color:${cF(f.u.v * 100)}">${(f.u.v * 100).toFixed(2)}%</b>
+                </div>`).join('')}
+              </div>`;
+            })()}
             <div style="font-size:10px;color:var(--sub);margin-top:8px;padding:6px;background:rgba(239,68,68,.06);border-radius:6px">Cada punto porcentual de merma = ~1% de ventas convertido en pérdida.</div>
           </div>
         </div>`,
