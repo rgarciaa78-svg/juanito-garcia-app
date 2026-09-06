@@ -31,6 +31,14 @@ TOKEN_URL = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token"
 PBI_BASE  = "https://api.powerbi.com/v1.0/myorg"
 WS_ID     = "461932ad-b5ec-4fd6-aa97-f1fc7bdc5169"
 
+# El reporte FILLRATE vive en OTRO workspace (visto en su URL el 2026-09-06),
+# no en el que usan los otros diez. Sin esto sus consultas fallan con 404.
+WS_FILLRATE = "dba94185-3df0-4310-b6b4-9c3b7bc30104"
+FILLRATE_REPORT_ID = "9641c6b7-2524-4774-b3be-b0370687cd3d"
+
+# dataset_id -> workspace, para los que no están en WS_ID
+WS_POR_DATASET = {}
+
 OUTPUT_DIR = Path("data/latest")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -88,7 +96,8 @@ def get_token():
 
 
 def dax(token, dataset_id, query, label="q", retries=3):
-    url = f"{PBI_BASE}/groups/{WS_ID}/datasets/{dataset_id}/executeQueries"
+    ws = WS_POR_DATASET.get(dataset_id, WS_ID)
+    url = f"{PBI_BASE}/groups/{ws}/datasets/{dataset_id}/executeQueries"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     body = {"queries": [{"query": query}], "serializerSettings": {"includeNulls": True}}
     for attempt in range(retries):
@@ -927,6 +936,121 @@ def serie_margen_precio_costo(token, ds_id, periodos):
     return out
 
 
+def dataset_de_reporte(token, ws, report_id):
+    """Devuelve el datasetId de un reporte. Necesario para FILLRATE, cuyo
+    dataset no conocíamos: solo teníamos el id del reporte, de su URL."""
+    r = requests.get(f"{PBI_BASE}/groups/{ws}/reports/{report_id}",
+                     headers={"Authorization": f"Bearer {token}"}, timeout=25)
+    if not r.ok:
+        print(f"    ✗ no se pudo resolver el dataset del reporte: HTTP {r.status_code}")
+        return None
+    return r.json().get("datasetId")
+
+
+def _mapa_calendario_fillrate(token, ds_id):
+    """Mapa IN_MES -> (año, mes) para el calendario del dataset FILLRATE.
+
+    La consulta del gráfico agrupa por 'CALENDARIO'[MES] e [IN_MES] y NO trae
+    el año, pero el eje abarca 15 meses cruzando dos años: sin el año no se
+    puede ubicar cada valor en su período.
+
+    En vez de modificar la consulta capturada, se pide el calendario aparte.
+    Primero se lee una fila de 'CALENDARIO' para descubrir cómo se llaman sus
+    columnas — no se adivinan — y luego se arma el mapa.
+    """
+    fila = dax(token, ds_id, "EVALUATE TOPN(1, 'CALENDARIO')", "fillrate-cols", retries=1)
+    if not fila:
+        print("    ✗ no se pudo leer 'CALENDARIO'")
+        return {}
+    cols = list(fila[0].keys())
+    print(f"    · columnas de CALENDARIO: {cols}")
+
+    def buscar(*claves):
+        for c in cols:
+            base = c.split("[")[-1].rstrip("]").strip().lower()
+            if base in claves:
+                return c
+        return None
+
+    col_anio = buscar("año", "anio", "ano", "year", "in_anio", "in_año")
+    col_mes  = buscar("in_mes")
+    if not col_anio or not col_mes:
+        print(f"    ✗ falta columna de año o de IN_MES en CALENDARIO ({cols})")
+        return {}
+
+    nombre_anio = col_anio.split("[")[-1].rstrip("]")
+    q = ("EVALUATE SUMMARIZECOLUMNS('CALENDARIO'[IN_MES], 'CALENDARIO'[MES], "
+         f"'CALENDARIO'[{nombre_anio}])")
+    filas = dax(token, ds_id, q, "fillrate-calendario")
+    mapa = {}
+    for r in filas or []:
+        inmes = r.get("CALENDARIO[IN_MES]")
+        anio = r.get(f"CALENDARIO[{nombre_anio}]")
+        mes = r.get("CALENDARIO[MES]")
+        if inmes is None or anio is None:
+            continue
+        if isinstance(mes, str):
+            mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+        if mes is None:
+            continue
+        try:
+            mapa[inmes] = (int(anio), int(mes))
+        except (TypeError, ValueError):
+            pass
+    print(f"    · calendario mapeado: {len(mapa)} meses")
+    return mapa
+
+
+def serie_fillrate(token, ds_id, periodos):
+    """FILLRATE y PEDIDOS NO ATENDIDOS mensuales.
+
+    Consulta capturada del visual "FILLRATE POR MES" (Copiar consulta,
+    2026-09-06), enviada VERBATIM — es la única de todo el proyecto que no
+    lleva ningún filtro. El año se resuelve aparte, con _mapa_calendario.
+    """
+    mapa = _mapa_calendario_fillrate(token, ds_id)
+    if not mapa:
+        return {}
+
+    q = ("DEFINE\n"
+         "\tVAR __DS0Core = \n"
+         "\t\tSUMMARIZECOLUMNS(\n"
+         "\t\t\t'CALENDARIO'[MES],\n"
+         "\t\t\t'CALENDARIO'[IN_MES],\n"
+         "\t\t\t\"FILLRATE\", '0_MEDIDAS'[FILLRATE],\n"
+         "\t\t\t\"PEDIDOS_NO_ATENDIDOS\", '0_MEDIDAS'[PEDIDOS NO ATENDIDOS]\n"
+         "\t\t)\n\n"
+         "EVALUATE\n\t__DS0Core\n\n"
+         "ORDER BY\n\t'CALENDARIO'[IN_MES], 'CALENDARIO'[MES]")
+    filas = dax(token, ds_id, q, "fillrate-mensual")
+    if not filas:
+        return {}
+
+    pares = {"% Fill Rate": {}, "Pedidos no atendidos": {}}
+    for r in filas:
+        per = mapa.get(r.get("CALENDARIO[IN_MES]"))
+        if not per:
+            continue
+        for alias, etiqueta in (("FILLRATE", "% Fill Rate"),
+                                ("PEDIDOS_NO_ATENDIDOS", "Pedidos no atendidos")):
+            v = r.get(f"[{alias}]", r.get(alias))
+            if v is None:
+                continue
+            try:
+                pares[etiqueta][per] = float(v)
+            except (TypeError, ValueError):
+                pass
+
+    out = {}
+    for etiqueta, m in pares.items():
+        serie = [m.get(pp) for pp in periodos]
+        if any(x is not None for x in serie):
+            out[etiqueta] = serie
+            print(f"    [{etiqueta}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    return out
+
+
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
@@ -1152,9 +1276,25 @@ def main():
         except Exception as e:
             print(f"    ✗ {e}\n")
 
+    # ── Fill Rate: otro workspace, y el dataset se resuelve desde el reporte
+    print("── fill_rate (consulta exacta de 'FILLRATE POR MES')")
+    try:
+        fr_id = dataset_de_reporte(token, WS_FILLRATE, FILLRATE_REPORT_ID)
+        if fr_id:
+            WS_POR_DATASET[fr_id] = WS_FILLRATE
+            print(f"    · dataset {fr_id} en workspace FILLRATE")
+            s = serie_fillrate(token, fr_id, periodos)
+            if s:
+                resultado["fill_rate"] = s
+        print()
+    except Exception as e:
+        print(f"    ✗ {e}\n")
+
     for ds_key, medidas_dict in cache.items():
         ds_id = DATASET_IDS.get(ds_key)
         if not ds_id:
+            continue
+        if ds_key == "fill_rate" and "fill_rate" in resultado:
             continue
         if ds_key == "mermas" and "mermas" in resultado:
             # ya resuelto con la consulta exacta; la genérica solo añadiría
