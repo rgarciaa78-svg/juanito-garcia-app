@@ -356,33 +356,54 @@ MERMAS_MEDIDAS = [
 #
 # Falta PLANTA TERCEROS: sin su Copiar consulta no se sabe ni su almacén ni
 # su medida, y no se van a deducir.
+# Plantas. Cada entrada: (etiqueta, [almacenes], medida, lleva_TIPO_DE_BASE).
+#
+# Nada de esto es deducible — los cuatro visuales de planta de un mismo
+# reporte resultaron distintos entre sí:
+#
+#   · ATE y Pachacamac: 1 almacén, 7 filtros (con TIPO DE BASE), y medidas
+#     DISTINTAS entre ellas ('% Merma total' vs '% Merma total SALSAS').
+#   · Terceros: 3 almacenes agrupados, 6 filtros (SIN TIPO DE BASE).
+#
+# Y el nombre del visual no dice nada del almacén: "PLANTA ATE" es
+# "Lacteos Producción" y "PLANTA TERCEROS" son tres maquilas.
+#
+# Nota sobre '% Merma total MAQUILA': se llegó a descartar por no coincidir
+# con el gráfico de la unidad de negocio MAQUILA (que usa MMAQUILA, con
+# doble M). Sí se usa — es la de Terceros. Dos medidas de nombre casi igual
+# para cosas distintas.
 PLANTAS_MERMAS = [
-    # etiqueta,             almacen,               medida
-    ("Planta ATE",          "Lacteos Producción",  "% Merma total"),         # captura 2026-09-06
-    ("Planta Pachacamac",   "Salsas Producción",   "% Merma total SALSAS"),  # captura 2026-09-06
+    # etiqueta,           almacenes,                    medida,                  tipo_base
+    ("Planta ATE",        ["Lacteos Producción"],       "% Merma total",         True),
+    ("Planta Pachacamac", ["Salsas Producción"],        "% Merma total SALSAS",  True),
+    ("Planta Terceros",   ["Abuela Maquila",
+                           "Piamonte Maquila",
+                           "Lacteos Dosimetria"],       "% Merma total MAQUILA", False),
 ]
 
 
-def _q_mermas_planta(anio, almacen, medida, alias):
+def _q_mermas_planta(anio, almacenes, medida, alias, tipo_base=True):
     """Merma mensual de UNA planta: filtro de [almacen] + su medida propia.
 
-    Reproduce la consulta capturada de los visuales PLANTA ATE y PLANTA
-    PACHACAMAC (Copiar consulta, 2026-09-06). Son 7 filtros: los 6 del
-    gráfico total más TREATAS sobre 'Tabla Mermas'[almacen].
+    Reproduce las consultas capturadas de PLANTA ATE, PLANTA PACHACAMAC y
+    PLANTA TERCEROS (Copiar consulta, 2026-09-06). Parte del bloque de
+    filtros del segmento (5 ó 6 según `tipo_base`) y le añade el TREATAS de
+    almacén como último VAR.
     """
-    base = _q_mermas(anio)
-    filtro = (f"\tVAR __DS0FilterTable7 = \n"
-              f"\t\tTREATAS({{\"{almacen}\"}}, 'Tabla Mermas'[almacen])\n\n")
+    base = _q_mermas_segmento(anio, "Tabla Mermas", medida, alias, tipo_base)
+    n_ultimo = 6 if tipo_base else 5          # cuántos VAR trae ya el bloque
+    nuevo = n_ultimo + 1
+    # Las llaves del conjunto son obligatorias: TREATAS({"a","b"}, col).
+    # Sin ellas DAX interpreta cada valor como un argumento suelto y falla.
+    vals = ",\n".join(f'\t\t\t\t"{a}"' for a in almacenes).lstrip("\t")
+    filtro = (f"\tVAR __DS0FilterTable{nuevo} = \n"
+              f"\t\tTREATAS(\n\t\t\t{{{vals}}},\n"
+              f"\t\t\t'Tabla Mermas'[almacen]\n\t\t)\n\n")
     base = base.replace("\tVAR __DS0Core = \n", filtro + "\tVAR __DS0Core = \n")
-    base = base.replace(
-        "\t\t\t__DS0FilterTable6,\n",
-        "\t\t\t__DS0FilterTable6,\n\t\t\t__DS0FilterTable7,\n",
+    return base.replace(
+        f"\t\t\t__DS0FilterTable{n_ultimo},\n",
+        f"\t\t\t__DS0FilterTable{n_ultimo},\n\t\t\t__DS0FilterTable{nuevo},\n",
     )
-    # Se deja solo la medida de la planta: las del gráfico total (Desviacion
-    # Bases, consumo interno, destrucción) son las del agregado, no las suyas.
-    ini = base.index('\t\t\t"SumDesviacion_Bases"')
-    fin = base.index("\t\t)\n\nEVALUATE")
-    return base[:ini] + f"\t\t\t\"{alias}\", 'Tabla Mermas'[{medida}]\n" + base[fin:]
 
 
 def _q_mermas(anio):
@@ -583,11 +604,11 @@ def serie_mermas_plantas(token, ds_id, periodos):
     """
     anios = sorted({a for a, _ in periodos})
     out = {}
-    for etiqueta, almacen, medida in PLANTAS_MERMAS:
+    for etiqueta, almacenes, medida, tipo_base in PLANTAS_MERMAS:
         alias = "v_" + re.sub(r"[^A-Za-z0-9]", "_", etiqueta)
         por_periodo = {}
         for anio in anios:
-            q = _q_mermas_planta(anio, almacen, medida, alias)
+            q = _q_mermas_planta(anio, almacenes, medida, alias, tipo_base)
             for r in dax(token, ds_id, q, f"mermas-{etiqueta}-{anio}") or []:
                 mes = r.get("Calendario[MES]") or r.get("[MES]")
                 if isinstance(mes, str):
@@ -604,7 +625,7 @@ def serie_mermas_plantas(token, ds_id, periodos):
             out[f"% Merma {etiqueta}"] = serie
             print(f"    [% Merma {etiqueta}]: "
                   f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses "
-                  f"({almacen} / {medida})")
+                  f"({'+'.join(almacenes)} / {medida})")
         else:
             print(f"    ✗ % Merma {etiqueta}: sin datos")
     return out
