@@ -14,7 +14,7 @@
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 20.9% — vencido S/3.25M. Activar cobranza.",
+        "texto": "Mora 20.9% — vencido S/3.57M. Activar cobranza.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -36,7 +36,8 @@
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.25M"
+              "valor": "S/3.57M",
+              "meta": "aging confirmado"
             },
             {
               "label": "CxC Total",
@@ -164,12 +165,12 @@
             },
             {
               "label": "Producción Neta (KG)",
-              "valor": "9,870,640 KG",
+              "valor": "9,899,697 KG",
               "validado": true
             },
             {
               "label": "Costo x TN Producida",
-              "valor": "S/135.71",
+              "valor": "S/135.46",
               "validado": true
             }
           ],
@@ -227,19 +228,19 @@
           "kpis": [
             {
               "label": "Stock PP (Punto de Pedido)",
-              "valor": "1895558"
+              "valor": "1904352"
             },
             {
               "label": "Stock Valorizado",
-              "valor": "S/5.97M"
+              "valor": "S/5.99M"
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10630863"
+              "valor": "10690300"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10476017"
+              "valor": "10505736"
             }
           ]
         },
@@ -249,7 +250,7 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/6.82M"
+              "valor": "S/6.71M"
             }
           ]
         },
@@ -366,28 +367,28 @@
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/126.21M"
+              "valor": "S/126.29M"
             },
             {
               "label": "Facturación",
-              "valor": "S/94.82M"
+              "valor": "S/94.93M"
             },
             {
               "label": "Venta Perdida",
-              "valor": "S/31.39M",
+              "valor": "S/31.37M",
               "estado": "red"
             }
           ]
         },
         "margen_variable_pag2": {
-          "estado": "red",
-          "alerta": "Avance 1.2% vs presupuesto",
+          "estado": "yellow",
+          "alerta": "Avance 63.0% vs presupuesto",
           "kpis": [
             {
               "label": "Avance vs Ppto",
-              "valor": "1.2%",
+              "valor": "63.0%",
               "meta": "100%",
-              "estado": "red"
+              "estado": "yellow"
             }
           ]
         }
