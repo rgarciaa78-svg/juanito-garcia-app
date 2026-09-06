@@ -2390,6 +2390,63 @@ def dax_avance_por_canal(token, ws, dataset_id, mes, label="avance_canal"):
     return out
 
 
+def dax_cumplimiento_produccion(token, ws, dataset_id, label="cumpl_produccion"):
+    """Cumplimiento del programa de producción del DÍA ANTERIOR, por categoría.
+
+    Confirmado con Copiar consulta (2026-09-06) sobre la tabla "CUMPLIMIENTO
+    DE PROGRAMA DE PRODUCCION DIARIO" del reporte '11. Reporte de
+    Planificaciones', pestaña RESUMEN 2.
+
+    El filtro de tiempo es 'Calendario'[Es ayer] = "Sí": la tabla mide UN día,
+    no el mes acumulado. El 70% que muestra el reporte es el cumplimiento de
+    ayer, y cambia cada día. Se etiqueta como tal para que nadie lo lea como
+    un indicador mensual.
+
+    Solo entran cuatro categorías de producto terminado, que son las que
+    tienen programa de fabricación.
+
+    Se quita el ROLLUPADDISSUBTOTAL (la fila Total, que se recompone sumando)
+    y el TOPN de presentación.
+    """
+    q = (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tTREATAS(\n"
+        "\t\t\t{\"MERCADERIAS SALSAS PACKS\",\n"
+        "\t\t\t\t\"PT DERIVADOS LACTEOS\",\n"
+        "\t\t\t\t\"PT SALSAS\",\n"
+        "\t\t\t\t\"PT YOGURTS\"},\n"
+        "\t\t\t'Maestra de Productos'[data.categoria_producto]\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0FilterTable2 = \n"
+        "\t\tTREATAS({\"Sí\"}, 'Calendario'[Es ayer])\n\n"
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'Maestra de Productos'[data.categoria_producto],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t__DS0FilterTable2,\n"
+        "\t\t\"SumPeso_Producido\", CALCULATE(SUM('Orden de Fabricacion'[Peso Producido])),\n"
+        "\t\t\"SumPeso_a_Producir\", CALCULATE(SUM('Orden de Fabricacion'[Peso a Producir])),\n"
+        "\t\t\"CUMPLIMIENTO_GENERAL_PESO\", 'Orden de Fabricacion'[CUMPLIMIENTO GENERAL PESO]\n"
+        "\t)\n\n"
+        "ORDER BY\n\t'Maestra de Productos'[data.categoria_producto]"
+    )
+    rows = dax(token, ws, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        cat = (r.get("Maestra de Productos[data.categoria_producto]")
+               or r.get("[data.categoria_producto]"))
+        if not cat:
+            continue
+        out.append({
+            "categoria": str(cat),
+            "producido": to_float(r.get("[SumPeso_Producido]")),
+            "programado": to_float(r.get("[SumPeso_a_Producir]")),
+            "cumplimiento": to_float(r.get("[CUMPLIMIENTO_GENERAL_PESO]")),
+        })
+    return out
+
+
 def build_avance(found):
     avance_val = (found.get("Avance") or found.get("% Avance") or found.get("Avance PPTO") or
                   found.get("% Avance Presupuesto"))
@@ -2408,6 +2465,27 @@ def build_avance(found):
 
     alerta = f"Avance {fmt_pct(avance_pct)} vs presupuesto" if sem != "green" and avance_pct else None
     res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Cumplimiento del programa de producción de AYER (ver
+    # dax_cumplimiento_produccion). Se etiqueta con el día explícito porque
+    # mide una sola jornada, no el mes.
+    cump = found.get("__cumpl_produccion") or []
+    if cump:
+        prog = sum(c["programado"] or 0 for c in cump)
+        prod = sum(c["producido"] or 0 for c in cump)
+        res["cumplimiento_produccion"] = [{
+            "categoria": c["categoria"],
+            "programado": f"{c['programado']:,.0f}" if c["programado"] is not None else "—",
+            "producido": f"{c['producido']:,.0f}" if c["producido"] is not None else "—",
+            "pct": (round(c["producido"] / c["programado"] * 100, 1)
+                    if c["programado"] and c["producido"] is not None else None),
+        } for c in cump]
+        if prog:
+            p = prod / prog * 100
+            res["kpis"].append({
+                "label": "Cumplimiento producción (ayer)",
+                "valor": f"{p:.0f}%", "meta": "100% del programa del día",
+                "estado": "green" if p >= 95 else "yellow" if p >= 80 else "red"})
 
     # Avance por canal (ver dax_avance_por_canal). Sustituye a las medidas del
     # sondeo genérico: estas vienen de la tabla del reporte, con su filtro.
@@ -3085,6 +3163,10 @@ def main():
                     ds_av = rr.json().get("datasetId")
                     hoy = datetime.date.today()
                     mes_ant = hoy.month - 1 or 12
+                    cump = dax_cumplimiento_produccion(token, ws_id, ds_av)
+                    if cump:
+                        scanned.setdefault("inventario", {})["__cumpl_produccion"] = cump
+                        print(f"    ✓ Cumplimiento producción (ayer): {len(cump)} categorías")
                     canales = dax_avance_por_canal(token, ws_id, ds_av, mes_ant)
                     if canales:
                         scanned.setdefault("inventario", {})["__avance_canal"] = canales

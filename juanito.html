@@ -4722,17 +4722,34 @@ function dxpDesglose(tipo, s) {
     // Avance por canal — tabla "FACTURACION AL ..." del reporte 11,
     // pestaña RESUMEN 2 (Copiar consulta 2026-09-06)
     const cs = s.rp.margen_variable_pag2?.por_canal || [];
-    if (!cs.length) return null;
+    // Cumplimiento del programa de producción de AYER — mide una jornada,
+    // no el mes; por eso va rotulado con el día.
+    const cp = s.rp.margen_variable_pag2?.cumplimiento_produccion || [];
+    if (!cs.length && !cp.length) return null;
     const mx = Math.max(...cs.map(c => c.avance || 0)) || 1;
-    return { t:'Avance vs presupuesto — por canal', h:
-      cs.map(c => bar(c.canal,
+    let h = '';
+    if (cs.length) {
+      h += cs.map(c => bar(c.canal,
                       (c.avance != null ? c.avance.toFixed(1) + '%' : '—'),
                       (c.avance || 0) / mx * 100,
                       col(c.avance == null ? 'sub'
                           : c.avance > 150 ? 'yellow'
                           : c.avance >= 100 ? 'green'
                           : c.avance >= 80 ? 'yellow' : 'red'))).join('')
-      + cs.map(c => mini(`${c.canal} — ppto ${c.ppto}`, `facturado ${c.facturado}`)).join('') };
+        + cs.map(c => mini(`${c.canal} — ppto ${c.ppto}`, `facturado ${c.facturado}`)).join('');
+    }
+    if (cp.length) {
+      h += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin:12px 0 6px">Cumplimiento del programa de producción — jornada anterior</div>`
+        + cp.map(c => bar(c.categoria,
+                          (c.pct != null ? c.pct.toFixed(1) + '%' : '—'),
+                          c.pct || 0,
+                          col(c.pct == null ? 'sub'
+                              : c.pct >= 95 ? 'green'
+                              : c.pct >= 80 ? 'yellow' : 'red'))).join('')
+        + cp.map(c => mini(`${c.categoria} — programado ${c.programado} TN`,
+                           `producido ${c.producido} TN`)).join('');
+    }
+    return { t:'Avance vs presupuesto — por canal', h };
   }
   if (tipo === 'margen_variable') {
     const u = s.rp.margen_variable.por_uen || [];
@@ -6024,6 +6041,7 @@ function construirContexto() {
         por_gerente: rd.por_gerente,
         por_uen: rd.por_uen,
         por_canal: rd.por_canal,
+        cumplimiento_produccion: rd.cumplimiento_produccion,
         por_marca: rd.por_marca,
         por_grupo: rd.por_grupo,
         dead_por_categoria: rd.dead_por_categoria,
