@@ -697,6 +697,166 @@ def _q_margen(anio, medida_tbl, medida, alias):
     )
 
 
+# Bloque de filtros del visual "PAUNO" de Precio por Kilo Vs Costo por Kilo
+# (Copiar consulta, 2026-09-06). Son DOCE, no once: lleva uno que el visual
+# de margen no tiene — excluye "BONIFICACION SELL IN" de [DESCRIPCION] — y
+# eso corre la numeración de todos los demás (el año pasa de 2 a 3).
+#
+# Se escribe completo en vez de derivarlo del bloque de margen: en este
+# reporte cada visual resultó tener su propio juego de filtros, y armarlo
+# por diferencias es justo el tipo de atajo que ya produjo cifras
+# equivocadas en Mermas.
+_MARGEN_PK_FILTROS = """	VAR __DS0FilterTable = 
+		TREATAS({"VENTA BRUTA"}, 'Exl A Maestra de Facturas de Venta'[CATEGORIZACION])
+
+	VAR __DS0FilterTable2 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[DESCRIPCION])),
+			NOT('Exl A Maestra de Facturas de Venta'[DESCRIPCION] IN {"BONIFICACION SELL IN"})
+		)
+
+	VAR __DS0FilterTable3 = 
+		TREATAS({__ANIO__}, 'Calendario'[Año])
+
+	VAR __DS0FilterTable4 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[categoria_producto])),
+			NOT(
+				'Exl A Maestra de Facturas de Venta'[categoria_producto] IN {"CHATARRA",
+					"SERVICIOS",
+					BLANK()}
+			)
+		)
+
+	VAR __DS0FilterTable5 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[producto])),
+			NOT(
+				'Exl A Maestra de Facturas de Venta'[producto] IN {"PAVO C/M C/ASA EP CONG (8 KG)",
+					"ALIMENTACION COMERCIAL"}
+			)
+		)
+
+	VAR __DS0FilterTable6 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Exl A Maestra de Facturas de Venta'[estado])),
+			NOT('Exl A Maestra de Facturas de Venta'[estado] IN {"Cancelado"})
+		)
+
+	VAR __DS0FilterTable7 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),
+			NOT(
+				'Maestra de Facturacion (Total)'[categoria_producto] IN {BLANK(),
+					"BONIFICACION Y REBATES",
+					"INTERESES",
+					"MATERIA PRIMA",
+					"SUMINISTROS",
+					"SERVICIOS"}
+			)
+		)
+
+	VAR __DS0FilterTable8 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),
+			NOT('Maestra de Facturacion (Total)'[estado] IN {"Cancelado"})
+		)
+
+	VAR __DS0FilterTable9 = 
+		FILTER(
+			KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),
+			NOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})
+		)
+
+	VAR __DS0FilterTable10 = 
+		FILTER(
+			KEEPFILTERS(VALUES('OrdenxFactura'[categoria_producto])),
+			NOT(
+				'OrdenxFactura'[categoria_producto] IN {BLANK(),
+					"BONIFICACION Y REBATES",
+					"CHATARRA",
+					"SERVICIOS"}
+			)
+		)
+
+	VAR __DS0FilterTable11 = 
+		FILTER(
+			KEEPFILTERS(VALUES('OrdenxFactura'[estado])),
+			NOT('OrdenxFactura'[estado] IN {"Cancelado"})
+		)
+
+	VAR __DS0FilterTable12 = 
+		FILTER(
+			KEEPFILTERS(VALUES('OrdenxFactura'[producto])),
+			NOT(
+				'OrdenxFactura'[producto] IN {"PAVO C/M C/ASA EP CONG (8 KG)",
+					"ALIMENTACION COMERCIAL"}
+			)
+		)
+"""
+
+_MARGEN_PK_USADOS = "".join(
+    "\t\t\t__DS0FilterTable%s,\n" % ("" if i == 1 else i) for i in range(1, 13)
+)
+
+
+def _q_margen_precio_costo(anio):
+    """Precio x Kilo y Costo x Kilo mensuales, con los 12 filtros del visual.
+
+    Ambas medidas salen de la misma consulta, igual que en el gráfico. La app
+    venía trayendo 'Costo x Kilo' por la sonda genérica, es decir SIN ninguno
+    de estos filtros.
+    """
+    ld = MARGEN_LOCALDATE
+    return (
+        "DEFINE\n"
+        + _MARGEN_PK_FILTROS.replace("__ANIO__", str(anio))
+        + "\n\tVAR __DS0Core = \n"
+        "\t\tSUMMARIZECOLUMNS(\n"
+        f"\t\t\t'{ld}'[Año],\n"
+        "\t\t\t'Calendario'[Mes Corto],\n"
+        "\t\t\t'Calendario'[MES],\n"
+        + _MARGEN_PK_USADOS
+        + "\t\t\t\"Precio_x_Kilo\", 'Medidas Julito'[Precio x Kilo],\n"
+        "\t\t\t\"Costo_x_Kilo\", 'Medidas Julito'[Costo x Kilo]\n"
+        "\t\t)\n\n"
+        "EVALUATE\n\t__DS0Core\n\n"
+        "ORDER BY\n\t'Calendario'[MES]"
+    )
+
+
+def serie_margen_precio_costo(token, ds_id, periodos):
+    """Series mensuales de Precio x Kilo y Costo x Kilo."""
+    anios = sorted({a for a, _ in periodos})
+    pares = {"Precio x Kilo": {}, "Costo x Kilo": {}}
+    for anio in anios:
+        for r in dax(token, ds_id, _q_margen_precio_costo(anio),
+                     f"margen-pk-{anio}") or []:
+            mes = r.get("Calendario[MES]") or r.get("[MES]")
+            if isinstance(mes, str):
+                mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+            if mes is None:
+                continue
+            for alias, etiqueta in (("Precio_x_Kilo", "Precio x Kilo"),
+                                    ("Costo_x_Kilo", "Costo x Kilo")):
+                v = r.get(f"[{alias}]", r.get(alias))
+                if v is None:
+                    continue
+                try:
+                    pares[etiqueta][(int(anio), int(mes))] = float(v)
+                except (TypeError, ValueError):
+                    pass
+
+    out = {}
+    for etiqueta, mapa in pares.items():
+        serie = [mapa.get(pp) for pp in periodos]
+        if any(x is not None for x in serie):
+            out[etiqueta] = serie
+            print(f"    [{etiqueta}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    return out
+
+
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
@@ -909,9 +1069,12 @@ def main():
                 ("% Margen Variable", "Medidas Julito", "% Margen Contribución. %"),
             ])
             if s:
-                # La sonda genérica sigue aportando 'Costo x Kilo' y
-                # 'Venta Total'; estas se le suman sin pisarlas.
                 resultado.setdefault("margen", {}).update(s)
+            # Precio y costo por kilo: otro visual, otros 12 filtros.
+            # Sustituyen al 'Costo x Kilo' de la sonda genérica, que venía
+            # sin ningún filtro de negocio.
+            resultado.setdefault("margen", {}).update(
+                serie_margen_precio_costo(token, margen_id, periodos))
             print()
         except Exception as e:
             print(f"    ✗ {e}\n")
