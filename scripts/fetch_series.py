@@ -17,7 +17,7 @@ Estructura:
 Todos los valores provienen exclusivamente de la API REST de Power BI (executeQueries).
 """
 
-import os, json, time, datetime, requests
+import os, json, re, time, datetime, requests
 from pathlib import Path
 
 TENANT_ID     = os.environ["AZURE_TENANT_ID"]
@@ -392,6 +392,79 @@ def _q_mermas(anio):
     )
 
 
+def _q_mermas_segmento(anio, medida_tbl, medida, alias):
+    """Consulta del gráfico "B&D" de MERMA MENSUAL POR UNIDAD DE NEGOCIO,
+    tal cual la genera Power BI (Copiar consulta, 2026-09-06).
+
+    Mismo bloque de filtros que el de planta salvo uno: aquí NO va el filtro
+    de 'Tabla Mermas'[TIPO DE BASE]. Son 5 filtros, no 6 — la diferencia está
+    en la consulta original, no es un olvido.
+
+    La medida cambia por segmento ('% Merma total B&D', etc.). Los nombres NO
+    se adivinan: se leen del modelo con medidas_mermas_variantes().
+    """
+    return (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\n"
+        "\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0FilterTable2 = \n"
+        f"\t\tTREATAS({{{anio}}}, 'Calendario'[Año])\n\n"
+        "\tVAR __DS0FilterTable3 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\n"
+        "\t\t\tNOT(\n"
+        "\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\n"
+        "\t\t\t\t\t\"CHATARRA\",\n\t\t\t\t\t\"INTERESES\",\n\t\t\t\t\t\"MATERIA PRIMA\",\n"
+        "\t\t\t\t\t\"SERVICIOS\",\n\t\t\t\t\t\"SUMINISTROS\",\n\t\t\t\t\tBLANK()}\n"
+        "\t\t\t)\n\t\t)\n\n"
+        "\tVAR __DS0FilterTable4 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\n"
+        "\t\t\tNOT(\n"
+        "\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\n"
+        "\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\n"
+        "\t\t\t)\n\t\t)\n\n"
+        "\tVAR __DS0FilterTable5 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\n"
+        "\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0Core = \n"
+        "\t\tSUMMARIZECOLUMNS(\n"
+        "\t\t\t'Calendario'[Año],\n\t\t\t'Calendario'[MES],\n"
+        "\t\t\t__DS0FilterTable,\n\t\t\t__DS0FilterTable2,\n\t\t\t__DS0FilterTable3,\n"
+        "\t\t\t__DS0FilterTable4,\n\t\t\t__DS0FilterTable5,\n"
+        f"\t\t\t\"{alias}\", '{medida_tbl}'[{medida}]\n"
+        "\t\t)\n\n"
+        "EVALUATE\n\t__DS0Core\n\n"
+        "ORDER BY\n\t'Calendario'[Año], 'Calendario'[MES]"
+    )
+
+
+def medidas_mermas_variantes(token, ds_id):
+    """Lee del modelo todas las medidas '% Merma total ...'.
+
+    El gráfico de B&D usa '% Merma total B&D'; TIGO y MAQUILA tendrán las
+    suyas, pero el nombre exacto no se adivina a partir del título del visual
+    (podría ser 'TIGO', 'Tigo', 'T&G'...). Se consulta INFO.MEASURES() y se
+    filtran las que empiezan por '% Merma total', quedándonos con el sufijo
+    real. Si la DMV está bloqueada devuelve [] y solo queda el total.
+    """
+    rows = dax(token, ds_id, "EVALUATE INFO.MEASURES()", "mermas-medidas", retries=1)
+    out = []
+    for r in rows or []:
+        nombre = r.get("[Name]") or r.get("Name")
+        if not nombre or not str(nombre).lower().startswith("% merma total"):
+            continue
+        sufijo = str(nombre)[len("% Merma total"):].strip()
+        if sufijo:                       # el sin sufijo ya lo trae la de planta
+            out.append((str(nombre), sufijo))
+    return sorted(out, key=lambda t: t[1])
+
+
 def serie_mermas_exacta(token, ds_id, periodos):
     """Series mensuales de Mermas con los filtros reales del visual.
 
@@ -425,6 +498,43 @@ def serie_mermas_exacta(token, ds_id, periodos):
         if any(v is not None for v in serie):
             out[alias] = serie
     return out or None
+
+
+def serie_mermas_segmentos(token, ds_id, periodos):
+    """Series mensuales de % Merma por unidad de negocio / planta.
+
+    Los nombres de medida salen del modelo (medidas_mermas_variantes), no de
+    los títulos de los visuales. Devuelve {'% Merma B&D': [...], ...}.
+    """
+    variantes = medidas_mermas_variantes(token, ds_id)
+    if not variantes:
+        print("    · INFO.MEASURES sin resultados — solo queda la merma total")
+        return {}
+
+    print(f"    · variantes en el modelo: {[s for _, s in variantes]}")
+    anios = sorted({a for a, _ in periodos})
+    out = {}
+    for medida, sufijo in variantes:
+        alias = "v_" + re.sub(r"[^A-Za-z0-9]", "_", sufijo)
+        por_periodo = {}
+        for anio in anios:
+            q = _q_mermas_segmento(anio, "Tabla Mermas", medida, alias)
+            for r in dax(token, ds_id, q, f"mermas-{sufijo}-{anio}") or []:
+                mes = r.get("Calendario[MES]") or r.get("[MES]")
+                if isinstance(mes, str):
+                    mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+                v = r.get(f"[{alias}]", r.get(alias))
+                if mes is None or v is None:
+                    continue
+                try:
+                    por_periodo[(int(anio), int(mes))] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        serie = [por_periodo.get(p) for p in periodos]
+        if any(x is not None for x in serie):
+            out[f"% Merma {sufijo}"] = serie
+            print(f"    [% Merma {sufijo}]: {sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    return out
 
 
 def main():
@@ -477,6 +587,9 @@ def main():
                 fechas_usadas["mermas"] = "Calendario[Año] + Calendario[MES] (6 filtros del visual)"
                 for med, vals in s.items():
                     print(f"    [{med}]: {sum(1 for v in vals if v is not None)}/{len(vals)} meses")
+                # Segmentos (B&D, TIGO, MAQUILA, plantas...): mismo bloque de
+                # filtros menos el de TIPO DE BASE, con la medida por segmento.
+                resultado["mermas"].update(serie_mermas_segmentos(token, mermas_id, periodos))
                 print()
             else:
                 print("    Sin filas\n")
