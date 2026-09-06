@@ -3804,9 +3804,21 @@ function renderMcKinseyArea(empresa, tipo) {
         ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Refinanciado = deuda renegociada con proveedores (riesgo de relación comercial).</div>` + (() => {
           // Top 15 proveedores por deuda pendiente — visual "TOP 15"
           // (Copiar consulta 2026-09-06)
+          // Tramos de vigencia de la deuda (visual de tarjetas del reporte)
+          const tr = rp.cuentas_por_pagar?.tramos || [];
+          const cV = s => s === 'red' ? 'var(--red)' : s === 'yellow' ? 'var(--yellow)' : 'var(--green)';
+          const bloqueTramos = tr.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            ${tr.map(t => `<div style="flex:1 1 120px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em">${t.label}</div>
+              <div style="font-size:17px;font-weight:800;color:${cV(t.estado)};font-family:var(--fm)">${t.valor}</div>
+              ${t.pct != null ? `<div style="font-size:10px;color:var(--sub)">${t.pct}% de la deuda viva</div>
+              <div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:5px;overflow:hidden">
+                <div style="height:100%;width:${Math.min(100, t.pct)}%;background:${cV(t.estado)}"></div></div>` : ''}
+            </div>`).join('')}
+          </div>` : '';
           const pc = rp.cuentas_por_pagar?.proveedores_criticos || [];
-          if (!pc.length) return '';
-          return `<div style="margin-top:12px">
+          if (!pc.length) return bloqueTramos;
+          return bloqueTramos + `<div style="margin-top:12px">
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">Proveedores con mayor deuda pendiente</div>
             ${pc.map(p => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
               <div style="flex:1 1 150px;min-width:120px;font-size:11px;font-weight:600">${p.nombre}${p.categoria ? `<span style="font-weight:400;color:var(--sub)"> · ${p.categoria}</span>` : ''}</div>

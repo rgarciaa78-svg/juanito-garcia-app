@@ -1373,6 +1373,72 @@ def dax_cxp_top_proveedores(token, ws, dataset_id, label="cxp_top15"):
     return out[:15]
 
 
+def dax_cxp_aging(token, ws, dataset_id, label="cxp_aging"):
+    """Tramos de vigencia de la deuda con proveedores.
+
+    Confirmado con Copiar consulta (2026-09-06) sobre la tarjeta "VIGENTE"
+    del reporte '2. Cuentas por pagar'. Sus seis filtros definen qué cuenta
+    como deuda viva:
+
+      · [CONSIDERACION] = 1
+      · [ESTADO VIGENCIA] = "Vigente"   ← lo único que cambia entre tarjetas
+      · [ESTADO DE PAGO] en {Pagado Parcialmente, Sin Pagar}
+      · [EXISTE] = "SÍ"
+      · [ESTADO_REFINANCIADO] = "NO"    ← lo refinanciado se reporta aparte
+      · 'Calendario'[Columna Mostrar] = "MOSTRAR"
+
+    Ojo con [ESTADO DE PAGO]: aquí son dos valores, sin BLANK(). La consulta
+    del TOP 15 sí incluye BLANK() — son universos distintos y por eso cada
+    una lleva su propia lista.
+
+    En vez de repetir la consulta una vez por tramo adivinando las etiquetas
+    de los vencidos, se agrupa por [ESTADO VIGENCIA] manteniendo los otros
+    cinco filtros: el modelo devuelve los nombres exactos. Mismo recurso que
+    se usó con el aging de CxC, donde el agrupado cuadró al peso con las
+    tarjetas individuales.
+
+    Devuelve [(estado, importe), ...] de mayor a menor.
+    """
+    filtros = (
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\n\n"
+        "\tVAR __DS0FilterTable2 = \n"
+        "\t\tTREATAS({\"Pagado Parcialmente\",\n"
+        "\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\n\n"
+        "\tVAR __DS0FilterTable3 = \n"
+        "\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\n\n"
+        "\tVAR __DS0FilterTable4 = \n"
+        "\t\tTREATAS({\"NO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\n\n"
+        "\tVAR __DS0FilterTable5 = \n"
+        "\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\n\n"
+    )
+    q = (
+        "DEFINE\n" + filtros +
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'CUENTAS CONTABLES'[ESTADO VIGENCIA],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t__DS0FilterTable2,\n"
+        "\t\t__DS0FilterTable3,\n"
+        "\t\t__DS0FilterTable4,\n"
+        "\t\t__DS0FilterTable5,\n"
+        "\t\t\"SumIMPORTE_NETO__42_\", IGNORE(\n"
+        "\t\t\tCALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\n"
+        "\t\t)\n"
+        "\t)\n\n"
+        "ORDER BY\n\t[SumIMPORTE_NETO__42_] DESC"
+    )
+    rows = dax(token, ws, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        est = (r.get("CUENTAS CONTABLES[ESTADO VIGENCIA]") or r.get("[ESTADO VIGENCIA]"))
+        v = to_float(r.get("[SumIMPORTE_NETO__42_]") or r.get("SumIMPORTE_NETO__42_"))
+        if est and v is not None:
+            out.append((str(est), v))
+    out.sort(key=lambda t: -t[1])
+    return out
+
+
 def build_cxp(found):
     # Nombres confirmados: "Cuentas x Pagar", "Refinanciamiento", "Proveedores"
     total_val = (found.get("Cuentas x Pagar") or found.get("CUENTAS X PAGAR") or
@@ -1425,6 +1491,31 @@ def build_cxp(found):
     alerta = f"CxP {dias:.0f}d — revisar flujo" if dias and dias > 60 else (
              f"Refinanciado {fmt_soles(refin_val)} — gestionar" if refin and total and refin/total > 0.30 else None)
     res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Tramos de vigencia de la deuda (ver dax_cxp_aging). Excluyen lo
+    # refinanciado, que el reporte muestra como tarjeta aparte.
+    aging = found.get("__aging_cxp") or []
+    if aging:
+        tot_ag = sum(v for _, v in aging) or None
+        def color(nombre):
+            n = nombre.lower()
+            if "vigente" in n:
+                return "green"
+            if "90" in n or "31" in n:
+                return "red"
+            return "yellow"
+        res["tramos"] = [{
+            "label": est,
+            "valor": fmt_soles(v),
+            "pct": round(v / tot_ag * 100, 1) if tot_ag else None,
+            "estado": color(est),
+        } for est, v in aging]
+        vencido = sum(v for est, v in aging if "vigente" not in est.lower())
+        if vencido and tot_ag:
+            res["kpis"].append({
+                "label": "CxP Vencido", "valor": fmt_soles(vencido),
+                "meta": f"{vencido / tot_ag * 100:.1f}% de la deuda viva",
+                "estado": "red" if vencido / tot_ag > 0.3 else "yellow"})
 
     # Top 15 proveedores por deuda pendiente (ver dax_cxp_top_proveedores).
     # Campos 'nombre' y 'monto': son los que ya consume juanito.html.
@@ -2511,6 +2602,11 @@ def main():
         cxp_ds_id = DATASET_IDS.get(empresa, {}).get("cxp")
         if cxp_ds_id:
             try:
+                aging_cxp = dax_cxp_aging(token, ws_id, cxp_ds_id)
+                if aging_cxp:
+                    scanned.setdefault("cxp", {})["__aging_cxp"] = aging_cxp
+                    for est, v in aging_cxp:
+                        print(f"    ✓ CxP [{est}]: {v:,.0f}")
                 top = dax_cxp_top_proveedores(token, ws_id, cxp_ds_id)
                 if top:
                     scanned.setdefault("cxp", {})["__top_proveedores"] = top
