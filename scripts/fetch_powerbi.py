@@ -1247,6 +1247,91 @@ def build_cxc(found):
     if tramos: result["tramos"] = tramos
     return result, sem, razon, mora_pct, vencer_val
 
+def dax_cxp_top_proveedores(token, ws, dataset_id, label="cxp_top15"):
+    """Top 15 proveedores por deuda pendiente.
+
+    Confirmado con Copiar consulta (2026-09-06) sobre el visual "TOP 15".
+
+    La consulta tiene DOS niveles y ambos importan:
+      1. __SQDS0Core agrupa por [contacto] y TOPN(15) se queda con los quince
+         de mayor importe.
+      2. El resultado se usa como FILTRO de la consulta externa, que agrupa
+         por [NOMBRE ABREV] y [CATEGORIA] — que es lo que muestra la tabla.
+    Agrupar directamente por nombre abreviado no daría lo mismo: el top se
+    decide por contacto, y un contacto puede abrir varias filas de categoría.
+
+    Los cinco filtros van literales. Definen qué es "deuda pendiente":
+      · [contacto] excluye INVENTARIO y SEDAPAL
+      · [EXISTE] = "SÍ"
+      · [ESTADO DE PAGO] en {vacío, Pagado Parcialmente, Sin Pagar}
+      · [CONSIDERACION] = 1
+      · 'Calendario'[Columna Mostrar] = "MOSTRAR"
+
+    Se quita solo la maquinaria de subtotales y ordenamiento
+    (ROLLUPADDISSUBTOTAL, NATURALLEFTOUTERJOIN, SELECTCOLUMNS, los TOPN de
+    presentación), que no altera los importes.
+    """
+    filtros = (
+        "\tVAR __SQDS0FilterTable = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('CUENTAS CONTABLES'[contacto])),\n"
+        "\t\t\tNOT(\n"
+        "\t\t\t\t'CUENTAS CONTABLES'[contacto] IN {\"INVENTARIO\",\n"
+        "\t\t\t\t\t\"SERV AGUA POTAB Y ALCANT DE LIMA-SEDAPAL\"}\n"
+        "\t\t\t)\n"
+        "\t\t)\n\n"
+        "\tVAR __SQDS0FilterTable2 = \n"
+        "\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\n\n"
+        "\tVAR __SQDS0FilterTable3 = \n"
+        "\t\tTREATAS(\n"
+        "\t\t\t{BLANK(),\n"
+        "\t\t\t\t\"Pagado Parcialmente\",\n"
+        "\t\t\t\t\"Sin Pagar\"},\n"
+        "\t\t\t'CUENTAS CONTABLES'[ESTADO DE PAGO]\n"
+        "\t\t)\n\n"
+        "\tVAR __SQDS0FilterTable4 = \n"
+        "\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\n\n"
+        "\tVAR __SQDS0FilterTable5 = \n"
+        "\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\n\n"
+    )
+    def usados(ind):
+        return "".join(f"{ind}__SQDS0FilterTable{'' if i == 1 else i},\n"
+                       for i in range(1, 6))
+
+    MED = ("\"SumIMPORTE_NETO__42_\", "
+           "CALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))")
+    q = (
+        "DEFINE\n" + filtros +
+        "\tVAR __SQDS0Core = \n"
+        "\t\tSUMMARIZECOLUMNS(\n"
+        "\t\t\t'CUENTAS CONTABLES'[contacto],\n"
+        + usados("\t\t\t") +
+        f"\t\t\t{MED}\n"
+        "\t\t)\n\n"
+        "\tVAR __SQDS0BodyLimited = \n"
+        "\t\tTOPN(15, __SQDS0Core, [SumIMPORTE_NETO__42_], 0)\n\n"
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        "\t\t'CUENTAS CONTABLES'[NOMBRE ABREV],\n"
+        "\t\t'CUENTAS CONTABLES'[CATEGORIA],\n"
+        "\t\t__SQDS0BodyLimited,\n"
+        + usados("\t\t") +
+        f"\t\t{MED}\n"
+        "\t)\n\n"
+        "ORDER BY\n\t[SumIMPORTE_NETO__42_] DESC"
+    )
+    rows = dax(token, ws, dataset_id, q, label)
+    out = []
+    for r in rows or []:
+        nom = (r.get("CUENTAS CONTABLES[NOMBRE ABREV]") or r.get("[NOMBRE ABREV]"))
+        cat = (r.get("CUENTAS CONTABLES[CATEGORIA]") or r.get("[CATEGORIA]"))
+        v = to_float(r.get("[SumIMPORTE_NETO__42_]") or r.get("SumIMPORTE_NETO__42_"))
+        if nom and v is not None:
+            out.append((str(nom), str(cat or ""), v))
+    out.sort(key=lambda t: -t[2])
+    return out
+
+
 def build_cxp(found):
     # Nombres confirmados: "Cuentas x Pagar", "Refinanciamiento", "Proveedores"
     total_val = (found.get("Cuentas x Pagar") or found.get("CUENTAS X PAGAR") or
@@ -1524,7 +1609,24 @@ def build_compras(found):
 
     alerta = f"Ratio {ratio:.1f}% — {interp}" if sem != "green" and ratio else (
              f"Faltantes: {int(to_float(faltantes_val) or 0)} ítems" if faltantes_val and to_float(faltantes_val) else None)
-    return {"estado": sem, "alerta": alerta, "kpis": kpis}, ratio
+    res = {"estado": sem, "alerta": alerta, "kpis": kpis}
+
+    # Top 15 proveedores por deuda pendiente (ver dax_cxp_top_proveedores)
+    top = found.get("__top_proveedores") or []
+    if top:
+        tot = sum(v for _, _, v in top) or None
+        # Campos 'nombre' y 'monto': son los que ya consume juanito.html
+        res["proveedores_criticos"] = [{
+            "nombre": n,
+            "categoria": c,
+            "monto": fmt_soles(v),
+            "pct": round(v / tot * 100, 1) if tot else None,
+        } for n, c, v in top[:15]]
+        if tot:
+            res["kpis"].append({
+                "label": "Top 15 proveedores", "valor": fmt_soles(tot),
+                "meta": "deuda concentrada"})
+    return res, ratio
 
 def build_inventario(found):
     # ── Clasificación por categoría, de la matriz "CLASIFICACION DE INVENTARIO"
@@ -2361,6 +2463,18 @@ def main():
         else:
             summary["semaforos"][empresa] = "yellow"
             summary["semaforo_razon"][empresa] = "Sin datos CxC"
+
+        # ── CxP: top 15 proveedores por deuda pendiente
+        cxp_ds_id = DATASET_IDS.get(empresa, {}).get("cxp")
+        if cxp_ds_id:
+            try:
+                top = dax_cxp_top_proveedores(token, ws_id, cxp_ds_id)
+                if top:
+                    scanned.setdefault("cxp", {})["__top_proveedores"] = top
+                    print(f"    ✓ CxP top proveedores: {len(top)} filas, "
+                          f"mayor {top[0][0]} {top[0][2]:,.0f}")
+            except Exception as e:
+                print(f"    ✗ CxP top proveedores: {e}")
 
         # ── CxP
         if scanned.get("cxp"):

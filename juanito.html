@@ -3801,7 +3801,22 @@ function renderMcKinseyArea(empresa, tipo) {
           {label:'CxP Total', valSoles: cxp, color:'var(--accent)'},
           {label:'Refinanciado', valSoles: ref, color:'var(--yellow)'},
           {label:'Deuda directa', valSoles: cxp - ref, color:'var(--red)'},
-        ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Refinanciado = deuda renegociada con proveedores (riesgo de relación comercial).</div>` : 'Sin datos de CxP.',
+        ]) + `<div style="font-size:11px;color:var(--sub);margin-top:8px">Refinanciado = deuda renegociada con proveedores (riesgo de relación comercial).</div>` + (() => {
+          // Top 15 proveedores por deuda pendiente — visual "TOP 15"
+          // (Copiar consulta 2026-09-06)
+          const pc = rp.cuentas_por_pagar?.proveedores_criticos || [];
+          if (!pc.length) return '';
+          return `<div style="margin-top:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">Proveedores con mayor deuda pendiente</div>
+            ${pc.map(p => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+              <div style="flex:1 1 150px;min-width:120px;font-size:11px;font-weight:600">${p.nombre}${p.categoria ? `<span style="font-weight:400;color:var(--sub)"> · ${p.categoria}</span>` : ''}</div>
+              <div style="flex:0 0 90px;height:12px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${p.pct != null ? Math.min(100, p.pct) : 0}%;background:var(--red)"></div>
+              </div>
+              <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm)">${p.monto}${p.pct != null ? ` · ${p.pct}%` : ''}</div>
+            </div>`).join('')}
+          </div>`;
+        })() : 'Sin datos de CxP.',
         IV: [
           {palanca:'Reducir deuda refinanciada', impacto: ref ? `Normalizar ${fmtM(ref)} refinanciado` : 'Mejorar relación con proveedores', accion:'Negociar plan de pago estructurado con top 5 proveedores por monto refinanciado. Priorizar los de mayor criticidad en abastecimiento.', prioridad: pctRef&&pctRef>50?'ALTA':'MEDIA', col: pctRef&&pctRef>50?'var(--red)':'var(--yellow)'},
           {palanca:'Optimizar días de pago', impacto:'Mejor posición de caja', accion:'Alinear plazos de pago a proveedores con ciclo de cobro a clientes. Negociar descuento por pronto pago donde sea posible.', prioridad:'MEDIA', col:'var(--yellow)'},
@@ -5950,7 +5965,7 @@ function construirContexto() {
         kpis: rd.kpis,
         acciones: (rd.acciones || []).slice(0, 3),
         riesgos: (rd.riesgos || []).slice(0, 3),
-        proveedores_criticos: (rd.proveedores_criticos || []).slice(0, 3),
+        proveedores_criticos: (rd.proveedores_criticos || []).slice(0, 5),
         tramos: rd.tramos,
         por_gerente: rd.por_gerente,
         por_uen: rd.por_uen,
