@@ -573,5 +573,142 @@
     "fill_rate": 0.8647581189382418,
     "mermas": 0.04987907894946126,
     "avance": 0.6295519287006067
-  }
+  },
+  "diagnostico": [
+    {
+      "consulta": "treatas_Calend_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Calendar</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_dCalen_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>dCalendario</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Fechas_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Fechas</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Dim_Fe_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Dim_Fecha</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Calend_Fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Calendar</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_dCalen_Fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>dCalendario</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Fechas_Fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Fechas</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Dim_Fe_Fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Dim_Fecha</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Calend_fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Calendar</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_dCalen_fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>dCalendario</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Fechas_fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Fechas</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Dim_Fe_fech",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Dim_Fecha</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Calend_date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Calendar</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_dCalen_date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>dCalendario</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Fechas_date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Fechas</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Dim_Fe_date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Dim_Fecha</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Calend_Cale",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Column '<oii>CalendarDate</oii>' in table '<oii>Calendario</oii>' cannot be found or may not be used in this expression.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803780\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Calend_Cale",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Calendar</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_dCalen_Cale",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>dCalendario</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Fechas_Cale",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Fechas</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Dim_Fe_Cale",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Dim_Fecha</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Calend_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Column '<oii>DateKey</oii>' in table '<oii>Calendario</oii>' cannot be found or may not be used in this expression.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803780\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Calend_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Calendar</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_dCalen_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>dCalendario</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Fechas_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Fechas</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "treatas_Dim_Fe_Date",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (9, 7) Cannot find table '<oii>Dim_Fecha</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "consumo_ventaneta",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (5, 9) Column '<oii>Peso total KG</oii>' in table '<oii>Maestra de Facturacion (Total)</oii>' cannot be found or may not be used in this expression.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803780\"}}]}}}"
+    }
+  ]
 }
