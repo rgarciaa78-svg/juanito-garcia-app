@@ -807,7 +807,12 @@ DATASET_IDS = {
 # Candidatos de medidas por tipo — orden de más probable a menos
 SCAN_CANDIDATES = {
     "cxc": [
-        "% Morosidad", "Morosidad", "% Mora", "Mora", "Tasa Morosidad",
+        # La oficial es '% Morosidad' (21.08%), confirmada por el usuario el
+        # 2026-09-06. El dataset tiene además una medida 'Morosidad' que
+        # devuelve 13.78% — mide otra cosa y NO debe usarse ni como respaldo:
+        # si se colara, el semáforo pasaría de rojo a amarillo y cambiaría la
+        # lectura del reporte. Por eso está excluida a propósito.
+        "% Morosidad", "% Mora", "Tasa Morosidad",
         "Por Vencer", "Saldo Por Vencer", "CxC Por Vencer", "No Vencido",
         "CxC Total", "Total CxC", "Saldo CxC", "Cartera Total",
         "Vencido", "Saldo Vencido", "Total Vencido",
@@ -1165,7 +1170,9 @@ def sem_thresh(v, red_above=None, yellow_above=None, red_below=None, yellow_belo
 # ─── Funciones de reporte ─────────────────────────────────────────────────────
 
 def build_cxc(found):
-    mora_val = found.get("% Morosidad") or found.get("Morosidad") or found.get("% Mora") or found.get("Mora")
+    # Solo '% Morosidad' (21.08%). La medida 'Morosidad' (13.78%) queda fuera
+    # a propósito — ver nota en SCAN_CANDIDATES["cxc"].
+    mora_val = found.get("% Morosidad") or found.get("% Mora") or found.get("Tasa Morosidad")
     vencer_val = found.get("Por Vencer") or found.get("Saldo Por Vencer") or found.get("No Vencido")
     total_val = found.get("CxC Total") or found.get("Total CxC") or found.get("Saldo CxC") or found.get("Cartera Total")
     vencido_val = found.get("Vencido") or found.get("Saldo Vencido") or found.get("Total Vencido")
@@ -2351,8 +2358,10 @@ def main():
                 if avance_yoy is not None:
                     summary["yoy"]["avance"] = avance_yoy
                 # Morosidad año anterior
-                mora_yoy = (yoy.get("cxc", {}) or {}).get("% Morosidad") or \
-                           (yoy.get("cxc", {}) or {}).get("Morosidad")
+                # Solo '% Morosidad': el respaldo a 'Morosidad' compararía el
+                # año actual (21.08%) contra otra medida distinta (13.78%) y
+                # produciría un YoY falso. Ver SCAN_CANDIDATES["cxc"].
+                mora_yoy = (yoy.get("cxc", {}) or {}).get("% Morosidad")
                 if mora_yoy is not None:
                     summary["yoy"]["morosidad"] = mora_yoy
                 print(f"  YoY {comp}: ventas={ventas_yoy} fr={fr_yoy} mermas={mermas_yoy}")
