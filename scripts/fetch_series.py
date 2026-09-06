@@ -825,6 +825,64 @@ def _q_margen_precio_costo(anio):
     )
 
 
+def _q_margen_ventas(anio):
+    """Ventas mensuales (S/.) del visual "VENTAS (S/.) PAUNO".
+
+    Copiar consulta 2026-09-06. Comparte los DOCE filtros del visual de
+    precio/costo — verificado por diff carácter a carácter contra la
+    consulta original, no asumido. Cambian dos cosas: agrupa además por
+    'Calendario'[Año], y la cifra es una suma de columna, no una medida:
+    SUM('Exl A Maestra de Facturas de Venta'[Monto_Neto_Factura]).
+
+    Como en el visual de margen, se conserva solo __DS0Core; el resto es la
+    maquinaria de eje y leyenda.
+    """
+    ld = MARGEN_LOCALDATE
+    return (
+        "DEFINE\n"
+        + _MARGEN_PK_FILTROS.replace("__ANIO__", str(anio))
+        + "\n\tVAR __DS0Core = \n"
+        "\t\tSUMMARIZECOLUMNS(\n"
+        f"\t\t\t'{ld}'[Año],\n"
+        "\t\t\t'Calendario'[Mes Corto],\n"
+        "\t\t\t'Calendario'[MES],\n"
+        "\t\t\t'Calendario'[Año],\n"
+        + _MARGEN_PK_USADOS
+        + "\t\t\t\"SumMonto_Neto_Factura\", "
+        "CALCULATE(SUM('Exl A Maestra de Facturas de Venta'[Monto_Neto_Factura]))\n"
+        "\t\t)\n\n"
+        "EVALUATE\n\t__DS0Core\n\n"
+        "ORDER BY\n\t'Calendario'[MES]"
+    )
+
+
+def serie_margen_ventas(token, ds_id, periodos):
+    """Serie mensual de Ventas (S/.)."""
+    anios = sorted({a for a, _ in periodos})
+    mapa = {}
+    for anio in anios:
+        for r in dax(token, ds_id, _q_margen_ventas(anio), f"margen-ventas-{anio}") or []:
+            v = r.get("[SumMonto_Neto_Factura]", r.get("SumMonto_Neto_Factura"))
+            if v is None:
+                continue
+            mes = r.get("Calendario[MES]") or r.get("[MES]")
+            if isinstance(mes, str):
+                mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+            if mes is None:
+                continue
+            try:
+                mapa[(int(anio), int(mes))] = float(v)
+            except (TypeError, ValueError):
+                pass
+    serie = [mapa.get(pp) for pp in periodos]
+    if not any(x is not None for x in serie):
+        print("    ✗ Ventas (S/.): sin datos")
+        return {}
+    print(f"    [Ventas (S/.)]: "
+          f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    return {"Ventas (S/.)": serie}
+
+
 def serie_margen_precio_costo(token, ds_id, periodos):
     """Series mensuales de Precio x Kilo y Costo x Kilo."""
     anios = sorted({a for a, _ in periodos})
@@ -1075,6 +1133,9 @@ def main():
             # sin ningún filtro de negocio.
             resultado.setdefault("margen", {}).update(
                 serie_margen_precio_costo(token, margen_id, periodos))
+            # Ventas: mismos 12 filtros (verificado por diff), otra columna
+            resultado["margen"].update(
+                serie_margen_ventas(token, margen_id, periodos))
             print()
         except Exception as e:
             print(f"    ✗ {e}\n")
