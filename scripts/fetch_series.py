@@ -64,6 +64,18 @@ DATE_CANDIDATES = [
 INICIO_ANIO = 2025
 INICIO_MES  = 1
 
+# Medidas de la sonda genérica que ya tienen equivalente capturado y por tanto
+# NO deben publicarse: mostrarían una segunda cifra del mismo concepto,
+# calculada sin los filtros del reporte.
+#
+# 'Venta Total' vs 'Ventas (S/.)': la primera venía sin ninguno de los 12
+# filtros del visual y daba ~S/350K más al mes (bonificaciones, chatarra y
+# servicios que el reporte excluye). Tener las dos en el dashboard es
+# justamente el problema que veníamos corrigiendo.
+SUSTITUIDAS_POR_CAPTURA = {
+    ("margen", "Venta Total"),
+}
+
 
 def get_token():
     r = requests.post(TOKEN_URL, data={
@@ -1232,6 +1244,8 @@ def main():
                               "posible relación inactiva o la medida ignora el filtro de fecha (confirmado con "
                               "Copiar consulta solo en Control Interno; para las demás falta validar en vivo).",
                 })
+            elif (ds_key, med) in SUSTITUIDAS_POR_CAPTURA:
+                print(f"    [{med}]: se omite — sustituida por la serie capturada")
             else:
                 serie_confiable[med] = vals
 

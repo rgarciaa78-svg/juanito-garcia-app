@@ -1708,7 +1708,7 @@ const REPORTE_LABEL = {
 //      'avg'  = tasa o ratio   → el acumulado se promedia
 //      'last' = saldo o stock  → no tiene acumulado (es una foto a la fecha)
 const KPI_SOURCE = {
-  'Ventas mes':                 { ds:'margen',        m:'Venta Total',       fmt:'money', dir:'up',   agg:'sum'  },
+  'Ventas mes':                 { ds:'margen',        m:'Ventas (S/.)',       fmt:'money', dir:'up',   agg:'sum'  },
   'Precio/kg':                  { ds:'margen',        m:'Precio x Kilo',     fmt:'money2',dir:'up',   agg:'avg'  },
   'Costo/kg':                   { ds:'margen',        m:'Costo x Kilo',      fmt:'money2',dir:'down', agg:'avg'  },
   'Margen variable':            { ds:'margen',        m:'__margen_calc__',   fmt:'pct',   dir:'up',   agg:'avg'  },
@@ -1952,7 +1952,7 @@ function origenVariacion(label, an) {
   const ps = an.ps, i = an.idx;
   const serieDeM = (ds, m) => (SERIES.datasets[ds] || {})[m];
   const pk = serieDeM('margen','Precio x Kilo'), ck = serieDeM('margen','Costo x Kilo');
-  const vt = serieDeM('margen','Venta Total');
+  const vt = serieDeM('margen','Ventas (S/.)');
 
   // Índice del mismo mes del año anterior
   const jY = an.yoy ? ps.indexOf(an.yoy.periodo) : -1;
@@ -2315,7 +2315,7 @@ function diagnosticoCompleto() {
   const hallazgos = [];
 
   // ── 1. Puente de margen: volumen vs precio vs costo ──
-  const vt = M['Venta Total'], pk = M['Precio x Kilo'], ck = M['Costo x Kilo'];
+  const vt = M['Ventas (S/.)'], pk = M['Precio x Kilo'], ck = M['Costo x Kilo'];
   if (vt && pk && ck) {
     const mg = pk.map((p,i) => (p==null||ck[i]==null||p===0) ? null : (p-ck[i])/p);
     const comp = mesesComparables(mg, ps, anioAnt, anioAct);
@@ -2549,7 +2549,7 @@ function dxpStats() {
   const ps = (SERIES && SERIES.periodos) || [];
   s.ps = ps; s.ds = ds;
   const M = ds.margen || {};
-  const pk = M['Precio x Kilo'], ck = M['Costo x Kilo'], vt = M['Venta Total'];
+  const pk = M['Precio x Kilo'], ck = M['Costo x Kilo'], vt = M['Ventas (S/.)'];
   if (pk && ck) {
     const mg = pk.map((p,i) => (p==null||ck[i]==null||!p) ? null : (p-ck[i])/p*100);
     const val = mg.map((v,i)=>({v,i})).filter(x=>x.v!=null);
@@ -3434,7 +3434,7 @@ function renderChartForReporte(tipo, rd) {
     cuentas_por_pagar: [{ ds:'cxp',        medida:'Refinanciamiento',label:'Refinanciamiento (serie)', money:true },
                         { ds:'cxp',        medida:'Proveedores',     label:'Proveedores (serie)' }],
     sop_inventario:    [{ ds:'inventario', medida:'Stock Total',     label:'Stock Total (kg)' }],
-    margen_variable:   [{ ds:'margen',     medida:'Venta Total',     label:'Venta Total (serie)', money:true }],
+    margen_variable:   [{ ds:'margen',     medida:'Ventas (S/.)',     label:'Ventas (S/.)', money:true }],
     fill_rate:         [{ ds:'fill_rate',  medida:'ORDEN DE VENTA',  label:'Orden de Venta (serie)', money:true }],
   };
   const extras = (EXTRA_SERIE[tipo] || []).map(e => {
@@ -4219,7 +4219,7 @@ function renderVentasMcKinsey(empresa) {
         ${row2('Avance vs Presupuesto', avanceV||'—', 'meta 100%', col)}
         ${row2('Presupuesto implícito mensual', ppto ? fmtM(ppto) : '—', '(= real ÷ avance)', 'var(--sub)')}
         ${row2('Brecha absoluta', gap ? fmtM(gap) : '—', 'faltante vs plan', 'var(--red)')}
-        ${!margenV ? `<div class="mck-nd" style="margin-top:8px">Margen Variable no disponible aún — el scraper encontró solo Venta Total. Ejecutar workflow con candidatos actualizados para descubrir "R. MARGEN" o "% Margen Variable".</div>` : ''}
+        ${!margenV ? `<div class="mck-nd" style="margin-top:8px">Margen Variable sin dato en este corte. La serie mensual sí existe: proviene de <code>'Medidas Julito'[% Margen Contribución. %]</code> con los 11 filtros del visual "MARGEN VARIABLE PAUNO" (confirmado con Copiar consulta, 2026-09-06) — mira el panel de tendencia.</div>` : ''}
       </div>
     </div>
   `)}
@@ -4367,9 +4367,9 @@ function renderVentasMcKinsey(empresa) {
 
   ${(() => {
     const ds = SERIES?.datasets?.margen;
-    if (!ds || !ds['Venta Total']) return `<div class="mck-notrend"><span class="icon">⊗</span><span class="txt"><b>Sin gráfico de tendencia.</b> La serie mensual de Ventas/Margen todavía no está disponible en <code>series.json</code>.</span></div>`;
+    if (!ds || !ds['Ventas (S/.)']) return `<div class="mck-notrend"><span class="icon">⊗</span><span class="txt"><b>Sin gráfico de tendencia.</b> La serie mensual de Ventas/Margen todavía no está disponible en <code>series.json</code>.</span></div>`;
     const ps = SERIES.periodos;
-    const vt = ds['Venta Total'], pk = ds['Precio x Kilo'], ck = ds['Costo x Kilo'];
+    const vt = ds['Ventas (S/.)'], pk = ds['Precio x Kilo'], ck = ds['Costo x Kilo'];
     const idxAct = vt.length - 1, idxPrev = idxAct - 1;
     const momPct = (vt[idxPrev] ? (vt[idxAct]/vt[idxPrev]-1)*100 : null);
     const anioAct = ps[idxAct].slice(0,4), anioAnt = String(parseInt(anioAct)-1);
@@ -4459,7 +4459,7 @@ function dxpSerie(ds, medida) {
 
 // Config por reporte: qué serie usar en el panel de tendencia y por qué no hay.
 const DXP_SERIE_CFG = {
-  margen_variable:      { ds:'margen',        medida:'Costo x Kilo',   extra:'Venta Total', label:'Costo x Kilo (S/)', label2:'Ventas (S/)', pct:false },
+  margen_variable:      { ds:'margen',        medida:'Costo x Kilo',   extra:'Ventas (S/.)', label:'Costo x Kilo (S/)', label2:'Ventas (S/)', pct:false },
   fill_rate:            { ds:'fill_rate',     medida:'% Fill Rate',    label:'% Fill Rate', pct:true,  meta:98 },
   mermas:               { ds:'mermas',        medida:'% Merma Total',  label:'% Merma Total', pct:true, meta:2, metaArriba:true },
   margen_variable_pag2: { ds:'planificacion', medida:'% Avance',       label:'% Avance', pct:true, meta:100 },
@@ -4919,7 +4919,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
     cuentas_por_pagar: [{ ds:'cxp',        medida:'Refinanciamiento',label:'Refinanciamiento (serie)', money:true },
                         { ds:'cxp',        medida:'Proveedores',     label:'Proveedores (serie)' }],
     sop_inventario:    [{ ds:'inventario', medida:'Stock Total',     label:'Stock Total (kg)' }],
-    margen_variable:   [{ ds:'margen',     medida:'Venta Total',     label:'Venta Total (serie)', money:true }],
+    margen_variable:   [{ ds:'margen',     medida:'Ventas (S/.)',     label:'Ventas (S/.)', money:true }],
     fill_rate:         [{ ds:'fill_rate',  medida:'ORDEN DE VENTA',  label:'Orden de Venta (serie)', money:true }],
   };
   const extras = (EXTRA_SERIE[tipo] || []).map(e => {
