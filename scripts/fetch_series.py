@@ -585,13 +585,33 @@ def serie_mermas_plantas(token, ds_id, periodos):
             except (TypeError, ValueError):
                 pass
 
+    # Agrupar por [almacen] devuelve TODAS las bodegas del modelo, no solo las
+    # 4 que el reporte grafica. Las chicas (maquilas puntuales) producen muy
+    # poco: aparecen en 4-5 meses y con % disparados (115%, 32%) porque el
+    # denominador es mínimo — ruido, no gestión. Se exige cobertura de al
+    # menos el 80% de los meses; las del reporte la cumplen (13/13) y las
+    # chicas no. Criterio por dato, no lista fija: si mañana una maquila pasa
+    # a producir de forma continua, entra sola.
+    #
+    # El umbral se mide contra la MEJOR cobertura observada, no contra el
+    # total de períodos: el visual filtra Date >= 31/07/2025, así que ni la
+    # planta más completa llega a los 20 meses del dashboard (llega a 13).
+    # Usar len(periodos) cortaría también a las buenas.
+    series = {alm: [por_planta[alm].get(p) for p in periodos] for alm in por_planta}
+    mejor = max((sum(1 for x in s if x is not None) for s in series.values()),
+                default=0)
+    minimo = max(3, int(mejor * 0.8))
+    print(f"    · cobertura máxima {mejor} meses → umbral {minimo}")
     out = {}
-    for alm in sorted(por_planta):
-        serie = [por_planta[alm].get(p) for p in periodos]
-        if any(x is not None for x in serie):
-            out[f"% Merma {alm}"] = serie
-            print(f"    [% Merma {alm}]: "
-                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    for alm in sorted(series):
+        serie = series[alm]
+        con_dato = sum(1 for x in serie if x is not None)
+        if con_dato < minimo:
+            print(f"    · {alm}: {con_dato}/{len(serie)} meses — volumen "
+                  f"intermitente, se omite")
+            continue
+        out[f"% Merma {alm}"] = serie
+        print(f"    [% Merma {alm}]: {con_dato}/{len(serie)} meses")
     if not out:
         print("    ✗ sin plantas — [almacen] no devolvió filas")
     return out
