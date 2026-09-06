@@ -2727,7 +2727,7 @@ function dxpCards(s) {
     fill_rate: () => `<b>${s.frBajoMeta}/${s.frN} meses</b> bajo meta · Venta Perdida <b>${s.ventaPerdida||'—'}</b> (${dxpPct(s.vpPct)} del pedido)`,
     mermas: () => `${s.uenPeor?`${s.uenPeor.uen} <b>${s.ratioUen?s.ratioUen.toFixed(1)+'x':''}</b> peor que ${s.uenMejor.uen}`:''}${s.plaPeor?` · ${s.plaPeor.planta} <b>${s.ratioPla?s.ratioPla.toFixed(1)+'x':''}</b> peor que ${s.plaMejor.planta}`:''}`,
     margen_variable: () => `Margen implícito <b>${dxpPct(s.mgAct,2)}</b> — ${s.mgEsMin?'mínimo histórico':'dentro'} de ${s.mgN} meses`,
-    cuentas_por_cobrar: () => `CxC por vencer <b>${s.cxcVencer||'—'}</b> · sin serie histórica`,
+    cuentas_por_cobrar: () => `CxC por vencer <b>${s.cxcVencer||'—'}</b> · aging en 4 tramos + serie mensual`,
     cuentas_por_pagar: () => `<b>${dxpPct(s.refPct)}</b> refinanciado (${s.refinanciado||'—'}) · ${s.proveedores||'—'} proveedores`,
     consumo_materiales: () => `Costo x TN Producida/Vendida — validados por Copiar consulta`,
     compras: () => `Consumo Prom 3M/6M casi plano — <b>a validar</b> si es bug`,
@@ -3696,11 +3696,13 @@ function renderMcKinseyArea(empresa, tipo) {
           </div>
         </div>`,
         II: yoyBlock(mora, yoy.morosidad != null ? yoy.morosidad * 100 : null, 'Morosidad CxC', v => v.toFixed(1)+'%',
-          `Comparativo YoY no disponible para Morosidad. Confirmado con Analizador de rendimiento ›
-          Copiar consulta (2026-09-04): la tarjeta de Morosidad es <code>EVALUATE ROW("v",
-          'DATA_FACTURACION'[% MOROSIDAD])</code> — sin ningún filtro de año, mes ni fecha. El reporte
-          solo guarda el valor de hoy, no un histórico por período. No hay forma de obtener "cómo estaba
-          la mora en agosto 2025" desde esta tarjeta porque nunca se calculó ni se guardó para esa fecha.`),
+          `La <b>tarjeta</b> de Morosidad es <code>EVALUATE ROW("v", 'DATA_FACTURACION'[% MOROSIDAD])</code>
+          — un escalar sin filtro de fecha, así que por sí sola no da comparativo. El
+          <b>gráfico</b>, en cambio, usa otra medida: <code>'DATA_FACTURACION'[% MOROSIDAD x mes]</code>,
+          cortada por <code>[Año]</code> y <code>'Calendario (FACT)'[Mes Numero]</code>
+          (confirmado con Copiar consulta, 2026-09-06). Esa serie mensual ya está incorporada — mira el
+          panel de tendencia. Si aquí no ves el YoY es porque el histórico aún no cubre el mismo mes del
+          año anterior.`),
         III: (() => {
           const tr = rp.cuentas_por_cobrar?.tramos || [];
           if (!tr.length) return pvenc ? `<div style="padding:12px;background:var(--red-soft);border:1px solid var(--border);border-radius:8px;text-align:center">
@@ -4464,9 +4466,9 @@ const DXP_SERIE_CFG = {
   cuentas_por_pagar:    { ds:'cxp',           medida:'Refinanciamiento',label:'Refinanciamiento (S/)', pct:false },
   compras:              { ds:'compras',       medida:'Consumo Prom 3M',label:'Consumo Prom 3M', pct:false },
   sop_inventario:       { ds:'inventario',    medida:'Stock Total',    label:'Stock Total (kg)', pct:false },
+  cuentas_por_cobrar:   { ds:'cxc',           medida:'% Morosidad',    label:'% Morosidad', pct:true, meta:15, metaArriba:true },
 };
 const DXP_SIN_SERIE_MOTIVO = {
-  cuentas_por_cobrar: 'La API de Power BI devolvió <b>HTTP 404</b> al pedir el esquema de fecha de este dataset — no tiene columna de calendario detectable. Solo existe el corte del mes actual.',
   control_interno:    'Las tarjetas de este dashboard son un <b>acumulado histórico total</b>: no responden al selector de mes (confirmado con Copiar consulta). No existe serie mensual que graficar.',
   consumo_materiales: 'Las medidas de este dataset devolvieron <b>HTTP 404</b> al pedir esquema temporal y no tienen columna de fecha filtrable — son acumulado histórico, no del mes.',
   productividad:      'Este dataset no está entre los que exponen serie mensual en <code>series.json</code> — solo existe el corte del mes actual.',

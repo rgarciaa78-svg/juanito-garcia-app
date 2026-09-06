@@ -246,6 +246,75 @@ def serie_mes_a_mes(token, dataset_id, medidas, tbl, col, periodos):
     return salida
 
 
+CXC_DATE_TBL = "LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537"
+
+MESES_CORTOS = {
+    "ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6,
+    "jul": 7, "ago": 8, "sep": 9, "set": 9, "oct": 10, "nov": 11, "dic": 12,
+}
+
+
+def serie_cxc_morosidad(token, ds_id, periodos):
+    """Serie mensual de % Morosidad — consulta exacta del gráfico "% DE MOROSIDAD".
+
+    Capturada con Copiar consulta el 2026-09-06. Dos hallazgos que hacían
+    imposible obtener esta serie con la sonda genérica:
+
+    1. La medida del gráfico es '[% MOROSIDAD x mes]', NO '[% MOROSIDAD]'.
+       La segunda es un escalar que ignora la fecha — por eso la tarjeta
+       devolvía siempre el mismo número y la serie salía "plana".
+    2. El eje de tiempo no es una tabla Calendario normal: el año viene de
+       una tabla de fechas automática ('LocalDateTable_9de71e0e-...') y el
+       mes de 'Calendario (FACT)'. Ninguna de las dos estaba en
+       DATE_CANDIDATES, y la detección automática no podía adivinarlas.
+
+    Se envía la consulta tal cual la genera Power BI (sin reescribirla) y
+    después se mapean las filas a los períodos del dashboard.
+    """
+    q = (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tFILTER(\n"
+        f"\t\t\tKEEPFILTERS(VALUES('{CXC_DATE_TBL}'[Año])),\n"
+        f"\t\t\t'{CXC_DATE_TBL}'[Año] > 2024\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0Core = \n"
+        "\t\tSUMMARIZECOLUMNS(\n"
+        f"\t\t\t'{CXC_DATE_TBL}'[Año],\n"
+        "\t\t\t'Calendario (FACT)'[Mes Corto],\n"
+        "\t\t\t'Calendario (FACT)'[Mes Numero],\n"
+        "\t\t\t__DS0FilterTable,\n"
+        "\t\t\t\"v__MOROSIDAD_x_mes\", 'DATA_FACTURACION'[% MOROSIDAD x mes]\n"
+        "\t\t)\n\n"
+        "EVALUATE\n\t__DS0Core\n\n"
+        "ORDER BY\n"
+        f"\t'{CXC_DATE_TBL}'[Año],\n"
+        "\t'Calendario (FACT)'[Mes Numero]"
+    )
+    rows = dax(token, ds_id, q, "cxc-morosidad-mensual")
+    if not rows:
+        return None
+
+    por_periodo = {}
+    for r in rows:
+        anio = r.get(f"{CXC_DATE_TBL}[Año]") or r.get("[Año]")
+        mes = r.get("Calendario (FACT)[Mes Numero]") or r.get("[Mes Numero]")
+        val = r.get("[v__MOROSIDAD_x_mes]") or r.get("v__MOROSIDAD_x_mes")
+        if mes is None:
+            corto = str(r.get("Calendario (FACT)[Mes Corto]") or "").strip().lower()[:3]
+            mes = MESES_CORTOS.get(corto)
+        if anio is None or mes is None or val is None:
+            continue
+        try:
+            por_periodo[(int(anio), int(mes))] = float(val)
+        except (TypeError, ValueError):
+            continue
+
+    if not por_periodo:
+        return None
+    return [por_periodo.get(p) for p in periodos]
+
+
 def main():
     print("=== JUANITO — SERIE HISTÓRICA MENSUAL ===\n")
     token = get_token()
@@ -265,9 +334,30 @@ def main():
     fechas_usadas = {}
     sin_serie = {}
 
+    # ── CxC: consulta exacta del gráfico (la sonda genérica no la alcanza)
+    cxc_id = DATASET_IDS.get("cxc")
+    if cxc_id:
+        print("── cxc (consulta exacta del gráfico '% DE MOROSIDAD')")
+        try:
+            s = serie_cxc_morosidad(token, cxc_id, periodos)
+            if s:
+                con_dato = sum(1 for v in s if v is not None)
+                resultado.setdefault("cxc", {})["% Morosidad"] = s
+                fechas_usadas["cxc"] = f"{CXC_DATE_TBL}[Año] + 'Calendario (FACT)'[Mes Numero]"
+                print(f"    [% Morosidad]: {con_dato}/{len(s)} meses con dato — "
+                      f"medida '[% MOROSIDAD x mes]'\n")
+            else:
+                print("    Sin filas — la consulta no devolvió datos\n")
+        except Exception as e:
+            print(f"    ✗ {e}\n")
+
     for ds_key, medidas_dict in cache.items():
         ds_id = DATASET_IDS.get(ds_key)
         if not ds_id:
+            continue
+        if ds_key == "cxc" and "cxc" in resultado:
+            # ya resuelto arriba con la consulta exacta; la sonda genérica
+            # solo volvería a marcar '% Morosidad' como plana
             continue
         medidas = list(medidas_dict.keys())
         if not medidas:
