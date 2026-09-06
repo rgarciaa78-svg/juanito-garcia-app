@@ -356,14 +356,14 @@
           ]
         },
         "fill_rate": {
-          "estado": "red",
-          "alerta": "Fill Rate 83.5% — bajo meta 98%",
+          "estado": "yellow",
+          "alerta": "Fill Rate 88.4% — bajo meta 98%",
           "kpis": [
             {
               "label": "Fill Rate",
-              "valor": "83.5%",
+              "valor": "88.4%",
               "meta": "98%",
-              "estado": "red"
+              "estado": "yellow"
             },
             {
               "label": "Orden de Venta",
@@ -379,6 +379,10 @@
               "estado": "red"
             },
             {
+              "label": "Venta del mes (tarjeta)",
+              "valor": "1,720"
+            },
+            {
               "label": "Pedidos no atendidos (mes)",
               "valor": "199",
               "estado": "red"
@@ -389,49 +393,57 @@
               "grupo": "SPSA",
               "valor": "92.5%",
               "estado": "yellow",
-              "pedidos": "129"
+              "pedidos": "129",
+              "pedidos_num": 129.37232
             },
             {
               "grupo": "CENCOSUD",
               "valor": "96.4%",
               "estado": "green",
-              "pedidos": "62"
+              "pedidos": "62",
+              "pedidos_num": 61.63875
             },
             {
               "grupo": "TOTTUS",
               "valor": "99.8%",
               "estado": "green",
-              "pedidos": "4"
+              "pedidos": "4",
+              "pedidos_num": 3.9733799999999997
             },
             {
               "grupo": "LIMA",
               "valor": "99.9%",
               "estado": "green",
-              "pedidos": "2"
+              "pedidos": "2",
+              "pedidos_num": 1.7859158000000002
             },
             {
               "grupo": "CENTRO SUR",
               "valor": "100.0%",
               "estado": "green",
-              "pedidos": "1"
+              "pedidos": "1",
+              "pedidos_num": 0.68025
             },
             {
               "grupo": "AJE",
               "valor": "100.0%",
               "estado": "green",
-              "pedidos": "1"
+              "pedidos": "1",
+              "pedidos_num": 0.55504
             },
             {
               "grupo": "NORTE",
               "valor": "100.0%",
               "estado": "green",
-              "pedidos": "0"
+              "pedidos": "0",
+              "pedidos_num": 0.4582
             },
             {
               "grupo": "OXXO",
               "valor": "100.0%",
               "estado": "green",
-              "pedidos": "0"
+              "pedidos": "0",
+              "pedidos_num": 0.1824
             }
           ],
           "por_marca": [
