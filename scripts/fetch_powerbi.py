@@ -1607,20 +1607,30 @@ def build_inventario(found):
     alerta = f"Dead Stock {dead_pct:.1f}% del inventario" if sem != "green" and dead_pct else None
     res = {"estado": sem, "alerta": alerta, "kpis": kpis}
 
-    # Categorías con más inventario muerto — lo accionable del reporte
+    # Apertura por categoría. Las etiquetas exactas ("1. Working", "4. Dead")
+    # están confirmadas con Copiar consulta de los visuales WORKING y DEAD
+    # (2026-09-06); esos gráficos filtran por clasificación y agrupan por
+    # categoría, que es la misma porción que produce la consulta agrupada.
     if clas:
-        dead_cat, dead_tot = {}, 0.0
-        for cat, cla, soles, _p in clas:
-            if soles and "dead" in str(cla).lower():
-                dead_cat[cat] = dead_cat.get(cat, 0.0) + soles
-                dead_tot += soles
-        if dead_cat:
-            top = sorted(dead_cat.items(), key=lambda kv: -kv[1])[:6]
-            res["dead_por_categoria"] = [{
-                "categoria": c,
-                "valor": fmt_soles(v),
-                "pct": round(v / dead_tot * 100, 1) if dead_tot else None,
-            } for c, v in top]
+        def apertura(marca):
+            acum, tot = {}, 0.0
+            for cat, cla, soles, _p in clas:
+                if soles and marca in str(cla).lower():
+                    acum[cat] = acum.get(cat, 0.0) + soles
+                    tot += soles
+            if not acum:
+                return None
+            top = sorted(acum.items(), key=lambda kv: -kv[1])[:6]
+            return [{"categoria": c, "valor": fmt_soles(v),
+                     "pct": round(v / tot * 100, 1) if tot else None}
+                    for c, v in top]
+
+        d = apertura("dead")
+        if d:
+            res["dead_por_categoria"] = d
+        w = apertura("working")
+        if w:
+            res["working_por_categoria"] = w
     return res
 
 def build_control(found):

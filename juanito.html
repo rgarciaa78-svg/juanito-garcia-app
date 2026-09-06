@@ -3919,10 +3919,24 @@ function renderMcKinseyArea(empresa, tipo) {
             </div>
             <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm);color:var(--red)">${c.valor}${c.pct != null ? ` · ${c.pct}%` : ''}</div>
           </div>`).join('')}
+          ${(() => {
+            const wc = rp.sop_inventario?.working_por_categoria || [];
+            if (!wc.length) return '';
+            return `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin:12px 0 6px">Inventario sano (Working), por categoría</div>
+            ${wc.map(c => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+              <div style="flex:0 0 130px;font-size:11px;font-weight:600">${c.categoria}</div>
+              <div style="flex:1 1 100px;min-width:80px;height:14px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${c.pct != null ? Math.min(100, c.pct) : 0}%;background:var(--green)"></div>
+              </div>
+              <div style="flex:0 0 auto;font-size:11px;font-family:var(--fm);color:var(--green)">${c.valor}${c.pct != null ? ` · ${c.pct}%` : ''}</div>
+            </div>`).join('')}`;
+          })()}
           <div style="font-size:11px;color:var(--sub);padding:8px;background:var(--surface2);border-radius:6px;line-height:1.5;margin-top:8px">
             Fuente: <code>SUM('SALDO ACTUAL'[Saldo Soles])</code> por
             <code>[Clasificación ALC Meses]</code> y categoría de producto — matriz
             "CLASIFICACION DE INVENTARIO" del reporte 11 (Copiar consulta, 2026-09-06).
+            Las etiquetas "1. Working" y "4. Dead" están confirmadas con las consultas
+            de sus propios gráficos.
           </div>`;
         })(),
         IV: [
@@ -5944,6 +5958,7 @@ function construirContexto() {
         por_marca: rd.por_marca,
         por_grupo: rd.por_grupo,
         dead_por_categoria: rd.dead_por_categoria,
+        working_por_categoria: rd.working_por_categoria,
         por_categoria: rd.por_categoria
         // excluimos tendencia_* para reducir tamaño
       };
