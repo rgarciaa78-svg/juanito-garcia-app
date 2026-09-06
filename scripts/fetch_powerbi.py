@@ -1018,6 +1018,12 @@ def get_token():
     r.raise_for_status()
     return r.json()["access_token"]
 
+# Errores de consultas DAX, para poder diagnosticar sin acceso al log del
+# workflow (descargarlo requiere permisos de admin del repositorio). Se
+# vuelcan al final en summaries.json, bajo "diagnostico".
+DIAGNOSTICO = []
+
+
 def dax(token, ws_id, dataset_id, query, label="query"):
     """Ejecuta una consulta DAX cruda. Retorna lista de filas o []."""
     import time
@@ -1034,9 +1040,15 @@ def dax(token, ws_id, dataset_id, query, label="query"):
                 continue
             if r.status_code != 200:
                 print(f"    [dax:{label}] {r.status_code} {r.text[:120]}")
+                DIAGNOSTICO.append({"consulta": label, "http": r.status_code,
+                                    "error": r.text[:600]})
                 return []
             tables = r.json().get("results", [{}])[0].get("tables", [])
-            return tables[0].get("rows", []) if tables else []
+            filas = tables[0].get("rows", []) if tables else []
+            if not filas:
+                DIAGNOSTICO.append({"consulta": label, "http": 200,
+                                    "error": "sin filas (la consulta corrió pero no devolvió datos)"})
+            return filas
         except Exception as e:
             print(f"    [dax:{label}] error: {e}")
             if attempt < 2:
@@ -2860,6 +2872,11 @@ def main():
                 print(f"  YoY {comp}: ventas={ventas_yoy} fr={fr_yoy} mermas={mermas_yoy}")
         except Exception as e:
             print(f"  YoY no disponible: {e}")
+
+    if DIAGNOSTICO:
+        summary["diagnostico"] = DIAGNOSTICO
+        print(f"\n⚠ {len(DIAGNOSTICO)} consultas con problema — detalle en "
+              f"summaries.json → diagnostico")
 
     out = OUTPUT_DIR / "summaries.json"
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2))
