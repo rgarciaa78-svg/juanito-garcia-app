@@ -1283,6 +1283,97 @@ def serie_compras_ratio(token, ds_id, periodos):
     return out
 
 
+CXP_LOCALDATE = "LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b"
+
+
+def _q_cxp_rotacion():
+    """Rotación de cuentas por pagar: compras acumuladas y días de pago.
+
+    Copiar consulta 2026-09-06 sobre el gráfico "Rotación de cuentas por pagar
+    (días)". Se conserva íntegro, incluido __ValueFilterDM0 — el filtro de
+    valor que descarta los meses sin compras. Sin él aparecerían meses en cero
+    que el gráfico no dibuja.
+
+    'Calendario'[Columna Mostrar] = "MOSTRAR" es una bandera del calendario
+    que decide qué meses entran al gráfico; no es un filtro de fecha, así que
+    no se puede sustituir por un rango.
+
+    Solo se quita el TOPN(1001), que limita filas sin cambiar valores.
+    """
+    ld = CXP_LOCALDATE
+    return (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\n\n"
+        "\tVAR __ValueFilterDM0 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(\n"
+        "\t\t\t\tSUMMARIZECOLUMNS(\n"
+        f"\t\t\t\t\t'{ld}'[Año],\n"
+        "\t\t\t\t\t'Calendario'[Columna Mostrar],\n"
+        "\t\t\t\t\t'Calendario'[Mes corto],\n"
+        "\t\t\t\t\t'Calendario'[Mes Nº],\n"
+        "\t\t\t\t\t__DS0FilterTable,\n"
+        "\t\t\t\t\t\"TOTAL_ACUMULADO_CTA_60\", 'CUENTAS CONTABLES'[TOTAL ACUMULADO CTA 60],\n"
+        "\t\t\t\t\t\"DIAS\", 'CUENTAS CONTABLES'[DIAS]\n"
+        "\t\t\t\t)\n"
+        "\t\t\t),\n"
+        "\t\t\t[TOTAL_ACUMULADO_CTA_60] > 0\n"
+        "\t\t)\n\n"
+        "EVALUATE\n"
+        "\tSUMMARIZECOLUMNS(\n"
+        f"\t\t'{ld}'[Año],\n"
+        "\t\t'Calendario'[Columna Mostrar],\n"
+        "\t\t'Calendario'[Mes corto],\n"
+        "\t\t'Calendario'[Mes Nº],\n"
+        "\t\t__DS0FilterTable,\n"
+        "\t\t__ValueFilterDM0,\n"
+        "\t\t\"TOTAL_ACUMULADO_CTA_60\", 'CUENTAS CONTABLES'[TOTAL ACUMULADO CTA 60],\n"
+        "\t\t\"DIAS\", 'CUENTAS CONTABLES'[DIAS]\n"
+        "\t)\n\n"
+        f"ORDER BY\n\t'{ld}'[Año], 'Calendario'[Mes Nº]"
+    )
+
+
+def serie_cxp_rotacion(token, ds_id, periodos):
+    """Series mensuales de compras (cta 60) y días de cuentas por pagar."""
+    filas = dax(token, ds_id, _q_cxp_rotacion(), "cxp-rotacion")
+    if not filas:
+        return {}
+    ld = CXP_LOCALDATE
+    pares = {"Compras (cta 60)": {}, "Días CxP": {}}
+    for r in filas:
+        anio = r.get(f"{ld}[Año]") or r.get("[Año]")
+        mes = r.get("Calendario[Mes Nº]") or r.get("[Mes Nº]")
+        if mes is None:
+            corto = str(r.get("Calendario[Mes corto]") or "").strip().lower()[:3]
+            mes = MESES_CORTOS.get(corto)
+        if anio is None or mes is None:
+            continue
+        try:
+            per = (int(anio), int(mes))
+        except (TypeError, ValueError):
+            continue
+        for alias, etiqueta in (("TOTAL_ACUMULADO_CTA_60", "Compras (cta 60)"),
+                                ("DIAS", "Días CxP")):
+            v = r.get(f"[{alias}]", r.get(alias))
+            if v is None:
+                continue
+            try:
+                pares[etiqueta][per] = float(v)
+            except (TypeError, ValueError):
+                pass
+
+    out = {}
+    for etiqueta, mapa in pares.items():
+        serie = [mapa.get(p) for p in periodos]
+        if any(x is not None for x in serie):
+            out[etiqueta] = serie
+            print(f"    [{etiqueta}]: "
+                  f"{sum(1 for x in serie if x is not None)}/{len(serie)} meses")
+    return out
+
+
 def serie_margen(token, ds_id, periodos, medidas):
     """Series mensuales del reporte de Margen.
 
@@ -1530,6 +1621,20 @@ def main():
             s = serie_compras_ratio(token, compras_id, periodos)
             if s:
                 resultado["compras"] = s
+            print()
+        except Exception as e:
+            print(f"    ✗ {e}\n")
+
+    # ── CxP: rotación (compras cta 60 y días de pago) del gráfico real.
+    # Reemplaza la serie 'Cuentas x Pagar' de la sonda genérica, que salía
+    # plana porque la medida ignoraba el filtro de fecha.
+    cxp_id = DATASET_IDS.get("cxp")
+    if cxp_id:
+        print("── cxp (consulta exacta de 'Rotación de cuentas por pagar')")
+        try:
+            s = serie_cxp_rotacion(token, cxp_id, periodos)
+            if s:
+                resultado.setdefault("cxp", {}).update(s)
             print()
         except Exception as e:
             print(f"    ✗ {e}\n")
