@@ -1600,14 +1600,25 @@ _PRODUCTIVIDAD_FILTROS = """	VAR __DS0FilterTable =
 		)
 """
 
+# Los dos visuales de productividad (KG PRODUCIDO y KG VENDIDO) comparten los
+# ocho filtros — verificado por diff contra ambas consultas, no asumido — y se
+# diferencian solo en las medidas. Por eso van como dos listas y una sola
+# plantilla de consulta.
 PRODUCTIVIDAD_MEDIDAS = [
     ("SUM_PROD",       "Producción (kg)",   "IGNORE('Maestra de Kardex (Total)'[SUM PROD])"),
     ("GASTO_TOTAL",    "Planilla (S/)",     "IGNORE('Exl Cuenta Contables'[GASTO TOTAL])"),
     ("PROD_OPERATIVA", "Planilla / kg producido", "'Exl Cuenta Contables'[PROD OPERATIVA]"),
 ]
 
+PRODUCTIVIDAD_MEDIDAS_VENDIDO = [
+    ("SumPeso_total_K", "Venta (kg)",
+     "IGNORE(\n\t\t\tCALCULATE(SUM('Maestra de Facturacion (Total)'[Peso total K]))\n\t\t)"),
+    ("VENTA_KG_X_SOL",  "Kg vendidos por sol de planilla",
+     "'Exl Cuenta Contables'[VENTA KG X SOL]"),
+]
 
-def _q_productividad():
+
+def _q_productividad(medidas=None):
     """Serie mensual de productividad: planilla, producción y su ratio.
 
     Copiar consulta 2026-09-06. Solo se quita el TOPN(1001), que limita filas
@@ -1616,8 +1627,9 @@ def _q_productividad():
     """
     ld = PRODUCTIVIDAD_LOCALDATE
     usados = "".join(f"\t\t__DS0FilterTable{'' if i == 1 else i},\n" for i in range(1, 9))
+    lista = medidas or PRODUCTIVIDAD_MEDIDAS
     medidas = "".join(f'\t\t"{alias}", {expr},\n'
-                      for alias, _etq, expr in PRODUCTIVIDAD_MEDIDAS).rstrip(",\n") + "\n"
+                      for alias, _etq, expr in lista).rstrip(",\n") + "\n"
     return (
         "DEFINE\n"
         + _PRODUCTIVIDAD_FILTROS
@@ -1634,11 +1646,19 @@ def _q_productividad():
 
 def serie_productividad(token, ds_id, periodos):
     """Series mensuales del reporte de productividad por funcionario."""
-    filas = dax(token, ds_id, _q_productividad(), "productividad")
+    out = {}
+    for lista, etiqueta in ((PRODUCTIVIDAD_MEDIDAS, "producido"),
+                            (PRODUCTIVIDAD_MEDIDAS_VENDIDO, "vendido")):
+        out.update(_serie_productividad_una(token, ds_id, periodos, lista, etiqueta))
+    return out
+
+
+def _serie_productividad_una(token, ds_id, periodos, lista, etiqueta):
+    filas = dax(token, ds_id, _q_productividad(lista), f"productividad-{etiqueta}")
     if not filas:
         return {}
     ld = PRODUCTIVIDAD_LOCALDATE
-    mapas = {etq: {} for _a, etq, _e in PRODUCTIVIDAD_MEDIDAS}
+    mapas = {etq: {} for _a, etq, _e in lista}
     for r in filas:
         anio = r.get(f"{ld}[Año]") or r.get("[Año]")
         mes = r.get("Calendario[Mes Numero]") or r.get("[Mes Numero]")
@@ -1653,7 +1673,7 @@ def serie_productividad(token, ds_id, periodos):
             per = (int(anio), int(mes))
         except (TypeError, ValueError):
             continue
-        for alias, etq, _e in PRODUCTIVIDAD_MEDIDAS:
+        for alias, etq, _e in lista:
             v = r.get(f"[{alias}]", r.get(alias))
             if v is None:
                 continue
@@ -1663,7 +1683,7 @@ def serie_productividad(token, ds_id, periodos):
                 pass
 
     out = {}
-    for _a, etq, _e in PRODUCTIVIDAD_MEDIDAS:
+    for _a, etq, _e in lista:
         serie = [mapas[etq].get(p) for p in periodos]
         if any(x is not None for x in serie):
             out[etq] = serie
