@@ -315,6 +315,118 @@ def serie_cxc_morosidad(token, ds_id, periodos):
     return [por_periodo.get(p) for p in periodos]
 
 
+MERMAS_MEDIDAS = [
+    ("v__Merma_total",             "% Merma Total"),
+    ("SumDesviacion_Bases",        "Desviación Bases"),
+    ("CANT_REAL_CONSUMO_INTERNO",  "Consumo Interno"),
+    ("CANT_REAL_DESTRUCCION",      "Destrucción"),
+]
+
+
+def _q_mermas(anio):
+    """Consulta del gráfico "PAUNO" de MERMA MENSUAL POR PLANTA, tal cual la
+    genera Power BI (Copiar consulta, 2026-09-06), con el año del segmentador
+    como parámetro.
+
+    Los 6 filtros del visual se reproducen literalmente. Son los que hacen
+    que el número sea comparable con lo que ve el equipo en el reporte:
+      1. 'Calendario'[Date] >= 31/07/2025 (ventana móvil del visual)
+      2. 'Tabla Mermas'[TIPO DE BASE] no vacío
+      3. 'Calendario'[Año] = <anio>  ← único parámetro; equivale a mover el
+         segmentador ANO del reporte, que es justamente lo que haría un
+         usuario para ver 2025 en vez de 2026.
+      4. categoria_producto excluye BONIFICACION Y REBATES, CHATARRA,
+         INTERESES, MATERIA PRIMA, SERVICIOS, SUMINISTROS y vacío
+      5. producto excluye 2 ítems puntuales
+      6. estado distinto de "Cancelado"
+
+    Sin estos filtros el % de merma sale inflado: incluye chatarra, materia
+    prima, servicios y comprobantes anulados.
+    """
+    return (
+        "DEFINE\n"
+        "\tVAR __DS0FilterTable = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\n"
+        "\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0FilterTable2 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Tabla Mermas'[TIPO DE BASE])),\n"
+        "\t\t\tNOT('Tabla Mermas'[TIPO DE BASE] IN {BLANK()})\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0FilterTable3 = \n"
+        f"\t\tTREATAS({{{anio}}}, 'Calendario'[Año])\n\n"
+        "\tVAR __DS0FilterTable4 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\n"
+        "\t\t\tNOT(\n"
+        "\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\n"
+        "\t\t\t\t\t\"CHATARRA\",\n\t\t\t\t\t\"INTERESES\",\n\t\t\t\t\t\"MATERIA PRIMA\",\n"
+        "\t\t\t\t\t\"SERVICIOS\",\n\t\t\t\t\t\"SUMINISTROS\",\n\t\t\t\t\tBLANK()}\n"
+        "\t\t\t)\n\t\t)\n\n"
+        "\tVAR __DS0FilterTable5 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\n"
+        "\t\t\tNOT(\n"
+        "\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\n"
+        "\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\n"
+        "\t\t\t)\n\t\t)\n\n"
+        "\tVAR __DS0FilterTable6 = \n"
+        "\t\tFILTER(\n"
+        "\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\n"
+        "\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\n"
+        "\t\t)\n\n"
+        "\tVAR __DS0Core = \n"
+        "\t\tSUMMARIZECOLUMNS(\n"
+        "\t\t\t'Calendario'[Año],\n\t\t\t'Calendario'[MES],\n"
+        "\t\t\t__DS0FilterTable,\n\t\t\t__DS0FilterTable2,\n\t\t\t__DS0FilterTable3,\n"
+        "\t\t\t__DS0FilterTable4,\n\t\t\t__DS0FilterTable5,\n\t\t\t__DS0FilterTable6,\n"
+        "\t\t\t\"SumDesviacion_Bases\", IGNORE(CALCULATE(SUM('Tabla Mermas'[Desviacion Bases]))),\n"
+        "\t\t\t\"CANT_REAL_CONSUMO_INTERNO\", IGNORE('Maestra de Kardex (Total)'[CANT REAL CONSUMO INTERNO]),\n"
+        "\t\t\t\"CANT_REAL_DESTRUCCION\", IGNORE('Maestra de Kardex (Total)'[CANT REAL DESTRUCCION]),\n"
+        "\t\t\t\"v__Merma_total\", 'Tabla Mermas'[% Merma total]\n"
+        "\t\t)\n\n"
+        "EVALUATE\n\t__DS0Core\n\n"
+        "ORDER BY\n\t'Calendario'[Año], 'Calendario'[MES]"
+    )
+
+
+def serie_mermas_exacta(token, ds_id, periodos):
+    """Series mensuales de Mermas con los filtros reales del visual.
+
+    Devuelve {nombre_medida: [valores por período]} o None.
+    Se consulta un año por vez porque el visual filtra por el segmentador ANO.
+    """
+    por_periodo = {alias: {} for _, alias in MERMAS_MEDIDAS}
+    anios = sorted({a for a, _ in periodos})
+    for anio in anios:
+        rows = dax(token, ds_id, _q_mermas(anio), f"mermas-{anio}")
+        for r in rows or []:
+            mes = r.get("Calendario[MES]") or r.get("[MES]")
+            if mes is None:
+                continue
+            if isinstance(mes, str):
+                mes = MESES_CORTOS.get(mes.strip().lower()[:3])
+            if mes is None:
+                continue
+            for col, alias in MERMAS_MEDIDAS:
+                v = r.get(f"[{col}]", r.get(col))
+                if v is None:
+                    continue
+                try:
+                    por_periodo[alias][(int(anio), int(mes))] = float(v)
+                except (TypeError, ValueError):
+                    pass
+
+    out = {}
+    for _, alias in MERMAS_MEDIDAS:
+        serie = [por_periodo[alias].get(p) for p in periodos]
+        if any(v is not None for v in serie):
+            out[alias] = serie
+    return out or None
+
+
 def main():
     print("=== JUANITO — SERIE HISTÓRICA MENSUAL ===\n")
     token = get_token()
@@ -351,9 +463,33 @@ def main():
         except Exception as e:
             print(f"    ✗ {e}\n")
 
+    # ── Mermas: consulta exacta del gráfico, con los 6 filtros del visual.
+    # La sonda genérica sí devolvía una serie, pero SIN esos filtros: incluía
+    # chatarra, materia prima, servicios y comprobantes cancelados, así que
+    # el % no coincidía con el que ve el equipo en el reporte.
+    mermas_id = DATASET_IDS.get("mermas")
+    if mermas_id:
+        print("── mermas (consulta exacta del gráfico 'MERMA MENSUAL POR PLANTA')")
+        try:
+            s = serie_mermas_exacta(token, mermas_id, periodos)
+            if s:
+                resultado["mermas"] = s
+                fechas_usadas["mermas"] = "Calendario[Año] + Calendario[MES] (6 filtros del visual)"
+                for med, vals in s.items():
+                    print(f"    [{med}]: {sum(1 for v in vals if v is not None)}/{len(vals)} meses")
+                print()
+            else:
+                print("    Sin filas\n")
+        except Exception as e:
+            print(f"    ✗ {e}\n")
+
     for ds_key, medidas_dict in cache.items():
         ds_id = DATASET_IDS.get(ds_key)
         if not ds_id:
+            continue
+        if ds_key == "mermas" and "mermas" in resultado:
+            # ya resuelto con la consulta exacta; la genérica solo añadiría
+            # una serie sin los filtros del visual (números no comparables)
             continue
         if ds_key == "cxc" and "cxc" in resultado:
             # ya resuelto arriba con la consulta exacta; la sonda genérica
