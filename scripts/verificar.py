@@ -73,6 +73,39 @@ def test_claves_internas(src):
                 f"{clave}: escribe {e or 'NADIE'} — lee {l or 'NADIE'}")
 
 
+def test_orden_carga_build(src):
+    """Cada bloque que trae datos debe correr ANTES de construir su reporte.
+
+    El margen por cliente salió vacío tres corridas seguidas por esto: la
+    consulta funcionaba y guardaba el resultado en `scanned`, pero
+    build_margen() ya se había ejecutado veinte líneas antes. No hay error
+    ni diagnóstico posible — el dato llega tarde y nadie lo lee.
+    """
+    print("\n5. Orden: la carga de datos antes de construir el reporte")
+    lineas = src.split("\n")
+
+    def linea_de(texto):
+        for i, l in enumerate(lineas):
+            if texto in l:
+                return i + 1
+        return None
+
+    pares = [
+        ("Margen por cliente (pestaña", "r, ventas, margen = build_margen"),
+        ("Compras: faltantes y necesidad", "r, ratio = build_compras"),
+        ("CxP: top 15 proveedores", "r, dias = build_cxp"),
+        ("CxC: aging real", "r, sem, razon, mora_pct, vencer = build_cxc"),
+        ("S&OP: clasificación del inventario", "r = build_inventario"),
+        ("Avance vs Presupuesto: tabla por canal", "av, avance_pct = build_avance"),
+    ]
+    for carga, build in pares:
+        a, b = linea_de(carga), linea_de(build)
+        if a is None or b is None:
+            revisar(False, f"no se encontró '{carga[:34]}' o su build")
+            continue
+        revisar(a < b, f"{carga[:38]}: carga L{a} → build L{b}")
+
+
 def test_funciones_usadas(src, prefijo, archivo):
     print(f"\n2. Funciones {prefijo}* de {archivo} que nadie llama")
     for nombre in re.findall(rf"^def ({prefijo}[a-z0-9_]+)\(", src, re.M):
@@ -159,6 +192,7 @@ def main():
     html = leer("juanito.html")
 
     test_claves_internas(src_pbi)
+    test_orden_carga_build(src_pbi)
     test_funciones_usadas(src_pbi, "dax_", "fetch_powerbi.py")
     test_funciones_usadas(src_ser, "serie_", "fetch_series.py")
     salidas = test_construccion(cargar_fetch_powerbi())

@@ -3122,6 +3122,26 @@ def main():
                     "empresa": empresa, "texto": f"CxP {dias:.0f}d — riesgo con proveedores.", "responsable": "Finanzas"
                 })
 
+        # ── Margen por cliente (pestaña "R. ORDEN DE VENTA" del reporte 3).
+        # Responde de qué cliente viene la caída de margen, no solo de qué
+        # unidad de negocio.
+        if empresa == "PAUNO":
+            try:
+                cli = desglose_desde_captura(
+                    token, ws_id, [ids.get("margen")],
+                    "ORDENES DE VENTA EN EL SISTEMA POR CLIENTE",
+                    {"cliente": "[cliente]",
+                     "margen": "[v__Margen_Venta__]",
+                     "margen_caida": "[v__MARGEN_CAIDA__]",
+                     "venta": "[SumMonto_Neto_Venta]",
+                     "costo": "[SumCOSTO_TOTAL]"})
+                if cli:
+                    scanned.setdefault("margen", {})["__por_cliente"] = cli
+            except Exception as e:
+                print(f"    ✗ margen por cliente: {e}")
+                DIAGNOSTICO.append({"consulta": "margen_cliente", "http": 0,
+                                    "error": repr(e)[:300]})
+
         # ── Margen
         if scanned.get("margen"):
             margen_ds_id_total = DATASET_IDS.get(empresa, {}).get("margen")
@@ -3251,26 +3271,6 @@ def main():
                 if planta_merma:
                     empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
                     print(f"  Mermas Planta: {planta_merma}")
-
-        # ── Margen por cliente (pestaña "R. ORDEN DE VENTA" del reporte 3).
-        # Responde de qué cliente viene la caída de margen, no solo de qué
-        # unidad de negocio.
-        if empresa == "PAUNO":
-            try:
-                cli = desglose_desde_captura(
-                    token, ws_id, [ids.get("margen")],
-                    "ORDENES DE VENTA EN EL SISTEMA POR CLIENTE",
-                    {"cliente": "[cliente]",
-                     "margen": "[v__Margen_Venta__]",
-                     "margen_caida": "[v__MARGEN_CAIDA__]",
-                     "venta": "[SumMonto_Neto_Venta]",
-                     "costo": "[SumCOSTO_TOTAL]"})
-                if cli:
-                    scanned.setdefault("margen", {})["__por_cliente"] = cli
-            except Exception as e:
-                print(f"    ✗ margen por cliente: {e}")
-                DIAGNOSTICO.append({"consulta": "margen_cliente", "http": 0,
-                                    "error": repr(e)[:300]})
 
         # ── Compras: faltantes y necesidad de compra, desde las capturas del
         # Analizador (pestaña "ANALISIS DE COMPRA" del reporte 5).
