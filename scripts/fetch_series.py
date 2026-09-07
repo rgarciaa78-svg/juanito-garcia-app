@@ -1721,6 +1721,49 @@ def cargar_catalogo():
     return por_visual
 
 
+def partir_evaluates(dax):
+    """Separa un DAX del Analizador en (bloque DEFINE, [consultas EVALUATE]).
+
+    La API REST de Power BI devuelve UNA sola tabla por consulta, aunque el
+    DAX traiga varios EVALUATE. Los visuales de matriz traen dos: el primero
+    es el eje (los períodos) y el segundo el cuerpo con los datos — así que
+    enviándolo entero solo llegaba el eje, y el cuerpo no se veía nunca.
+
+    Cada EVALUATE se devuelve completo con su ORDER BY, listo para anteponerle
+    el DEFINE y mandarlo por separado.
+    """
+    i = dax.find("EVALUATE")
+    if i < 0:
+        return "", [dax]
+    define = dax[:i]
+    resto = dax[i:]
+    partes, actual = [], []
+    for linea in resto.splitlines():
+        if linea.lstrip().startswith("EVALUATE") and actual:
+            partes.append("\n".join(actual).rstrip())
+            actual = [linea]
+        else:
+            actual.append(linea)
+    if actual:
+        partes.append("\n".join(actual).rstrip())
+    return define, partes
+
+
+def tablas_de_captura(ejecutor, dax, label):
+    """Ejecuta un DAX capturado y devuelve una tabla por cada EVALUATE.
+
+    `ejecutor` recibe (consulta, etiqueta) y devuelve la lista de filas.
+    """
+    define, partes = partir_evaluates(dax)
+    if len(partes) <= 1:
+        filas = ejecutor(dax, label)
+        return [filas] if filas else []
+    tablas = []
+    for n, parte in enumerate(partes, 1):
+        filas = ejecutor(define + parte, f"{label}#{n}")
+        tablas.append(filas or [])
+    return tablas
+
 def dax_crudo(token, dataset_id, query, label):
     """Ejecuta DAX y devuelve TODAS las tablas del resultado.
 
@@ -1782,7 +1825,10 @@ def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
         print(f"    · '{visual}': no está en el catálogo — falta exportar esa pestaña")
         return {}
 
-    tablas = dax_crudo(token, ds_id, entrada["dax"], f"captura:{visual}")
+    # Una consulta por EVALUATE: la API devuelve una sola tabla por llamada.
+    tablas = tablas_de_captura(
+        lambda q, lb: (dax_crudo(token, ds_id, q, lb) or [[]])[0],
+        entrada["dax"], f"captura:{visual}")
     if not tablas:
         return {}
 

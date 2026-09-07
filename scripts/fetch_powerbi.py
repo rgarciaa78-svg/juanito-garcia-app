@@ -1058,6 +1058,49 @@ def catalogo_capturas():
     return _CATALOGO
 
 
+def partir_evaluates(dax):
+    """Separa un DAX del Analizador en (bloque DEFINE, [consultas EVALUATE]).
+
+    La API REST de Power BI devuelve UNA sola tabla por consulta, aunque el
+    DAX traiga varios EVALUATE. Los visuales de matriz traen dos: el primero
+    es el eje (los períodos) y el segundo el cuerpo con los datos — así que
+    enviándolo entero solo llegaba el eje, y el cuerpo no se veía nunca.
+
+    Cada EVALUATE se devuelve completo con su ORDER BY, listo para anteponerle
+    el DEFINE y mandarlo por separado.
+    """
+    i = dax.find("EVALUATE")
+    if i < 0:
+        return "", [dax]
+    define = dax[:i]
+    resto = dax[i:]
+    partes, actual = [], []
+    for linea in resto.splitlines():
+        if linea.lstrip().startswith("EVALUATE") and actual:
+            partes.append("\n".join(actual).rstrip())
+            actual = [linea]
+        else:
+            actual.append(linea)
+    if actual:
+        partes.append("\n".join(actual).rstrip())
+    return define, partes
+
+
+def tablas_de_captura(ejecutor, dax, label):
+    """Ejecuta un DAX capturado y devuelve una tabla por cada EVALUATE.
+
+    `ejecutor` recibe (consulta, etiqueta) y devuelve la lista de filas.
+    """
+    define, partes = partir_evaluates(dax)
+    if len(partes) <= 1:
+        filas = ejecutor(dax, label)
+        return [filas] if filas else []
+    tablas = []
+    for n, parte in enumerate(partes, 1):
+        filas = ejecutor(define + parte, f"{label}#{n}")
+        tablas.append(filas or [])
+    return tablas
+
 def _tablas_dax(token, ws, dataset_id, query, label):
     """Como dax(), pero devuelve TODAS las tablas del resultado.
 
@@ -1108,7 +1151,9 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
     for ds in candidatos:
         if not ds:
             continue
-        tablas = _tablas_dax(token, ws, ds, entrada["dax"], f"captura:{visual}")
+        tablas = tablas_de_captura(
+            lambda q, lb: (_tablas_dax(token, ws, ds, q, lb) or [[]])[0],
+            entrada["dax"], f"captura:{visual}")
         if not tablas:
             continue
         todas = tablas
@@ -1162,6 +1207,14 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
         out.append(fila)
     if limite:
         out = out[:limite]
+    if not out:
+        # Llegaron filas pero todas venian con las columnas pedidas en blanco
+        # (son las de subtotal del visual). Sin dejar constancia, el desglose
+        # aparece vacio en el dashboard y no hay por donde empezar a mirar.
+        DIAGNOSTICO.append({
+            "consulta": f"captura:{visual}", "http": 200,
+            "error": (f"{len(filas)} filas devueltas, ninguna con datos en las "
+                      f"columnas pedidas. Muestra: {filas[:2]}")})
     print(f"    ✓ '{visual}': {len(out)} filas")
     return out
 
