@@ -29,7 +29,7 @@
     "cxp": "Calendario[Date]",
     "margen": "Calendario[Date]",
     "inventario": "Calendario[Date]",
-    "planificacion": "Calendario[Fecha]"
+    "planificacion": "Calendario[Date]"
   },
   "sin_serie": {
     "cxp": {
@@ -107,7 +107,7 @@
         "Calendario"
       ],
       "columnas_fecha": [
-        "Calendario[Fecha]"
+        "Calendario[Date]"
       ],
       "medidas_planas": [
         {
@@ -836,50 +836,6 @@
         122.4607069165439,
         117.70593543192682,
         107.00593039309997
-      ],
-      "Refinanciamiento": [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        13331.6,
-        70637.47,
-        240880.65,
-        24683.96,
-        25881.269999999997,
-        -16720.40999999998,
-        -59303.96,
-        115084.4,
-        362834.67000000004,
-        2332470.0500000003
-      ],
-      "Proveedores": [
-        null,
-        1,
-        null,
-        1,
-        4,
-        4,
-        10,
-        2,
-        15,
-        17,
-        18,
-        18,
-        24,
-        26,
-        28,
-        39,
-        59,
-        80,
-        104,
-        121
       ]
     },
     "consumo": {

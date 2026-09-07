@@ -32,22 +32,36 @@
               "label": "Morosidad",
               "valor": "20.9%",
               "meta": "15%",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "CxC por vencer",
               "valor": "S/3.57M",
-              "meta": "aging confirmado"
+              "meta": "aging confirmado",
+              "fuente": "reporte"
             },
             {
               "label": "CxC Total",
-              "valor": "S/4.52M"
+              "valor": "S/4.52M",
+              "fuente": "reporte"
             },
             {
               "label": "CxC Vencido",
               "valor": "S/946,144",
               "meta": "20.9% de cartera",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
+            },
+            {
+              "label": "Clientes",
+              "valor": "218",
+              "fuente": "reporte"
+            },
+            {
+              "label": "Ventas del mes",
+              "valor": "S/185,410",
+              "fuente": "reporte"
             }
           ],
           "tramos": [
@@ -83,27 +97,37 @@
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/16.81M"
+              "valor": "S/16.79M",
+              "fuente": "reporte"
             },
             {
               "label": "Refinanciado",
               "valor": "S/6.96M",
-              "estado": "yellow"
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "# Proveedores",
-              "valor": "138"
+              "valor": "136",
+              "fuente": "reporte"
             },
             {
               "label": "CxP Vencido",
               "valor": "S/3.37M",
               "meta": "34.2% de la deuda viva",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
-              "label": "Top 15 proveedores",
+              "label": "Deuda top 15 proveedores",
               "valor": "S/12.05M",
-              "meta": "deuda concentrada"
+              "meta": "concentración",
+              "fuente": "reporte"
+            },
+            {
+              "label": "Días CxP",
+              "valor": "107d",
+              "meta": "<90d"
             }
           ],
           "tramos": [
@@ -255,21 +279,111 @@
           "kpis": [
             {
               "label": "Ventas mes",
-              "valor": "S/7.93M"
+              "valor": "S/7.69M",
+              "fuente": "reporte"
             },
             {
               "label": "Margen variable",
-              "valor": "49.5%",
-              "meta": "52%",
-              "estado": "yellow"
+              "valor": "46.5%",
+              "meta": "≥52%",
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "Precio/kg",
-              "valor": "S/5.85"
+              "valor": "S/5.93",
+              "fuente": "reporte"
             },
             {
               "label": "Costo/kg",
-              "valor": "S/2.96"
+              "valor": "S/3.16",
+              "fuente": "reporte"
+            }
+          ],
+          "por_cliente": [
+            {
+              "cliente": "SUPERMERCADOS PERUANOS SOCIEDAD ANONIMA 'O ' S.P.S.A.",
+              "venta": "S/4.64M",
+              "pct_venta": 55.1,
+              "margen": "43.5%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "HIPERMERCADOS TOTTUS S.A",
+              "venta": "S/717,607",
+              "pct_venta": 8.5,
+              "margen": "40.6%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "CENCOSUD RETAIL PERU S.A.",
+              "venta": "S/627,638",
+              "pct_venta": 7.4,
+              "margen": "52.9%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "AJILES PERU S.A.C.",
+              "venta": "S/371,373",
+              "pct_venta": 4.4,
+              "margen": "39.4%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "TIENDAS TAMBO S.A.C.",
+              "venta": "S/318,013",
+              "pct_venta": 3.8,
+              "margen": "50.0%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "KL IMPORT EXPORT PERU SAC",
+              "venta": "S/137,442",
+              "pct_venta": 1.6,
+              "margen": "65.6%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "PUNTO BLANCO S.A.C.",
+              "venta": "S/104,286",
+              "pct_venta": 1.2,
+              "margen": "69.3%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "COMERCIAL LA GOLOSINA SAC",
+              "venta": "S/78,150",
+              "pct_venta": 0.9,
+              "margen": "62.2%",
+              "caida": "1.5%"
+            },
+            {
+              "cliente": "J R DISTRIBUCIONES E I R LTDA",
+              "venta": "S/77,375",
+              "pct_venta": 0.9,
+              "margen": "61.5%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "WHITE ROLLING PIN S.R.L.",
+              "venta": "S/76,107",
+              "pct_venta": 0.9,
+              "margen": "44.3%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "RED ORIENTE SOCIEDAD ANONIMA CERRADA",
+              "venta": "S/72,600",
+              "pct_venta": 0.9,
+              "margen": "64.1%",
+              "caida": "0.0%"
+            },
+            {
+              "cliente": "DACORE S.A.C.",
+              "venta": "S/64,368",
+              "pct_venta": 0.8,
+              "margen": "66.8%",
+              "caida": "0.0%"
             }
           ],
           "por_uen": [
@@ -302,29 +416,34 @@
           "kpis": [
             {
               "label": "Costo Total",
-              "valor": "S/1.42M",
+              "valor": "S/-1.42M",
               "validado": true,
-              "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)"
+              "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)",
+              "fuente": "reporte"
             },
             {
               "label": "Venta Neta (KG)",
               "valor": "16,560,227 KG",
-              "validado": true
+              "validado": true,
+              "fuente": "reporte"
             },
             {
               "label": "Costo x TN Vendida",
-              "valor": "S/133.44",
-              "validado": true
+              "valor": "S/143.63",
+              "validado": true,
+              "fuente": "reporte"
             },
             {
               "label": "Producción Neta (KG)",
-              "valor": "9,907,886 KG",
-              "validado": true
+              "valor": "9,907,886 kg",
+              "validado": true,
+              "fuente": "reporte"
             },
             {
               "label": "Costo x TN Producida",
-              "valor": "S/135.40",
-              "validado": true
+              "valor": "S/151.64",
+              "validado": true,
+              "fuente": "reporte"
             }
           ],
           "no_validado_dax": false
@@ -335,9 +454,10 @@
           "kpis": [
             {
               "label": "Merma Total",
-              "valor": "4.87%",
-              "meta": "2%",
-              "estado": "red"
+              "valor": "2.9%",
+              "meta": "<2%",
+              "estado": "red",
+              "fuente": "reporte"
             }
           ],
           "por_uen": [
@@ -381,29 +501,35 @@
           "kpis": [
             {
               "label": "Stock PP (Punto de Pedido)",
-              "valor": "1904352"
+              "valor": "4,687,549",
+              "fuente": "reporte"
             },
             {
               "label": "Stock Valorizado",
-              "valor": "S/5.92M"
+              "valor": "S/7.23M",
+              "fuente": "reporte"
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10645100"
+              "valor": "13,645,267",
+              "fuente": "reporte"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10475210"
+              "valor": "13,849,443",
+              "fuente": "reporte"
             },
             {
               "label": "Materiales en quiebre",
               "valor": "14",
               "meta": "explosión de materiales",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "Ítems con necesidad de compra",
-              "valor": "431"
+              "valor": "431",
+              "fuente": "reporte"
             }
           ],
           "faltantes": [
@@ -517,31 +643,37 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/6.61M"
+              "valor": "S/6.61M",
+              "fuente": "reporte"
             },
             {
               "label": "Dead Stock",
               "valor": "S/1.24M",
               "meta": "<S/500K",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "% Dead Stock",
               "valor": "18.8%",
               "meta": "<5%",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "Working Stock",
-              "valor": "S/4.24M"
+              "valor": "S/4.24M",
+              "fuente": "reporte"
             },
             {
               "label": "Exceso 1 (2-5 meses)",
-              "valor": "S/711,417"
+              "valor": "S/711,417",
+              "fuente": "reporte"
             },
             {
               "label": "Exceso 2 (5-12 meses)",
-              "valor": "S/417,162"
+              "valor": "S/417,162",
+              "fuente": "reporte"
             }
           ],
           "dead_por_categoria": [
@@ -617,70 +749,198 @@
               "label": "% Cumplimiento",
               "valor": "69.32%",
               "meta": "85%",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "Puntos de Control evaluados",
-              "valor": "311"
+              "valor": "311",
+              "fuente": "reporte"
             },
             {
               "label": "Satisfactorio",
               "valor": "139",
-              "estado": "green"
+              "estado": "green",
+              "fuente": "reporte"
             },
             {
               "label": "Con Observaciones",
               "valor": "64",
-              "estado": "yellow"
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "Crítico",
               "valor": "108",
               "meta": "0",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "% Puntos en estado Crítico",
               "valor": "34.7%",
               "meta": "<10%",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "Total Planes de Acción",
-              "valor": "93"
+              "valor": "93",
+              "fuente": "reporte"
             },
             {
               "label": "Planes de Acción Abiertos",
               "valor": "1",
-              "estado": "yellow"
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "Planes de Acción Cerrados",
               "valor": "62",
-              "estado": "green"
+              "estado": "green",
+              "fuente": "reporte"
             },
             {
               "label": "Planes de Acción Atrasados",
               "valor": "29",
               "meta": "0",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "% Avance Planes de Acción",
               "valor": "66.7%",
-              "estado": "yellow"
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "Puntos Ejecutados",
-              "valor": "314"
+              "valor": "314",
+              "fuente": "reporte"
             },
             {
               "label": "Calificación",
-              "valor": "653"
+              "valor": "653",
+              "fuente": "reporte"
             },
             {
               "label": "Puntos Totales",
-              "valor": "942"
+              "valor": "942",
+              "fuente": "reporte"
+            }
+          ],
+          "por_area": [
+            {
+              "jefe": "Christians Oliva",
+              "valor": "33.3%",
+              "pct": 33.3,
+              "estado": "red"
+            },
+            {
+              "jefe": "Michael Yefersson",
+              "valor": "44.4%",
+              "pct": 44.4,
+              "estado": "red"
+            },
+            {
+              "jefe": "Daniel Pumahuare",
+              "valor": "54.2%",
+              "pct": 54.2,
+              "estado": "red"
+            },
+            {
+              "jefe": "Bladimir Lopez",
+              "valor": "54.2%",
+              "pct": 54.2,
+              "estado": "red"
+            },
+            {
+              "jefe": "William Astete",
+              "valor": "56.1%",
+              "pct": 56.1,
+              "estado": "red"
+            },
+            {
+              "jefe": "Karen Poma",
+              "valor": "59.5%",
+              "pct": 59.5,
+              "estado": "red"
+            },
+            {
+              "jefe": "Richard Garcia",
+              "valor": "62.5%",
+              "pct": 62.5,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Mayra Surco",
+              "valor": "63.3%",
+              "pct": 63.3,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Miguel Bramon",
+              "valor": "69.4%",
+              "pct": 69.4,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Walter Soto",
+              "valor": "69.4%",
+              "pct": 69.4,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Joselyn Astoray",
+              "valor": "81.0%",
+              "pct": 81.0,
+              "estado": "green"
+            },
+            {
+              "jefe": "Liset Vasquez",
+              "valor": "83.3%",
+              "pct": 83.3,
+              "estado": "green"
+            },
+            {
+              "jefe": "Cecilia Velasquez",
+              "valor": "84.3%",
+              "pct": 84.3,
+              "estado": "green"
+            },
+            {
+              "jefe": "Lennin Tirado",
+              "valor": "89.8%",
+              "pct": 89.8,
+              "estado": "green"
+            },
+            {
+              "jefe": "Yoselyn Wong",
+              "valor": "98.2%",
+              "pct": 98.2,
+              "estado": "green"
+            }
+          ],
+          "planes_por_planta": [
+            {
+              "planta": "PAUNO",
+              "estatus": "—",
+              "planes": 4
+            },
+            {
+              "planta": "ATE",
+              "estatus": "—",
+              "planes": 2
+            },
+            {
+              "planta": "PACHACAMAC",
+              "estatus": "—",
+              "planes": 2
+            },
+            {
+              "planta": "SOMA",
+              "estatus": "—",
+              "planes": 1
             }
           ]
         },
@@ -690,23 +950,32 @@
           "kpis": [
             {
               "label": "Planilla S/. / KG Producido",
-              "valor": "S/0.47"
+              "valor": "S/0.04",
+              "fuente": "reporte",
+              "meta": "2026-08 parcial — mediana previa S/0.52",
+              "estado": "yellow"
             },
             {
               "label": "Planilla S/. / KG Vendido",
-              "valor": "S/0.46"
+              "valor": "S/0.04",
+              "fuente": "reporte",
+              "meta": "2026-08 parcial — mediana previa S/0.53",
+              "estado": "yellow"
             },
             {
               "label": "Producción Total (KG)",
-              "valor": "9,629,256 kg"
+              "valor": "9,629,256 kg",
+              "fuente": "reporte"
             },
             {
               "label": "Venta Neta (KG)",
-              "valor": "9,853,195 kg"
+              "valor": "6,794,756 kg",
+              "fuente": "reporte"
             },
             {
               "label": "Planilla Total",
-              "valor": "S/4.51M"
+              "valor": "S/4.51M",
+              "fuente": "reporte"
             }
           ]
         },
@@ -718,29 +987,35 @@
               "label": "Fill Rate",
               "valor": "88.4%",
               "meta": "98%",
-              "estado": "yellow"
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/126.29M"
+              "valor": "S/126.29M",
+              "fuente": "sondeo"
             },
             {
               "label": "Facturación",
-              "valor": "S/94.93M"
+              "valor": "S/94.93M",
+              "fuente": "sondeo"
             },
             {
               "label": "Venta Perdida",
               "valor": "S/31.37M",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "sondeo"
             },
             {
               "label": "Venta del mes (tarjeta)",
-              "valor": "1,720"
+              "valor": "1,720",
+              "fuente": "reporte"
             },
             {
               "label": "Pedidos no atendidos (mes)",
               "valor": "199",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             }
           ],
           "por_grupo": [
@@ -820,32 +1095,37 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "yellow",
+          "estado": "red",
           "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
           "kpis": [
             {
               "label": "Presupuesto del mes",
-              "valor": "S/7.83M"
+              "valor": "S/7.83M",
+              "fuente": "reporte"
             },
             {
               "label": "Facturado",
-              "valor": "S/18.75M"
+              "valor": "S/18.75M",
+              "fuente": "reporte"
             },
             {
               "label": "Avance vs presupuesto",
               "valor": "239.4%",
               "meta": "revisar — el visual no filtra año",
-              "estado": "yellow"
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "Cumplimiento producción (ayer)",
               "valor": "70%",
               "meta": "100% del programa del día",
-              "estado": "red"
+              "estado": "red",
+              "fuente": "reporte"
             },
             {
               "label": "Pendiente de facturar",
-              "valor": "S/333,047"
+              "valor": "S/333,047",
+              "fuente": "reporte"
             }
           ],
           "cumplimiento_produccion": [
@@ -907,5 +1187,16 @@
     "fill_rate": 0.8647581189382418,
     "mermas": 0.04987907894946126,
     "avance": 0.6295519287006067
-  }
+  },
+  "verificacion": {
+    "verificados": 60,
+    "total": 63
+  },
+  "diagnostico": [
+    {
+      "consulta": "captura:ESTADO DE PLANES DE ACCION",
+      "http": 200,
+      "error": "columnas sin mapear: ['estatus ([Estatus])', 'area ([Área])']. Claves reales: ['Planes de Accion[Planta]', '[Color_KPI]', '[ColumnIndex]', '[CountÁrea]', '[SortBy_DM0_0]']"
+    }
+  ]
 }
