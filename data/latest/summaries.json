@@ -127,7 +127,8 @@
             {
               "label": "Días CxP",
               "valor": "107d",
-              "meta": "<90d"
+              "meta": "<90d",
+              "fuente": "reporte"
             }
           ],
           "tramos": [
@@ -925,21 +926,46 @@
             {
               "planta": "PAUNO",
               "estatus": "—",
-              "planes": 4
+              "planes": 1
+            },
+            {
+              "planta": "PAUNO",
+              "estatus": "Abierto",
+              "planes": 1
+            },
+            {
+              "planta": "PAUNO",
+              "estatus": "Atrasado",
+              "planes": 1
+            },
+            {
+              "planta": "PAUNO",
+              "estatus": "Cerrado",
+              "planes": 1
             },
             {
               "planta": "ATE",
-              "estatus": "—",
-              "planes": 2
+              "estatus": "Atrasado",
+              "planes": 1
+            },
+            {
+              "planta": "ATE",
+              "estatus": "Cerrado",
+              "planes": 1
             },
             {
               "planta": "PACHACAMAC",
-              "estatus": "—",
-              "planes": 2
+              "estatus": "Atrasado",
+              "planes": 1
+            },
+            {
+              "planta": "PACHACAMAC",
+              "estatus": "Cerrado",
+              "planes": 1
             },
             {
               "planta": "SOMA",
-              "estatus": "—",
+              "estatus": "Cerrado",
               "planes": 1
             }
           ]
@@ -992,19 +1018,19 @@
             },
             {
               "label": "Orden de Venta",
-              "valor": "S/126.29M",
-              "fuente": "sondeo"
+              "valor": "S/6.79M",
+              "fuente": "reporte"
             },
             {
               "label": "Facturación",
-              "valor": "S/94.93M",
-              "fuente": "sondeo"
+              "valor": "S/6.09M",
+              "fuente": "reporte"
             },
             {
               "label": "Venta Perdida",
               "valor": "S/31.37M",
               "estado": "red",
-              "fuente": "sondeo"
+              "fuente": "reporte"
             },
             {
               "label": "Venta del mes (tarjeta)",
@@ -1189,14 +1215,14 @@
     "avance": 0.6295519287006067
   },
   "verificacion": {
-    "verificados": 60,
+    "verificados": 63,
     "total": 63
   },
   "diagnostico": [
     {
       "consulta": "captura:ESTADO DE PLANES DE ACCION",
       "http": 200,
-      "error": "columnas sin mapear: ['estatus ([Estatus])', 'area ([Área])']. Claves reales: ['Planes de Accion[Planta]', '[Color_KPI]', '[ColumnIndex]', '[CountÁrea]', '[SortBy_DM0_0]']"
+      "error": "columnas sin mapear: ['area ([Área])']. Claves reales: ['Planes de Accion[Planta]', '[Color_KPI]', '[ColumnIndex]', '[CountÁrea]', '[SortBy_DM0_0]']"
     }
   ]
 }
