@@ -2094,6 +2094,17 @@ RECONCILIAR = [
     ("margen_variable", "Precio/kg",       "margen", "Precio x Kilo",     "soles", None),
     ("margen_variable", "Ventas mes",      "margen", "Ventas (S/.)",      "soles", None),
     ("cuentas_por_pagar", "Días CxP",      "cxp",    "Días CxP",          "dias",  "<90d"),
+    # Mermas no tiene tarjeta de KPI —su página son todos gráficos— así que el
+    # valor sale del último mes de la serie capturada, que es la misma cifra
+    # que dibuja el gráfico del reporte.
+    ("mermas", "Merma Total", "mermas", "% Merma Total", "pct", "<2%"),
+    # Consumo: el reporte muestra el ratio del mes, no un acumulado.
+    ("consumo_materiales", "Costo x TN Vendida",   "consumo", "MIP / TN Vendida",   "soles", None),
+    ("consumo_materiales", "Costo x TN Producida", "consumo", "MIP / TN Producida", "soles", None),
+    ("productividad", "Planilla S/. / KG Producido", "productividad",
+     "Planilla / kg producido", "soles", None),
+    ("productividad", "Planilla S/. / KG Vendido", "productividad",
+     "Kg vendidos por sol de planilla", "soles", None),
 ]
 
 
@@ -2149,18 +2160,36 @@ def reconciliar_kpis(resultado, periodos_str):
             if valor is None:
                 continue
             texto, _ = _formatear(valor, formato)
+
+            # Aviso de mes incompleto: si el último valor se sale mucho de lo
+            # que venían siendo los meses anteriores, casi siempre es un corte
+            # parcial y no una mejora. Pasa con la planilla por kilo, que en el
+            # mes en curso cae a S/0.04 desde S/0.50 porque solo hay unos días
+            # cargados — leído sin contexto parece una mejora de diez veces.
+            previos = [x for x in serie[:-1] if x is not None][-6:]
+            aviso = None
+            if len(previos) >= 3:
+                previos_ord = sorted(previos)
+                mediana = previos_ord[len(previos_ord) // 2]
+                if mediana and (valor < mediana * 0.3 or valor > mediana * 3):
+                    aviso = f"{periodo} parcial — mediana previa "
+                    aviso += _formatear(mediana, formato)[0]
             kpis = rep.setdefault("kpis", [])
             actual = next((k for k in kpis if k["label"] == etiqueta), None)
             if actual is None:
                 kpis.append({"label": etiqueta, "valor": texto,
-                             "meta": meta or (periodo or "")})
+                             "meta": aviso or meta or (periodo or ""),
+                             **({"estado": "yellow"} if aviso else {})})
                 cambios += 1
                 print(f"    + [{tipo}] {etiqueta} = {texto} ({periodo})")
             elif actual.get("valor") != texto:
                 print(f"    ~ [{tipo}] {etiqueta}: {actual['valor']} → {texto} "
                       f"({periodo}, de la consulta capturada)")
                 actual["valor"] = texto
-                if meta:
+                if aviso:
+                    actual["meta"] = aviso
+                    actual["estado"] = "yellow"
+                elif meta:
                     actual["meta"] = meta
                 cambios += 1
     if cambios:

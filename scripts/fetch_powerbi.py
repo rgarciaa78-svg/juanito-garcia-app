@@ -2219,6 +2219,20 @@ def build_compras(found):
              f"Faltantes: {int(to_float(faltantes_val) or 0)} ítems" if faltantes_val and to_float(faltantes_val) else None)
     res = {"estado": sem, "alerta": alerta, "kpis": kpis}
 
+    # Totales de la tabla de materiales: sustituyen a los del sondeo, que
+    # consultaba las mismas medidas sin los filtros del visual.
+    tot_mat = found.get("__totales_materiales") or {}
+    for etiqueta, valor in tot_mat.items():
+        if valor is None:
+            continue
+        texto = (f"{valor:,.0f}" if "Consumo" in etiqueta or "PP" in etiqueta
+                 else fmt_soles(valor))
+        actual = next((k for k in kpis if k["label"] == etiqueta), None)
+        if actual is None:
+            kpis.append({"label": etiqueta, "valor": texto})
+        else:
+            actual["valor"] = texto
+
     # Materiales en quiebre según la explosión de materiales semanal.
     # Es la lista más accionable del reporte: son pocos y hay que comprarlos.
     falt = found.get("__faltantes") or []
@@ -3478,6 +3492,36 @@ def main():
                 if planta_merma:
                     empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
                     print(f"  Mermas Planta: {planta_merma}")
+
+        # ── Compras: los KPIs de stock salen de la tabla ANALISIS DE
+        # MATERIALES sumando sus filas, que es lo que hace la fila Total del
+        # visual. Antes venían del sondeo, sin los filtros del reporte.
+        if empresa == "PAUNO":
+            try:
+                mat = desglose_desde_captura(
+                    token, ws_id,
+                    [ids.get("compras"), ids.get("planificacion"), ids.get("inventario")],
+                    "ANALISIS DE MATERIALES ( PLANIFICACION Y COMPRA)",
+                    {"stock_pp": "[Stock_PP]",
+                     "stock_val": "[Stock_Valorizado]",
+                     "c3": "[Consumo_Prom_3M]",
+                     "c6": "[Consumo_Prom_6M]"})
+                if mat:
+                    def suma(clave):
+                        vals = [to_float(x.get(clave)) for x in mat]
+                        vals = [v for v in vals if v is not None]
+                        return sum(vals) if vals else None
+                    scanned.setdefault("compras", {})["__totales_materiales"] = {
+                        "Stock PP (Punto de Pedido)": suma("stock_pp"),
+                        "Stock Valorizado": suma("stock_val"),
+                        "Consumo Prom 3M": suma("c3"),
+                        "Consumo Prom 6M": suma("c6"),
+                    }
+                    print(f"    ✓ Totales de materiales desde {len(mat)} filas")
+            except Exception as e:
+                print(f"    ✗ totales de materiales: {e}")
+                DIAGNOSTICO.append({"consulta": "totales_materiales", "http": 0,
+                                    "error": repr(e)[:300]})
 
         # ── Compras: faltantes y necesidad de compra, desde las capturas del
         # Analizador (pestaña "ANALISIS DE COMPRA" del reporte 5).
