@@ -3969,11 +3969,15 @@ def main():
 
             planes = desglose_desde_captura(
                 token, WORKSPACES["PAUNO"], ids_ci, "ESTADO DE PLANES DE ACCION",
-                {"planta": "[Planta]", "estatus": "[Estatus]", "area": "[Área]"})
+                # El visual no expone el nombre del área, solo su conteo
+                # ([CountÁrea]), así que se agrupa por planta y estatus.
+                {"planta": "[Planta]", "estatus": "[Estatus]"})
             conteo = {}
             for pl in planes:
-                clave = ((pl.get("planta") or "—").strip(),
-                         (pl.get("estatus") or "—").strip())
+                estatus = (pl.get("estatus") or "").strip()
+                if not estatus or estatus == "—":
+                    continue          # fila de subtotal del visual
+                clave = ((pl.get("planta") or "—").strip(), estatus)
                 conteo[clave] = conteo.get(clave, 0) + 1
             if conteo:
                 ci["planes_por_planta"] = [

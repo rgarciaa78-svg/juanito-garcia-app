@@ -2199,6 +2199,45 @@ def reconciliar_kpis(resultado, periodos_str):
                 elif meta:
                     actual["meta"] = meta
                 cambios += 1
+    # Venta Perdida = Orden de Venta − Facturación. El visual mensual del
+    # reporte 12 no la trae como medida, pero sí sus dos componentes, y esa
+    # resta es su definición. Quedaba el valor viejo del sondeo —S/31.37M,
+    # cinco veces mayor que la propia orden de venta— marcado como verificado.
+    for empresa, edatos in (datos.get("empresas") or {}).items():
+        fr = (edatos.get("reportes") or {}).get("fill_rate")
+        if not fr:
+            continue
+        kp = {k["label"]: k for k in fr.get("kpis", [])}
+        ov, fa = kp.get("Orden de Venta"), kp.get("Facturación")
+        if not (ov and fa and ov.get("fuente") == "reporte"
+                and fa.get("fuente") == "reporte"):
+            continue
+
+        def _n(t):
+            t = str(t).replace("S/", "").replace(",", "")
+            return float(t.rstrip("M")) * (1e6 if t.endswith("M") else 1)
+
+        try:
+            perdida = _n(ov["valor"]) - _n(fa["valor"])
+        except ValueError:
+            continue
+        if perdida < 0:
+            continue
+        texto, _ = _formatear(perdida, "soles")
+        vp = kp.get("Venta Perdida")
+        if vp is None:
+            fr["kpis"].append({"label": "Venta Perdida", "valor": texto,
+                               "meta": "orden de venta − facturación",
+                               "fuente": "reporte"})
+        else:
+            if vp.get("valor") != texto:
+                print(f"    ~ [fill_rate] Venta Perdida: {vp['valor']} → {texto} "
+                      f"(orden de venta − facturación)")
+            vp["valor"] = texto
+            vp["meta"] = "orden de venta − facturación"
+            vp["fuente"] = "reporte"
+        cambios += 1
+
     if cambios:
         ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2))
         print(f"  ✓ {cambios} KPI(s) reconciliados con las series capturadas")
