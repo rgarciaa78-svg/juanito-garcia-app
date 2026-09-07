@@ -925,11 +925,6 @@
           "planes_por_planta": [
             {
               "planta": "PAUNO",
-              "estatus": "—",
-              "planes": 1
-            },
-            {
-              "planta": "PAUNO",
               "estatus": "Abierto",
               "planes": 1
             },
@@ -1123,24 +1118,14 @@
         },
         "margen_variable_pag2": {
           "estado": "red",
-          "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
+          "alerta": "Avance 1.3% vs presupuesto",
           "kpis": [
             {
-              "label": "Presupuesto del mes",
-              "valor": "S/7.83M",
-              "fuente": "reporte"
-            },
-            {
-              "label": "Facturado",
-              "valor": "S/18.75M",
-              "fuente": "reporte"
-            },
-            {
-              "label": "Avance vs presupuesto",
-              "valor": "239.4%",
-              "meta": "revisar — el visual no filtra año",
-              "estado": "yellow",
-              "fuente": "reporte"
+              "label": "Avance vs Ppto",
+              "valor": "1.3%",
+              "meta": "100%",
+              "estado": "red",
+              "fuente": "sondeo"
             },
             {
               "label": "Cumplimiento producción (ayer)",
@@ -1183,25 +1168,25 @@
           ],
           "por_canal": [
             {
-              "canal": "MODERNO",
-              "ppto": "S/5.87M",
-              "facturado": "S/14.13M",
-              "pendiente": "S/295,290",
-              "avance": 240.8
-            },
-            {
               "canal": "TRADICIONAL",
-              "ppto": "S/1.69M",
-              "facturado": "S/3.88M",
+              "ppto": "—",
+              "facturado": "—",
               "pendiente": "S/11,921",
-              "avance": 229.3
+              "avance": null
             },
             {
               "canal": "HORECA",
-              "ppto": "S/270,000",
-              "facturado": "S/739,192",
+              "ppto": "—",
+              "facturado": "—",
               "pendiente": "S/25,836",
-              "avance": 273.8
+              "avance": null
+            },
+            {
+              "canal": "MODERNO",
+              "ppto": "—",
+              "facturado": "—",
+              "pendiente": "S/295,290",
+              "avance": null
             }
           ]
         }
@@ -1216,14 +1201,7 @@
     "avance": 0.6295519287006067
   },
   "verificacion": {
-    "verificados": 63,
-    "total": 63
-  },
-  "diagnostico": [
-    {
-      "consulta": "captura:ESTADO DE PLANES DE ACCION",
-      "http": 200,
-      "error": "columnas sin mapear: ['area ([Área])']. Claves reales: ['Planes de Accion[Planta]', '[Color_KPI]', '[ColumnIndex]', '[CountÁrea]', '[SortBy_DM0_0]']"
-    }
-  ]
+    "verificados": 60,
+    "total": 61
+  }
 }
