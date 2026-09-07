@@ -1050,6 +1050,9 @@ def catalogo_capturas():
                 v, dax = f.get("visual"), f.get("dax")
                 if not v or not dax:
                     continue
+                # Se indexa por visual+hash: varias tarjetas comparten título
+                # y quedarnos con una sola perdería las demás.
+                _CATALOGO[f"{v}#{f.get('hash','')}"] = f
                 prev = _CATALOGO.get(v)
                 if prev is None or (f.get("filas") or 0) > (prev.get("filas") or 0):
                     _CATALOGO[v] = f
@@ -1417,6 +1420,104 @@ KPIS_CAPTURADOS = [
     ("COSTO X TN VENDIDA",   "consumo_materiales", "Costo x TN Vendida",  "soles", None),
     ("COSTO X TN PRODUCIDA", "consumo_materiales", "Costo x TN Producida", "soles", None),
 ]
+
+
+
+# Tarjetas que comparten nombre de visual y solo se distinguen por sus filtros.
+# En el reporte de CxP las siete tarjetas se llaman todas "Proyeccion
+# Producción" —quedaron con el nombre de otro reporte al copiarlas— así que
+# mapearlas por título es imposible. Se identifican por su firma: qué columnas
+# filtra cada una y con qué valores.
+#
+# (archivo, [(columna, valor_esperado)…], columnas_prohibidas, reporte,
+#  etiqueta, formato)
+# (archivo, medida, [(columna, valor)…], columnas_prohibidas, reporte,
+#  etiqueta, formato)
+#
+# La medida importa: en este reporte conviven tarjetas de importe y tarjetas
+# de TEXTO con exactamente los mismos filtros, así que sin distinguirlas la
+# firma es ambigua.
+TARJETAS_POR_FIRMA = [
+    ("02-cxp", "DISTINCTCOUNT", [], [],
+     "cuentas_por_pagar", "# Proveedores", "conteo"),
+    ("02-cxp", "SUM", [], ["ESTADO VIGENCIA", "ESTADO_REFINANCIADO", "RANGO"],
+     "cuentas_por_pagar", "CxP Total", "soles"),
+    ("02-cxp", "SUM", [("ESTADO_REFINANCIADO", "REFINANCIADO")], [],
+     "cuentas_por_pagar", "Refinanciado", "soles"),
+]
+
+
+def _firma_de(dax):
+    """Columnas filtradas por un DAX y el valor de cada una."""
+    import re
+    pares = {}
+    for valores, col in re.findall(
+            r"TREATAS\(\s*\{([^}]{0,200})\},\s*'[^']+'\[([^\]]+)\]", dax, re.S):
+        pares[col] = re.sub(r"\s+", " ", valores).replace('"', "").strip()
+    return pares
+
+
+def tarjeta_por_firma(token, ws, candidatos, prefijo_archivo, medida,
+                      requeridos, prohibidos):
+    """Busca en el catálogo la tarjeta cuya firma de filtros coincide.
+
+    `requeridos` son pares (columna, valor); valor None significa "que la
+    consulta mencione esa columna, sin importar el valor" —así se identifica
+    el conteo de proveedores, que usa DISTINCTCOUNT sobre [contacto]—.
+    `prohibidos` son columnas que NO deben aparecer, que es lo que separa el
+    total de la deuda de sus tramos.
+    """
+    vistos = set()
+    for entrada in catalogo_capturas().values():
+        if not entrada.get("archivo", "").startswith(prefijo_archivo):
+            continue
+        # Solo tarjetas: un visual de una fila. Sin esto la firma atrapa
+        # también las tablas del reporte, que comparten filtros.
+        if (entrada.get("filas") or 0) != 1:
+            continue
+        h = entrada.get("hash")
+        if h in vistos:          # el catálogo indexa por visual y por hash
+            continue
+        vistos.add(h)
+        dax = entrada["dax"]
+        firma = _firma_de(dax)
+        # Las columnas prohibidas se buscan solo en la FIRMA: rastrearlas en
+        # todo el DAX daba falsos positivos, porque el nombre aparece también
+        # en definiciones que la tarjeta no usa como filtro.
+        if any(c in firma for c in prohibidos):
+            continue
+        if medida == "DISTINCTCOUNT" and "DISTINCTCOUNT" not in dax:
+            continue
+        if medida == "SUM" and ("DISTINCTCOUNT" in dax or "SUM(" not in dax):
+            continue
+        ok = True
+        for col, val in requeridos:
+            if val is None:
+                if col not in dax:
+                    ok = False
+                    break
+            elif firma.get(col) != val:
+                ok = False
+                break
+        if not ok:
+            continue
+        for ds in candidatos:
+            if not ds:
+                continue
+            tablas = tablas_de_captura(
+                lambda q, lb: (_tablas_dax(token, ws, ds, q, lb) or [[]])[0],
+                dax, f"firma:{prefijo_archivo}")
+            for t in tablas:
+                if not t:
+                    continue
+                for clave, valor in t[0].items():
+                    if any(x in clave for x in ("IsGrandTotal", "IsDM",
+                                                "ColumnIndex", "SortBy")):
+                        continue
+                    v = to_float(valor)
+                    if v is not None:
+                        return v
+    return None
 
 
 def valor_de_tarjeta(token, ws, candidatos, visual):
@@ -3672,6 +3773,27 @@ def main():
         }
         reps = (summary.get("empresas", {}).get("PAUNO", {}) or {}).get("reportes", {})
         n = aplicar_kpis_capturados(token, WORKSPACES["PAUNO"], candidatos, reps)
+
+        # Tarjetas que comparten nombre y solo se distinguen por sus filtros
+        for pref, med, req, prohib, tipo, etiqueta, formato in TARJETAS_POR_FIRMA:
+            rep = reps.get(tipo)
+            if rep is None:
+                continue
+            v = tarjeta_por_firma(token, WORKSPACES["PAUNO"],
+                                  [ids_p.get("cxp")], pref, med, req, prohib)
+            if v is None:
+                continue
+            texto = _fmt_kpi(v, formato)
+            actual = next((k for k in rep.setdefault("kpis", [])
+                           if k["label"] == etiqueta), None)
+            if actual is None:
+                rep["kpis"].append({"label": etiqueta, "valor": texto})
+                n += 1
+            elif actual.get("valor") != texto:
+                print(f"    ~ [{tipo}] {etiqueta}: {actual['valor']} → {texto} "
+                      f"(tarjeta identificada por sus filtros)")
+                actual["valor"] = texto
+                n += 1
         if n:
             print(f"  ✓ {n} KPI(s) tomados de las tarjetas del reporte")
     except Exception as e:
