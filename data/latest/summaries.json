@@ -92,12 +92,12 @@
             },
             {
               "label": "# Proveedores",
-              "valor": "139"
+              "valor": "138"
             },
             {
               "label": "CxP Vencido",
               "valor": "S/3.37M",
-              "meta": "34.3% de la deuda viva",
+              "meta": "34.2% de la deuda viva",
               "estado": "red"
             },
             {
@@ -110,7 +110,7 @@
             {
               "label": "Vigente",
               "valor": "S/6.47M",
-              "pct": 65.7,
+              "pct": 65.8,
               "estado": "green"
             },
             {
@@ -151,7 +151,7 @@
             },
             {
               "label": "Más de 91 días",
-              "valor": "S/239,759",
+              "valor": "S/235,730",
               "pct": 2.4,
               "estado": "red"
             }
@@ -160,8 +160,8 @@
             {
               "nombre": "E & M S.R.L.",
               "categoria": "LECHE DESCREMADA",
-              "monto": "S/5.18M",
-              "pct": 43.0
+              "monto": "S/5.17M",
+              "pct": 42.9
             },
             {
               "nombre": "DIVERPLAST S.A.C.",
@@ -173,7 +173,7 @@
               "nombre": "CORPORACION DE ALIMENTOS TIERRA BENDITA SOCIEDAD ANONIMA CERRADA",
               "categoria": "GRANOLA",
               "monto": "S/668,587",
-              "pct": 5.5
+              "pct": 5.6
             },
             {
               "nombre": "SAN MIGUEL INDUSTRIAS PET S.A.",
@@ -185,7 +185,7 @@
               "nombre": "INTERLOOM S.A.C.",
               "categoria": "AZUCAR BLANCA",
               "monto": "S/644,536",
-              "pct": 5.3
+              "pct": 5.4
             },
             {
               "nombre": "SOCIEDAD GANADERA EL SEQUION S A",
@@ -318,12 +318,12 @@
             },
             {
               "label": "Producción Neta (KG)",
-              "valor": "9,899,697 KG",
+              "valor": "9,907,886 KG",
               "validado": true
             },
             {
               "label": "Costo x TN Producida",
-              "valor": "S/135.46",
+              "valor": "S/135.40",
               "validado": true
             }
           ],
@@ -426,7 +426,7 @@
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/6.62M"
+              "valor": "S/6.61M"
             },
             {
               "label": "Dead Stock",
@@ -442,11 +442,11 @@
             },
             {
               "label": "Working Stock",
-              "valor": "S/4.25M"
+              "valor": "S/4.24M"
             },
             {
               "label": "Exceso 1 (2-5 meses)",
-              "valor": "S/714,044"
+              "valor": "S/711,417"
             },
             {
               "label": "Exceso 2 (5-12 meses)",
@@ -498,7 +498,7 @@
             },
             {
               "categoria": "PT YOGURTS",
-              "valor": "S/364,370",
+              "valor": "S/364,304",
               "pct": 8.6
             },
             {
@@ -508,7 +508,7 @@
             },
             {
               "categoria": "PROD. EN PROCESO",
-              "valor": "S/192,619",
+              "valor": "S/189,495",
               "pct": 4.5
             },
             {
@@ -729,7 +729,7 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "red",
+          "estado": "yellow",
           "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
           "kpis": [
             {
@@ -767,8 +767,8 @@
             {
               "categoria": "PT DERIVADOS LACTEOS",
               "programado": "99,207",
-              "producido": "62,631",
-              "pct": 63.1
+              "producido": "62,996",
+              "pct": 63.5
             },
             {
               "categoria": "PT SALSAS",
@@ -779,8 +779,8 @@
             {
               "categoria": "PT YOGURTS",
               "programado": "14,362,346",
-              "producido": "11,324,185",
-              "pct": 78.8
+              "producido": "11,326,694",
+              "pct": 78.9
             }
           ],
           "por_canal": [
