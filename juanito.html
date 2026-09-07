@@ -2768,7 +2768,7 @@ function dxpCards(s) {
         <div><div class="rcard-num">${String(i+1).padStart(2,'0')}</div><div class="rcard-title">${DXP_NOMBRE[t]||t}<span class="arrow">→</span></div></div>
         <span class="pill ${est}">${lbl}</span>
       </div>
-      <div class="rcard-kpi"><span class="v" style="color:${est==='crit'?'var(--red)':est==='warn'?'var(--yellow)':'var(--ink)'}">${k0.valor}</span><span class="meta">${k0.label}${k0.meta?' · meta '+k0.meta:''}</span></div>
+      <div class="rcard-kpi"><span class="v" style="color:${est==='crit'?'var(--red)':est==='warn'?'var(--yellow)':'var(--ink)'}">${k0.valor}</span><span class="meta">${k0.label}${k0.fuente && k0.fuente !== 'reporte' ? ' <span title="No contrastado contra Power BI" style="color:var(--yellow);font-weight:700">◦</span>' : ''}${k0.meta?' · meta '+k0.meta:''}</span></div>
       <div class="rcard-body">${body}</div>
     </div>`;
   }).join('');
@@ -2869,7 +2869,7 @@ function renderHome() {
       ${dxpRoadmapCTA()}
       ${dxpHolding(s)}
       ${dxpCards(s)}
-      <div class="legend">
+      <div class="legend"><span class="li"><i style="background:var(--yellow)"></i>◦ cifra no contrastada contra Power BI</span>
         <span><span class="dot crit"></span>Crítico — fuera de meta, acción inmediata</span>
         <span><span class="dot warn"></span>Atención — desviación relevante, monitorear</span>
         <span><span class="dot ok"></span>Sin alerta / en línea</span>
@@ -3649,9 +3649,20 @@ function renderMcKinseyArea(empresa, tipo) {
       ${content}
     </div>`;
 
-  const rowKpi = (lbl, val, meta, col) => {
+  // Marca de origen: los KPIs que no salen de una consulta capturada del
+  // reporte llevan un signo. El sondeo genérico consulta la medida SIN los
+  // filtros del visual, y eso ya produjo diferencias reales (49.5% vs 46.5%
+  // en margen, 4.87% vs 2.93% en mermas). Quien lea el dashboard debe poder
+  // distinguir una cifra contrastada de una que no lo está.
+  const marcaFuente = (tipoRep, lbl) => {
+    const k = rp[tipoRep]?.kpis?.find(x => x.label === lbl);
+    if (!k || k.fuente === 'reporte' || !k.fuente) return '';
+    return ` <span title="No contrastado contra Power BI: viene del escaneo automático, sin los filtros del visual" style="color:var(--yellow);font-weight:700;cursor:help">◦</span>`;
+  };
+
+  const rowKpi = (lbl, val, meta, col, tipoRep) => {
     const cls = col === 'var(--red)' ? 'crit' : col === 'var(--yellow)' ? 'warn' : col === 'var(--green)' ? 'ok' : '';
-    return `<div class="mck-kv"><span class="l">${lbl}</span><span class="v ${cls}">${val}${meta?` <small>meta ${meta}</small>`:''}</span></div>`;
+    return `<div class="mck-kv"><span class="l">${lbl}${tipoRep ? marcaFuente(tipoRep, lbl) : ''}</span><span class="v ${cls}">${val}${meta?` <small>meta ${meta}</small>`:''}</span></div>`;
   };
 
   const yoyBlock = (valorActual, valorYoY, labelMetrica, fmt, motivoPendiente) => {

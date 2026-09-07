@@ -1594,6 +1594,74 @@ def aplicar_kpis_capturados(token, ws, candidatos_por_reporte, reportes):
     return cambios
 
 
+
+# KPIs que provienen de una consulta capturada del reporte, por tipo. Todo lo
+# que no esté aquí viene del sondeo genérico: consulta la medida SIN los
+# filtros del visual, así que puede no coincidir con lo que muestra Power BI.
+#
+# La distinción no es teórica. En Margen el sondeo daba 49.5% donde el reporte
+# muestra 46.5%; en Mermas daba 4.87% donde son 2.93%. Marcar el origen evita
+# que una cifra sin contrastar se lea con la misma confianza que una validada.
+KPIS_VERIFICADOS = {
+    "cuentas_por_cobrar": {"Morosidad", "CxC Total", "CxC por vencer",
+                           "CxC Vencido", "Rotación CxC", "Clientes",
+                           "Ventas del mes"},
+    "cuentas_por_pagar": {"CxP Total", "Refinanciado", "# Proveedores",
+                          "CxP Vencido", "Deuda top 15 proveedores", "Días CxP",
+                          "Top 15 proveedores"},  # etiqueta anterior
+    "margen_variable": {"Margen variable", "Precio/kg", "Costo/kg", "Ventas mes"},
+    "mermas": {"Merma Total"},
+    "compras": {"Stock PP (Punto de Pedido)", "Stock Valorizado",
+                "Consumo Prom 3M", "Consumo Prom 6M", "Materiales en quiebre",
+                "Ítems con necesidad de compra", "Ratio Consumo/Compra"},
+    "sop_inventario": {"Inventario Total", "Dead Stock", "% Dead Stock",
+                       "Working Stock", "Exceso 1 (2-5 meses)",
+                       "Exceso 2 (5-12 meses)"},
+    "fill_rate": {"Fill Rate", "Venta del mes (tarjeta)",
+                  "Pedidos no atendidos (mes)"},
+    "consumo_materiales": {"Costo Total", "Producción Neta (KG)",
+                           "Costo x TN Vendida", "Costo x TN Producida",
+                           # dax_consumo_venta_neta_kg, confirmada con Copiar
+                           # consulta y corregida a [Peso total K] tras el
+                           # diagnóstico del 2026-09-06.
+                           "Venta Neta (KG)"},
+    # Los 14 de Control Interno salen de dax_control_interno(),
+    # dax_planes_accion(), dax_control_interno_sum() y
+    # dax_control_resultado_acumulado(): las cuatro se armaron con Copiar
+    # consulta el 2026-09-04 y se verificaron carácter a carácter.
+    "control_interno": {"% Cumplimiento", "Puntos de Control evaluados",
+                        "Satisfactorio", "Con Observaciones", "Crítico",
+                        "% Puntos en estado Crítico", "Total Planes de Acción",
+                        "Planes de Acción Abiertos", "Planes de Acción Cerrados",
+                        "Planes de Acción Atrasados", "% Avance Planes de Acción",
+                        "Puntos Ejecutados", "Calificación", "Puntos Totales"},
+    "productividad": {"Producción Total (KG)", "Planilla Total",
+                      "Venta Neta (KG)", "Planilla S/. / KG Producido",
+                      "Planilla S/. / KG Vendido"},
+    "margen_variable_pag2": {"Presupuesto del mes", "Facturado",
+                             "Avance vs presupuesto", "Pendiente de facturar",
+                             "Cumplimiento producción (ayer)"},
+}
+
+
+def marcar_origen(reportes):
+    """Anota en cada KPI si viene del reporte o del sondeo genérico.
+
+    Devuelve (verificados, total) para poder informarlo al final.
+    """
+    ver = tot = 0
+    for tipo, rep in reportes.items():
+        conocidos = KPIS_VERIFICADOS.get(tipo, set())
+        for k in rep.get("kpis", []):
+            tot += 1
+            if k["label"] in conocidos:
+                k["fuente"] = "reporte"
+                ver += 1
+            else:
+                k["fuente"] = "sondeo"
+    return ver, tot
+
+
 def build_cxc(found):
     # Solo '% Morosidad' (21.08%). La medida 'Morosidad' (13.78%) queda fuera
     # a propósito — ver nota en SCAN_CANDIDATES["cxc"].
@@ -3893,6 +3961,16 @@ def main():
         print(f"    ✗ Control interno por área: {e}")
         DIAGNOSTICO.append({"consulta": "control_interno_areas", "http": 0,
                             "error": repr(e)[:300]})
+
+    # Origen de cada cifra: del reporte o del sondeo genérico.
+    try:
+        reps_m = (summary.get("empresas", {}).get("PAUNO", {}) or {}).get("reportes", {})
+        ver, tot = marcar_origen(reps_m)
+        summary["verificacion"] = {"verificados": ver, "total": tot}
+        print(f"\n  Origen de los KPIs: {ver}/{tot} desde el reporte "
+              f"({ver / tot * 100:.0f}%)" if tot else "")
+    except Exception as e:
+        print(f"  ✗ marcar origen: {e}")
 
     if DIAGNOSTICO:
         summary["diagnostico"] = DIAGNOSTICO
