@@ -1116,7 +1116,9 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
         for t in tablas:
             if not t:
                 continue
-            n = sum(1 for suf in columnas.values() if busca(t[0], suf) is not None)
+            ks = {k for f in t[:20] for k in f}
+            n = sum(1 for suf in columnas.values()
+                    if any(k.endswith(suf) for k in ks))
             if n > mejor_n or (n == mejor_n and mejor and len(t) > len(mejor)):
                 mejor, mejor_n = t, n
         if mejor and mejor_n:
@@ -1138,8 +1140,12 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
     # elegida, el desglose sale incompleto o vacío sin que nada falle. Pasó
     # con 'faltantes', que mapeaba el producto pero no la cantidad y quedaba
     # en cero. Se deja constancia con las claves reales para poder corregir.
+    # Se comprueba la EXISTENCIA de la clave, no su valor: la primera fila
+    # suele ser un subtotal del visual y trae la dimensión en blanco. Mirar el
+    # valor daba por ausentes columnas que sí estaban.
+    claves = {k for f in filas[:20] for k in f}
     sin_mapear = [f"{n} ({suf})" for n, suf in columnas.items()
-                  if busca(filas[0], suf) is None]
+                  if not any(k.endswith(suf) for k in claves)]
     if sin_mapear:
         print(f"    · '{visual}': sin mapear {sin_mapear}")
         DIAGNOSTICO.append({
@@ -3212,7 +3218,7 @@ def main():
                      "categoria": "[CATEGORÍA]",
                      "faltante": "[SumFALTANTES_BOOM_SEMNANAL]",
                      "stock": "[Stock]",
-                     "lead_time": "[Lead_Time]"})
+                     "pendiente": "[Pendiente_Compra]"})
                 if falt:
                     scanned.setdefault("compras", {})["__faltantes"] = falt
             except Exception as e:
@@ -3225,7 +3231,6 @@ def main():
                     {"producto": "[data.nombre_producto]",
                      "categoria": "[CATEGORÍA]",
                      "momento": "[Momento_de_Compra]",
-                     "solicitud": "[Solicitud_Compra]",
                      "stock": "[Stock]"})
                 if nec:
                     scanned.setdefault("compras", {})["__necesidad"] = nec
