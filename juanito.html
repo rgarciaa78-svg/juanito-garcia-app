@@ -6307,7 +6307,26 @@ async function sendJuanito() {
 function construirContexto() {
   const d = DATA;
   const obj = {
+    // Guía para el modelo: sin esto tiende a responder solo con los KPIs del
+    // mes y a ignorar las series, que son las que permiten decir de DÓNDE
+    // viene un problema y desde CUÁNDO.
+    _guia: {
+      que_hay: 'KPIs del último mes, desgloses por segmento y series mensuales completas.',
+      como_responder: [
+        'Para "por qué" o "de dónde viene": busca en desgloses (por_cliente, por_uen, por_area, dead_por_categoria, tramos, faltantes) y en series por segmento.',
+        'Para "desde cuándo" o "cómo viene": recorre la serie mensual y di en qué mes cambió la tendencia.',
+        'Compara segmentos entre sí antes de dar un promedio: el promedio esconde al que está mal.',
+        'Cita siempre el mes de cada cifra. Los períodos están en series.periodos, alineados por posición con cada array.',
+        'Si un KPI trae meta, di la brecha en puntos o en soles, no solo el valor.'
+      ],
+      limites: [
+        'No inventes cifras que no estén aquí. Si falta el dato, dilo.',
+        'Un KPI con fuente distinta de "reporte" no está contrastado contra Power BI: avísalo si lo usas.',
+        'Revisa avisos_datos antes de afirmar que algo es actual.'
+      ]
+    },
     fecha: d.fecha,
+    verificacion: d.verificacion,
     semaforos: d.semaforos,
     semaforo_razon: d.semaforo_razon,
     holding_ventas: d.holding_ventas,
@@ -6315,7 +6334,7 @@ function construirContexto() {
     agenda_ceo: d.agenda_ceo,
     empresas: {}
   };
-  // Por cada empresa: solo alertas + KPIs (sin tendencia histórica)
+
   Object.entries(d.empresas || {}).forEach(([emp, ed]) => {
     obj.empresas[emp] = { reportes: {} };
     Object.entries(ed.reportes || {}).forEach(([tipo, rd]) => {
@@ -6330,6 +6349,7 @@ function construirContexto() {
         por_gerente: rd.por_gerente,
         por_uen: rd.por_uen,
         por_canal: rd.por_canal,
+        por_planta: rd.por_planta,
         cumplimiento_produccion: rd.cumplimiento_produccion,
         faltantes: rd.faltantes,
         por_cliente: rd.por_cliente,
@@ -6341,10 +6361,76 @@ function construirContexto() {
         dead_por_categoria: rd.dead_por_categoria,
         working_por_categoria: rd.working_por_categoria,
         por_categoria: rd.por_categoria
-        // excluimos tendencia_* para reducir tamaño
       };
     });
   });
+
+  // ── Series mensuales. Antes se excluían "para reducir tamaño", y esa era la
+  // razón de que el chat no pudiera responder de dónde viene un problema ni
+  // desde cuándo. Comprimidas ocupan ~6 KB: redondear los enteros y recortar
+  // los nulos del final basta.
+  if (typeof SERIES !== 'undefined' && SERIES && SERIES.datasets) {
+    const compactar = arr => {
+      let fin = arr.length;
+      while (fin > 0 && arr[fin - 1] == null) fin--;
+      return arr.slice(0, fin).map(x =>
+        x == null ? null : (Math.abs(x) < 10 ? Number(x.toFixed(4)) : Math.round(x)));
+    };
+    const ds = {};
+    Object.entries(SERIES.datasets).forEach(([nombre, ss]) => {
+      ds[nombre] = {};
+      Object.entries(ss).forEach(([k, v]) => {
+        if (Array.isArray(v)) ds[nombre][k] = compactar(v);
+      });
+    });
+    obj.series = {
+      periodos: SERIES.periodos,
+      nota: 'Cada array está alineado por posición con periodos. null = mes sin dato.',
+      datasets: ds
+    };
+    // Qué dataset alimenta a qué reporte, para que el modelo no tenga que
+    // adivinar dónde buscar la serie de un reporte.
+    obj.series.mapa_reporte_dataset = {
+      cuentas_por_cobrar: 'cxc', cuentas_por_pagar: 'cxp',
+      margen_variable: 'margen', mermas: 'mermas', compras: 'compras',
+      sop_inventario: 'inventario', fill_rate: 'fill_rate',
+      consumo_materiales: 'consumo', productividad: 'productividad',
+      margen_variable_pag2: 'planificacion'
+    };
+  }
+
+  // ── Avisos: datos viejos y cifras sin contrastar. Sin esto el modelo
+  // presenta como actual un número de hace más de un año.
+  const avisos = [];
+  if (obj.series) {
+    const hoy = new Date();
+    Object.entries(obj.series.datasets).forEach(([ds, ss]) => {
+      let ultimo = null;
+      Object.values(ss).forEach(arr => {
+        for (let i = arr.length - 1; i >= 0; i--)
+          if (arr[i] != null) {
+            const p = obj.series.periodos[i];
+            if (!ultimo || p > ultimo) ultimo = p;
+            break;
+          }
+      });
+      if (!ultimo) return;
+      const [a, m] = ultimo.split('-').map(Number);
+      const meses = (hoy.getFullYear() - a) * 12 + (hoy.getMonth() + 1 - m);
+      if (meses > 2) avisos.push(
+        `${ds}: último dato ${ultimo}, hace ${meses} meses — NO es la situación actual.`);
+    });
+  }
+  Object.entries(d.empresas || {}).forEach(([emp, ed]) => {
+    Object.entries(ed.reportes || {}).forEach(([tipo, rd]) => {
+      (rd.kpis || []).forEach(k => {
+        if (k.fuente && k.fuente !== 'reporte')
+          avisos.push(`${tipo}/${k.label}: no contrastado contra Power BI.`);
+      });
+    });
+  });
+  if (avisos.length) obj.avisos_datos = avisos;
+
   return JSON.stringify(obj);
 }
 
