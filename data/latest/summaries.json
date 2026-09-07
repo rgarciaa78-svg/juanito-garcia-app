@@ -1,6 +1,6 @@
 {
-  "fecha": "06/09/2026",
-  "fecha_actualizacion": "2026-09-06",
+  "fecha": "07/09/2026",
+  "fecha_actualizacion": "2026-09-07",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "red"
@@ -389,11 +389,11 @@
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "10729953"
+              "valor": "10645100"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "10525562"
+              "valor": "10475210"
             },
             {
               "label": "Ítems con necesidad de compra",
@@ -816,5 +816,22 @@
     "fill_rate": 0.8647581189382418,
     "mermas": 0.04987907894946126,
     "avance": 0.6295519287006067
-  }
+  },
+  "diagnostico": [
+    {
+      "consulta": "captura:ORDENES DE VENTA EN EL SISTEMA POR CLIENTE",
+      "http": 200,
+      "error": "columnas sin mapear: ['cliente ([cliente])']. Claves reales: ['Exl A Maestra de Ordenes de Venta[PERIODO]', 'Exl A Maestra de Ordenes de Venta[cliente]', '[Color_Prioridad]', '[IsDM1Total]', '[IsGrandTotalRowTotal]', '[SortBy_DM1_0]', '[SumCANTIDAD_BON]', '[SumCANTIDAD_VENTA]', '[SumCOSTO_DE_BONIF]', '[SumCOSTO_DE_VENTA]', '[SumCOSTO_TOTAL]', '[SumMonto_Neto_Venta]', '[Sumcantidad]', '[v__MARGEN_CAIDA__]', '[v__Margen_Venta__]', '[v__Margen_Venta___Bonificacion__]']"
+    },
+    {
+      "consulta": "captura:LISTADO DE PRODUCTOS FALTANES EN EXPLOCIÓN DE MATERIALES",
+      "http": 200,
+      "error": "columnas sin mapear: ['lead_time ([Lead_Time])']. Claves reales: ['CATEGORIZ[CATEGORÍA]', 'CATEGORIZ[PLANTA]', 'Maestra de Productos[data.categoria_producto]', 'Maestra de Productos[data.codigo_producto]', 'Maestra de Productos[data.nombre_producto]', '[Pendiente_Compra]', '[SortBy_DM0_0]', '[SortBy_DM1_0]', '[SortBy_DM2_0]', '[SortBy_DM3_0]', '[Stock]', '[Stock_Producción]', '[SumFALTANTES_BOOM_SEMNANAL]', '[SumRequerimiento_Total_Boom]']"
+    },
+    {
+      "consulta": "captura:NECESIDAD DE COMPRA ",
+      "http": 200,
+      "error": "columnas sin mapear: ['producto ([data.nombre_producto])', 'categoria ([CATEGORÍA])', 'solicitud ([Solicitud_Compra])']. Claves reales: ['CATEGORIZ[CATEGORÍA]', 'CATEGORIZ[PLANTA]', 'Maestra de Productos[data.codigo_producto]', 'Maestra de Productos[data.nombre_producto]', '[Color_Momento_de_Compra]', '[Consumo_Prom_3M]', '[IsDM1Total]', '[IsDM3Total]', '[IsDM5Total]', '[IsGrandTotalRowTotal]', '[Momento_de_Compra]', '[Pendiente_Compra]', '[Req_Forecast_Trimestral]', '[Stock]', '[ultima_Empresa_de_Compra]']"
+    }
+  ]
 }
