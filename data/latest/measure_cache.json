@@ -6,9 +6,9 @@
   },
   "cxp": {
     "Cuentas x Pagar": null,
+    "CUENTAS X PAGAR": null,
     "Refinanciamiento": null,
-    "Proveedores": null,
-    "CUENTAS X PAGAR": null
+    "Proveedores": null
   },
   "margen": {
     "Venta Total": null,
@@ -39,18 +39,16 @@
   },
   "fill_rate": {
     "% FILLRATE": null,
+    "% Fill Rate": null,
     "ORDEN DE VENTA": null,
     "FACTURACION": null,
     "VENTA PERDIDA": null,
-    "% Fill Rate": null,
-    "% FillRate": null,
     "Orden de Venta": null,
     "Facturacion": null,
     "Venta Perdida": null
   },
   "mermas": {
-    "% Merma Total": null,
-    "Merma": null
+    "% Merma Total": null
   },
   "planificacion": {
     "% Avance": null

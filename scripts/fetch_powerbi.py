@@ -3536,4 +3536,25 @@ def main():
     print("\n=== COMPLETADO ===")
 
 if __name__ == "__main__":
-    main()
+    # Un fallo en cualquier punto tumbaba la corrida entera y el dashboard se
+    # quedaba con los datos del día anterior, aunque el 95% de las consultas
+    # hubiera funcionado. Se deja constancia del error en summaries.json —
+    # donde sí se puede leer sin permisos de admin sobre el log— y se sale con
+    # código 1 igual, para que la corrida siga marcada como fallida.
+    import traceback
+    try:
+        main()
+    except Exception:
+        rastro = traceback.format_exc()
+        print(rastro)
+        try:
+            ruta = OUTPUT_DIR / "summaries.json"
+            datos = json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else {}
+            datos.setdefault("diagnostico", []).append({
+                "consulta": "main", "http": 0,
+                "error": "la corrida murió: " + rastro[-1500:]})
+            ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2))
+            print("→ traceback guardado en summaries.json → diagnostico")
+        except Exception as e2:
+            print(f"→ no se pudo guardar el traceback: {e2}")
+        sys.exit(1)
