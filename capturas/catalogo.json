@@ -1,5 +1,608 @@
 [
   {
+    "visual": "VENTAS MES ANTERIOR",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE VAR __DS0FilterTable = \r\n\tTREATAS({\"MES_ANTERIOR\"}, 'DATA_FACTURACION'[FIL_MES_ANTERIOR])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(__DS0FilterTable, \"SUM_FACT_S_IGV\", IGNORE('DATA_FACTURACION'[SUM FACT S/IGV]))",
+    "hash": "87a0184f10ae",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "FIL_MES_ANTERIOR",
+      "SUM FACT S/IGV"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "VENTAS MES ACTUAL",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE VAR __DS0FilterTable = \r\n\tTREATAS({\"MES_ACTUAL\"}, 'DATA_FACTURACION'[FIL_MES_ACTUAL])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(__DS0FilterTable, \"SUM_FACT_S_IGV\", IGNORE('DATA_FACTURACION'[SUM FACT S/IGV]))",
+    "hash": "f223153cb4c2",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "FIL_MES_ACTUAL",
+      "SUM FACT S/IGV"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "# CLIENTES",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE VAR __DS0FilterTable = \r\n\tTREATAS({\"Pendiente\"}, 'DATA_FACTURACION'[CXC])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t\"DistinctCountnumero_documento\", IGNORE(CALCULATE(DISTINCTCOUNT('DATA_FACTURACION'[numero_documento])))\r\n\t)",
+    "hash": "8fb5d6d00e22",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "CXC",
+      "numero_documento"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "ROTACION CxC",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "EVALUATE\r\n\tROW(\r\n\t\"DIAS_ACT\", 'DATA_FACTURACION'[DIAS ACT]\r\n)",
+    "hash": "7302ad6ece1c",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "DIAS ACT"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MOROSIDAD",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "EVALUATE\r\n\tROW(\r\n\t\"v__MOROSIDAD\", 'DATA_FACTURACION'[% MOROSIDAD]\r\n)",
+    "hash": "3b11ec474770",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "% MOROSIDAD"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "CUENTAS POR COBRAR",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE VAR __DS0FilterTable = \r\n\tTREATAS({\"Pendiente\"}, 'DATA_FACTURACION'[CXC])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t\"SumTotal_fact\", IGNORE(CALCULATE(SUM('DATA_FACTURACION'[Total_fact])))\r\n\t)",
+    "hash": "2678239fcb61",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "CXC",
+      "Total_fact"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "POR VENCER",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Pendiente\"}, 'DATA_FACTURACION'[CXC])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"1. Por Vencer\"}, 'DATA_FACTURACION'[O_SEGMENTO])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t\"SumTotal_fact\", IGNORE(CALCULATE(SUM('DATA_FACTURACION'[Total_fact])))\r\n\t)",
+    "hash": "cfd576279271",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "CXC",
+      "O_SEGMENTO",
+      "Total_fact"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "0 A 15 DIAS",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Pendiente\"}, 'DATA_FACTURACION'[CXC])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"2. 0 a 15 días\"}, 'DATA_FACTURACION'[O_SEGMENTO])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t\"SumTotal_fact\", IGNORE(CALCULATE(SUM('DATA_FACTURACION'[Total_fact])))\r\n\t)",
+    "hash": "cd17c8121ea6",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "CXC",
+      "O_SEGMENTO",
+      "Total_fact"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "16 A 30 DIAS",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"3. 16 a 30 días\"}, 'DATA_FACTURACION'[O_SEGMENTO])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pendiente\"}, 'DATA_FACTURACION'[CXC])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t\"SumTotal_fact\", IGNORE(CALCULATE(SUM('DATA_FACTURACION'[Total_fact])))\r\n\t)",
+    "hash": "1fbd3981889e",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "CXC",
+      "O_SEGMENTO",
+      "Total_fact"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MAS DE 30 DIAS",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"4. Más de 30 días\"}, 'DATA_FACTURACION'[O_SEGMENTO])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pendiente\"}, 'DATA_FACTURACION'[CXC])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t\"SumTotal_fact\", IGNORE(CALCULATE(SUM('DATA_FACTURACION'[Total_fact])))\r\n\t)",
+    "hash": "03e10d599f70",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "CXC",
+      "O_SEGMENTO",
+      "Total_fact"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "DIAS DE COBRANZA",
+    "tipo_visual": "lineStackedColumnComboChart",
+    "filas": 21,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año])),\r\n\t\t\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año] > 2024\r\n\t\t)\r\n\r\n\tVAR __ValueFilterDM0 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tSUMMARIZECOLUMNS(\r\n\t\t\t\t\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año],\r\n\t\t\t\t\t'Calendario (FACT)'[Mes Corto],\r\n\t\t\t\t\t'Calendario (FACT)'[Mes Numero],\r\n\t\t\t\t\t__DS0FilterTable,\r\n\t\t\t\t\t\"DIAS_COBRANZA\", 'DATA_FACTURACION'[DIAS COBRANZA],\r\n\t\t\t\t\t\"Ventas_Ultimos_12_Meses\", IGNORE('DATA_FACTURACION'[Ventas Ultimos 12 Meses])\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t[Ventas_Ultimos_12_Meses] > CURRENCY(\"0\")\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año],\r\n\t\t\t'Calendario (FACT)'[Mes Corto],\r\n\t\t\t'Calendario (FACT)'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__ValueFilterDM0,\r\n\t\t\t\"DIAS_COBRANZA\", 'DATA_FACTURACION'[DIAS COBRANZA]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario (FACT)'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario (FACT)'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año],\r\n\t'Calendario (FACT)'[Mes Numero],\r\n\t'Calendario (FACT)'[Mes Corto]",
+    "hash": "bd0404e1eef4",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "Calendario (FACT)",
+      "DATA_FACTURACION",
+      "LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537"
+    ],
+    "campos": [
+      "Año",
+      "DIAS COBRANZA",
+      "Mes Corto",
+      "Mes Numero",
+      "Ventas Ultimos 12 Meses"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "% DE MOROSIDAD",
+    "tipo_visual": "lineChart",
+    "filas": 21,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año])),\r\n\t\t\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año] > 2024\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año],\r\n\t\t\t'Calendario (FACT)'[Mes Corto],\r\n\t\t\t'Calendario (FACT)'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t\"v__MOROSIDAD_x_mes\", 'DATA_FACTURACION'[% MOROSIDAD x mes]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario (FACT)'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario (FACT)'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537'[Año],\r\n\t'Calendario (FACT)'[Mes Numero],\r\n\t'Calendario (FACT)'[Mes Corto]",
+    "hash": "a22c337805d2",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "Calendario (FACT)",
+      "DATA_FACTURACION",
+      "LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537"
+    ],
+    "campos": [
+      "% MOROSIDAD x mes",
+      "Año",
+      "Mes Corto",
+      "Mes Numero"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Tarjeta",
+    "tipo_visual": "cardVisual",
+    "filas": 1,
+    "dax": "EVALUATE\r\n\tROW(\r\n\t\t\"MinFecha_de_Actualización2\", CALCULATE(MIN('Fecha de Actualización'[Fecha de Actualización]))\r\n\t)",
+    "hash": "365d822abe5c",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "Fecha de Actualización"
+    ],
+    "campos": [
+      "Fecha de Actualización"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Tarjeta",
+    "tipo_visual": "cardVisual",
+    "filas": 1,
+    "dax": "EVALUATE\r\n\tROW(\r\n\t\"FechaHoraLima\", 'Fecha de Actualización'[FechaHoraLima]\r\n)",
+    "hash": "4f82a1c3ac10",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "Fecha de Actualización"
+    ],
+    "campos": [
+      "FechaHoraLima"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Matriz",
+    "tipo_visual": "pivotTable",
+    "filas": 14,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Pendiente\"}, 'DATA_FACTURACION'[CXC])\r\n\r\n\tVAR __DM3FilterTable = \r\n\t\tTREATAS({\"HORECA\",\r\n\t\t\t\"CANAL TRADICIONAL\",\r\n\t\t\t\"CANAL MODERNO\"}, 'DATA_FACTURACION'[CANAL])\r\n\r\n\tVAR __DM5FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{(\"CANAL TRADICIONAL\", \"HUGO BARRANTES\")},\r\n\t\t\t'DATA_FACTURACION'[CANAL],\r\n\t\t\t'DATA_FACTURACION'[JEFE_VENTA]\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\t'DATA_FACTURACION'[CANAL], \"IsGrandTotalRowTotal\",\r\n\t\t\t\t'DATA_FACTURACION'[JEFE_VENTA], \"IsDM1Total\", NONVISUAL(__DM3FilterTable),\r\n\t\t\t\t'DATA_FACTURACION'[EJECUTIVO],\r\n\t\t\t\t\"IsDM3Total\",\r\n\t\t\t\tNONVISUAL(__DM3FilterTable),\r\n\t\t\t\tNONVISUAL(__DM5FilterTable)\r\n\t\t\t),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t\"POR_VENCER\", 'DATA_FACTURACION'[POR VENCER],\r\n\t\t\t\"v0_A_15_DÍAS\", 'DATA_FACTURACION'[0 A 15 DÍAS],\r\n\t\t\t\"v16_A_30_DÍAS\", 'DATA_FACTURACION'[16 A 30 DÍAS],\r\n\t\t\t\"MAS_DE_30_DÍAS\", 'DATA_FACTURACION'[MAS DE 30 DÍAS],\r\n\t\t\t\"SumTotal_fact\", CALCULATE(SUM('DATA_FACTURACION'[Total_fact]))\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM1 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(KEEPFILTERS(__DS0Core), AND([IsDM1Total] = TRUE, [IsDM3Total] = TRUE))\r\n\t\t\t),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'DATA_FACTURACION'[CANAL]\", 'DATA_FACTURACION'[CANAL],\r\n\t\t\t\"SortBy_DM1_0\", [POR_VENCER]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM3 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(FILTER(KEEPFILTERS(__DS0Core), [IsDM3Total] = TRUE)),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'DATA_FACTURACION'[CANAL]\", 'DATA_FACTURACION'[CANAL],\r\n\t\t\t\"IsDM1Total\", [IsDM1Total],\r\n\t\t\t\"'DATA_FACTURACION'[JEFE_VENTA]\", 'DATA_FACTURACION'[JEFE_VENTA],\r\n\t\t\t\"SortBy_DM3_0\", [POR_VENCER]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumns = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t__DS0CoreTableByDM1\r\n\t\t\t),\r\n\t\t\t__DS0CoreTableByDM3\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t502,\r\n\t\t\t__DS0PrimaryWithSortColumns,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t[SortBy_DM1_0],\r\n\t\t\t0,\r\n\t\t\t'DATA_FACTURACION'[CANAL],\r\n\t\t\t1,\r\n\t\t\t[IsDM1Total],\r\n\t\t\t0,\r\n\t\t\t[SortBy_DM3_0],\r\n\t\t\t0,\r\n\t\t\t'DATA_FACTURACION'[JEFE_VENTA],\r\n\t\t\t1,\r\n\t\t\t[IsDM3Total],\r\n\t\t\t0,\r\n\t\t\t[POR_VENCER],\r\n\t\t\t0,\r\n\t\t\t'DATA_FACTURACION'[EJECUTIVO],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC,\r\n\t[SortBy_DM1_0] DESC,\r\n\t'DATA_FACTURACION'[CANAL],\r\n\t[IsDM1Total] DESC,\r\n\t[SortBy_DM3_0] DESC,\r\n\t'DATA_FACTURACION'[JEFE_VENTA],\r\n\t[IsDM3Total] DESC,\r\n\t[POR_VENCER] DESC,\r\n\t'DATA_FACTURACION'[EJECUTIVO]",
+    "hash": "38e3644b220b",
+    "archivo": "01-cxc__reporte.json",
+    "tablas": [
+      "DATA_FACTURACION"
+    ],
+    "campos": [
+      "0 A 15 DÍAS",
+      "16 A 30 DÍAS",
+      "CANAL",
+      "CXC",
+      "EJECUTIVO",
+      "JEFE_VENTA",
+      "MAS DE 30 DÍAS",
+      "POR VENCER",
+      "Total_fact"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('CUENTAS CONTABLES'[glosa])),\r\n\t\t\tNOT('CUENTAS CONTABLES'[glosa] IN {\"SALDOS DE APERTURA\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"DistinctCountcontacto\", IGNORE(CALCULATE(DISTINCTCOUNT('CUENTAS CONTABLES'[contacto])))\r\n\t)",
+    "hash": "56dcb7a0bdc3",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "EXISTE",
+      "contacto",
+      "glosa"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t\"SumIMPORTE_NETO__42_\", IGNORE(\r\n\t\t\tCALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\t)",
+    "hash": "431fd2e63cfd",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "EXISTE",
+      "IMPORTE NETO (42)"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Vigente\"}, 'CUENTAS CONTABLES'[ESTADO VIGENCIA])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"NO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t\"SumIMPORTE_NETO__42_\", IGNORE(\r\n\t\t\tCALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\t)",
+    "hash": "60e637379c2f",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO VIGENCIA",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "IMPORTE NETO (42)"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Tarjeta",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"No Vigente\"}, 'CUENTAS CONTABLES'[ESTADO VIGENCIA])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"2. 8 a 15 días\",\r\n\t\t\t\"1. 0 a 7 días\"}, 'CUENTAS CONTABLES'[RANGO])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"NO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t\"SumIMPORTE_NETO__42_\", IGNORE(\r\n\t\t\tCALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\t)",
+    "hash": "e400aada7007",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO VIGENCIA",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "IMPORTE NETO (42)",
+      "RANGO"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"REFINANCIADO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"TXT_VENCIDO_0_15\", IGNORE('CUENTAS CONTABLES'[TXT VENCIDO 0 15])\r\n\t)",
+    "hash": "9bc3f1f90ec2",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "TXT VENCIDO 0 15"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"No Vigente\"}, 'CUENTAS CONTABLES'[ESTADO VIGENCIA])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"3. 16 a 30 días\"}, 'CUENTAS CONTABLES'[RANGO])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"NO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t\"SumIMPORTE_NETO__42_\", IGNORE(\r\n\t\t\tCALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\t)",
+    "hash": "6fd9900b344b",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO VIGENCIA",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "IMPORTE NETO (42)",
+      "RANGO"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"No Vigente\"}, 'CUENTAS CONTABLES'[ESTADO VIGENCIA])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS(\r\n\t\t\t{\"4. 31 a 45 días\",\r\n\t\t\t\t\"5. 46 a 60 días\",\r\n\t\t\t\t\"6. 61 a 90 días\",\r\n\t\t\t\t\"7. Más de 91 días\"},\r\n\t\t\t'CUENTAS CONTABLES'[RANGO]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"NO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t\"SumIMPORTE_NETO__42_\", IGNORE(\r\n\t\t\tCALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\t)",
+    "hash": "65783b23572a",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO VIGENCIA",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "IMPORTE NETO (42)",
+      "RANGO"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"REFINANCIADO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"SumIMPORTE_NETO__42_\", IGNORE(\r\n\t\t\tCALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\t)",
+    "hash": "d425cc45f8dd",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "IMPORTE NETO (42)"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"REFINANCIADO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"TXT_VENCIDO_REF\", IGNORE('CUENTAS CONTABLES'[TXT VENCIDO REF])\r\n\t)",
+    "hash": "8b2a1210acf7",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "TXT VENCIDO REF"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"REFINANCIADO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"TXT_VENCIDO_30\", IGNORE('CUENTAS CONTABLES'[TXT VENCIDO 30])\r\n\t)",
+    "hash": "d553899f40cd",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "TXT VENCIDO 30"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Proyeccion Producción",
+    "tipo_visual": "card",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pagado Parcialmente\",\r\n\t\t\t\"Sin Pagar\"}, 'CUENTAS CONTABLES'[ESTADO DE PAGO])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"REFINANCIADO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"TXT_VENCIDO_90\", IGNORE('CUENTAS CONTABLES'[TXT VENCIDO 90])\r\n\t)",
+    "hash": "14bdd1348456",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "ESTADO_REFINANCIADO",
+      "EXISTE",
+      "TXT VENCIDO 90"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Rotación de cuentas por pagar (días) ",
+    "tipo_visual": "lineClusteredColumnComboChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\n\tVAR __ValueFilterDM0 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tSUMMARIZECOLUMNS(\r\n\t\t\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Año],\r\n\t\t\t\t\t'Calendario'[Columna Mostrar],\r\n\t\t\t\t\t'Calendario'[Mes corto],\r\n\t\t\t\t\t'Calendario'[Mes Nº],\r\n\t\t\t\t\t__DS0FilterTable,\r\n\t\t\t\t\t\"TOTAL_ACUMULADO_CTA_60\", 'CUENTAS CONTABLES'[TOTAL ACUMULADO CTA 60],\r\n\t\t\t\t\t\"DIAS\", 'CUENTAS CONTABLES'[DIAS]\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t[TOTAL_ACUMULADO_CTA_60] > 0\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Año],\r\n\t\t\t'Calendario'[Columna Mostrar],\r\n\t\t\t'Calendario'[Mes corto],\r\n\t\t\t'Calendario'[Mes Nº],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__ValueFilterDM0,\r\n\t\t\t\"TOTAL_ACUMULADO_CTA_60\", 'CUENTAS CONTABLES'[TOTAL ACUMULADO CTA 60],\r\n\t\t\t\"DIAS\", 'CUENTAS CONTABLES'[DIAS]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'Calendario'[Columna Mostrar],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Nº],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Calendario'[Columna Mostrar],\r\n\t'LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b'[Año],\r\n\t'Calendario'[Mes Nº],\r\n\t'Calendario'[Mes corto]",
+    "hash": "be4acf4a701f",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario",
+      "LocalDateTable_42b93aac-d3d2-4a95-b7b8-66bfc130de2b"
+    ],
+    "campos": [
+      "Año",
+      "Columna Mostrar",
+      "DIAS",
+      "Mes Nº",
+      "Mes corto",
+      "TOTAL ACUMULADO CTA 60"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Tarjeta",
+    "tipo_visual": "cardVisual",
+    "filas": 1,
+    "dax": "DEFINE VAR __DS0FilterTable = \r\n\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t\"FechaHoraLima\", IGNORE('Fecha de Actualización'[FechaHoraLima])\r\n\t)",
+    "hash": "0dacf009d5d8",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "Calendario",
+      "Fecha de Actualización"
+    ],
+    "campos": [
+      "Columna Mostrar",
+      "FechaHoraLima"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Refinanciamiento",
+    "tipo_visual": "pivotTable",
+    "filas": 84,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"REFINANCIADO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('REFINANCIAMIENTO'[PARNER])),\r\n\t\t\tNOT('REFINANCIAMIENTO'[PARNER] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('REFINANCIAMIENTO'[PARNER], \"IsGrandTotalRowTotal\"),\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\tROLLUPGROUP(\r\n\t\t\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[Mes],\r\n\t\t\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[NroMes]\r\n\t\t\t\t), \"IsGrandTotalColumnTotal\"\r\n\t\t\t),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t\"SumMONTO_A_PAGAR\", CALCULATE(SUM('REFINANCIAMIENTO'[MONTO A PAGAR]))\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM1 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(FILTER(KEEPFILTERS(__DS0Core), [IsGrandTotalColumnTotal] = TRUE)),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'REFINANCIAMIENTO'[PARNER]\", 'REFINANCIAMIENTO'[PARNER],\r\n\t\t\t\"SortBy_DM1_0\", [SumMONTO_A_PAGAR]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumns = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\tSUMMARIZE(__DS0Core, 'REFINANCIAMIENTO'[PARNER], [IsGrandTotalRowTotal]),\r\n\t\t\t__DS0CoreTableByDM1\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t102,\r\n\t\t\t__DS0PrimaryWithSortColumns,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t0,\r\n\t\t\t[SortBy_DM1_0],\r\n\t\t\t0,\r\n\t\t\t'REFINANCIAMIENTO'[PARNER],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0SecondaryBase = \r\n\t\tSUMMARIZE(\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[Mes],\r\n\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[NroMes],\r\n\t\t\t[IsGrandTotalColumnTotal]\r\n\t\t)\r\n\r\n\tVAR __DS0Secondary = \r\n\t\tTOPN(\r\n\t\t\t102,\r\n\t\t\t__DS0SecondaryBase,\r\n\t\t\t[IsGrandTotalColumnTotal],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[NroMes],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[Mes],\r\n\t\t\t1\r\n\t\t)\r\n\r\n\tVAR __DS0BodyLimited = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0PrimaryWindowed,\r\n\t\t\tSUBSTITUTEWITHINDEX(\r\n\t\t\t\t__DS0Core,\r\n\t\t\t\t\"ColumnIndex\",\r\n\t\t\t\t__DS0Secondary,\r\n\t\t\t\t[IsGrandTotalColumnTotal],\r\n\t\t\t\tASC,\r\n\t\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[NroMes],\r\n\t\t\t\tASC,\r\n\t\t\t\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[Mes],\r\n\t\t\t\tASC\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0Secondary\r\n\r\nORDER BY\r\n\t[IsGrandTotalColumnTotal],\r\n\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[NroMes],\r\n\t'LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6'[Mes]\r\n\r\nEVALUATE\r\n\t__DS0BodyLimited\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal] DESC,\r\n\t[SortBy_DM1_0] DESC,\r\n\t'REFINANCIAMIENTO'[PARNER],\r\n\t[ColumnIndex]",
+    "hash": "150fa4f5740b",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario",
+      "LocalDateTable_affee1be-9b9b-45b5-9717-c7153d9f26f6",
+      "REFINANCIAMIENTO"
+    ],
+    "campos": [
+      "Columna Mostrar",
+      "ESTADO_REFINANCIADO",
+      "MONTO A PAGAR",
+      "Mes",
+      "NroMes",
+      "PARNER"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Refinanciamiento",
+    "tipo_visual": "pivotTable",
+    "filas": 29,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"REFINANCIADO\"}, 'CUENTAS CONTABLES'[ESTADO_REFINANCIADO])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('REFINANCIAMIENTO'[PARNER])),\r\n\t\t\tNOT('REFINANCIAMIENTO'[PARNER] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL('REFINANCIAMIENTO'[PARNER], \"IsGrandTotalRowTotal\"),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t\"SumMONTO_A_PAGAR\", CALCULATE(SUM('REFINANCIAMIENTO'[MONTO A PAGAR])),\r\n\t\t\t\"MaxDías_Pago_Máximo\", CALCULATE(MAX('REFINANCIAMIENTO'[Días Pago Máximo])),\r\n\t\t\t\"SUM_VENCIDO\", 'REFINANCIAMIENTO'[SUM VENCIDO],\r\n\t\t\t\"SUM_VIGENTE\", 'REFINANCIAMIENTO'[SUM VIGENTE],\r\n\t\t\t\"CUOTAS\", 'REFINANCIAMIENTO'[CUOTAS],\r\n\t\t\t\"MinESTATUS\", CALCULATE(MIN('REFINANCIAMIENTO'[ESTATUS]))\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t501,\r\n\t\t\t__DS0Core,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t1,\r\n\t\t\t[SumMONTO_A_PAGAR],\r\n\t\t\t0,\r\n\t\t\t'REFINANCIAMIENTO'[PARNER],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal], [SumMONTO_A_PAGAR] DESC, 'REFINANCIAMIENTO'[PARNER]",
+    "hash": "946f85596a1c",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario",
+      "REFINANCIAMIENTO"
+    ],
+    "campos": [
+      "CUOTAS",
+      "Columna Mostrar",
+      "Días Pago Máximo",
+      "ESTADO_REFINANCIADO",
+      "ESTATUS",
+      "MONTO A PAGAR",
+      "PARNER",
+      "SUM VENCIDO",
+      "SUM VIGENTE"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "TOP 15",
+    "tipo_visual": "pivotTable",
+    "filas": 16,
+    "dax": "DEFINE\r\n\tVAR __SQDS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('CUENTAS CONTABLES'[contacto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'CUENTAS CONTABLES'[contacto] IN {\"INVENTARIO\",\r\n\t\t\t\t\t\"SERV AGUA POTAB Y ALCANT DE LIMA-SEDAPAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __SQDS0FilterTable2 = \r\n\t\tTREATAS({\"SÍ\"}, 'CUENTAS CONTABLES'[EXISTE])\r\n\r\n\tVAR __SQDS0FilterTable3 = \r\n\t\tTREATAS(\r\n\t\t\t{BLANK(),\r\n\t\t\t\t\"Pagado Parcialmente\",\r\n\t\t\t\t\"Sin Pagar\"},\r\n\t\t\t'CUENTAS CONTABLES'[ESTADO DE PAGO]\r\n\t\t)\r\n\r\n\tVAR __SQDS0FilterTable4 = \r\n\t\tTREATAS({1}, 'CUENTAS CONTABLES'[CONSIDERACION])\r\n\r\n\tVAR __SQDS0FilterTable5 = \r\n\t\tTREATAS({\"MOSTRAR\"}, 'Calendario'[Columna Mostrar])\r\n\r\n\tVAR __SQDS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'CUENTAS CONTABLES'[contacto],\r\n\t\t\t__SQDS0FilterTable,\r\n\t\t\t__SQDS0FilterTable2,\r\n\t\t\t__SQDS0FilterTable3,\r\n\t\t\t__SQDS0FilterTable4,\r\n\t\t\t__SQDS0FilterTable5,\r\n\t\t\t\"SumIMPORTE_NETO__42_\", CALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\r\n\tVAR __SQDS0BodyLimited = \r\n\t\tTOPN(15, __SQDS0Core, [SumIMPORTE_NETO__42_], 0)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\tROLLUPADDISSUBTOTAL(\r\n\t\t\t\t'CUENTAS CONTABLES'[NOMBRE ABREV], \"IsGrandTotalRowTotal\",\r\n\t\t\t\t'CUENTAS CONTABLES'[CATEGORIA], \"IsDM1Total\"\r\n\t\t\t),\r\n\t\t\t__SQDS0BodyLimited,\r\n\t\t\t__SQDS0FilterTable,\r\n\t\t\t__SQDS0FilterTable2,\r\n\t\t\t__SQDS0FilterTable3,\r\n\t\t\t__SQDS0FilterTable4,\r\n\t\t\t__SQDS0FilterTable5,\r\n\t\t\t\"SumIMPORTE_NETO__42_\", CALCULATE(SUM('CUENTAS CONTABLES'[IMPORTE NETO (42)]))\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM1 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(FILTER(KEEPFILTERS(__DS0Core), [IsDM1Total] = TRUE)),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'CUENTAS CONTABLES'[NOMBRE ABREV]\", 'CUENTAS CONTABLES'[NOMBRE ABREV],\r\n\t\t\t\"SortBy_DM1_0\", [SumIMPORTE_NETO__42_]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumns = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0Core,\r\n\t\t\t__DS0CoreTableByDM1\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumnsOutputTotals = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(\r\n\t\t\t\tFILTER(\r\n\t\t\t\t\tKEEPFILTERS(__DS0PrimaryWithSortColumns),\r\n\t\t\t\t\tOR([IsGrandTotalRowTotal] = TRUE, [IsDM1Total] = FALSE)\r\n\t\t\t\t)\r\n\t\t\t),\r\n\t\t\t\"IsGrandTotalRowTotal\", [IsGrandTotalRowTotal],\r\n\t\t\t\"'CUENTAS CONTABLES'[NOMBRE ABREV]\", 'CUENTAS CONTABLES'[NOMBRE ABREV],\r\n\t\t\t\"SortBy_DM1_0\", [SortBy_DM1_0],\r\n\t\t\t\"'CUENTAS CONTABLES'[CATEGORIA]\", 'CUENTAS CONTABLES'[CATEGORIA],\r\n\t\t\t\"SumIMPORTE_NETO__42_\", [SumIMPORTE_NETO__42_]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t501,\r\n\t\t\t__DS0PrimaryWithSortColumnsOutputTotals,\r\n\t\t\t[IsGrandTotalRowTotal],\r\n\t\t\t1,\r\n\t\t\t[SortBy_DM1_0],\r\n\t\t\t0,\r\n\t\t\t'CUENTAS CONTABLES'[NOMBRE ABREV],\r\n\t\t\t1,\r\n\t\t\t[SumIMPORTE_NETO__42_],\r\n\t\t\t0,\r\n\t\t\t'CUENTAS CONTABLES'[CATEGORIA],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[IsGrandTotalRowTotal],\r\n\t[SortBy_DM1_0] DESC,\r\n\t'CUENTAS CONTABLES'[NOMBRE ABREV],\r\n\t[SumIMPORTE_NETO__42_] DESC,\r\n\t'CUENTAS CONTABLES'[CATEGORIA]",
+    "hash": "c35d44e7db22",
+    "archivo": "02-cxp__reporte.json",
+    "tablas": [
+      "CUENTAS CONTABLES",
+      "Calendario"
+    ],
+    "campos": [
+      "CATEGORIA",
+      "CONSIDERACION",
+      "Columna Mostrar",
+      "ESTADO DE PAGO",
+      "EXISTE",
+      "IMPORTE NETO (42)",
+      "NOMBRE ABREV",
+      "contacto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
     "visual": "Segmentación de datos",
     "tipo_visual": "slicer",
     "filas": 2,
@@ -310,7 +913,7 @@
       "estado",
       "producto"
     ],
-    "probablemente_implementada": false
+    "probablemente_implementada": true
   },
   {
     "visual": "ORDENES DE VENTA EN EL SISTEMA",
@@ -1118,6 +1721,97 @@
   {
     "visual": "Segmentación de datos",
     "tipo_visual": "slicer",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"Amauta Impresiones Comerciales SAC\",\r\n\t\t\t\t\"Pauno\"},\r\n\t\t\t'Pauno Registro de Ejecuciones'[Empresa]\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tVALUES('Pauno Registro de Ejecuciones'[Empresa]),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(101, __DS0Core, 'Pauno Registro de Ejecuciones'[Empresa], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Pauno Registro de Ejecuciones'[Empresa]",
+    "hash": "d4c62185dbf4",
+    "archivo": "08-auditoria__control-interno.json",
+    "tablas": [
+      "Pauno Registro de Ejecuciones"
+    ],
+    "campos": [
+      "Empresa"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "Segmentación de datos",
+    "tipo_visual": "slicer",
+    "filas": 12,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes])),\r\n\t\t\tNOT('LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Pauno\"}, 'Pauno Registro de Ejecuciones'[Empresa])\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tSUMMARIZE(\r\n\t\t\t\tVALUES('LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'),\r\n\t\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes],\r\n\t\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[NroMes]\r\n\t\t\t),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable2)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t101,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[NroMes],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[NroMes],\r\n\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes]",
+    "hash": "a85982c8e075",
+    "archivo": "08-auditoria__control-interno.json",
+    "tablas": [
+      "LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1",
+      "Pauno Registro de Ejecuciones"
+    ],
+    "campos": [
+      "Empresa",
+      "Mes",
+      "NroMes"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "RESULTADO DE CUMPLIMIENTO",
+    "tipo_visual": "lineChart",
+    "filas": 9,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Pauno\"}, 'Pauno Registro de Ejecuciones'[Empresa])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes],\r\n\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[NroMes],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t\"v__Cumplimento\", 'Pauno Registro de Ejecuciones'[% Cumplimento]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[NroMes],\r\n\t\t\t1,\r\n\t\t\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[NroMes],\r\n\t'LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1'[Mes]",
+    "hash": "0d996e842590",
+    "archivo": "08-auditoria__control-interno.json",
+    "tablas": [
+      "LocalDateTable_54e60697-8c3e-4089-804f-925c1c976fb1",
+      "Pauno Registro de Ejecuciones"
+    ],
+    "campos": [
+      "% Cumplimento",
+      "Empresa",
+      "Mes",
+      "NroMes"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "RESULTADO DE CUMPLIMIENTO ACUMULADO",
+    "tipo_visual": "barChart",
+    "filas": 15,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Pauno\"}, 'Pauno Registro de Ejecuciones'[Empresa])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Areas-Pauno'[Jefe de Area],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t\"v__Cumplimento\", 'Pauno Registro de Ejecuciones'[% Cumplimento],\r\n\t\t\t\"Color_KPI\", IGNORE('Pauno Registro de Ejecuciones'[Color KPI])\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, [v__Cumplimento], 0, 'Areas-Pauno'[Jefe de Area], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t[v__Cumplimento] DESC, 'Areas-Pauno'[Jefe de Area]",
+    "hash": "65205ce7c0e5",
+    "archivo": "08-auditoria__control-interno.json",
+    "tablas": [
+      "Areas-Pauno",
+      "Pauno Registro de Ejecuciones"
+    ],
+    "campos": [
+      "% Cumplimento",
+      "Color KPI",
+      "Empresa",
+      "Jefe de Area"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "ESTADO DE PLANES DE ACCION",
+    "tipo_visual": "lineStackedColumnComboChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Pauno\"}, 'Pauno Registro de Ejecuciones'[Empresa])\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Planes de Accion'[Planta],\r\n\t\t\tROLLUPADDISSUBTOTAL('Planes de Accion'[Estatus], \"IsGrandTotalColumnTotal\"),\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t\"CountÁrea\", CALCULATE(COUNTA('Planes de Accion'[Área])),\r\n\t\t\t\"Color_KPI\", IGNORE('Pauno Registro de Ejecuciones'[Color KPI])\r\n\t\t)\r\n\r\n\tVAR __DS0CoreOnlyOutputTotals = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(FILTER(KEEPFILTERS(__DS0Core), [IsGrandTotalColumnTotal] = FALSE)),\r\n\t\t\t\"'Planes de Accion'[Planta]\", 'Planes de Accion'[Planta],\r\n\t\t\t\"'Planes de Accion'[Estatus]\", 'Planes de Accion'[Estatus],\r\n\t\t\t\"CountÁrea\", [CountÁrea],\r\n\t\t\t\"Color_KPI\", [Color_KPI]\r\n\t\t)\r\n\r\n\tVAR __DS0CoreTableByDM0 = \r\n\t\tSELECTCOLUMNS(\r\n\t\t\tKEEPFILTERS(FILTER(KEEPFILTERS(__DS0Core), [IsGrandTotalColumnTotal] = TRUE)),\r\n\t\t\t\"'Planes de Accion'[Planta]\", 'Planes de Accion'[Planta],\r\n\t\t\t\"SortBy_DM0_0\", [CountÁrea]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWithSortColumns = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\tSUMMARIZE(__DS0Core, 'Planes de Accion'[Planta]),\r\n\t\t\t__DS0CoreTableByDM0\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(201, __DS0PrimaryWithSortColumns, [SortBy_DM0_0], 0, 'Planes de Accion'[Planta], 1)\r\n\r\n\tVAR __DS0SecondaryBase = \r\n\t\tSUMMARIZE(__DS0CoreOnlyOutputTotals, 'Planes de Accion'[Estatus])\r\n\r\n\tVAR __DS0Secondary = \r\n\t\tTOPN(62, __DS0SecondaryBase, 'Planes de Accion'[Estatus], 1)\r\n\r\n\tVAR __DS0BodyLimited = \r\n\t\tNATURALLEFTOUTERJOIN(\r\n\t\t\t__DS0PrimaryWindowed,\r\n\t\t\tSUBSTITUTEWITHINDEX(\r\n\t\t\t\t__DS0CoreOnlyOutputTotals,\r\n\t\t\t\t\"ColumnIndex\",\r\n\t\t\t\t__DS0Secondary,\r\n\t\t\t\t'Planes de Accion'[Estatus],\r\n\t\t\t\tASC\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0Secondary\r\n\r\nORDER BY\r\n\t'Planes de Accion'[Estatus]\r\n\r\nEVALUATE\r\n\t__DS0BodyLimited\r\n\r\nORDER BY\r\n\t[SortBy_DM0_0] DESC, 'Planes de Accion'[Planta], [ColumnIndex]",
+    "hash": "5438a27e0a42",
+    "archivo": "08-auditoria__control-interno.json",
+    "tablas": [
+      "Pauno Registro de Ejecuciones",
+      "Planes de Accion"
+    ],
+    "campos": [
+      "Color KPI",
+      "Empresa",
+      "Estatus",
+      "Planta",
+      "Área"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "Segmentación de datos",
+    "tipo_visual": "slicer",
     "filas": 8,
     "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS(\r\n\t\t\t{\"MATERIA PRIMA\",\r\n\t\t\t\t\"MERCADERIAS SALSAS PACKS\",\r\n\t\t\t\t\"PROD. EN PROCESO\",\r\n\t\t\t\t\"PT DERIVADOS LACTEOS\",\r\n\t\t\t\t\"PT SALSAS\",\r\n\t\t\t\t\"PT YOGURTS\",\r\n\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\"ENVASES Y EMBALAJES\"},\r\n\t\t\t'Maestra de Productos'[data.categoria_producto]\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(KEEPFILTERS(VALUES('SALDO ACTUAL'[Saldo Soles])), 'SALDO ACTUAL'[Saldo Soles] > 0)\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tVALUES('Maestra de Productos'[data.categoria_producto]),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable2)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(101, __DS0Core, 'Maestra de Productos'[data.categoria_producto], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Maestra de Productos'[data.categoria_producto]",
     "hash": "56e29064dc99",
@@ -1341,6 +2035,1204 @@
       "Peso Producido",
       "Peso a Producir",
       "data.categoria_producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG PRODUCIDO",
+    "tipo_visual": "lineChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD]),\r\n\t\t\t\"GASTO_TOTAL\", IGNORE('Exl Cuenta Contables'[GASTO TOTAL]),\r\n\t\t\t\"PROD_OPERATIVA\", 'Exl Cuenta Contables'[PROD OPERATIVA]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "e398a5675174",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO TOTAL",
+      "GASTO_PERSONAL",
+      "Mes Corto",
+      "Mes Numero",
+      "MesActual",
+      "PROD OPERATIVA",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG VENDIDO",
+    "tipo_visual": "lineChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t\"SumPeso_total_K\", IGNORE(\r\n\t\t\t\tCALCULATE(SUM('Maestra de Facturacion (Total)'[Peso total K]))\r\n\t\t\t),\r\n\t\t\t\"GASTO_TOTAL\", IGNORE('Exl Cuenta Contables'[GASTO TOTAL]),\r\n\t\t\t\"VENTA_KG_X_SOL\", 'Exl Cuenta Contables'[VENTA KG X SOL]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "cbd12bd253b4",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO TOTAL",
+      "GASTO_PERSONAL",
+      "Mes Corto",
+      "Mes Numero",
+      "MesActual",
+      "Peso total K",
+      "SUB_CATEGORIA",
+      "VENTA KG X SOL",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG VENDIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t\"SumPeso_total_K\", IGNORE(\r\n\t\t\t\tCALCULATE(SUM('Maestra de Facturacion (Total)'[Peso total K]))\r\n\t\t\t),\r\n\t\t\t\"GASTO_TOTAL\", IGNORE('Exl Cuenta Contables'[GASTO TOTAL]),\r\n\t\t\t\"VENTA_KG_X_SOL\", 'Exl Cuenta Contables'[VENTA KG X SOL]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "e7b386d38375",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO TOTAL",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "Peso total K",
+      "SUB_CATEGORIA",
+      "VENTA KG X SOL",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG PRODUCIDO",
+    "tipo_visual": "lineChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD]),\r\n\t\t\t\"ATE_Ajustado\", IGNORE('Exl Cuenta Contables'[ATE Ajustado]),\r\n\t\t\t\"PROD_OPERATIVA_ATE\", 'Exl Cuenta Contables'[PROD OPERATIVA ATE]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "feeed2c8793f",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "ATE Ajustado",
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "Mes Corto",
+      "Mes Numero",
+      "MesActual",
+      "PROD OPERATIVA ATE",
+      "Planta",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG PRODUCIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD]),\r\n\t\t\t\"ATE_Ajustado\", IGNORE('Exl Cuenta Contables'[ATE Ajustado]),\r\n\t\t\t\"PROD_OPERATIVA_ATE\", 'Exl Cuenta Contables'[PROD OPERATIVA ATE]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "307995863373",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "ATE Ajustado",
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "PROD OPERATIVA ATE",
+      "Planta",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA X KG VENDIDO",
+    "tipo_visual": "lineChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"VENTA_KG_X_SOL_ATE\", 'Exl Cuenta Contables'[VENTA KG X SOL ATE]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "0d4c29997716",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "Mes Corto",
+      "Mes Numero",
+      "MesActual",
+      "Planta",
+      "SUB_CATEGORIA",
+      "VENTA KG X SOL ATE",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG VENDIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"VENTA_KG_X_SOL_ATE\", 'Exl Cuenta Contables'[VENTA KG X SOL ATE]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "ffa70a18b99a",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "Planta",
+      "SUB_CATEGORIA",
+      "VENTA KG X SOL ATE",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG PRODUCIDO",
+    "tipo_visual": "lineChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD]),\r\n\t\t\t\"PACHACAMAC_Ajustado\", IGNORE('Exl Cuenta Contables'[PACHACAMAC Ajustado]),\r\n\t\t\t\"PROD_OPERATIVA_PACHA\", 'Exl Cuenta Contables'[PROD OPERATIVA PACHA]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "19be94ea1212",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "Mes Corto",
+      "Mes Numero",
+      "MesActual",
+      "PACHACAMAC Ajustado",
+      "PROD OPERATIVA PACHA",
+      "Planta",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG PRODUCIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD]),\r\n\t\t\t\"PACHACAMAC_Ajustado\", IGNORE('Exl Cuenta Contables'[PACHACAMAC Ajustado]),\r\n\t\t\t\"PROD_OPERATIVA_PACHA\", 'Exl Cuenta Contables'[PROD OPERATIVA PACHA]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "a3da8882b346",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "PACHACAMAC Ajustado",
+      "PROD OPERATIVA PACHA",
+      "Planta",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG VENDIDO",
+    "tipo_visual": "lineChart",
+    "filas": 13,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"VENTA_KG_X_SOL_PACHA\", 'Exl Cuenta Contables'[VENTA KG X SOL PACHA]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "732cc2921ba2",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "Mes Corto",
+      "Mes Numero",
+      "MesActual",
+      "Planta",
+      "SUB_CATEGORIA",
+      "VENTA KG X SOL PACHA",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PLANILLA (S/.) ENTRE KG VENDIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t__DS0FilterTable7,\r\n\t\t\t__DS0FilterTable8,\r\n\t\t\t__DS0FilterTable9,\r\n\t\t\t\"VENTA_KG_X_SOL_PACHA\", 'Exl Cuenta Contables'[VENTA KG X SOL PACHA]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "f50dc782e1f5",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Facturacion (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "Planta",
+      "SUB_CATEGORIA",
+      "VENTA KG X SOL PACHA",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PRODUCCIÓN TOTAL (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\tAND(\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1)),\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t__DS0FilterTable9,\r\n\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD])\r\n\t)",
+    "hash": "4b41922b8678",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "PLANILLA TOTAL (S/.)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t__DS0FilterTable9,\r\n\t\t\"GASTO_TOTAL\", IGNORE('Exl Cuenta Contables'[GASTO TOTAL])\r\n\t)",
+    "hash": "6e4e5d2f2d41",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "Maestra de Facturacion (Total)"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO TOTAL",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "SUB_CATEGORIA",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "PRODUCCIÓN TOTAL (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\tAND(\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1)),\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable10 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t__DS0FilterTable9,\r\n\t\t__DS0FilterTable10,\r\n\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD])\r\n\t)",
+    "hash": "9c8172e3f0dd",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "Planta",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "VENTA NETA (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\tAND(\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1)),\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),\r\n\t\t\tNOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable10 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable11 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable12 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t__DS0FilterTable9,\r\n\t\t__DS0FilterTable10,\r\n\t\t__DS0FilterTable11,\r\n\t\t__DS0FilterTable12,\r\n\t\t\"SumPeso_total_K\", IGNORE(\r\n\t\t\tCALCULATE(SUM('Maestra de Facturacion (Total)'[Peso total K]))\r\n\t\t)\r\n\t)",
+    "hash": "27b1b3360a7d",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "Maestra de Facturacion (Total)",
+      "TIPO DE NEGOCIO",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "Peso total K",
+      "Planta",
+      "SUB_CATEGORIA",
+      "TIPO DE NEGOCIO N2",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "PRODUCCIÓN TOTAL (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'Tabla_Almacen_Planta'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\tAND(\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1)),\r\n\t\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 31) + TIME(0, 0, 1))\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({\"Otros\"}, 'Calendario'[MesActual])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tTREATAS({\"AMBAS\",\r\n\t\t\t\"GASTO DE PERSONAL OPERATIVO\"}, 'Exl Cuenta Contables'[CLASIFICACION])\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"GASTO DE PERSONAL\"}, 'Exl Cuenta Contables'[GASTO_PERSONAL])\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tTREATAS({\"Gasto de Personal Operativo\"}, 'Exl Cuenta Contables'[SUB_CATEGORIA])\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[categoria_producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[categoria_producto] IN {\"BONIFICACION Y REBATES\",\r\n\t\t\t\t\t\"CHATARRA\",\r\n\t\t\t\t\t\"INTERESES\",\r\n\t\t\t\t\t\"MATERIA PRIMA\",\r\n\t\t\t\t\t\"SERVICIOS\",\r\n\t\t\t\t\t\"SUMINISTROS\",\r\n\t\t\t\t\tBLANK()}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable9 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[producto])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Facturacion (Total)'[producto] IN {\"PAVO C/M C/ASA EP CONG (8 KG)\",\r\n\t\t\t\t\t\"ALIMENTACION COMERCIAL\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable10 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Facturacion (Total)'[estado])),\r\n\t\t\tNOT('Maestra de Facturacion (Total)'[estado] IN {\"Cancelado\"})\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t__DS0FilterTable9,\r\n\t\t__DS0FilterTable10,\r\n\t\t\"SUM_PROD\", IGNORE('Maestra de Kardex (Total)'[SUM PROD])\r\n\t)",
+    "hash": "b24f137798f9",
+    "archivo": "13-productividad__r-productividad.json",
+    "tablas": [
+      "Calendario",
+      "Exl Cuenta Contables",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "Tabla_Almacen_Planta"
+    ],
+    "campos": [
+      "Año",
+      "CLASIFICACION",
+      "Date",
+      "GASTO_PERSONAL",
+      "MesActual",
+      "Planta",
+      "SUB_CATEGORIA",
+      "SUM PROD",
+      "categoria_producto",
+      "estado",
+      "producto"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MES",
+    "tipo_visual": "slicer",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[MES])),\r\n\t\t\tNOT('Calendario'[MES] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2025,\r\n\t\t\t2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tTREATAS({\"Costo\",\r\n\t\t\t\"Gasto\"}, 'PLANTA POR CECOS'[TIPO DE OPERACION])\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t\"MinDIA\", IGNORE(CALCULATE(MIN('Calendario'[DIA]))),\r\n\t\t\"MaxDIA\", IGNORE(CALCULATE(MAX('Calendario'[DIA])))\r\n\t)",
+    "hash": "67fc47135f4b",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "DIA",
+      "MES",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MIP(S/.) / TN VENDIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t\"Ratio_costo___kg\", 'Maestra de Kardex (Total)'[Ratio costo / kg]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "e07c7d5b1ef1",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Ratio costo / kg",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MIP / TN VENDIDA",
+    "tipo_visual": "lineChart",
+    "filas": 9,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tAND(\r\n\t\t\t\tNOT('Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK()}),\r\n\t\t\t\tNOT(\r\n\t\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t\t)\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t\"Ratio_costo___kg\", 'Maestra de Kardex (Total)'[Ratio costo / kg]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "6a39ce63a4f8",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Mes Corto",
+      "Mes Numero",
+      "Ratio costo / kg",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MIP(S/.) / TN PRODUCIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t\"Costo_x_ton_producida\", 'Medidas'[Costo x ton producida]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "9eec7ca3216d",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MIP / TN PRODUCIDA",
+    "tipo_visual": "lineChart",
+    "filas": 9,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t\"Costo_x_ton_producida\", 'Medidas'[Costo x ton producida]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "572afd5f74d5",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida",
+      "Mes Corto",
+      "Mes Numero",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "MIP / TN VENDIDA",
+    "tipo_visual": "lineChart",
+    "filas": 9,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Ratio_costo___kg_ATE___PRORROTEO\", 'Maestra de Kardex (Total)'[Ratio costo / kg ATE + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "190c1181a362",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Mes Corto",
+      "Mes Numero",
+      "Planta",
+      "Ratio costo / kg ATE + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP (S/.) ENTRE KG VENDIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Ratio_costo___kg_ATE___PRORROTEO\", 'Maestra de Kardex (Total)'[Ratio costo / kg ATE + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "12248ae820c0",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Planta",
+      "Ratio costo / kg ATE + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP (S/.) ENTRE KG PRODUCIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Costo_x_ton_producida_ATE___PRORROTEO\", 'Medidas'[Costo x ton producida ATE + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "295bb30823de",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida ATE + PRORROTEO",
+      "Planta",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP / TN PRODUCIDA",
+    "tipo_visual": "lineChart",
+    "filas": 9,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"ATE\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Costo_x_ton_producida_ATE___PRORROTEO\", 'Medidas'[Costo x ton producida ATE + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "a63aa5dc0886",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida ATE + PRORROTEO",
+      "Mes Corto",
+      "Mes Numero",
+      "Planta",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP / TN VENDIDA",
+    "tipo_visual": "lineChart",
+    "filas": 9,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Ratio_costo___kg_PACHACAMAC___PRORROTEO\", 'Maestra de Kardex (Total)'[Ratio costo / kg PACHACAMAC + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "cca0a2e5c962",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Mes Corto",
+      "Mes Numero",
+      "Planta",
+      "Ratio costo / kg PACHACAMAC + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP (S/.) ENTRE KG VENDIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Ratio_costo___kg_PACHACAMAC___PRORROTEO\", 'Maestra de Kardex (Total)'[Ratio costo / kg PACHACAMAC + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "a3dd15f37fa7",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Planta",
+      "Ratio costo / kg PACHACAMAC + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP / TN PRODUCIDA",
+    "tipo_visual": "lineChart",
+    "filas": 9,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Costo_x_ton_producida_PACHACAMAC___PRORROTEO\", 'Medidas'[Costo x ton producida PACHACAMAC + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(\r\n\t\t\t1001,\r\n\t\t\t__DS0Core,\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Numero],\r\n\t\t\t1,\r\n\t\t\t'Calendario'[Mes Corto],\r\n\t\t\t1\r\n\t\t)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t'Calendario'[Mes Numero],\r\n\t'Calendario'[Mes Corto]",
+    "hash": "07f55e73ab2b",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida PACHACAMAC + PRORROTEO",
+      "Mes Corto",
+      "Mes Numero",
+      "Planta",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP (S/.) ENTRE KG PRODUCIDO",
+    "tipo_visual": "clusteredColumnChart",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tSUMMARIZECOLUMNS(\r\n\t\t\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año],\r\n\t\t\t__DS0FilterTable,\r\n\t\t\t__DS0FilterTable2,\r\n\t\t\t__DS0FilterTable3,\r\n\t\t\t__DS0FilterTable4,\r\n\t\t\t__DS0FilterTable5,\r\n\t\t\t__DS0FilterTable6,\r\n\t\t\t\"Costo_x_ton_producida_PACHACAMAC___PRORROTEO\", 'Medidas'[Costo x ton producida PACHACAMAC + PRORROTEO]\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(1001, __DS0Core, 'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987'[Año]",
+    "hash": "6463186f95aa",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida PACHACAMAC + PRORROTEO",
+      "Planta",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MES",
+    "tipo_visual": "advancedSlicerVisual",
+    "filas": 2,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[MES])),\r\n\t\t\tNOT('Calendario'[MES] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2025,\r\n\t\t\t2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0Core = \r\n\t\tCALCULATETABLE(\r\n\t\t\tVALUES('Calendario'[Año]),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable2),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable3),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable4),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable5),\r\n\t\t\tKEEPFILTERS(__DS0FilterTable6)\r\n\t\t)\r\n\r\n\tVAR __DS0PrimaryWindowed = \r\n\t\tTOPN(101, __DS0Core, 'Calendario'[Año], 1)\r\n\r\nEVALUATE\r\n\t__DS0PrimaryWindowed\r\n\r\nORDER BY\r\n\t'Calendario'[Año]",
+    "hash": "2782bf77d520",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "MES",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "VENTA NETA (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),\r\n\t\t\tNOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t\"Peso_total_KG\", IGNORE('Maestra de Facturacion (Total)'[Peso total KG])\r\n\t)",
+    "hash": "7768ef2ed901",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS",
+      "TIPO DE NEGOCIO"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CUENTA ORIGEN",
+      "Date",
+      "Peso total KG",
+      "TIPO DE NEGOCIO N2",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "COSTO TOTAL",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"Costo_total_validado\", IGNORE('Maestra de Kardex (Total)'[Costo total validado])\r\n\t)",
+    "hash": "7fc030955546",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo total validado",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "PRODUCCIÓN NETA (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"Producción__KG__Odoo\", IGNORE('Medidas'[Producción (KG) Odoo])\r\n\t)",
+    "hash": "cce2788bf3ec",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Producción (KG) Odoo",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "COSTO X TN VENDIDA",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),\r\n\t\t\tNOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t\"Ratio_costo___kg\", IGNORE('Maestra de Kardex (Total)'[Ratio costo / kg])\r\n\t)",
+    "hash": "d94f00974eb5",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS",
+      "TIPO DE NEGOCIO"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CUENTA ORIGEN",
+      "Date",
+      "Ratio costo / kg",
+      "TIPO DE NEGOCIO N2",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "COSTO X TN PRODUCIDA",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Calendario'[Date])),\r\n\t\t\t'Calendario'[Date] >= (DATE(2025, 7, 1) + TIME(0, 0, 1))\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),\r\n\t\t\tNOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable8 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t__DS0FilterTable8,\r\n\t\t\"Costo_x_ton_producida\", IGNORE('Medidas'[Costo x ton producida])\r\n\t)",
+    "hash": "7cbb71b8d5c7",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS",
+      "TIPO DE NEGOCIO"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CUENTA ORIGEN",
+      "Costo x ton producida",
+      "Date",
+      "TIPO DE NEGOCIO N2",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": true
+  },
+  {
+    "visual": "VENTA NETA (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),\r\n\t\t\tNOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t\"Peso_total_KG_ATE\", IGNORE('Maestra de Facturacion (Total)'[Peso total KG ATE])\r\n\t)",
+    "hash": "e818b32846dd",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS",
+      "TIPO DE NEGOCIO"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CUENTA ORIGEN",
+      "Peso total KG ATE",
+      "TIPO DE NEGOCIO N2",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"Costo_total_validado_ATE___PRORROTEO\", IGNORE('Maestra de Kardex (Total)'[Costo total validado ATE + PRORROTEO])\r\n\t)",
+    "hash": "a2a6e5f96c72",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo total validado ATE + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP / TN VENDIDA",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t\"Ratio_costo___kg_ATE___PRORROTEO\", IGNORE('Maestra de Kardex (Total)'[Ratio costo / kg ATE + PRORROTEO])\r\n\t)",
+    "hash": "ab3fb17ae54b",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CUENTA ORIGEN",
+      "Ratio costo / kg ATE + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP / TN PRODUCIDA",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"Costo_x_ton_producida_ATE___PRORROTEO\", IGNORE('Medidas'[Costo x ton producida ATE + PRORROTEO])\r\n\t)",
+    "hash": "490d331ada22",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida ATE + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PRODUCCIÓN NETA (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"Producción__KG__Odoo_ATE\", IGNORE('Medidas'[Producción (KG) Odoo ATE])\r\n\t)",
+    "hash": "72c558e3f078",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Producción (KG) Odoo ATE",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "VENTA NETA (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2])),\r\n\t\t\tNOT('TIPO DE NEGOCIO'[TIPO DE NEGOCIO N2] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t\"Peso_total_KG_PACHACAMAC\", IGNORE('Maestra de Facturacion (Total)'[Peso total KG PACHACAMAC])\r\n\t)",
+    "hash": "109a42298aa8",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS",
+      "TIPO DE NEGOCIO"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CUENTA ORIGEN",
+      "Peso total KG PACHACAMAC",
+      "TIPO DE NEGOCIO N2",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "PRODUCCIÓN NETA (KG)",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"Producción__KG__Odoo_PACHACAMAC\", IGNORE('Medidas'[Producción (KG) Odoo PACHACAMAC])\r\n\t)",
+    "hash": "3d399635ce2e",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Producción (KG) Odoo PACHACAMAC",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP / TN PRODUCIDA",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t\"Costo_x_ton_producida_PACHACAMAC\", IGNORE('Medidas'[Costo x ton producida PACHACAMAC])\r\n\t)",
+    "hash": "f63237c7aaa8",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "Medidas",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo x ton producida PACHACAMAC",
+      "Planta",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t\"Costo_total_validdo_PACHACAMAC___PRORROTEO\", IGNORE('Maestra de Kardex (Total)'[Costo total validdo PACHACAMAC + PRORROTEO])\r\n\t)",
+    "hash": "67bea0287b4c",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CUENTA ORIGEN",
+      "Costo total validdo PACHACAMAC + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
+    ],
+    "probablemente_implementada": false
+  },
+  {
+    "visual": "MIP / TN VENDIDA",
+    "tipo_visual": "PBI_CV_7B952816_A48F_49B4_9E13_15E3BB2C0337",
+    "filas": 1,
+    "dax": "DEFINE\r\n\tVAR __DS0FilterTable = \r\n\t\tTREATAS({\"VENTA BRUTA\"}, 'Maestra de Facturacion (Total)'[CATEGORIZACION])\r\n\r\n\tVAR __DS0FilterTable2 = \r\n\t\tTREATAS({\"PACHACAMAC\"}, 'PLANTA POR CECOS'[Planta])\r\n\r\n\tVAR __DS0FilterTable3 = \r\n\t\tTREATAS({2026}, 'Calendario'[Año])\r\n\r\n\tVAR __DS0FilterTable4 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),\r\n\t\t\tAND(\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\"},\r\n\t\t\t\t'PLANTA POR CECOS'[TIPO DE OPERACION] IN {\"Costo\",\r\n\t\t\t\t\t\"Gasto\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable5 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable6 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[CUENTA ORIGEN])),\r\n\t\t\tNOT('Maestra de Kardex (Total)'[CUENTA ORIGEN] IN {BLANK()})\r\n\t\t)\r\n\r\n\tVAR __DS0FilterTable7 = \r\n\t\tFILTER(\r\n\t\t\tKEEPFILTERS(VALUES('Maestra de Kardex (Total)'[cuenta_analitica])),\r\n\t\t\tNOT(\r\n\t\t\t\t'Maestra de Kardex (Total)'[cuenta_analitica] IN {BLANK(),\r\n\t\t\t\t\t\"[941002] CONTROL INTERNO\",\r\n\t\t\t\t\t\"ALMACEN ATE\",\r\n\t\t\t\t\t\"ALMACEN PACHACAMAC\"}\r\n\t\t\t)\r\n\t\t)\r\n\r\nEVALUATE\r\n\tSUMMARIZECOLUMNS(\r\n\t\t__DS0FilterTable,\r\n\t\t__DS0FilterTable2,\r\n\t\t__DS0FilterTable3,\r\n\t\t__DS0FilterTable4,\r\n\t\t__DS0FilterTable5,\r\n\t\t__DS0FilterTable6,\r\n\t\t__DS0FilterTable7,\r\n\t\t\"Ratio_costo___kg_PACHACAMAC___PRORROTEO\", IGNORE('Maestra de Kardex (Total)'[Ratio costo / kg PACHACAMAC + PRORROTEO])\r\n\t)",
+    "hash": "89b74a1a534f",
+    "archivo": "14-consumo__control-mip.json",
+    "tablas": [
+      "Calendario",
+      "Maestra de Facturacion (Total)",
+      "Maestra de Kardex (Total)",
+      "PLANTA POR CECOS"
+    ],
+    "campos": [
+      "Año",
+      "CATEGORIZACION",
+      "CUENTA ORIGEN",
+      "Planta",
+      "Ratio costo / kg PACHACAMAC + PRORROTEO",
+      "TIPO DE OPERACION",
+      "categoria_hijo",
+      "cuenta_analitica"
     ],
     "probablemente_implementada": false
   }

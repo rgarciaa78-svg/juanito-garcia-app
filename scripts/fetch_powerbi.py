@@ -1390,6 +1390,109 @@ def sem_thresh(v, red_above=None, yellow_above=None, red_below=None, yellow_belo
 
 # ─── Funciones de reporte ─────────────────────────────────────────────────────
 
+
+# KPIs de tarjeta tomados directamente del visual del reporte.
+# (visual, reporte, etiqueta, formato, meta)
+#
+# Estos sustituyen a los del sondeo genérico, que consulta la medida SIN los
+# filtros del visual. La diferencia no es teórica: en Margen el sondeo daba
+# 49.5% donde el reporte muestra 46.5%, y S/2.96 de costo/kg donde son S/3.16.
+KPIS_CAPTURADOS = [
+    # ── 1. Cuentas por cobrar
+    ("MOROSIDAD",           "cuentas_por_cobrar", "Morosidad",        "pct",   "15%"),
+    ("CUENTAS POR COBRAR",  "cuentas_por_cobrar", "CxC Total",        "soles", None),
+    ("POR VENCER",          "cuentas_por_cobrar", "CxC por vencer",   "soles", None),
+    ("ROTACION CxC",        "cuentas_por_cobrar", "Rotación CxC",     "dias",  None),
+    ("# CLIENTES",          "cuentas_por_cobrar", "Clientes",         "conteo", None),
+    ("VENTAS MES ACTUAL",   "cuentas_por_cobrar", "Ventas del mes",   "soles", None),
+    # El reporte 8 no tiene tarjetas: son tablas. Su desglose por jefe de
+    # área y por planta se trae aparte, en el bloque de Control Interno.
+    # ── 13. Productividad
+    ("PRODUCCIÓN TOTAL (KG)", "productividad", "Producción Total (KG)", "kg",  None),
+    ("PLANILLA TOTAL (S/.)",  "productividad", "Planilla Total",        "soles", None),
+    ("VENTA NETA (KG)",       "productividad", "Venta Neta (KG)",       "kg",  None),
+    # ── 14. Consumo de materiales indirectos
+    ("COSTO TOTAL",          "consumo_materiales", "Costo Total",         "soles", None),
+    ("PRODUCCIÓN NETA (KG)", "consumo_materiales", "Producción Neta (KG)", "kg",   None),
+    ("COSTO X TN VENDIDA",   "consumo_materiales", "Costo x TN Vendida",  "soles", None),
+    ("COSTO X TN PRODUCIDA", "consumo_materiales", "Costo x TN Producida", "soles", None),
+]
+
+
+def valor_de_tarjeta(token, ws, candidatos, visual):
+    """Valor único de un visual de tarjeta capturado del Analizador.
+
+    Las tarjetas devuelven una sola fila con una sola medida. Se toma el
+    primer valor numérico que no sea un indicador de subtotal ni un índice:
+    así no hace falta saber de antemano el alias que le puso Power BI.
+    """
+    entrada = catalogo_capturas().get(visual)
+    if not entrada:
+        return None
+    for ds in candidatos:
+        if not ds:
+            continue
+        tablas = tablas_de_captura(
+            lambda q, lb: (_tablas_dax(token, ws, ds, q, lb) or [[]])[0],
+            entrada["dax"], f"tarjeta:{visual}")
+        for t in tablas:
+            if not t:
+                continue
+            for clave, valor in t[0].items():
+                if any(x in clave for x in ("IsGrandTotal", "IsDM", "ColumnIndex",
+                                            "SortBy", "[Año]", "[Mes")):
+                    continue
+                v = to_float(valor)
+                if v is not None:
+                    return v
+    return None
+
+
+def _fmt_kpi(valor, formato):
+    if formato == "pct":
+        v = valor * 100 if abs(valor) <= 1.5 else valor
+        return f"{v:.1f}%"
+    if formato == "dias":
+        return f"{valor:.0f} días"
+    if formato == "conteo":
+        return f"{valor:,.0f}"
+    if formato == "kg":
+        return f"{valor:,.0f} kg"
+    return fmt_soles(valor)
+
+
+def aplicar_kpis_capturados(token, ws, candidatos_por_reporte, reportes):
+    """Reemplaza los KPIs del sondeo por los de las tarjetas del reporte.
+
+    Devuelve cuántos cambió. Los que no estén en el catálogo se saltan sin
+    ruido: significa que esa pestaña todavía no se ha exportado.
+    """
+    cambios = 0
+    for visual, tipo, etiqueta, formato, meta in KPIS_CAPTURADOS:
+        rep = reportes.get(tipo)
+        if rep is None or visual not in catalogo_capturas():
+            continue
+        v = valor_de_tarjeta(token, ws, candidatos_por_reporte.get(tipo, []), visual)
+        if v is None:
+            continue
+        texto = _fmt_kpi(v, formato)
+        kpis = rep.setdefault("kpis", [])
+        actual = next((k for k in kpis if k["label"] == etiqueta), None)
+        if actual is None:
+            nuevo = {"label": etiqueta, "valor": texto}
+            if meta:
+                nuevo["meta"] = meta
+            kpis.append(nuevo)
+            cambios += 1
+            print(f"    + [{tipo}] {etiqueta} = {texto} (tarjeta del reporte)")
+        elif actual.get("valor") != texto:
+            print(f"    ~ [{tipo}] {etiqueta}: {actual['valor']} → {texto} "
+                  f"(tarjeta del reporte)")
+            actual["valor"] = texto
+            cambios += 1
+    return cambios
+
+
 def build_cxc(found):
     # Solo '% Morosidad' (21.08%). La medida 'Morosidad' (13.78%) queda fuera
     # a propósito — ver nota en SCAN_CANDIDATES["cxc"].
@@ -3557,6 +3660,73 @@ def main():
                 print(f"  YoY {comp}: ventas={ventas_yoy} fr={fr_yoy} mermas={mermas_yoy}")
         except Exception as e:
             print(f"  YoY no disponible: {e}")
+
+    # Los KPIs de tarjeta del propio reporte mandan sobre los del sondeo.
+    try:
+        ids_p = DATASET_IDS.get("PAUNO", {})
+        candidatos = {
+            "cuentas_por_cobrar": [ids_p.get("cxc")],
+            "control_interno":    [ids_p.get("control_ds")],
+            "productividad":      [ids_p.get("productividad_ds"), ids_p.get("consumo")],
+            "consumo_materiales": [ids_p.get("consumo"), ids_p.get("productividad_ds")],
+        }
+        reps = (summary.get("empresas", {}).get("PAUNO", {}) or {}).get("reportes", {})
+        n = aplicar_kpis_capturados(token, WORKSPACES["PAUNO"], candidatos, reps)
+        if n:
+            print(f"  ✓ {n} KPI(s) tomados de las tarjetas del reporte")
+    except Exception as e:
+        print(f"  ✗ KPIs capturados: {e}")
+        DIAGNOSTICO.append({"consulta": "kpis_capturados", "http": 0,
+                            "error": repr(e)[:300]})
+
+    # ── Control Interno: cumplimiento por jefe de área y planes por planta.
+    # Sus 14 KPIs venían del sondeo y nunca se habían contrastado; estas dos
+    # tablas del reporte 8 dicen además QUIÉN y DÓNDE, que es lo accionable.
+    try:
+        ids_ci = [DATASET_IDS.get("PAUNO", {}).get("control_ds")]
+        reps_ci = (summary.get("empresas", {}).get("PAUNO", {}) or {}).get("reportes", {})
+        ci = reps_ci.get("control_interno")
+        if ci is not None:
+            areas = desglose_desde_captura(
+                token, WORKSPACES["PAUNO"], ids_ci,
+                "RESULTADO DE CUMPLIMIENTO ACUMULADO",
+                {"jefe": "[Jefe de Area]", "cumplimiento": "[v__Cumplimento]",
+                 "color": "[Color_KPI]"})
+            filas = []
+            for a in areas:
+                jefe = (a.get("jefe") or "").strip()
+                v = to_float(a.get("cumplimiento"))
+                if not jefe or v is None:
+                    continue
+                pct = v * 100 if abs(v) <= 1.5 else v
+                filas.append({"jefe": jefe, "valor": f"{pct:.1f}%",
+                              "pct": round(pct, 1),
+                              "estado": ("red" if pct < 60 else
+                                         "yellow" if pct < 80 else "green")})
+            if filas:
+                filas.sort(key=lambda x: x["pct"])
+                ci["por_area"] = filas
+                peor = filas[0]
+                print(f"    ✓ Control interno por área: {len(filas)} — "
+                      f"peor {peor['jefe']} {peor['valor']}")
+
+            planes = desglose_desde_captura(
+                token, WORKSPACES["PAUNO"], ids_ci, "ESTADO DE PLANES DE ACCION",
+                {"planta": "[Planta]", "estatus": "[Estatus]", "area": "[Área]"})
+            conteo = {}
+            for pl in planes:
+                clave = ((pl.get("planta") or "—").strip(),
+                         (pl.get("estatus") or "—").strip())
+                conteo[clave] = conteo.get(clave, 0) + 1
+            if conteo:
+                ci["planes_por_planta"] = [
+                    {"planta": p, "estatus": e, "planes": n}
+                    for (p, e), n in sorted(conteo.items(), key=lambda kv: -kv[1])]
+                print(f"    ✓ Planes de acción: {len(conteo)} combinaciones planta/estatus")
+    except Exception as e:
+        print(f"    ✗ Control interno por área: {e}")
+        DIAGNOSTICO.append({"consulta": "control_interno_areas", "http": 0,
+                            "error": repr(e)[:300]})
 
     if DIAGNOSTICO:
         summary["diagnostico"] = DIAGNOSTICO

@@ -3522,6 +3522,27 @@ function renderChartForReporte(tipo, rd) {
     </div>`;
   }
 
+  if (tipo === 'control_interno') {
+    // Cumplimiento por jefe de área y planes por planta — tablas del reporte 8.
+    // Sus 14 KPIs decían CUÁNTO fallaba pero no QUIÉN ni DÓNDE.
+    const ar = s.rp.control_interno?.por_area || [];
+    const pl = s.rp.control_interno?.planes_por_planta || [];
+    if (!ar.length && !pl.length) return null;
+    let h2 = '';
+    if (ar.length) {
+      h2 += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin-bottom:6px">Cumplimiento por jefe de área — peor primero</div>`
+        + ar.map(a => bar(a.jefe, a.valor, a.pct, col(a.estado))).join('');
+    }
+    if (pl.length) {
+      const mx = Math.max(...pl.map(p => p.planes)) || 1;
+      h2 += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);letter-spacing:.04em;margin:12px 0 6px">Planes de acción por planta y estado</div>`
+        + pl.map(p => bar(`${p.planta} · ${p.estatus}`, String(p.planes),
+            p.planes / mx * 100,
+            /atras|vencid/i.test(p.estatus) ? 'var(--red)'
+            : /abiert|proceso/i.test(p.estatus) ? 'var(--yellow)' : 'var(--green)')).join('');
+    }
+    return { t:'Control interno — quién y dónde', h: h2 };
+  }
   if (tipo === 'margen_variable_pag2') {
     const av = num('Avance vs Ppto');
     if (!av) return '';
@@ -6301,6 +6322,8 @@ function construirContexto() {
         cumplimiento_produccion: rd.cumplimiento_produccion,
         faltantes: rd.faltantes,
         por_cliente: rd.por_cliente,
+        por_area: rd.por_area,
+        planes_por_planta: rd.planes_por_planta,
         necesidad_compra: rd.necesidad_compra,
         por_marca: rd.por_marca,
         por_grupo: rd.por_grupo,
