@@ -1134,6 +1134,19 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
                       f"{list(columnas.values())}. Devueltas: {disponibles[:25]}")})
         return []
 
+    # Aviso de mapeo parcial: si una columna pedida no existe en la tabla
+    # elegida, el desglose sale incompleto o vacío sin que nada falle. Pasó
+    # con 'faltantes', que mapeaba el producto pero no la cantidad y quedaba
+    # en cero. Se deja constancia con las claves reales para poder corregir.
+    sin_mapear = [f"{n} ({suf})" for n, suf in columnas.items()
+                  if busca(filas[0], suf) is None]
+    if sin_mapear:
+        print(f"    · '{visual}': sin mapear {sin_mapear}")
+        DIAGNOSTICO.append({
+            "consulta": f"captura:{visual}", "http": 200,
+            "error": (f"columnas sin mapear: {sin_mapear}. "
+                      f"Claves reales: {sorted(filas[0].keys())[:25]}")})
+
     out = []
     for f in filas:
         fila = {nombre: busca(f, suf) for nombre, suf in columnas.items()}
