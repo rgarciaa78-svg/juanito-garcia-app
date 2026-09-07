@@ -2904,8 +2904,6 @@ def build_fill_rate(found):
     return res
 
 def dax_avance_por_canal(token, ws, dataset_id, mes, label="avance_canal"):
-    # (ver nota sobre [Año] dentro de la consulta: el visual original no
-    #  separa el año y por eso su avance sale por encima del 200%)
     """Avance de facturación vs presupuesto, por canal comercial.
 
     Confirmado con Copiar consulta (2026-09-06) sobre la tabla
@@ -2928,6 +2926,18 @@ def dax_avance_por_canal(token, ws, dataset_id, mes, label="avance_canal"):
     filtra el mes 7. El título es un cuadro de texto fijo, no sigue al
     segmentador.
 
+    Sobre el avance por encima del 200%: viene de que el visual agrupa por mes
+    sin separar el año, así que suma el mismo mes de varios años contra un
+    presupuesto mensual. Se intentó corregir añadiendo 'Calendario'[Año] como
+    columna de agrupación (commit 426975b) y el resultado fue peor: el
+    presupuesto y lo facturado salieron en blanco para todos los canales.
+    Lo más probable es que 'Exl PPTO' no se relacione con esa columna del
+    calendario, así que agruparla rompe el vínculo.
+
+    Queda como está —fiel a lo que muestra el reporte— con la advertencia en
+    el KPI. Arreglarlo de verdad es editar el visual en Power BI y agregarle
+    el filtro de año.
+
     Se quita solo el ROLLUPADDISSUBTOTAL (la fila Total del visual, que se
     recompone sumando) y el TOPN de presentación.
     """
@@ -2943,12 +2953,6 @@ def dax_avance_por_canal(token, ws, dataset_id, mes, label="avance_canal"):
         "EVALUATE\n"
         "\tSUMMARIZECOLUMNS(\n"
         "\t\t'Exl Cliente x Vendedor'[Canal],\n"
-        # El visual agrupa solo por mes, sin separar el año, así que suma el
-        # mismo mes de varios años contra un presupuesto mensual y da 239%.
-        # Se añade [Año] como columna de AGRUPACIÓN — no como filtro inventado:
-        # el modelo devuelve cada año por separado y se elige el que
-        # corresponde. Las medidas y los filtros quedan intactos.
-        "\t\t'Calendario'[Año],\n"
         "\t\t__DS0FilterTable,\n"
         "\t\t__DS0FilterTable2,\n"
         "\t\t\"SumMonto_Neto_Factura\", CALCULATE(SUM('Maestra de Facturacion (Total)'[Monto_Neto_Factura])),\n"
@@ -2961,17 +2965,10 @@ def dax_avance_por_canal(token, ws, dataset_id, mes, label="avance_canal"):
         "ORDER BY\n\t[SumMonto_Neto_Factura] DESC"
     )
     rows = dax(token, ws, dataset_id, q, label)
-    # Con el año separado, nos quedamos con el más reciente que tenga datos:
-    # es el que el reporte pretendía mostrar.
-    anios = {to_float(r.get("Calendario[Año]") or r.get("[Año]"))
-             for r in (rows or [])}
-    anios = {int(a) for a in anios if a}
-    anio_sel = max(anios) if anios else None
     out = []
     for r in rows or []:
         canal = (r.get("Exl Cliente x Vendedor[Canal]") or r.get("[Canal]"))
-        a = to_float(r.get("Calendario[Año]") or r.get("[Año]"))
-        if not canal or (anio_sel and a and int(a) != anio_sel):
+        if not canal:
             continue
         out.append({
             "canal": str(canal),
@@ -3102,12 +3099,12 @@ def build_avance(found):
         } for c in canales]
         if ppto:
             pct = fact / ppto * 100
-            # El visual original no separa el año y por eso mostraba 239%:
-            # sumaba el mismo mes de varios años contra un presupuesto
-            # mensual. La consulta ahora agrupa por [Año] y toma el más
-            # reciente, así que el avance ya es comparable. El aviso se
-            # mantiene por si volviera a dispararse: seguiría indicando que
-            # algo no cuadra entre el presupuesto y lo facturado.
+            # La consulta del visual filtra 'Calendario'[Mes Nº] SIN filtro de
+            # año, así que un mismo mes de dos años distintos se suma contra un
+            # presupuesto de un solo mes. Por eso el avance sale por encima de
+            # 200%: no es sobrecumplimiento, es doble conteo. El reporte
+            # muestra la misma cifra, así que se publica tal cual pero sin
+            # semáforo verde y con la advertencia al lado.
             sospechoso = pct > 150
             # Se descartan los KPIs del sondeo genérico: su '% Avance' es la
             # medida plana que nunca respondió al filtro de fecha, y publicaba
