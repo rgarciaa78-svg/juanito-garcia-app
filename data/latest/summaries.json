@@ -1028,9 +1028,10 @@
             },
             {
               "label": "Venta Perdida",
-              "valor": "S/31.37M",
+              "valor": "S/700,000",
               "estado": "red",
-              "fuente": "reporte"
+              "fuente": "reporte",
+              "meta": "orden de venta − facturación"
             },
             {
               "label": "Venta del mes (tarjeta)",
