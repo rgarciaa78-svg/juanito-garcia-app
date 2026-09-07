@@ -3834,6 +3834,12 @@ function renderMcKinseyArea(empresa, tipo) {
               <div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:5px;overflow:hidden">
                 <div style="height:100%;width:${Math.min(100, t.pct)}%;background:${cV(t.estado)}"></div></div>` : ''}
             </div>`).join('')}
+          </div>
+          <div style="font-size:11px;color:var(--sub);padding:8px;background:var(--surface2);border-radius:6px;line-height:1.5;margin-top:8px">
+            Estos tramos son la <b>deuda viva</b>: la consulta del reporte excluye lo
+            refinanciado (<code>[ESTADO_REFINANCIADO]="NO"</code>). Por eso suman menos que
+            el CxP Total — la diferencia es justamente el saldo refinanciado, que el reporte
+            presenta como tarjeta aparte.
           </div>` : '';
           const pc = rp.cuentas_por_pagar?.proveedores_criticos || [];
           if (!pc.length) return bloqueTramos;
@@ -5068,6 +5074,34 @@ function dxpGrupoSeries(ds) {
   return grupos;
 }
 
+// Aviso de dato viejo. Fill Rate lleva 17 meses sin refrescarse en Power BI
+// y su 88% se lee como el de este mes. Un KPI desactualizado presentado como
+// actual es peor que no tenerlo, así que se marca en la propia pantalla.
+function dxpAvisoVigencia(tipo) {
+  const cfg = DXP_SERIE_CFG[tipo];
+  if (!cfg || !SERIES) return '';
+  const ds = SERIES.datasets?.[cfg.ds] || {};
+  const per = SERIES.periodos || [];
+  let ultimo = null;
+  Object.values(ds).forEach(arr => {
+    if (!Array.isArray(arr)) return;
+    for (let i = arr.length - 1; i >= 0; i--)
+      if (arr[i] != null) { if (!ultimo || per[i] > ultimo) ultimo = per[i]; break; }
+  });
+  if (!ultimo) return '';
+  const [a, m] = ultimo.split('-').map(Number);
+  const hoy = new Date();
+  const meses = (hoy.getFullYear() - a) * 12 + (hoy.getMonth() + 1 - m);
+  if (meses <= 2) return '';
+  return `<div style="margin-top:10px;padding:9px 11px;border-radius:8px;
+      background:var(--yellow-soft);border:1px solid var(--border);
+      font-size:11px;line-height:1.5;color:var(--ink)">
+    <b>Dato desactualizado.</b> El último mes con información es <b>${ultimo}</b>,
+    hace ${meses} meses. Las cifras de este reporte no reflejan la situación actual —
+    el dataset no se está refrescando en Power BI.
+  </div>`;
+}
+
 function dxpPanelSegmentos(tipo, s) {
   const cfg = DXP_SERIE_CFG[tipo];
   if (!cfg) return '';
@@ -5365,6 +5399,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
       </div>
 
       ${dxpTrendPanel(tipo, s)}
+      ${dxpAvisoVigencia(tipo)}
       ${dxpPanelSegmentos(tipo, s)}
       ${dxpOtrasSeries(tipo)}
     </div>

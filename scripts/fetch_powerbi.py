@@ -1749,8 +1749,11 @@ def build_cxp(found):
         } for n, c, v in top[:15]]
         if tot:
             res["kpis"].append({
-                "label": "Top 15 proveedores", "valor": fmt_soles(tot),
-                "meta": "deuda concentrada"})
+                # La etiqueta dice 'Deuda' y no 'Top 15' a secas: un KPI que
+                # dice "Top 15 proveedores = S/12.05M" se lee como si fueran
+                # doce millones de proveedores.
+                "label": "Deuda top 15 proveedores", "valor": fmt_soles(tot),
+                "meta": "concentración"})
     return res, dias
 
 def build_margen(found):

@@ -130,7 +130,7 @@ def test_construccion(fp):
              "__top_proveedores": [("E & M S.R.L.", "LECHE", 5175254.0)],
              "__aging_cxp": [("Vigente", 6467432.0), ("0 a 7 días", 600000.0),
                              ("8 a 15 días", 454715.0), ("31 a 90 días", 1300005.0)]}),
-         ["CxP Total", "Refinanciado", "# Proveedores", "Top 15 proveedores",
+         ["CxP Total", "Refinanciado", "# Proveedores", "Deuda top 15 proveedores",
           "CxP Vencido"],
          ["proveedores_criticos", "tramos"]),
         ("build_fill_rate",

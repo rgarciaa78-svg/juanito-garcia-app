@@ -85,6 +85,15 @@ INICIO_MES  = 1
 # justamente el problema que veníamos corrigiendo.
 SUSTITUIDAS_POR_CAPTURA = {
     ("margen", "Venta Total"),
+    # Ambas contradicen los KPIs capturados del mismo reporte:
+    #   · 'Refinanciamiento' trae variaciones mensuales — con meses negativos —
+    #     junto a un KPI de saldo refinanciado de S/6.96M. Son cosas distintas
+    #     con el mismo nombre.
+    #   · 'Proveedores' va acumulando (1, 4, 10, … 121) mientras el KPI dice
+    #     138 proveedores. No es un conteo mensual.
+    # Se retiran: dos cifras para lo mismo es peor que una sola.
+    ("cxp", "Refinanciamiento"),
+    ("cxp", "Proveedores"),
 }
 
 
@@ -2071,6 +2080,94 @@ def serie_mermas_segmentos(token, ds_id, periodos):
     return out
 
 
+
+# KPIs que deben salir de una serie capturada y no del sondeo genérico.
+# (reporte, etiqueta del KPI, dataset, serie, formato, meta)
+#
+# Nace de una contradicción real: el reporte de Margen mostraba 49.5% de
+# margen y S/2.96 de costo por kilo —del sondeo, sin los filtros del visual—
+# mientras su propia serie capturada decía 46.48% y S/3.16. Dos cifras para lo
+# mismo en la misma pantalla.
+RECONCILIAR = [
+    ("margen_variable", "Margen variable", "margen", "% Margen Variable", "pct", "≥52%"),
+    ("margen_variable", "Costo/kg",        "margen", "Costo x Kilo",      "soles", None),
+    ("margen_variable", "Precio/kg",       "margen", "Precio x Kilo",     "soles", None),
+    ("margen_variable", "Ventas mes",      "margen", "Ventas (S/.)",      "soles", None),
+    ("cuentas_por_pagar", "Días CxP",      "cxp",    "Días CxP",          "dias",  "<90d"),
+]
+
+
+def _ultimo(serie, periodos):
+    for i in range(len(serie) - 1, -1, -1):
+        if serie[i] is not None:
+            return serie[i], (periodos[i] if i < len(periodos) else None)
+    return None, None
+
+
+def _formatear(valor, formato):
+    if formato == "pct":
+        v = valor * 100 if abs(valor) <= 1.5 else valor
+        return f"{v:.1f}%", v
+    if formato == "dias":
+        return f"{valor:.0f}d", valor
+    if abs(valor) >= 1_000_000:
+        return f"S/{valor / 1_000_000:.2f}M", valor
+    if abs(valor) >= 1_000:
+        return f"S/{valor:,.0f}", valor
+    return f"S/{valor:.2f}", valor
+
+
+def reconciliar_kpis(resultado, periodos_str):
+    """Hace que los KPIs del dashboard coincidan con las series capturadas.
+
+    fetch_powerbi corre antes que este script y construye los KPIs con el
+    sondeo genérico, que consulta las medidas SIN los filtros del visual. Donde
+    existe una serie capturada del mismo concepto, esa manda: es la que
+    reproduce lo que ve el usuario en Power BI.
+
+    Se anota el mes del dato en `meta`, porque un KPI sin período invita a
+    leerlo como "hoy" cuando es el último mes cerrado.
+    """
+    ruta = OUTPUT_DIR / "summaries.json"
+    if not ruta.exists():
+        return
+    try:
+        datos = json.loads(ruta.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"  · no se pudo reconciliar summaries.json: {e}")
+        return
+
+    cambios = 0
+    for empresa, edatos in (datos.get("empresas") or {}).items():
+        reportes = edatos.get("reportes") or {}
+        for tipo, etiqueta, ds, serie_nom, formato, meta in RECONCILIAR:
+            rep = reportes.get(tipo)
+            serie = (resultado.get(ds) or {}).get(serie_nom)
+            if not rep or not serie:
+                continue
+            valor, periodo = _ultimo(serie, periodos_str)
+            if valor is None:
+                continue
+            texto, _ = _formatear(valor, formato)
+            kpis = rep.setdefault("kpis", [])
+            actual = next((k for k in kpis if k["label"] == etiqueta), None)
+            if actual is None:
+                kpis.append({"label": etiqueta, "valor": texto,
+                             "meta": meta or (periodo or "")})
+                cambios += 1
+                print(f"    + [{tipo}] {etiqueta} = {texto} ({periodo})")
+            elif actual.get("valor") != texto:
+                print(f"    ~ [{tipo}] {etiqueta}: {actual['valor']} → {texto} "
+                      f"({periodo}, de la consulta capturada)")
+                actual["valor"] = texto
+                if meta:
+                    actual["meta"] = meta
+                cambios += 1
+    if cambios:
+        ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2))
+        print(f"  ✓ {cambios} KPI(s) reconciliados con las series capturadas")
+
+
 def main():
     print("=== JUANITO — SERIE HISTÓRICA MENSUAL ===\n")
     token = get_token()
@@ -2410,6 +2507,10 @@ def main():
             del out["datasets"][ds_key]
     path.write_text(json.dumps(out, ensure_ascii=False, indent=2, allow_nan=False))
     print(f"Guardado: {path}")
+
+    # Los KPIs de summaries.json los arma fetch_powerbi con el sondeo
+    # genérico; donde hay serie capturada del mismo concepto, se corrigen.
+    reconciliar_kpis(resultado, periodos_str)
     print(f"Datasets con serie: {list(resultado.keys())}")
 
 
