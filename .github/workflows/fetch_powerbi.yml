@@ -46,5 +46,22 @@ jobs:
           git config user.name  "JUANITO Bot"
           git config user.email "juanito@pauno.pe"
           git add data/latest/summaries.json data/latest/measure_cache.json data/latest/series.json data/historico/historico.json || true
-          git diff --staged --quiet || git commit -m "data: auto-update Power BI $(date +'%Y-%m-%d %H:%M')"
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/rgarciaa78-svg/juanito-garcia-app.git HEAD:main
+          git diff --staged --quiet && echo "sin cambios que publicar" && exit 0
+          git commit -m "data: auto-update Power BI $(date +'%Y-%m-%d %H:%M')"
+
+          # La corrida tarda ~10 minutos. Si alguien sube algo al repositorio
+          # mientras tanto, el push se rechaza y se pierde toda la extracción
+          # aunque haya funcionado (pasó en la corrida 63). Se reintenta
+          # trayendo lo nuevo con rebase: los datos van en archivos propios,
+          # así que no hay conflicto real con cambios de código.
+          REMOTO="https://x-access-token:${{ secrets.GH_PAT }}@github.com/rgarciaa78-svg/juanito-garcia-app.git"
+          for intento in 1 2 3; do
+            if git push "$REMOTO" HEAD:main; then
+              echo "publicado en el intento $intento"
+              exit 0
+            fi
+            echo "push rechazado — traigo los cambios remotos y reintento"
+            git pull --rebase "$REMOTO" main || exit 1
+          done
+          echo "no se pudo publicar tras 3 intentos"
+          exit 1
