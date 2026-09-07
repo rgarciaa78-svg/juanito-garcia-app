@@ -2105,6 +2105,9 @@ RECONCILIAR = [
      "Planilla / kg producido", "soles", None),
     ("productividad", "Planilla S/. / KG Vendido", "productividad",
      "Kg vendidos por sol de planilla", "soles", None),
+    # Reporte 12: los tres KPIs de Fill Rate que quedaban sin contrastar.
+    ("fill_rate", "Facturación",  "fill_rate", "Facturación",    "soles", None),
+    ("fill_rate", "Orden de Venta", "fill_rate", "Orden de Venta", "soles", None),
 ]
 
 
@@ -2373,6 +2376,15 @@ def main():
             ("EVOLUCIÓN DE INVENTARIO (S/. MM)", None,
              "Consumo_Acumulado_Total_S__saldo", "Consumo acumulado",
              "inventario", ["compras", "inventario", "planificacion"]),
+            # Reporte 12 (Cálculo de Provisiones): cierra los tres KPIs de
+            # Fill Rate que seguían viniendo del sondeo.
+            ("FILL RATE (S/) - MENSUAL", None, "FACTURACION", "Facturación",
+             "fill_rate", ["fill_rate", "margen", "compras"]),
+            ("FILL RATE (S/) - MENSUAL", None, "ORDEN_DE_VENTA",
+             "Orden de Venta", "fill_rate", ["fill_rate", "margen", "compras"]),
+            ("FILL RATE (S/) - MENSUAL", None, "v__FillRate",
+             "% Fill Rate mensual", "fill_rate",
+             ["fill_rate", "margen", "compras"]),
         ]
         resuelto = {}
         for visual, dim, medida, prefijo, destino, candidatos in CAPTURAS:

@@ -1639,7 +1639,9 @@ KPIS_VERIFICADOS = {
                        "Working Stock", "Exceso 1 (2-5 meses)",
                        "Exceso 2 (5-12 meses)"},
     "fill_rate": {"Fill Rate", "Venta del mes (tarjeta)",
-                  "Pedidos no atendidos (mes)"},
+                  "Pedidos no atendidos (mes)",
+                  # Del visual "FILL RATE (S/) - MENSUAL" del reporte 12.
+                  "Facturación", "Orden de Venta", "Venta Perdida"},
     "consumo_materiales": {"Costo Total", "Producción Neta (KG)",
                            "Costo x TN Vendida", "Costo x TN Producida",
                            # dax_consumo_venta_neta_kg, confirmada con Copiar
