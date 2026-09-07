@@ -1694,6 +1694,10 @@ def _serie_productividad_una(token, ds_id, periodos, lista, etiqueta):
 
 CATALOGO = Path("capturas/catalogo.json")
 
+# Problemas de las consultas capturadas. Se vuelcan en series.json para poder
+# diagnosticarlos sin acceso al log del workflow, igual que en fetch_powerbi.
+DIAG_SERIES = []
+
 
 def cargar_catalogo():
     """Consultas exportadas del Analizador, indexadas por nombre de visual."""
@@ -1732,10 +1736,13 @@ def dax_crudo(token, dataset_id, query, label):
         r = requests.post(url, json=body, headers=headers, timeout=90)
         if r.status_code != 200:
             print(f"      [{label}] HTTP {r.status_code}: {r.text[:180]}")
+            DIAG_SERIES.append({"consulta": label, "http": r.status_code,
+                                "error": r.text[:400]})
             return []
         return [t.get("rows", []) for t in r.json()["results"][0].get("tables", [])]
     except Exception as e:
         print(f"      [{label}] error: {e}")
+        DIAG_SERIES.append({"consulta": label, "http": 0, "error": repr(e)[:300]})
         return []
 
 
@@ -1798,9 +1805,14 @@ def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
         if n > mejor_n or (n == mejor_n and n and len(t) > len(filas)):
             filas, mejor_n = t, n
     if not mejor_n:
-        disponibles = sorted(tablas[-1][0].keys()) if tablas[-1] else []
+        disponibles = sorted({k for t in tablas for f in t[:5] for k in f})
         print(f"    · '{visual}': ninguna tabla trae [{col_medida}]"
-              f"{f' ni [{col_dim}]' if col_dim else ''}. Devueltas: {disponibles[:20]}")
+              f"{f' ni [{col_dim}]' if col_dim else ''}")
+        DIAG_SERIES.append({
+            "consulta": f"captura:{visual}", "http": 200,
+            "error": (f"falta [{col_medida}]"
+                      + (f" o [{col_dim}]" if col_dim else "")
+                      + f". Claves devueltas: {disponibles[:30]}")})
         return {}
 
     # Los visuales de matriz usan SUBSTITUTEWITHINDEX: cambian las columnas de
@@ -1860,8 +1872,12 @@ def serie_desde_captura(token, ds_id, periodos, visual, col_dim, col_medida,
             out[etiqueta] = serie
             print(f"    [{etiqueta}]: {n}/{len(serie)} meses")
     if not out:
-        print(f"    · '{visual}': sin series utilizables "
-              f"(dim={col_dim}, medida={col_medida})")
+        muestra = filas[:2]
+        print(f"    · '{visual}': sin series utilizables")
+        DIAG_SERIES.append({
+            "consulta": f"captura:{visual}", "http": 200,
+            "error": (f"{len(filas)} filas pero ninguna serie con 3+ meses. "
+                      f"eje={'sí' if eje else 'no'}. Muestra: {muestra}")})
     return out
 
 
@@ -2329,6 +2345,11 @@ def main():
     # verdad — p.ej. '% Merma <almacén>' en meses sin producción divide entre
     # cero — así que se convierten a null (mes sin dato) en vez de ocultarlos.
     # allow_nan=False haría reventar el script; preferimos publicar el resto.
+    if DIAG_SERIES:
+        out["diagnostico"] = DIAG_SERIES
+        print(f"\n⚠ {len(DIAG_SERIES)} consulta(s) con problema — "
+              f"detalle en series.json → diagnostico")
+
     n_inf = _sanear_no_finitos(out)
     if n_inf:
         print(f"⚠ {n_inf} valores no finitos (Infinity/NaN) → null")
