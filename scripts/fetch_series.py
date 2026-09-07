@@ -2177,8 +2177,11 @@ def reconciliar_kpis(resultado, periodos_str):
             kpis = rep.setdefault("kpis", [])
             actual = next((k for k in kpis if k["label"] == etiqueta), None)
             if actual is None:
+                # fuente='reporte': viene de una serie capturada. Sin esto
+                # queda marcado como no contrastado, que es justo lo contrario.
                 kpis.append({"label": etiqueta, "valor": texto,
                              "meta": aviso or meta or (periodo or ""),
+                             "fuente": "reporte",
                              **({"estado": "yellow"} if aviso else {})})
                 cambios += 1
                 print(f"    + [{tipo}] {etiqueta} = {texto} ({periodo})")
@@ -2186,6 +2189,7 @@ def reconciliar_kpis(resultado, periodos_str):
                 print(f"    ~ [{tipo}] {etiqueta}: {actual['valor']} → {texto} "
                       f"({periodo}, de la consulta capturada)")
                 actual["valor"] = texto
+                actual["fuente"] = "reporte"
                 if aviso:
                     actual["meta"] = aviso
                     actual["estado"] = "yellow"

@@ -1192,6 +1192,9 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
     # suele ser un subtotal del visual y trae la dimensión en blanco. Mirar el
     # valor daba por ausentes columnas que sí estaban.
     claves = {k for f in filas[:20] for k in f}
+    for t in todas:
+        if t:
+            claves |= {k for k in t[0]}
     sin_mapear = [f"{n} ({suf})" for n, suf in columnas.items()
                   if not any(k.endswith(suf) for k in claves)]
     if sin_mapear:
@@ -1201,9 +1204,27 @@ def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None)
             "error": (f"columnas sin mapear: {sin_mapear}. "
                       f"Claves reales: {sorted(filas[0].keys())[:25]}")})
 
+    # En las matrices, las columnas del encabezado no viajan en el cuerpo:
+    # se sustituyen por un [ColumnIndex] y sus valores van en la primera
+    # tabla. 'ESTADO DE PLANES DE ACCION' abre por Planta en las filas y por
+    # Estatus en las columnas, así que sin resolver el eje el estatus se
+    # perdía.
+    eje = []
+    if filas and any(k.endswith("[ColumnIndex]") for k in filas[0]):
+        for t in todas:
+            if t and t is not filas and not any(k.endswith("[ColumnIndex]") for k in t[0]):
+                eje = t
+                break
+
     out = []
     for f in filas:
         fila = {nombre: busca(f, suf) for nombre, suf in columnas.items()}
+        if eje:
+            idx = busca(f, "[ColumnIndex]")
+            if isinstance(idx, (int, float)) and 0 <= idx < len(eje):
+                for nombre, suf in columnas.items():
+                    if fila.get(nombre) is None:
+                        fila[nombre] = busca(eje[int(idx)], suf)
         # Las filas de subtotal del visual llegan con la dimensión vacía.
         if all(v is None for v in fila.values()):
             continue
