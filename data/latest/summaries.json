@@ -6,15 +6,15 @@
     "PAUNO": "red"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 20.9% — crítica"
+    "PAUNO": "Morosidad 20.1% — crítica"
   },
-  "holding_ventas": "S/7.93M",
-  "holding_mora": "20.9%",
+  "holding_ventas": "S/7.95M",
+  "holding_mora": "20.1%",
   "agenda_ceo": {
     "decidir_hoy": [
       {
         "empresa": "PAUNO",
-        "texto": "Mora 20.9% — vencido S/3.57M. Activar cobranza.",
+        "texto": "Mora 20.1% — vencido S/3.66M. Activar cobranza.",
         "responsable": "Gerencia Financiera"
       }
     ],
@@ -26,101 +26,101 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "red",
-          "alerta": "Morosidad 20.9% — crítica",
+          "alerta": "Morosidad 20.1% — crítica",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "20.9%",
+              "valor": "20.1%",
               "meta": "15%",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/3.57M",
+              "valor": "S/3.66M",
               "meta": "aging confirmado",
               "fuente": "reporte"
             },
             {
               "label": "CxC Total",
-              "valor": "S/4.52M",
+              "valor": "S/4.58M",
               "fuente": "reporte"
             },
             {
               "label": "CxC Vencido",
-              "valor": "S/946,144",
-              "meta": "20.9% de cartera",
+              "valor": "S/920,891",
+              "meta": "20.1% de cartera",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "Clientes",
-              "valor": "218",
+              "valor": "214",
               "fuente": "reporte"
             },
             {
               "label": "Ventas del mes",
-              "valor": "S/185,410",
+              "valor": "S/357,445",
               "fuente": "reporte"
             }
           ],
           "tramos": [
             {
               "label": "Por Vencer",
-              "valor": "S/3.57M",
+              "valor": "S/3.66M",
               "estado": "green",
-              "pct": 79.1
+              "pct": 79.9
             },
             {
               "label": "0 a 15 días",
-              "valor": "S/226,121",
+              "valor": "S/214,925",
               "estado": "yellow",
-              "pct": 5.0
+              "pct": 4.7
             },
             {
               "label": "16 a 30 días",
-              "valor": "S/277,775",
+              "valor": "S/277,344",
               "estado": "yellow",
               "pct": 6.1
             },
             {
               "label": "Más de 30 días",
-              "valor": "S/442,248",
+              "valor": "S/428,623",
               "estado": "red",
-              "pct": 9.8
+              "pct": 9.4
             }
           ]
         },
         "cuentas_por_pagar": {
           "estado": "yellow",
-          "alerta": "Refinanciado S/6.96M — gestionar",
+          "alerta": "Refinanciado S/6.93M — gestionar",
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/16.79M",
+              "valor": "S/16.71M",
               "fuente": "reporte"
             },
             {
               "label": "Refinanciado",
-              "valor": "S/6.96M",
+              "valor": "S/6.93M",
               "estado": "yellow",
               "fuente": "reporte"
             },
             {
               "label": "# Proveedores",
-              "valor": "136",
+              "valor": "137",
               "fuente": "reporte"
             },
             {
               "label": "CxP Vencido",
-              "valor": "S/3.37M",
-              "meta": "34.2% de la deuda viva",
+              "valor": "S/3.35M",
+              "meta": "34.3% de la deuda viva",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "Deuda top 15 proveedores",
-              "valor": "S/12.05M",
+              "valor": "S/12.03M",
               "meta": "concentración",
               "fuente": "reporte"
             },
@@ -134,50 +134,50 @@
           "tramos": [
             {
               "label": "Vigente",
-              "valor": "S/6.47M",
-              "pct": 65.8,
+              "valor": "S/6.43M",
+              "pct": 65.7,
               "estado": "green"
             },
             {
               "label": "16 a 30 días",
-              "valor": "S/1.01M",
-              "pct": 10.3,
+              "valor": "S/925,059",
+              "pct": 9.5,
               "estado": "yellow"
             },
             {
               "label": "8 a 15 días",
-              "valor": "S/628,281",
-              "pct": 6.4,
+              "valor": "S/674,186",
+              "pct": 6.9,
               "estado": "yellow"
             },
             {
               "label": "31 a 45 días",
-              "valor": "S/538,152",
-              "pct": 5.5,
+              "valor": "S/669,146",
+              "pct": 6.8,
               "estado": "red"
             },
             {
               "label": "0 a 7 días",
-              "valor": "S/426,433",
-              "pct": 4.3,
+              "valor": "S/318,467",
+              "pct": 3.3,
               "estado": "yellow"
             },
             {
               "label": "61 a 90 días",
-              "valor": "S/281,235",
-              "pct": 2.9,
-              "estado": "red"
-            },
-            {
-              "label": "46 a 60 días",
-              "valor": "S/240,859",
-              "pct": 2.4,
+              "valor": "S/278,176",
+              "pct": 2.8,
               "estado": "red"
             },
             {
               "label": "Más de 91 días",
-              "valor": "S/235,730",
-              "pct": 2.4,
+              "valor": "S/242,818",
+              "pct": 2.5,
+              "estado": "red"
+            },
+            {
+              "label": "46 a 60 días",
+              "valor": "S/241,900",
+              "pct": 2.5,
               "estado": "red"
             }
           ],
@@ -185,8 +185,8 @@
             {
               "nombre": "E & M S.R.L.",
               "categoria": "LECHE DESCREMADA",
-              "monto": "S/5.17M",
-              "pct": 42.9
+              "monto": "S/5.18M",
+              "pct": 43.0
             },
             {
               "nombre": "DIVERPLAST S.A.C.",
@@ -246,7 +246,7 @@
               "nombre": "QUIMERCO S.A.S. SUCURSAL DEL PERU",
               "categoria": "ESPESANTE",
               "monto": "S/343,177",
-              "pct": 2.8
+              "pct": 2.9
             },
             {
               "nombre": "ICATOM S.A.",
@@ -267,10 +267,10 @@
               "pct": 2.3
             },
             {
-              "nombre": "PAPELERA DEL SUR S A",
-              "categoria": "CAJAS",
-              "monto": "S/260,981",
-              "pct": 2.2
+              "nombre": "OWENS-ILLINOIS PERU S.A.",
+              "categoria": "",
+              "monto": "S/242,663",
+              "pct": 2.0
             }
           ]
         },
@@ -424,7 +424,7 @@
             },
             {
               "label": "Venta Neta (KG)",
-              "valor": "16,560,227 KG",
+              "valor": "16,591,310 KG",
               "validado": true,
               "fuente": "reporte"
             },
@@ -502,7 +502,7 @@
           "kpis": [
             {
               "label": "Stock PP (Punto de Pedido)",
-              "valor": "4,687,549",
+              "valor": "4,509,988",
               "fuente": "reporte"
             },
             {
@@ -512,12 +512,12 @@
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "13,645,267",
+              "valor": "13,652,302",
               "fuente": "reporte"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "13,849,443",
+              "valor": "13,852,961",
               "fuente": "reporte"
             },
             {
@@ -544,8 +544,8 @@
             {
               "producto": "AZUCAR BLANCA",
               "categoria": "Azúcares y edulcorantes",
-              "faltante": "2,085",
-              "stock": "14,405",
+              "faltante": "4,185",
+              "stock": "12,305",
               "lead_time": null
             },
             {
@@ -622,11 +622,11 @@
           "necesidad_compra": [
             {
               "momento": "Comprar-( Oct 2026)",
-              "items": 189
+              "items": 191
             },
             {
               "momento": "Comprar-( Nov 2026)",
-              "items": 164
+              "items": 162
             },
             {
               "momento": "Comprar-( Set 2026)",
@@ -640,40 +640,40 @@
         },
         "sop_inventario": {
           "estado": "red",
-          "alerta": "Dead Stock 18.8% del inventario",
+          "alerta": "Dead Stock 18.5% del inventario",
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/6.61M",
+              "valor": "S/6.75M",
               "fuente": "reporte"
             },
             {
               "label": "Dead Stock",
-              "valor": "S/1.24M",
+              "valor": "S/1.25M",
               "meta": "<S/500K",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "% Dead Stock",
-              "valor": "18.8%",
+              "valor": "18.5%",
               "meta": "<5%",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "Working Stock",
-              "valor": "S/4.24M",
+              "valor": "S/4.38M",
               "fuente": "reporte"
             },
             {
               "label": "Exceso 1 (2-5 meses)",
-              "valor": "S/711,417",
+              "valor": "S/688,426",
               "fuente": "reporte"
             },
             {
               "label": "Exceso 2 (5-12 meses)",
-              "valor": "S/417,162",
+              "valor": "S/425,051",
               "fuente": "reporte"
             }
           ],
@@ -681,12 +681,12 @@
             {
               "categoria": "ENVASES Y EMBALAJES",
               "valor": "S/917,801",
-              "pct": 73.8
+              "pct": 73.3
             },
             {
               "categoria": "MATERIA PRIMA",
               "valor": "S/113,889",
-              "pct": 9.2
+              "pct": 9.1
             },
             {
               "categoria": "PROD. EN PROCESO",
@@ -712,33 +712,33 @@
           "working_por_categoria": [
             {
               "categoria": "ENVASES Y EMBALAJES",
-              "valor": "S/1.90M",
-              "pct": 44.7
+              "valor": "S/1.91M",
+              "pct": 43.6
             },
             {
               "categoria": "MATERIA PRIMA",
-              "valor": "S/1.33M",
-              "pct": 31.4
-            },
-            {
-              "categoria": "PT YOGURTS",
-              "valor": "S/364,304",
-              "pct": 8.6
+              "valor": "S/1.40M",
+              "pct": 32.0
             },
             {
               "categoria": "PT SALSAS",
-              "valor": "S/309,602",
-              "pct": 7.3
+              "valor": "S/350,662",
+              "pct": 8.0
+            },
+            {
+              "categoria": "PT YOGURTS",
+              "valor": "S/343,517",
+              "pct": 7.8
             },
             {
               "categoria": "PROD. EN PROCESO",
-              "valor": "S/189,495",
-              "pct": 4.5
+              "valor": "S/218,235",
+              "pct": 5.0
             },
             {
               "categoria": "SUMINISTROS",
               "valor": "S/71,462",
-              "pct": 1.7
+              "pct": 1.6
             }
           ]
         },
@@ -973,7 +973,7 @@
               "label": "Planilla S/. / KG Producido",
               "valor": "S/0.04",
               "fuente": "reporte",
-              "meta": "2026-08 parcial — mediana previa S/0.52",
+              "meta": "2026-08 parcial — mediana previa S/0.54",
               "estado": "yellow"
             },
             {
@@ -995,7 +995,7 @@
             },
             {
               "label": "Planilla Total",
-              "valor": "S/4.51M",
+              "valor": "S/3.18M",
               "fuente": "reporte"
             }
           ]
@@ -1118,14 +1118,24 @@
         },
         "margen_variable_pag2": {
           "estado": "red",
-          "alerta": "Avance 1.3% vs presupuesto",
+          "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
           "kpis": [
             {
-              "label": "Avance vs Ppto",
-              "valor": "1.3%",
-              "meta": "100%",
-              "estado": "red",
-              "fuente": "sondeo"
+              "label": "Presupuesto del mes",
+              "valor": "S/7.83M",
+              "fuente": "reporte"
+            },
+            {
+              "label": "Facturado",
+              "valor": "S/18.75M",
+              "fuente": "reporte"
+            },
+            {
+              "label": "Avance vs presupuesto",
+              "valor": "239.4%",
+              "meta": "revisar — el visual no filtra año",
+              "estado": "yellow",
+              "fuente": "reporte"
             },
             {
               "label": "Cumplimiento producción (ayer)",
@@ -1136,7 +1146,7 @@
             },
             {
               "label": "Pendiente de facturar",
-              "valor": "S/333,047",
+              "valor": "S/346,521",
               "fuente": "reporte"
             }
           ],
@@ -1162,31 +1172,31 @@
             {
               "categoria": "PT YOGURTS",
               "programado": "14,362,346",
-              "producido": "11,326,694",
+              "producido": "11,326,761",
               "pct": 78.9
             }
           ],
           "por_canal": [
             {
+              "canal": "MODERNO",
+              "ppto": "S/5.87M",
+              "facturado": "S/14.13M",
+              "pendiente": "S/293,764",
+              "avance": 240.8
+            },
+            {
               "canal": "TRADICIONAL",
-              "ppto": "—",
-              "facturado": "—",
-              "pendiente": "S/11,921",
-              "avance": null
+              "ppto": "S/1.69M",
+              "facturado": "S/3.88M",
+              "pendiente": "S/26,746",
+              "avance": 229.3
             },
             {
               "canal": "HORECA",
-              "ppto": "—",
-              "facturado": "—",
-              "pendiente": "S/25,836",
-              "avance": null
-            },
-            {
-              "canal": "MODERNO",
-              "ppto": "—",
-              "facturado": "—",
-              "pendiente": "S/295,290",
-              "avance": null
+              "ppto": "S/270,000",
+              "facturado": "S/739,192",
+              "pendiente": "S/26,011",
+              "avance": 273.8
             }
           ]
         }
@@ -1201,7 +1211,7 @@
     "avance": 0.6295519287006067
   },
   "verificacion": {
-    "verificados": 60,
-    "total": 61
+    "verificados": 63,
+    "total": 63
   }
 }
