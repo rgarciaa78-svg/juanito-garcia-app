@@ -26,7 +26,7 @@
   "tablas_fecha": {
     "cxc": "LocalDateTable_9de71e0e-3dad-40db-b49a-7124064ba537[Año] + 'Calendario (FACT)'[Mes Numero]",
     "mermas": "Calendario[Año] + Calendario[MES] (6 filtros del visual)",
-    "cxp": "Calendario[Fecha]",
+    "cxp": "Calendario[Date]",
     "margen": "Calendario[Date]",
     "inventario": "Calendario[Date]",
     "planificacion": "Calendario[Date]"
@@ -38,7 +38,7 @@
         "Calendario"
       ],
       "columnas_fecha": [
-        "Calendario[Fecha]"
+        "Calendario[Date]"
       ],
       "medidas_planas": [
         {
@@ -907,6 +907,64 @@
         0.5423033339736576,
         0.04266413030017015
       ]
+    },
+    "inventario": {
+      "Días de rotación": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        43.0,
+        34.0,
+        45.0,
+        44.0,
+        46.0,
+        45.0,
+        49.0,
+        54.0,
+        53.0,
+        67.0,
+        67.0,
+        79.0,
+        74.0,
+        63.0
+      ],
+      "Consumo acumulado": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        3489205.482020002,
+        3094657.0127830133,
+        4209191.277482003,
+        4517204.790233016,
+        4752317.684837997,
+        4709935.836435109,
+        5147009.088143051,
+        5654341.7304851115,
+        5726586.536824256,
+        7203643.6463621855,
+        7405257.1593263745,
+        8862521.331503332,
+        8422304.42832613,
+        7269103.851178825
+      ]
     }
-  }
+  },
+  "diagnostico": [
+    {
+      "consulta": "captura:COSTO UNITARIO",
+      "http": 200,
+      "error": "falta [C__Unit] o [Categoria]. Claves devueltas: ['LocalDateTable_17f9bf1b-53ab-4dc5-bca5-92ec1d35bc75[Año]', 'LocalDateTable_17f9bf1b-53ab-4dc5-bca5-92ec1d35bc75[Mes]', 'LocalDateTable_17f9bf1b-53ab-4dc5-bca5-92ec1d35bc75[NroMes]']"
+    },
+    {
+      "consulta": "captura:PRECIO UNITARIO",
+      "http": 200,
+      "error": "falta [Precio_unitario] o [Canal]. Claves devueltas: ['LocalDateTable_17f9bf1b-53ab-4dc5-bca5-92ec1d35bc75[Año]', 'LocalDateTable_17f9bf1b-53ab-4dc5-bca5-92ec1d35bc75[Mes]', 'LocalDateTable_17f9bf1b-53ab-4dc5-bca5-92ec1d35bc75[NroMes]']"
+    }
+  ]
 }

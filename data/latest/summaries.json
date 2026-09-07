@@ -396,11 +396,102 @@
               "valor": "10475210"
             },
             {
+              "label": "Materiales en quiebre",
+              "valor": "14",
+              "meta": "explosión de materiales",
+              "estado": "red"
+            },
+            {
               "label": "Ítems con necesidad de compra",
               "valor": "431"
             }
           ],
-          "faltantes": [],
+          "faltantes": [
+            {
+              "producto": "LECHE FRESCA",
+              "categoria": "Lácteos base y derivados",
+              "faltante": "73,191",
+              "stock": "191",
+              "lead_time": null
+            },
+            {
+              "producto": "AZUCAR BLANCA",
+              "categoria": "Azúcares y edulcorantes",
+              "faltante": "2,085",
+              "stock": "14,405",
+              "lead_time": null
+            },
+            {
+              "producto": "BOTELLA  PET GB 1,6 LT 90 GR TAPA ROJA",
+              "categoria": "Envases rígidos (botellas, frascos, potes, vasos)",
+              "faltante": "1,970",
+              "stock": "1,248",
+              "lead_time": null
+            },
+            {
+              "producto": "ETIQ TIGOMIX BOLITAS (OJITOS)",
+              "categoria": "Etiquetas",
+              "faltante": "1,939",
+              "stock": "0",
+              "lead_time": null
+            },
+            {
+              "producto": "TAPA ROJA P/BOTELLA PET GB 1,6 LT 90 GR",
+              "categoria": "Tapas y cierres",
+              "faltante": "1,292",
+              "stock": "1,926",
+              "lead_time": null
+            },
+            {
+              "producto": "ETIQ. GRIEGO BEBIBLE FRESA TIGO 1.6 KG",
+              "categoria": "Etiquetas",
+              "faltante": "609",
+              "stock": "1,000",
+              "lead_time": null
+            },
+            {
+              "producto": "ETIQ PRECIO UNO YOG BEB FRUTOS DEL BOSQUE 900G",
+              "categoria": "Etiquetas",
+              "faltante": "300",
+              "stock": "2,500",
+              "lead_time": null
+            },
+            {
+              "producto": "CULTIVO FD DVS YF L 903 X 200U",
+              "categoria": "Cultivos y fermentos",
+              "faltante": "3",
+              "stock": "106",
+              "lead_time": null
+            },
+            {
+              "producto": "SABOR DURAZNO NATURAL D45735-00",
+              "categoria": "Colorantes Esencias y saborizantes",
+              "faltante": "2",
+              "stock": "3",
+              "lead_time": null
+            },
+            {
+              "producto": "CREMA DE LECHE 38% (Bolsa de 946ML)",
+              "categoria": "",
+              "faltante": "0",
+              "stock": "-0",
+              "lead_time": null
+            },
+            {
+              "producto": "AJI AMARILLO FRESCO",
+              "categoria": "Ingredientes frescos y vegetales",
+              "faltante": "0",
+              "stock": "-0",
+              "lead_time": null
+            },
+            {
+              "producto": "STICKER PUBLICIDAD",
+              "categoria": "",
+              "faltante": "0",
+              "stock": "-0",
+              "lead_time": null
+            }
+          ],
           "necesidad_compra": [
             {
               "momento": "Comprar-( Oct 2026)",
@@ -729,7 +820,7 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "yellow",
+          "estado": "red",
           "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
           "kpis": [
             {
