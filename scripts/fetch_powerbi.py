@@ -1750,6 +1750,13 @@ def build_margen(found):
             continue
         limpios.append((nombre, v, to_float(c.get("margen")),
                         to_float(c.get("margen_caida"))))
+    if cli and not limpios:
+        # Llegaron filas pero ninguna paso el filtro. Sin una muestra no hay
+        # forma de saber si el problema es el nombre vacio, la venta en cero
+        # o un signo invertido.
+        DIAGNOSTICO.append({"consulta": "margen_cliente_vacio", "http": 200,
+                            "error": f"{len(cli)} filas, ninguna util. "
+                                     f"Muestra: {cli[:3]}"})
     if limpios:
         limpios.sort(key=lambda t: -t[1])
         total_v = sum(t[1] for t in limpios) or None
@@ -1956,12 +1963,19 @@ def build_compras(found):
     # Es la lista más accionable del reporte: son pocos y hay que comprarlos.
     falt = found.get("__faltantes") or []
     if falt:
-        vivos = [f for f in falt if (to_float(f.get("faltante")) or 0) > 0]
-        vivos.sort(key=lambda f: -(to_float(f.get("faltante")) or 0))
+        # El faltante puede venir con signo negativo segun como lo calcule el
+        # modelo, asi que se compara en valor absoluto y se ordena por magnitud.
+        vivos = [f for f in falt if abs(to_float(f.get("faltante")) or 0) > 0]
+        vivos.sort(key=lambda f: -abs(to_float(f.get("faltante")) or 0))
+        if falt and not vivos:
+            DIAGNOSTICO.append({"consulta": "faltantes_vacio", "http": 200,
+                                "error": f"{len(falt)} filas, ninguna con "
+                                         f"faltante distinto de cero. "
+                                         f"Muestra: {falt[:3]}"})
         res["faltantes"] = [{
             "producto": (f.get("producto") or f.get("codigo") or "—"),
             "categoria": f.get("categoria") or "",
-            "faltante": f"{to_float(f.get('faltante')) or 0:,.0f}",
+            "faltante": f"{abs(to_float(f.get('faltante')) or 0):,.0f}",
             "stock": f"{to_float(f.get('stock')) or 0:,.0f}",
             "lead_time": f.get("lead_time"),
         } for f in vivos[:12]]
