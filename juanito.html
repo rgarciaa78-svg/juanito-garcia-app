@@ -5857,7 +5857,7 @@ const TERMINOS_REPORTE = {
     debil: ['precio','costo','uen','tigo','maquila','b&d','venta','ventas','vendimos'] },
   mermas: {
     fuerte: ['merma','mermas','desperdicio'],
-    debil: ['planta','plantas','ate','pachacamac','terceros'] },
+    debil: ['planta','plantas','ate','pachacamac','terceros','tigo','maquila','b&d'] },
   compras: {
     fuerte: ['compra','compras','sobrecompra','sobrecomprando','quiebre','faltante',
              'faltantes','abastecimiento','punto de pedido'],
@@ -5868,7 +5868,7 @@ const TERMINOS_REPORTE = {
   fill_rate: {
     fuerte: ['fill rate','fill','venta perdida','atiendo','atendido','atencion',
              'no atendido','despacho','perdi'],
-    debil: ['pedido','pedidos','orden de venta','entrega'] },
+    debil: ['pedido','pedidos','orden de venta','entrega','cliente','clientes'] },
   control_interno: {
     fuerte: ['control interno','auditoria','plan de accion','planes de accion',
              'punto de control','puntos de control'],
@@ -5915,15 +5915,25 @@ function localEncaja(termino, texto, tk) {
   return tk.some(t => localMismaRaiz(t, termino));
 }
 
+let localUltimoTipo = null;
+
 function localReporte(pregunta) {
   const texto = localNormalizar(pregunta);
   const tk = localTokens(pregunta);
+  const puntos = {};
   let mejor = null, mejorN = 0, nombrado = false;
   Object.entries(TERMINOS_REPORTE).forEach(([tipo, def]) => {
     const fuertes = def.fuerte.filter(x => localEncaja(x, texto, tk)).length;
     const n = fuertes * 10 + def.debil.filter(x => localEncaja(x, texto, tk)).length;
+    puntos[tipo] = n;
     if (n > mejorN) { mejor = tipo; mejorN = n; nombrado = fuertes > 0; }
   });
+  // Sin un término que nombre otro reporte, se sigue en el de la respuesta
+  // anterior siempre que encaje igual de bien. Una repregunta corta ("en tigo
+  // qué SKU?") continúa el tema; no empieza uno nuevo.
+  if (!nombrado && localUltimoTipo && (puntos[localUltimoTipo] || 0) >= mejorN) {
+    return { tipo: localUltimoTipo, puntaje: mejorN, nombrado: false, heredado: true };
+  }
   return { tipo: mejor, puntaje: mejorN, nombrado };
 }
 
@@ -5931,6 +5941,7 @@ function localReporte(pregunta) {
 function localIntencion(p) {
   const t = p.toLowerCase();
   if (/desde cuando|desde cuándo|evolucion|evolución|tendencia|como viene|cómo viene|historico|histórico|meses|mensual|ultimamente|últimamente|venimos|va mejorando|empeorando/.test(t)) return 'tendencia';
+  if (/segundo|tercero|siguiente|el resto|completa|lista|todos|todas/.test(t)) return 'ranking';
   if (/quien|quién|cual|cuál|peor|mejor|mayor|menor|top|ranking|mas |más |concentra/.test(t)) return 'ranking';
   if (/de donde|de dónde|por que|por qué|causa|origen|explica/.test(t)) return 'origen';
   return 'resumen';
@@ -6044,7 +6055,7 @@ function localBuscarEntidad(rp, tk, tipoPref, texto) {
         const literal = [cabecera, corto]
           .some(c => c.length >= 5 && texto.includes(c));
         if (literal || golpes >= 2 ||
-            largos.some(w => nom.split(/\s+/).some(x => x === w) && w.length >= 5)) {
+            largos.some(w => nom.split(/\s+/).some(x => x === w) && w.length >= 4)) {
           return { tipo: t, cfg, fila: f };
         }
       }
@@ -6054,7 +6065,7 @@ function localBuscarEntidad(rp, tk, tipoPref, texto) {
 }
 
 // Ficha de una fila concreta: sus campos y en qué puesto queda.
-function localFichaEntidad(rp, ent) {
+function localFichaEntidad(rp, ent, aviso) {
   const nomSec = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[ent.tipo]) || ent.tipo;
   const campos = Object.entries(ent.fila)
     .filter(([k]) => k !== ent.cfg.entidad)
@@ -6062,7 +6073,7 @@ function localFichaEntidad(rp, ent) {
   const r = localRanking(rp[ent.tipo], ent.cfg, 999);
   const pos = r ? r.items.findIndex(x => x.n === String(ent.fila[ent.cfg.entidad])) : -1;
   return `<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
-    `<b>${localEsc(ent.fila[ent.cfg.entidad])}</b><br>` + campos.join('<br>') +
+    (aviso || '') + `<b>${localEsc(ent.fila[ent.cfg.entidad])}</b><br>` + campos.join('<br>') +
     (pos >= 0 ? `<br><br>Puesto <b>${pos + 1}</b> de ${r.n} en ${ent.cfg.etq}.` : '');
 }
 
@@ -6075,7 +6086,9 @@ function analizarLocal(pregunta) {
   const texto = localNormalizar(pregunta);
   if (!tipo) {
     const solo = localBuscarEntidad(rp, localTokens(pregunta), null, texto);
-    return solo ? localFichaEntidad(rp, solo) : null;
+    if (!solo) return null;
+    localUltimoTipo = solo.tipo;
+    return localFichaEntidad(rp, solo);
   }
   if (!tipo || !rp[tipo]) return null;
   const rd = rp[tipo];
@@ -6086,13 +6099,9 @@ function analizarLocal(pregunta) {
 
   const cab = `<b>${nombre}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>`;
 
-  // ── Preguntó por alguien concreto: se responde por esa fila.
-  const ent = localBuscarEntidad(rp, tk, tipo, texto);
-  if (ent) return localFichaEntidad(rp, ent);
-
   // ── Dimensión pedida que este reporte no tiene.
   const dimPedida = Object.entries(DIMENSIONES).find(([, ws]) =>
-    ws.some(w => localEncaja(w, localNormalizar(pregunta), tk)));
+    ws.some(w => localEncaja(w, texto, tk)));
   let avisoDim = '';
   if (dimPedida) {
     const cubre = DESGLOSES_LOCALES.some(c =>
@@ -6101,6 +6110,10 @@ function analizarLocal(pregunta) {
     if (!cubre) avisoDim = `ℹ️ <b>${nombre}</b> no está abierto por ` +
       `<b>${dimPedida[0]}</b> — ese dato no existe en este reporte.<br><br>`;
   }
+
+  // ── Preguntó por alguien concreto: se responde por esa fila.
+  const ent = localBuscarEntidad(rp, tk, tipo, texto);
+  if (ent) { localUltimoTipo = ent.tipo; return localFichaEntidad(rp, ent, avisoDim); }
 
   // ── Ranking / origen: se busca el desglose que responde la pregunta.
   // También se entra aquí en preguntas sin verbo de ranking ("qué materiales
@@ -6115,7 +6128,8 @@ function analizarLocal(pregunta) {
       const esPct = /%/.test(String(r.items[0].crudo || ''));
       const dir = elegido.menorEsPeor ? 'de peor a mejor' : 'de mayor a menor';
       partes.push(`<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
-        avisoDim + `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>`);
+        (sel.tipo === tipo ? avisoDim : '') +
+        `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>`);
       partes.push(r.items.map((x, i) => {
         const peso = (!elegido.menorEsPeor && r.total)
           ? ` · ${(x.v / r.total * 100).toFixed(1)}% del total` : '';
@@ -6199,6 +6213,7 @@ function analizarLocal(pregunta) {
     }
   }
 
+  if (partes.length) localUltimoTipo = tipo;
   return partes.length ? partes.join('') : null;
 }
 
