@@ -5730,6 +5730,310 @@ function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(e
 
 const STOPWORDS = new Set(['como','cómo','está','están','qué','que','debo','hacer','cual','cuál','cuánto','cuanto','para','esta','este','esto','tiene','tienen','puedo','hago','pasa','pasan','más','menos','algo','algo','todo','toda','todos','todas','cada','donde','dónde','cuando','cuándo','algo','algunas','algunos','mucho','muchos','poco','pocos','bien','mal','muy','solo','sólo','pero','también','además','entre','sobre','desde','hasta','durante','mientras','aunque','porque','porqué']);
 
+// ─── Analizador local ────────────────────────────────────────────────────────
+// Responde consultas sobre los datos de Juanito SIN llamar a ninguna IA: todo
+// sale de summaries.json y series.json, que ya están cargados en el navegador.
+//
+// Existe porque depender de un servicio externo para preguntar "quién me debe
+// más" es frágil: si el modelo está ocupado, el CEO se queda sin respuesta a
+// una pregunta que es una ordenación de una lista que ya tenemos. Esto es
+// determinista, instantáneo y no falla.
+//
+// No sustituye a la IA para razonar o redactar; cubre las preguntas frecuentes,
+// que son de tres tipos: ranking, tendencia y desglose.
+
+// Todos los desgloses publicados, con el campo que nombra a la entidad y el
+// que lleva el valor. Se declara una vez para no repetir la forma de cada uno.
+const DESGLOSES_LOCALES = [
+  { clave:'proveedores_criticos', entidad:'nombre', valor:'monto', etq:'proveedores por deuda',
+    alias:['proveedor','proveedores','debo','deuda','deudas','acreedor'] },
+  { clave:'por_cliente', entidad:'cliente', valor:'venta', etq:'clientes por venta',
+    alias:['cliente','clientes','venta','ventas','factura','facturacion','concentracion'] },
+  { clave:'por_uen', entidad:'uen', valor:['merma','margen'], etq:'unidades de negocio',
+    alias:['uen','unidad','unidades','negocio','tigo','maquila','bd'] },
+  { clave:'por_planta', entidad:'planta', valor:'merma', etq:'plantas por merma',
+    alias:['planta','plantas','ate','pachacamac','terceros'] },
+  { clave:'por_area', entidad:'jefe', valor:'valor', etq:'jefes de area por cumplimiento',
+    alias:['jefe','jefes','area','areas','responsable','responsables','cumplimiento'], menorEsPeor:true },
+  { clave:'planes_por_planta', entidad:'planta', valor:'planes', etq:'planes de accion por planta',
+    alias:['plan','planes','accion','acciones','pendiente','pendientes'], sumar:true },
+  { clave:'dead_por_categoria', entidad:'categoria', valor:'valor', etq:'categorias con inventario muerto',
+    alias:['muerto','dead','obsoleto','inmovilizado','categoria','categorias'] },
+  { clave:'working_por_categoria', entidad:'categoria', valor:'valor', etq:'categorias con inventario sano',
+    alias:['sano','working','rotacion','vigente'] },
+  { clave:'faltantes', entidad:'producto', valor:'faltante', etq:'materiales en quiebre',
+    alias:['falta','faltante','faltantes','quiebre','quiebres','material','materiales','producto','productos','stockout'] },
+  { clave:'necesidad_compra', entidad:'momento', valor:'items', etq:'items por urgencia de compra',
+    alias:['urgencia','urgente','comprar','necesidad','reposicion'] },
+  { clave:'tramos', entidad:'label', valor:'valor', etq:'tramos de antiguedad',
+    alias:['tramo','tramos','antiguedad','vencido','vencidos','aging','dias','mora'] },
+  { clave:'por_grupo', entidad:'grupo', valor:'valor', etq:'clientes por fill rate',
+    alias:['grupo','grupos','cliente','clientes','fill','atencion','atendido'], menorEsPeor:true },
+  { clave:'por_marca', entidad:'marca', valor:'valor', etq:'marcas por fill rate',
+    alias:['marca','marcas'] },
+  { clave:'por_canal', entidad:'canal', valor:'facturado', etq:'canales por facturacion',
+    alias:['canal','canales','moderno','tradicional','distribuidor'] },
+  { clave:'cumplimiento_produccion', entidad:'categoria', valor:'pct', etq:'categorias por cumplimiento de produccion',
+    alias:['produccion','producido','programado','fabricacion'], menorEsPeor:true },
+];
+
+// Un mismo nombre de desglose (por_uen) aparece en reportes distintos con
+// campos distintos, así que el valor puede declararse como lista y se toma
+// el primer campo que exista de verdad en la fila.
+function localCampoValor(cfg, fila) {
+  const cands = Array.isArray(cfg.valor) ? cfg.valor : [cfg.valor];
+  return cands.find(c => fila[c] != null) || cands[0];
+}
+
+
+function localNum(v) {
+  if (v == null) return null;
+  if (typeof v === 'number') return v;
+  let t = String(v).replace(/S\//g, '').replace(/\s/g, '').replace(/%/g, '');
+  const mult = /M$/i.test(t) ? 1e6 : (/K$/i.test(t) ? 1e3 : 1);
+  t = t.replace(/[MK]$/i, '').replace(/,/g, '');
+  const n = parseFloat(t);
+  return isNaN(n) ? null : n * mult;
+}
+
+function localFmt(v, esPct) {
+  if (v == null) return '—';
+  if (esPct) return v.toFixed(1) + '%';
+  if (Math.abs(v) >= 1e6) return 'S/' + (v / 1e6).toFixed(2) + 'M';
+  if (Math.abs(v) >= 1000) return 'S/' + v.toLocaleString('es-PE', { maximumFractionDigits: 0 });
+  return v.toLocaleString('es-PE', { maximumFractionDigits: 2 });
+}
+
+// Palabras de la pregunta que sirven para buscar, sin las vacías.
+function localTokens(p) {
+  const vacias = new Set(['que','qué','cual','cuál','como','cómo','donde','dónde','quien','quién',
+    'cuanto','cuánto','cuanta','cuánta','del','de','la','el','los','las','un','una','en','y','o',
+    'es','son','esta','está','mi','mis','me','se','por','para','con','mas','más','tengo','hay','viene']);
+  return p.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9ñ&\s]/g, ' ')
+    .split(/\s+/).filter(w => w.length > 2 && !vacias.has(w));
+}
+
+// Dos palabras cuentan como la misma si comparten raíz: en español la
+// terminación cambia mucho ("faltando" / "faltante") y comparar completo
+// deja fuera la mitad de las preguntas escritas con naturalidad.
+function localMismaRaiz(a, b) {
+  if (a === b) return true;
+  const n = Math.min(a.length, b.length);
+  if (n < 6) return a.startsWith(b) || b.startsWith(a);
+  return a.slice(0, 6) === b.slice(0, 6);
+}
+
+// Reporte al que se refiere la pregunta, por coincidencia de palabras.
+function localReporte(pregunta) {
+  const alias = {
+    cuentas_por_cobrar: ['cobrar','cxc','mora','morosidad','cartera','cliente','clientes','cobranza'],
+    cuentas_por_pagar:  ['pagar','cxp','proveedor','proveedores','deuda','debo','debe','deudas'],
+    margen_variable:    ['margen','precio','costo','rentabilidad','uen','b&d','bd','tigo','maquila','venta','ventas','vendimos','facturamos'],
+    mermas:             ['merma','mermas','desperdicio','planta','plantas'],
+    compras:            ['compra','compras','insumo','insumos','quiebre','faltante','faltantes','ratio','abastecimiento'],
+    sop_inventario:     ['inventario','stock','dead','muerto','rotacion','almacen'],
+    fill_rate:          ['fill','atencion','atendido','despacho','pedido','pedidos','perdida'],
+    control_interno:    ['control','auditoria','area','areas','jefe','jefes','plan','planes','cumplimiento'],
+    consumo_materiales: ['consumo','mip','indirecto','indirectos'],
+    productividad:      ['productividad','planilla','funcionario','personal'],
+    margen_variable_pag2:['presupuesto','ppto','avance','facturacion','facturado','canal','canales','produccion'],
+  };
+  const tk = localTokens(pregunta);
+  let mejor = null, mejorN = 0;
+  Object.entries(alias).forEach(([tipo, palabras]) => {
+    const n = tk.filter(t => palabras.some(a => localMismaRaiz(t, a))).length;
+    if (n > mejorN) { mejor = tipo; mejorN = n; }
+  });
+  return mejor;
+}
+
+// ¿Qué tipo de pregunta es?
+function localIntencion(p) {
+  const t = p.toLowerCase();
+  if (/desde cuando|desde cuándo|evolucion|evolución|tendencia|como viene|cómo viene|historico|histórico|meses|mensual|ultimamente|últimamente|venimos|va mejorando|empeorando/.test(t)) return 'tendencia';
+  if (/quien|quién|cual|cuál|peor|mejor|mayor|menor|top|ranking|mas |más |concentra/.test(t)) return 'ranking';
+  if (/de donde|de dónde|por que|por qué|causa|origen|explica/.test(t)) return 'origen';
+  return 'resumen';
+}
+
+// Ranking de un desglose: ordena y devuelve los primeros, con su peso.
+function localRanking(rd, cfg, tope) {
+  const filas = rd[cfg.clave] || [];
+  const items = [];
+  filas.forEach(f => {
+    const campo = localCampoValor(cfg, f);
+    const v = localNum(f[campo]);
+    if (v == null) return;
+    const n = String(f[cfg.entidad] ?? '—');
+    // Algunos desgloses traen la misma entidad en varias filas (una por
+    // estado). Sumarlas evita un ranking donde el primer puesto se repite.
+    const previo = cfg.sumar ? items.find(x => x.n === n) : null;
+    if (previo) { previo.v += v; previo.crudo = previo.v; return; }
+    items.push({ n, v, crudo: f[campo],
+      extra: f.pct != null ? f.pct : (f.margen ?? f.pedidos ?? null) });
+  });
+  if (!items.length) return null;
+  items.sort((a, b) => cfg.menorEsPeor ? a.v - b.v : b.v - a.v);
+  const total = items.reduce((a, b) => a + b.v, 0);
+  return { items: items.slice(0, tope || 6), total, n: items.length };
+}
+
+// Elige el desglose que responde la pregunta. Busca primero dentro del
+// reporte detectado y, si ahí no hay ninguno que encaje, en todos los demás:
+// quien pregunta por "canal" o por "faltantes" nombra el dato, no el reporte
+// donde vive.
+function localElegirDesglose(rp, tipo, tk) {
+  const puntaje = (cfg) => tk.filter(t => cfg.alias.some(a => localMismaRaiz(t, a))).length;
+  const enReporte = (t) => DESGLOSES_LOCALES
+    .filter(c => Array.isArray(rp[t]?.[c.clave]) && rp[t][c.clave].length);
+
+  const propios = enReporte(tipo).map(c => ({ tipo, cfg: c, p: puntaje(c) }));
+  const mejorPropio = propios.slice().sort((x, y) => y.p - x.p)[0];
+  if (mejorPropio && mejorPropio.p > 0) return mejorPropio;
+
+  let mejorAjeno = null;
+  Object.keys(rp).forEach(t => {
+    if (t === tipo) return;
+    enReporte(t).forEach(c => {
+      const p = puntaje(c);
+      if (p > 0 && (!mejorAjeno || p > mejorAjeno.p)) mejorAjeno = { tipo: t, cfg: c, p };
+    });
+  });
+  // Se cambia de reporte cuando el propio no tiene ninguna coincidencia: si
+  // la pregunta dice "canal" y este reporte no desglosa por canal, el dato
+  // está en otro y es ahí donde hay que ir.
+  if (mejorAjeno && (!mejorPropio || mejorPropio.p === 0)) return mejorAjeno;
+  return propios.length ? { tipo, cfg: propios[0].cfg, p: 0 } : null;
+}
+
+// Tendencia de una serie: primer y último dato, cambio y punto de inflexión.
+function localTendencia(arr, periodos) {
+  const pts = [];
+  arr.forEach((v, i) => { if (v != null) pts.push({ v, p: periodos[i] }); });
+  if (pts.length < 3) return null;
+  const ini = pts[0], fin = pts[pts.length - 1];
+  const cambio = ini.v ? (fin.v - ini.v) / Math.abs(ini.v) * 100 : null;
+  // El mes de mayor salto respecto al anterior: casi siempre es donde empezó
+  // el problema, y es lo que se busca al preguntar "desde cuándo".
+  let quiebre = null, mayor = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const d = Math.abs(pts[i].v - pts[i - 1].v);
+    if (d > mayor) { mayor = d; quiebre = pts[i]; }
+  }
+  const max = pts.reduce((a, b) => b.v > a.v ? b : a);
+  const min = pts.reduce((a, b) => b.v < a.v ? b : a);
+  return { ini, fin, cambio, quiebre, max, min, n: pts.length };
+}
+
+function localSeriesDe(tipo) {
+  const mapa = {
+    cuentas_por_cobrar: 'cxc', cuentas_por_pagar: 'cxp', margen_variable: 'margen',
+    mermas: 'mermas', compras: 'compras', sop_inventario: 'inventario',
+    fill_rate: 'fill_rate', consumo_materiales: 'consumo', productividad: 'productividad',
+    margen_variable_pag2: 'planificacion'
+  };
+  const ds = mapa[tipo];
+  return (typeof SERIES !== 'undefined' && SERIES?.datasets?.[ds]) || null;
+}
+
+// Punto de entrada. Devuelve HTML o null si no sabe responder.
+function analizarLocal(pregunta) {
+  const emp = 'PAUNO';
+  const rp = (DATA?.empresas || {})[emp]?.reportes || {};
+  const tipo = localReporte(pregunta);
+  if (!tipo || !rp[tipo]) return null;
+  const rd = rp[tipo];
+  const nombre = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[tipo]) || tipo;
+  const intencion = localIntencion(pregunta);
+  const tk = localTokens(pregunta);
+  const partes = [];
+
+  const cab = `<b>${nombre}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>`;
+
+  // ── Ranking / origen: se busca el desglose que responde la pregunta.
+  // También se entra aquí en preguntas sin verbo de ranking ("qué materiales
+  // me faltan") cuando la pregunta nombra un desglose de forma inequívoca.
+  const sel = localElegirDesglose(rp, tipo, tk);
+  if (sel && (intencion === 'ranking' || intencion === 'origen' || sel.p >= 1)) {
+    const elegido = sel.cfg;
+    const r = localRanking(rp[sel.tipo], elegido, 6);
+    if (r) {
+      const nomSec = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[sel.tipo]) || sel.tipo;
+      const esPct = /%/.test(String(r.items[0].crudo || ''));
+      const dir = elegido.menorEsPeor ? 'de peor a mejor' : 'de mayor a menor';
+      partes.push(`<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
+        `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>`);
+      partes.push(r.items.map((x, i) => {
+        const peso = (!elegido.menorEsPeor && r.total)
+          ? ` · ${(x.v / r.total * 100).toFixed(1)}% del total` : '';
+        const ex = (x.extra == null || esPct) ? ''
+          : ` · ${typeof x.extra === 'number' ? x.extra.toFixed(1) + '%' : x.extra}`;
+        return `${i + 1}. <b>${x.n}</b> — ${x.crudo}${peso}${ex}`;
+      }).join('<br>'));
+      const primero = r.items[0];
+      if (!elegido.menorEsPeor && r.total && primero.v / r.total > 0.3) {
+        partes.push(`<br><br>⚠️ <b>${primero.n}</b> concentra el ` +
+          `${(primero.v / r.total * 100).toFixed(0)}% — la cifra depende de uno solo.`);
+      }
+      if (elegido.menorEsPeor) {
+        partes.push(`<br><br>El peor es <b>${primero.n}</b> con ${primero.crudo}.`);
+      }
+    }
+  }
+
+  // ── Tendencia: se recorre la serie del reporte
+  if (intencion === 'tendencia' || (!partes.length && intencion === 'origen')) {
+    const ss = localSeriesDe(tipo);
+    if (ss && typeof SERIES !== 'undefined') {
+      const claves = Object.keys(ss);
+      // Serie que nombre la pregunta, o la primera que tenga suficientes datos
+      const clave = claves.find(k => tk.some(t =>
+        k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(t))) || claves[0];
+      const t = localTendencia(ss[clave], SERIES.periodos);
+      if (t) {
+        const esPct = clave.trim().startsWith('%');
+        const f = v => esPct ? (v * 100).toFixed(2) + '%' : localFmt(v, false);
+        if (!partes.length) partes.push(cab);
+        partes.push(`<br><b>${clave}</b> — ${t.n} meses con dato:<br>` +
+          `· ${t.ini.p}: ${f(t.ini.v)}<br>` +
+          `· ${t.fin.p}: <b>${f(t.fin.v)}</b>` +
+          (t.cambio != null ? ` (${t.cambio >= 0 ? '+' : ''}${t.cambio.toFixed(1)}%)` : '') + '<br>' +
+          `· máximo ${f(t.max.v)} en ${t.max.p} · mínimo ${f(t.min.v)} en ${t.min.p}`);
+        if (t.quiebre) partes.push(`<br><br>El mayor salto fue en <b>${t.quiebre.p}</b> ` +
+          `(${f(t.quiebre.v)}): ahí conviene mirar primero.`);
+      }
+      // Si hay varias series del mismo grupo, se comparan entre sí
+      const grupo = claves.filter(k => k !== clave && k.split(' ')[0] === clave.split(' ')[0]);
+      if (grupo.length >= 2) {
+        const ult = grupo.map(k => {
+          const a = ss[k];
+          for (let i = a.length - 1; i >= 0; i--) if (a[i] != null) return { k, v: a[i], p: SERIES.periodos[i] };
+          return null;
+        }).filter(Boolean).sort((a, b) => b.v - a.v);
+        if (ult.length) {
+          const esPct = ult[0].k.trim().startsWith('%');
+          partes.push(`<br><br><b>Comparación por segmento</b> (${ult[0].p}):<br>` +
+            ult.map(x => `· ${x.k.replace(clave.split(' ')[0], '').trim() || x.k}: ` +
+              `<b>${esPct ? (x.v * 100).toFixed(2) + '%' : localFmt(x.v)}</b>`).join('<br>'));
+        }
+      }
+    }
+  }
+
+  // ── Sin desglose ni serie: al menos los KPIs del reporte
+  if (!partes.length) {
+    const k = rd.kpis || [];
+    if (!k.length) return null;
+    partes.push(cab + k.map(x =>
+      `· ${x.label}: <b>${x.valor}</b>${x.meta ? ` (meta ${x.meta})` : ''}`).join('<br>'));
+    if (rd.alerta) partes.push(`<br><br>⚠️ ${rd.alerta}`);
+  }
+
+  return partes.join('');
+}
+
 function buscarRespuestaLocal(pregunta) {
   const qa = DATA?.chat_qa;
   if (!qa || !qa.length) return null;
@@ -6326,7 +6630,11 @@ async function sendJuanito() {
       <b>La IA no pudo responder tras 6 intentos.</b> ${ultimoFalloIA || 'Servicio no disponible.'}
       Abajo va un resumen de los datos, no un análisis. Vuelve a preguntar en un minuto.
     </div>`;
-    cuerpo = avisoIA + (local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text));
+    // El analizador local recorre los mismos datos que ve la IA y responde
+    // preguntas libres (rankings, tendencias, desgloses). Va primero: es una
+    // respuesta calculada, no una plantilla.
+    const propio = analizarLocal(text);
+    cuerpo = avisoIA + (propio || (local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text)));
   }
 
   // Solo mostrar banner y crosscheck en la primera respuesta de la sesión
