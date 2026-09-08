@@ -1752,6 +1752,33 @@ def build_cxc(found):
 
     result = {"estado": sem, "alerta": alerta, "kpis": kpis}
     if tramos: result["tramos"] = tramos
+
+    # Aging por canal, jefe de venta y ejecutivo. La matriz devuelve los tres
+    # niveles mezclados con sus subtotales; se toma el nivel más fino que trae
+    # cada fila, para que la mora tenga un responsable con nombre.
+    resp = []
+    for f in (found.get("__por_canal") or []):
+        nombre = ((f.get("ejecutivo") or "").strip() or
+                  (f.get("jefe") or "").strip() or
+                  (f.get("canal") or "").strip())
+        if not nombre:
+            continue
+        nivel = ("ejecutivo" if (f.get("ejecutivo") or "").strip() else
+                 "jefe" if (f.get("jefe") or "").strip() else "canal")
+        vencido = sum(v for v in [to_float(f.get("d0_15")), to_float(f.get("d16_30")),
+                                  to_float(f.get("mas_30"))] if v is not None)
+        total = to_float(f.get("total"))
+        resp.append({"responsable": nombre, "nivel": nivel,
+                     "canal": (f.get("canal") or "").strip() or None,
+                     "total": fmt_soles(total) if total is not None else None,
+                     "vencido": fmt_soles(vencido) if vencido else None,
+                     "_v": vencido or 0})
+    if resp:
+        resp.sort(key=lambda x: -x["_v"])
+        for x in resp:
+            x.pop("_v", None)
+        result["responsables"] = resp[:15]
+
     return result, sem, razon, mora_pct, vencer_val
 
 def dax_cxp_top_proveedores(token, ws, dataset_id, label="cxp_top15"):
@@ -2120,6 +2147,28 @@ def build_margen(found):
             "caida": (f"{(ca * 100 if abs(ca) <= 1 else ca):.1f}%"
                       if ca is not None else None),
         } for n, v, mg, ca in limpios[:12]]
+
+    # Órdenes de venta por cliente. A diferencia de por_cliente (facturado),
+    # aquí está la CAÍDA: cuánto margen se pierde entre lo cotizado y lo
+    # vendido. Es la pregunta "por qué bajó el margen" respondida por nombre.
+    ov = []
+    for o in (found.get("__ordenes_cliente") or []):
+        nombre = (o.get("cliente") or "").strip()
+        venta = to_float(o.get("venta"))
+        if not nombre or venta is None or venta <= 0:
+            continue
+        ov.append((nombre, venta, to_float(o.get("costo")),
+                   to_float(o.get("margen")), to_float(o.get("caida"))))
+    if ov:
+        ov.sort(key=lambda t: -t[1])
+        def pct(x):
+            return f"{(x * 100 if abs(x) <= 1 else x):.1f}%" if x is not None else None
+        res["ordenes_por_cliente"] = [{
+            "cliente": n, "venta": fmt_soles(v),
+            "costo": fmt_soles(c) if c is not None else None,
+            "margen": pct(mg), "caida": pct(ca),
+        } for n, v, c, mg, ca in ov[:15]]
+
     return res, ventas_val, margen_pct
 
 def build_mermas(found):
@@ -2189,6 +2238,31 @@ def build_mermas(found):
     result = {"estado": sem, "alerta": alerta, "kpis": kpis}
     if por_uen:    result["por_uen"]    = por_uen
     if por_planta: result["por_planta"] = por_planta
+
+    # Merma por SKU: el nivel más fino que publica el reporte. Se ordena por
+    # desviación absoluta contra el estándar, no por porcentaje: un 40% sobre
+    # cien kilos importa menos que un 3% sobre cien toneladas.
+    sk = []
+    for f in (found.get("__por_sku") or []):
+        nombre = (f.get("sku") or "").strip()
+        desvio = to_float(f.get("desvio"))
+        if not nombre or desvio is None:
+            continue
+        real = to_float(f.get("real"))
+        std = to_float(f.get("estandar"))
+        sk.append({"sku": nombre,
+                   "almacen": (f.get("almacen") or "").strip() or None,
+                   "categoria": (f.get("categoria") or "").strip() or None,
+                   "estandar": std, "real": real,
+                   "desvio": round(desvio, 2),
+                   "pct": (f.get("pct") or None),
+                   "_a": abs(desvio)})
+    if sk:
+        sk.sort(key=lambda x: -x["_a"])
+        for x in sk:
+            x.pop("_a", None)
+        result["por_sku"] = sk[:20]
+
     return result
 
 def build_consumo_materiales(found):
@@ -3595,6 +3669,81 @@ def main():
                 if planta_merma:
                     empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
                     print(f"  Mermas Planta: {planta_merma}")
+
+        # ── Merma por SKU. Es la pregunta que más se repite ("qué producto
+        # genera más merma") y la respuesta estaba capturada desde el inicio,
+        # sin conectar: la matriz de la pestaña "Declaraciones" abre la merma
+        # por SKU dentro de cada almacén. DIF CANT es la desviación contra el
+        # estándar, que es de donde sale el porcentaje.
+        if empresa == "PAUNO":
+            try:
+                sku = desglose_desde_captura(
+                    token, ws_id,
+                    [ids.get("mermas"), ids.get("planificacion")],
+                    "Matriz#32dc719b5e1f",
+                    {"sku": "[sku]",
+                     "almacen": "[almacen_referencia]",
+                     "categoria": "[categoria_hijo]",
+                     "estandar": "[SumSTD_CANT]",
+                     "real": "[SumCANT_REAL]",
+                     "desvio": "[SumDIF_CANT]",
+                     "pct": "[v__Merma__Texto_]"})
+                if sku:
+                    scanned.setdefault("mermas", {})["__por_sku"] = sku
+                    print(f"    ✓ Merma por SKU: {len(sku)} filas")
+            except Exception as e:
+                print(f"    ✗ merma por sku: {e}")
+                DIAGNOSTICO.append({"consulta": "merma_por_sku", "http": 0,
+                                    "error": repr(e)[:300]})
+
+        # ── CxC por canal, jefe de venta y ejecutivo, con el aging de cada
+        # uno. Sin esto, la mora es un porcentaje sin dueño: no se puede saber
+        # a quién pedirle la cobranza.
+        if empresa == "PAUNO":
+            try:
+                canal = desglose_desde_captura(
+                    token, ws_id,
+                    [ids.get("cxc")],
+                    "Matriz#38e3644b220b",
+                    {"canal": "[CANAL]",
+                     "jefe": "[JEFE_VENTA]",
+                     "ejecutivo": "[EJECUTIVO]",
+                     "por_vencer": "[POR_VENCER]",
+                     "d0_15": "[v0_A_15_DÍAS]",
+                     "d16_30": "[v16_A_30_DÍAS]",
+                     "mas_30": "[MAS_DE_30_DÍAS]",
+                     "total": "[SumTotal_fact]"})
+                if canal:
+                    scanned.setdefault("cuentas_por_cobrar", {})["__por_canal"] = canal
+                    print(f"    ✓ CxC por canal/ejecutivo: {len(canal)} filas")
+            except Exception as e:
+                print(f"    ✗ cxc por canal: {e}")
+                DIAGNOSTICO.append({"consulta": "cxc_por_canal", "http": 0,
+                                    "error": repr(e)[:300]})
+
+        # ── Órdenes de venta por cliente con su margen y su caída. Es el
+        # único sitio donde el margen aparece junto a la caída contra lo
+        # cotizado, que es lo que explica por qué el margen del mes baja.
+        if empresa == "PAUNO":
+            try:
+                ov = desglose_desde_captura(
+                    token, ws_id,
+                    [ids.get("margen")],
+                    "ORDENES DE VENTA EN EL SISTEMA POR CLIENTE#feef40c9d4c8",
+                    {"cliente": "[cliente]",
+                     "periodo": "[PERIODO]",
+                     "venta": "[SumMonto_Neto_Venta]",
+                     "costo": "[SumCOSTO_TOTAL]",
+                     "margen": "[v__Margen_Venta__]",
+                     "caida": "[v__MARGEN_CAIDA__]",
+                     "cantidad": "[SumCANTIDAD_VENTA]"})
+                if ov:
+                    scanned.setdefault("margen_variable", {})["__ordenes_cliente"] = ov
+                    print(f"    ✓ Órdenes de venta por cliente: {len(ov)} filas")
+            except Exception as e:
+                print(f"    ✗ ordenes por cliente: {e}")
+                DIAGNOSTICO.append({"consulta": "ordenes_por_cliente", "http": 0,
+                                    "error": repr(e)[:300]})
 
         # ── Compras: los KPIs de stock salen de la tabla ANALISIS DE
         # MATERIALES sumando sus filas, que es lo que hace la fila Total del
