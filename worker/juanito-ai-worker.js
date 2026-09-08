@@ -7,16 +7,12 @@
 
 const ALLOWED_ORIGIN = "https://rgarciaa78-svg.github.io";
 
-// Modelos en orden de preferencia. El primero es el más capaz; si devuelve 503
-// —"This model is currently experiencing high demand"— se prueba el siguiente.
-// Sin esta lista, una saturación temporal de un modelo dejaba el chat entero
-// sin IA y el usuario recibía una plantilla sin saber que el modelo nunca
-// había contestado.
-const MODELOS = [
-  "gemini-3.6-flash",
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
-];
+// Modelos en orden de preferencia. Solo gemini-3.6-flash: las versiones 2.5 y
+// 2.0 ya no están disponibles para cuentas nuevas ("no longer available to new
+// users"), y tenerlas en la lista era peor que no tener respaldo — el 404 de
+// la segunda tapaba el error real de la primera y el diagnóstico apuntaba al
+// sitio equivocado.
+const MODELOS = ["gemini-3.6-flash"];
 
 export default {
   async fetch(request, env) {
@@ -86,16 +82,40 @@ Usa HTML simple para formato (negritas <strong>, saltos <br>, listas simples) �
       }
     });
 
+    // Cuerpo alternativo sin thinkingConfig: es un parámetro relativamente
+    // nuevo y si el modelo no lo acepta responde 400. Antes que fallar, se
+    // reintenta sin él.
+    const cuerpoSimple = JSON.stringify({
+      system_instruction: { parts: [{ text: systemPrompt }] },
+      contents,
+      generationConfig: { temperature: 0.3, maxOutputTokens: 16384 }
+    });
+
     let ultimoError = "";
     for (const modelo of MODELOS) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
       let resp;
+      let usado = cuerpo;
       try {
         resp = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-          body: cuerpo
+          body: usado
         });
+        if (resp.status === 400) {
+          const err = await resp.text();
+          if (/thinking|generationConfig|Unknown name/i.test(err)) {
+            usado = cuerpoSimple;
+            resp = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+              body: usado
+            });
+          } else {
+            ultimoError = err;
+            break;
+          }
+        }
       } catch (e) {
         ultimoError = `fallo de red con ${modelo}: ${e}`;
         continue;
