@@ -6622,27 +6622,21 @@ async function sendJuanito() {
   const loadEl = addJuanitoMsg('assistant', '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>');
   loadEl.classList.add('loading');
 
-  const iaResp = await preguntarJuanitoIA(text);
-  let cuerpo;
-  if (iaResp) {
-    cuerpo = iaResp;
-  } else {
-    // Sin este aviso la plantilla local se lee como si fuera la respuesta de
-    // la IA: la misma tarjeta sale para cualquier pregunta y no hay forma de
-    // saber que el modelo nunca contestó.
-    await new Promise(r => setTimeout(r, 200));
-    const local = buscarRespuestaLocal(text);
-    const avisoIA = `<div style="padding:9px 11px;margin-bottom:10px;border-radius:8px;
-        background:var(--yellow-soft,#F2E7D2);border:1px solid rgba(0,0,0,.08);
-        font-size:12px;line-height:1.5">
-      <b>La IA no pudo responder tras 6 intentos.</b> ${ultimoFalloIA || 'Servicio no disponible.'}
-      Abajo va un resumen de los datos, no un análisis. Vuelve a preguntar en un minuto.
-    </div>`;
-    // El analizador local recorre los mismos datos que ve la IA y responde
-    // preguntas libres (rankings, tendencias, desgloses). Va primero: es una
-    // respuesta calculada, no una plantilla.
-    const propio = analizarLocal(text);
-    cuerpo = avisoIA + (propio || (local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text)));
+  // El analizador local va PRIMERO. Responde al instante con los mismos
+  // datos que vería la IA, así que cuando sabe contestar no tiene sentido
+  // hacer esperar al usuario por un servicio externo que además puede fallar.
+  let cuerpo = analizarLocal(text);
+
+  if (!cuerpo) {
+    // Solo si el analizador no reconoce la pregunta se recurre a la IA, que
+    // es la que puede razonar sobre lo que no está tabulado.
+    const iaResp = await preguntarJuanitoIA(text);
+    if (iaResp) {
+      cuerpo = iaResp;
+    } else {
+      const local = buscarRespuestaLocal(text);
+      cuerpo = (local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text));
+    }
   }
 
   // Solo mostrar banner y crosscheck en la primera respuesta de la sesión
