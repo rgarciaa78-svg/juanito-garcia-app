@@ -4307,7 +4307,7 @@ function renderMcKinseyArea(empresa, tipo) {
     </div>
 
     <div class="mck-pad"><div class="mck-cta">
-      <button data-msg="${(chatMsg||'').replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Analizar con Juanito (IA)</button>
+      <button data-msg="${(chatMsg||'').replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Preguntar a Juanito sobre este reporte</button>
     </div></div>`;
 }
 
@@ -5436,7 +5436,7 @@ function showDetail(empresa, tipo, label, archivo, desc) {
       ${dxpOtrasSeries(tipo)}
     </div>
 
-    <div class="cta-ia"><button data-msg="${chat.replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Analizar con Juanito (IA)</button></div>
+    <div class="cta-ia"><button data-msg="${chat.replace(/"/g,'&quot;')}" onclick="openChatWithMsg(this.dataset.msg)">Preguntar a Juanito sobre este reporte</button></div>
     <div class="deck-footer"><span>PAUNO — Diagnóstico Ejecutivo</span><span class="conf">Confidencial · Uso interno</span><span>${idx>=0?String(idx+1).padStart(2,'0')+' · ':''}${nombre}</span></div>
   </div></div>`;
 
@@ -5625,17 +5625,6 @@ function initJuanitoChat() {
   const msgs = document.getElementById('juanito-messages');
   if (msgs.children.length === 0) {
     document.getElementById('juanito-fecha').textContent = DATA?.fecha || '';
-    const sugerencias = [
-      '¿Qué debo decidir hoy?',
-      '¿Cómo está la mora?',
-      '¿Cómo van las compras?',
-      'Fill Rate',
-      '¿Cómo está el inventario?',
-      '¿Cómo está el margen?',
-    ];
-    const chips = sugerencias.map(s =>
-      `<button class="chat-chip" onclick="usarChipJuanito('${s}')">${s}</button>`
-    ).join('');
     // Saludo con datos reales del dashboard
     const sems = DATA?.semaforos || {};
     const agenda = DATA?.agenda_ceo || {};
@@ -5647,7 +5636,10 @@ function initJuanitoChat() {
     else if (nDecisiones > 0) alertaInicial = `<br><br>🟡 Hay <b>${nDecisiones}</b> tema${nDecisiones!==1?'s':''} de atención en la agenda CEO.`;
     const msg = document.createElement('div');
     msg.className = 'msg assistant';
-    msg.innerHTML = `Hola. Soy <b>JUANITO</b>, tu agente BI.${alertaInicial}<br><br>¿Qué quieres analizar?<div class="chat-chips">${chips}</div>`;
+    msg.innerHTML = `Hola. Soy <b>JUANITO</b>, tu agente BI.${alertaInicial}<br><br>`
+      + `Pregunta lo que quieras, con tus palabras. Por ejemplo: `
+      + `<i>quién me debe más</i>, <i>desde cuándo se disparó la merma</i>, `
+      + `<i>qué materiales me están faltando</i>.`;
     msgs.appendChild(msg);
   }
 }
@@ -6658,11 +6650,7 @@ async function sendJuanito() {
   const esPrimera = chatHistorial.filter(m => m.rol === 'assistant').length === 0;
   const prefijo = esPrimera ? bannerFrescura() + crossCheckMora() : '';
 
-  // Agregar chips de seguimiento al final
-  const followUp = chipsFollowUp(text);
-  const chipsHtml = '<div class="chat-chips" style="margin-top:12px">' +
-    followUp.map(s => `<button class="chat-chip" onclick="usarChipJuanito('${s}')">${s}</button>`).join('') +
-    '</div>';
+  const chipsHtml = '';
 
   loadEl.innerHTML = prefijo + cuerpo + chipsHtml;
   loadEl.classList.remove('loading');
