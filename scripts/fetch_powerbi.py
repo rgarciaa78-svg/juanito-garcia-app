@@ -1773,11 +1773,12 @@ def build_cxc(found):
                      "total": fmt_soles(total) if total is not None else None,
                      "vencido": fmt_soles(vencido) if vencido else None,
                      "_v": vencido or 0})
-    if resp:
-        resp.sort(key=lambda x: -x["_v"])
-        for x in resp:
+    nominales = [x for x in resp if x["nivel"] != "canal"]
+    if nominales:
+        nominales.sort(key=lambda x: -x["_v"])
+        for x in nominales:
             x.pop("_v", None)
-        result["responsables"] = resp[:15]
+        result["responsables"] = nominales[:15]
 
     return result, sem, razon, mora_pct, vencer_val
 
@@ -2148,26 +2149,19 @@ def build_margen(found):
                       if ca is not None else None),
         } for n, v, mg, ca in limpios[:12]]
 
-    # Órdenes de venta por cliente. A diferencia de por_cliente (facturado),
-    # aquí está la CAÍDA: cuánto margen se pierde entre lo cotizado y lo
-    # vendido. Es la pregunta "por qué bajó el margen" respondida por nombre.
-    ov = []
+    # El costo por cliente viene de la tabla de órdenes de venta, que trae los
+    # mismos clientes con las mismas ventas y márgenes. Se añade aquí en vez de
+    # publicar un segundo desglose idéntico.
+    costos = {}
     for o in (found.get("__ordenes_cliente") or []):
         nombre = (o.get("cliente") or "").strip()
-        venta = to_float(o.get("venta"))
-        if not nombre or venta is None or venta <= 0:
-            continue
-        ov.append((nombre, venta, to_float(o.get("costo")),
-                   to_float(o.get("margen")), to_float(o.get("caida"))))
-    if ov:
-        ov.sort(key=lambda t: -t[1])
-        def pct(x):
-            return f"{(x * 100 if abs(x) <= 1 else x):.1f}%" if x is not None else None
-        res["ordenes_por_cliente"] = [{
-            "cliente": n, "venta": fmt_soles(v),
-            "costo": fmt_soles(c) if c is not None else None,
-            "margen": pct(mg), "caida": pct(ca),
-        } for n, v, c, mg, ca in ov[:15]]
+        c = to_float(o.get("costo"))
+        if nombre and c is not None:
+            costos[nombre] = c
+    for fila in res.get("por_cliente", []):
+        c = costos.get(fila["cliente"])
+        if c is not None:
+            fila["costo"] = fmt_soles(c)
 
     return res, ventas_val, margen_pct
 
@@ -2250,11 +2244,13 @@ def build_mermas(found):
             continue
         real = to_float(f.get("real"))
         std = to_float(f.get("estandar"))
+        pct = to_float(f.get("pct"))
         sk.append({"sku": nombre,
                    "almacen": (f.get("almacen") or "").strip() or None,
-                   "estandar": std, "real": real,
-                   "desvio": round(desvio, 2),
-                   "pct": (f.get("pct") or None),
+                   "estandar": round(abs(std), 1) if std is not None else None,
+                   "consumido": round(abs(real), 1) if real is not None else None,
+                   "exceso": round(abs(desvio), 1),
+                   "pct": (f"{abs(pct) * 100:.1f}%" if pct is not None else None),
                    "_a": abs(desvio)})
     if sk:
         sk.sort(key=lambda x: -x["_a"])
