@@ -5746,7 +5746,7 @@ const STOPWORDS = new Set(['como','cómo','está','están','qué','que','debo','
 // que lleva el valor. Se declara una vez para no repetir la forma de cada uno.
 const DESGLOSES_LOCALES = [
   { clave:'proveedores_criticos', entidad:'nombre', valor:'monto', etq:'proveedores por deuda',
-    alias:['proveedor','proveedores','debo','deuda','deudas','acreedor'] },
+    alias:['proveedor','proveedores','debe','debemos','deuda','deudas','acreedor','adeuda'] },
   { clave:'por_cliente', entidad:'cliente', valor:'venta', etq:'clientes por venta',
     alias:['cliente','clientes','venta','ventas','factura','facturacion','concentracion'] },
   { clave:'por_uen', entidad:'uen', valor:['merma','margen'], etq:'unidades de negocio',
@@ -5785,6 +5785,12 @@ function localCampoValor(cfg, fila) {
   return cands.find(c => fila[c] != null) || cands[0];
 }
 
+
+// Las metas vienen como texto libre y algunas son "<2%": sin escapar, el
+// navegador se come todo desde el "<" creyendo que abre una etiqueta.
+function localEsc(v) {
+  return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function localNum(v) {
   if (v == null) return null;
@@ -5829,7 +5835,7 @@ function localMismaRaiz(a, b) {
 function localReporte(pregunta) {
   const alias = {
     cuentas_por_cobrar: ['cobrar','cxc','mora','morosidad','cartera','cliente','clientes','cobranza'],
-    cuentas_por_pagar:  ['pagar','cxp','proveedor','proveedores','deuda','debo','debe','deudas'],
+    cuentas_por_pagar:  ['pagar','cxp','proveedor','proveedores','deuda','debe','deudas'],
     margen_variable:    ['margen','precio','costo','rentabilidad','uen','b&d','bd','tigo','maquila','venta','ventas','vendimos','facturamos'],
     mermas:             ['merma','mermas','desperdicio','planta','plantas'],
     compras:            ['compra','compras','insumo','insumos','quiebre','faltante','faltantes','ratio','abastecimiento'],
@@ -5846,7 +5852,7 @@ function localReporte(pregunta) {
     const n = tk.filter(t => palabras.some(a => localMismaRaiz(t, a))).length;
     if (n > mejorN) { mejor = tipo; mejorN = n; }
   });
-  return mejor;
+  return { tipo: mejor, puntaje: mejorN };
 }
 
 // ¿Qué tipo de pregunta es?
@@ -5884,7 +5890,7 @@ function localRanking(rd, cfg, tope) {
 // reporte detectado y, si ahí no hay ninguno que encaje, en todos los demás:
 // quien pregunta por "canal" o por "faltantes" nombra el dato, no el reporte
 // donde vive.
-function localElegirDesglose(rp, tipo, tk) {
+function localElegirDesglose(rp, tipo, tk, seguridad) {
   const puntaje = (cfg) => tk.filter(t => cfg.alias.some(a => localMismaRaiz(t, a))).length;
   const enReporte = (t) => DESGLOSES_LOCALES
     .filter(c => Array.isArray(rp[t]?.[c.clave]) && rp[t][c.clave].length);
@@ -5904,7 +5910,10 @@ function localElegirDesglose(rp, tipo, tk) {
   // Se cambia de reporte cuando el propio no tiene ninguna coincidencia: si
   // la pregunta dice "canal" y este reporte no desglosa por canal, el dato
   // está en otro y es ahí donde hay que ir.
-  if (mejorAjeno && (!mejorPropio || mejorPropio.p === 0)) return mejorAjeno;
+  // Y solo si el reporte no estaba claramente nombrado: si la pregunta dice
+  // "el reporte Mermas", ninguna palabra suelta debe llevarnos a otro sitio.
+  const sinDudas = (seguridad || 0) >= 2;
+  if (mejorAjeno && (!mejorPropio || mejorPropio.p === 0) && !sinDudas) return mejorAjeno;
   return propios.length ? { tipo, cfg: propios[0].cfg, p: 0 } : null;
 }
 
@@ -5942,7 +5951,8 @@ function localSeriesDe(tipo) {
 function analizarLocal(pregunta) {
   const emp = 'PAUNO';
   const rp = (DATA?.empresas || {})[emp]?.reportes || {};
-  const tipo = localReporte(pregunta);
+  const det = localReporte(pregunta);
+  const tipo = det.tipo;
   if (!tipo || !rp[tipo]) return null;
   const rd = rp[tipo];
   const nombre = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[tipo]) || tipo;
@@ -5955,7 +5965,7 @@ function analizarLocal(pregunta) {
   // ── Ranking / origen: se busca el desglose que responde la pregunta.
   // También se entra aquí en preguntas sin verbo de ranking ("qué materiales
   // me faltan") cuando la pregunta nombra un desglose de forma inequívoca.
-  const sel = localElegirDesglose(rp, tipo, tk);
+  const sel = localElegirDesglose(rp, tipo, tk, det.puntaje);
   if (sel && (intencion === 'ranking' || intencion === 'origen' || sel.p >= 1)) {
     const elegido = sel.cfg;
     const r = localRanking(rp[sel.tipo], elegido, 6);
@@ -5970,16 +5980,16 @@ function analizarLocal(pregunta) {
           ? ` · ${(x.v / r.total * 100).toFixed(1)}% del total` : '';
         const ex = (x.extra == null || esPct) ? ''
           : ` · ${typeof x.extra === 'number' ? x.extra.toFixed(1) + '%' : x.extra}`;
-        return `${i + 1}. <b>${x.n}</b> — ${x.crudo}${peso}${ex}`;
+        return `${i + 1}. <b>${localEsc(x.n)}</b> — ${localEsc(x.crudo)}${peso}${ex}`;
       }).join('<br>'));
       const primero = r.items[0];
       const conc = r.total ? primero.v / r.total : 0;
       if (!elegido.menorEsPeor && (conc > 0.5 || (r.n >= 6 && conc > 0.3))) {
-        partes.push(`<br><br>⚠️ <b>${primero.n}</b> concentra el ` +
+        partes.push(`<br><br>⚠️ <b>${localEsc(primero.n)}</b> concentra el ` +
           `${(conc * 100).toFixed(0)}% — la cifra depende de uno solo.`);
       }
       if (elegido.menorEsPeor) {
-        partes.push(`<br><br>El peor es <b>${primero.n}</b> con ${primero.crudo}.`);
+        partes.push(`<br><br>El peor es <b>${localEsc(primero.n)}</b> con ${localEsc(primero.crudo)}.`);
       }
       const pidePersona = /trabajador|empleado|persona|colaborador|responsable|jefe/
         .test(pregunta.toLowerCase());
@@ -5991,8 +6001,22 @@ function analizarLocal(pregunta) {
     }
   }
 
-  // ── Tendencia: se recorre la serie del reporte
-  if (intencion === 'tendencia' || (!partes.length && intencion === 'origen')) {
+  const huboRanking = partes.length > 0;
+
+  // ── Sin ranking que mostrar, se abre con los KPIs del reporte
+  if (!huboRanking) {
+    const k = rd.kpis || [];
+    if (k.length) {
+      partes.push(cab + k.map(x =>
+        `· ${localEsc(x.label)}: <b>${localEsc(x.valor)}</b>` +
+        `${x.meta ? ` (meta ${localEsc(x.meta)})` : ''}`).join('<br>'));
+      if (rd.alerta) partes.push(`<br><br>⚠️ ${localEsc(rd.alerta)}`);
+    }
+  }
+
+  // ── Tendencia: se recorre la serie del reporte. Va también cuando no hubo
+  // ranking, porque unos KPIs sueltos no dicen si la cosa mejora o empeora.
+  if (intencion === 'tendencia' || !huboRanking) {
     const ss = localSeriesDe(tipo);
     if (ss && typeof SERIES !== 'undefined') {
       const claves = Object.keys(ss);
@@ -6030,16 +6054,7 @@ function analizarLocal(pregunta) {
     }
   }
 
-  // ── Sin desglose ni serie: al menos los KPIs del reporte
-  if (!partes.length) {
-    const k = rd.kpis || [];
-    if (!k.length) return null;
-    partes.push(cab + k.map(x =>
-      `· ${x.label}: <b>${x.valor}</b>${x.meta ? ` (meta ${x.meta})` : ''}`).join('<br>'));
-    if (rd.alerta) partes.push(`<br><br>⚠️ ${rd.alerta}`);
-  }
-
-  return partes.join('');
+  return partes.length ? partes.join('') : null;
 }
 
 function buscarRespuestaLocal(pregunta) {
