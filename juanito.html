@@ -5813,38 +5813,118 @@ function localTokens(p) {
     .split(/\s+/).filter(w => w.length > 2 && !vacias.has(w));
 }
 
-// Dos palabras cuentan como la misma si comparten raíz: en español la
-// terminación cambia mucho ("faltando" / "faltante") y comparar completo
-// deja fuera la mitad de las preguntas escritas con naturalidad.
-function localMismaRaiz(a, b) {
-  if (a === b) return true;
-  const n = Math.min(a.length, b.length);
-  if (n < 6) return a.startsWith(b) || b.startsWith(a);
-  return a.slice(0, 6) === b.slice(0, 6);
+// Dos palabras cuentan como la misma si tienen la misma raíz: en español la
+// terminación cambia mucho ("faltando" / "faltante") y comparar completo deja
+// fuera la mitad de las preguntas escritas con naturalidad.
+//
+// Se quita la terminación en vez de cortar por un número fijo de letras.
+// Cortando a 6, "producido" y "productividad" eran la misma palabra y las
+// preguntas sobre producción caían en el reporte de Productividad.
+const TERMINACIONES = ['aciones','acion','ciones','cion','antes','ante','entes',
+  'ente','mente','ando','endo','ados','idos','adas','idas','ado','ido','ada',
+  'ida','os','as','es','s'];
+
+function localRaiz(w) {
+  for (const t of TERMINACIONES) {
+    if (w.length - t.length >= 4 && w.endsWith(t)) return w.slice(0, -t.length);
+  }
+  return w;
 }
 
-// Reporte al que se refiere la pregunta, por coincidencia de palabras.
+function localMismaRaiz(a, b) {
+  if (a === b) return true;
+  const ra = localRaiz(a), rb = localRaiz(b);
+  return ra.length >= 4 && ra === rb;
+}
+
+// Reporte al que se refiere la pregunta.
+//
+// Pesar todas las palabras igual no funciona: en "cómo está la merma de
+// MAQUILA", 'merma' dice de qué reporte hablamos y 'maquila' es un detalle,
+// pero ambos sumaban 1 y ganaba el que estuviera primero en la lista. Por eso
+// cada reporte tiene términos FUERTES (lo nombran; valen 10) y DÉBILES (solo
+// acompañan; valen 1).
+const TERMINOS_REPORTE = {
+  cuentas_por_cobrar: {
+    fuerte: ['cobrar','cxc','mora','morosidad','cobranza','por cobrar'],
+    debil: ['cartera','cliente','clientes','vencido','vencida','deben'] },
+  cuentas_por_pagar: {
+    fuerte: ['pagar','cxp','proveedor','proveedores','le debo','les debo','por pagar'],
+    debil: ['deuda','deudas','debe','acreedor','dias de pago'] },
+  margen_variable: {
+    fuerte: ['margen','rentabilidad','precio kg','precio por kilo','cuesta el kilo',
+             'costo por kilo','costo unitario','me compra','nos compra'],
+    debil: ['precio','costo','uen','tigo','maquila','b&d','venta','ventas','vendimos'] },
+  mermas: {
+    fuerte: ['merma','mermas','desperdicio'],
+    debil: ['planta','plantas','ate','pachacamac','terceros'] },
+  compras: {
+    fuerte: ['compra','compras','sobrecompra','sobrecomprando','quiebre','faltante',
+             'faltantes','abastecimiento','punto de pedido'],
+    debil: ['insumo','insumos','ratio','material','materiales','proveedor'] },
+  sop_inventario: {
+    fuerte: ['inventario','stock','dead stock','inventario muerto','s&op','sop'],
+    debil: ['muerto','obsoleto','almacen','rotacion','categoria'] },
+  fill_rate: {
+    fuerte: ['fill rate','fill','venta perdida','atiendo','atendido','atencion',
+             'no atendido','despacho','perdi'],
+    debil: ['pedido','pedidos','orden de venta','entrega'] },
+  control_interno: {
+    fuerte: ['control interno','auditoria','plan de accion','planes de accion',
+             'punto de control','puntos de control'],
+    debil: ['control','area','areas','jefe','jefes','plan','planes','cumplimiento',
+            'observacion','critico'] },
+  consumo_materiales: {
+    fuerte: ['consumo','mip','tonelada','toneladas','costo x tn','por tonelada'],
+    debil: ['indirecto','indirectos','material','materiales'] },
+  productividad: {
+    fuerte: ['productividad','planilla','funcionario','funcionarios'],
+    debil: ['personal','kg producido','kilo producido','mano de obra'] },
+  margen_variable_pag2: {
+    fuerte: ['presupuesto','ppto','avance vs','canal','canales','produccion',
+             'programado','cumplimiento de produccion'],
+    debil: ['avance','facturacion','facturado','moderno','tradicional'] },
+};
+
+// Palabras con las que se pide un corte. Sirven para responder "esto no está
+// abierto por producto" en vez de entregar otro corte como si fuera el pedido.
+const DIMENSIONES = {
+  producto: ['producto','sku','articulo','item','items'],
+  cliente:  ['cliente','clientes'],
+  canal:    ['canal','canales'],
+  planta:   ['planta','plantas'],
+  persona:  ['persona','trabajador','empleado','colaborador','jefe','responsable'],
+  categoria:['categoria','categorias','familia','rubro'],
+  proveedor:['proveedor','proveedores'],
+  marca:    ['marca','marcas'],
+  uen:      ['uen','unidad de negocio','negocio'],
+};
+// Con qué campo de los desgloses se cubre cada dimensión.
+const DIMENSION_DE = { producto:'producto', cliente:'cliente', grupo:'cliente',
+  canal:'canal', planta:'planta', jefe:'persona', categoria:'categoria',
+  nombre:'proveedor', marca:'marca', uen:'uen', label:null, momento:null };
+
+function localNormalizar(t) {
+  return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// Un término encaja si aparece como frase dentro de la pregunta (para los de
+// varias palabras) o si comparte raíz con alguna palabra suelta.
+function localEncaja(termino, texto, tk) {
+  if (termino.includes(' ')) return texto.includes(termino);
+  return tk.some(t => localMismaRaiz(t, termino));
+}
+
 function localReporte(pregunta) {
-  const alias = {
-    cuentas_por_cobrar: ['cobrar','cxc','mora','morosidad','cartera','cliente','clientes','cobranza'],
-    cuentas_por_pagar:  ['pagar','cxp','proveedor','proveedores','deuda','debe','deudas'],
-    margen_variable:    ['margen','precio','costo','rentabilidad','uen','b&d','bd','tigo','maquila','venta','ventas','vendimos','facturamos'],
-    mermas:             ['merma','mermas','desperdicio','planta','plantas'],
-    compras:            ['compra','compras','insumo','insumos','quiebre','faltante','faltantes','ratio','abastecimiento'],
-    sop_inventario:     ['inventario','stock','dead','muerto','rotacion','almacen'],
-    fill_rate:          ['fill','atencion','atendido','despacho','pedido','pedidos','perdida'],
-    control_interno:    ['control','auditoria','area','areas','jefe','jefes','plan','planes','cumplimiento'],
-    consumo_materiales: ['consumo','mip','indirecto','indirectos'],
-    productividad:      ['productividad','planilla','funcionario','personal'],
-    margen_variable_pag2:['presupuesto','ppto','avance','facturacion','facturado','canal','canales','produccion'],
-  };
+  const texto = localNormalizar(pregunta);
   const tk = localTokens(pregunta);
-  let mejor = null, mejorN = 0;
-  Object.entries(alias).forEach(([tipo, palabras]) => {
-    const n = tk.filter(t => palabras.some(a => localMismaRaiz(t, a))).length;
-    if (n > mejorN) { mejor = tipo; mejorN = n; }
+  let mejor = null, mejorN = 0, nombrado = false;
+  Object.entries(TERMINOS_REPORTE).forEach(([tipo, def]) => {
+    const fuertes = def.fuerte.filter(x => localEncaja(x, texto, tk)).length;
+    const n = fuertes * 10 + def.debil.filter(x => localEncaja(x, texto, tk)).length;
+    if (n > mejorN) { mejor = tipo; mejorN = n; nombrado = fuertes > 0; }
   });
-  return { tipo: mejor, puntaje: mejorN };
+  return { tipo: mejor, puntaje: mejorN, nombrado };
 }
 
 // ¿Qué tipo de pregunta es?
@@ -5882,7 +5962,7 @@ function localRanking(rd, cfg, tope) {
 // reporte detectado y, si ahí no hay ninguno que encaje, en todos los demás:
 // quien pregunta por "canal" o por "faltantes" nombra el dato, no el reporte
 // donde vive.
-function localElegirDesglose(rp, tipo, tk, seguridad) {
+function localElegirDesglose(rp, tipo, tk, det) {
   const puntaje = (cfg) => tk.filter(t => cfg.alias.some(a => localMismaRaiz(t, a))).length;
   const enReporte = (t) => DESGLOSES_LOCALES
     .filter(c => Array.isArray(rp[t]?.[c.clave]) && rp[t][c.clave].length);
@@ -5902,11 +5982,14 @@ function localElegirDesglose(rp, tipo, tk, seguridad) {
   // Se cambia de reporte cuando el propio no tiene ninguna coincidencia: si
   // la pregunta dice "canal" y este reporte no desglosa por canal, el dato
   // está en otro y es ahí donde hay que ir.
-  // Y solo si el reporte no estaba claramente nombrado: si la pregunta dice
-  // "el reporte Mermas", ninguna palabra suelta debe llevarnos a otro sitio.
-  const sinDudas = (seguridad || 0) >= 2;
-  if (mejorAjeno && (!mejorPropio || mejorPropio.p === 0) && !sinDudas) return mejorAjeno;
-  return propios.length ? { tipo, cfg: propios[0].cfg, p: 0 } : null;
+  // Y solo si el reporte no estaba nombrado. Si preguntas por "merma por
+  // producto", el tema es la merma: que no haya desglose por producto es un
+  // hueco del dato, no una excusa para contestar de otro reporte.
+  const fijo = det.nombrado || det.puntaje >= 2;
+  if (mejorAjeno && (!mejorPropio || mejorPropio.p === 0) && !fijo) return mejorAjeno;
+  return propios.length
+    ? { tipo, cfg: propios[0].cfg, p: 0, noDisponible: mejorAjeno ? mejorAjeno.cfg : null }
+    : { tipo, cfg: null, p: 0, noDisponible: mejorAjeno ? mejorAjeno.cfg : null };
 }
 
 // Tendencia de una serie: primer y último dato, cambio y punto de inflexión.
@@ -5939,12 +6022,61 @@ function localSeriesDe(tipo) {
   return (typeof SERIES !== 'undefined' && SERIES?.datasets?.[ds]) || null;
 }
 
+// Si la pregunta nombra a alguien o algo que está en un desglose ("cuánto le
+// debo a E & M"), lo que se quiere es esa fila, no el total del reporte.
+function localBuscarEntidad(rp, tk, tipoPref, texto) {
+  const largos = tk.filter(t => t.length >= 4);
+  const tipos = [tipoPref, ...Object.keys(rp).filter(t => t !== tipoPref)].filter(Boolean);
+  for (const t of tipos) {
+    for (const cfg of DESGLOSES_LOCALES) {
+      const filas = rp[t]?.[cfg.clave];
+      if (!Array.isArray(filas)) continue;
+      for (const f of filas) {
+        const nom = localNormalizar(String(f[cfg.entidad] ?? ''));
+        if (nom.length < 3) continue;
+        const golpes = largos.filter(w => nom.includes(w)).length;
+        // El nombre entero dicho en la pregunta, dos palabras coincidentes, o
+        // una palabra que ya sea casi todo el nombre.
+        // Nadie escribe "E & M S.R.L." entero: basta con que la pregunta
+        // traiga el arranque del nombre.
+        const cabecera = nom.split(/[,(]/)[0].trim();
+        const corto = cabecera.split(/\s+/).slice(0, 3).join(' ');
+        const literal = [cabecera, corto]
+          .some(c => c.length >= 5 && texto.includes(c));
+        if (literal || golpes >= 2 ||
+            largos.some(w => nom.split(/\s+/).some(x => x === w) && w.length >= 5)) {
+          return { tipo: t, cfg, fila: f };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// Ficha de una fila concreta: sus campos y en qué puesto queda.
+function localFichaEntidad(rp, ent) {
+  const nomSec = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[ent.tipo]) || ent.tipo;
+  const campos = Object.entries(ent.fila)
+    .filter(([k]) => k !== ent.cfg.entidad)
+    .map(([k, v]) => `· ${localEsc(k.replace(/_/g, ' '))}: <b>${localEsc(v)}</b>`);
+  const r = localRanking(rp[ent.tipo], ent.cfg, 999);
+  const pos = r ? r.items.findIndex(x => x.n === String(ent.fila[ent.cfg.entidad])) : -1;
+  return `<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
+    `<b>${localEsc(ent.fila[ent.cfg.entidad])}</b><br>` + campos.join('<br>') +
+    (pos >= 0 ? `<br><br>Puesto <b>${pos + 1}</b> de ${r.n} en ${ent.cfg.etq}.` : '');
+}
+
 // Punto de entrada. Devuelve HTML o null si no sabe responder.
 function analizarLocal(pregunta) {
   const emp = 'PAUNO';
   const rp = (DATA?.empresas || {})[emp]?.reportes || {};
   const det = localReporte(pregunta);
   const tipo = det.tipo;
+  const texto = localNormalizar(pregunta);
+  if (!tipo) {
+    const solo = localBuscarEntidad(rp, localTokens(pregunta), null, texto);
+    return solo ? localFichaEntidad(rp, solo) : null;
+  }
   if (!tipo || !rp[tipo]) return null;
   const rd = rp[tipo];
   const nombre = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[tipo]) || tipo;
@@ -5954,11 +6086,28 @@ function analizarLocal(pregunta) {
 
   const cab = `<b>${nombre}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>`;
 
+  // ── Preguntó por alguien concreto: se responde por esa fila.
+  const ent = localBuscarEntidad(rp, tk, tipo, texto);
+  if (ent) return localFichaEntidad(rp, ent);
+
+  // ── Dimensión pedida que este reporte no tiene.
+  const dimPedida = Object.entries(DIMENSIONES).find(([, ws]) =>
+    ws.some(w => localEncaja(w, localNormalizar(pregunta), tk)));
+  let avisoDim = '';
+  if (dimPedida) {
+    const cubre = DESGLOSES_LOCALES.some(c =>
+      Array.isArray(rd[c.clave]) && rd[c.clave].length &&
+      DIMENSION_DE[c.entidad] === dimPedida[0]);
+    if (!cubre) avisoDim = `ℹ️ <b>${nombre}</b> no está abierto por ` +
+      `<b>${dimPedida[0]}</b> — ese dato no existe en este reporte.<br><br>`;
+  }
+
   // ── Ranking / origen: se busca el desglose que responde la pregunta.
   // También se entra aquí en preguntas sin verbo de ranking ("qué materiales
   // me faltan") cuando la pregunta nombra un desglose de forma inequívoca.
-  const sel = localElegirDesglose(rp, tipo, tk, det.puntaje);
-  if (sel && (intencion === 'ranking' || intencion === 'origen' || sel.p >= 1)) {
+  const sel = localElegirDesglose(rp, tipo, tk, det);
+  if (sel && sel.cfg && (intencion === 'ranking' || intencion === 'origen' ||
+      (sel.p >= 1 && intencion !== 'tendencia'))) {
     const elegido = sel.cfg;
     const r = localRanking(rp[sel.tipo], elegido, 6);
     if (r) {
@@ -5966,7 +6115,7 @@ function analizarLocal(pregunta) {
       const esPct = /%/.test(String(r.items[0].crudo || ''));
       const dir = elegido.menorEsPeor ? 'de peor a mejor' : 'de mayor a menor';
       partes.push(`<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
-        `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>`);
+        avisoDim + `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>`);
       partes.push(r.items.map((x, i) => {
         const peso = (!elegido.menorEsPeor && r.total)
           ? ` · ${(x.v / r.total * 100).toFixed(1)}% del total` : '';
@@ -5975,8 +6124,10 @@ function analizarLocal(pregunta) {
         return `${i + 1}. <b>${localEsc(x.n)}</b> — ${localEsc(x.crudo)}${peso}${ex}`;
       }).join('<br>'));
       const primero = r.items[0];
+      // En una lista de tres, tener el 56% no es una concentración: es
+      // aritmética. La alerta pide lista suficientemente larga.
       const conc = r.total ? primero.v / r.total : 0;
-      if (!elegido.menorEsPeor && (conc > 0.5 || (r.n >= 6 && conc > 0.3))) {
+      if (!elegido.menorEsPeor && ((r.n >= 4 && conc > 0.5) || (r.n >= 6 && conc > 0.3))) {
         partes.push(`<br><br>⚠️ <b>${localEsc(primero.n)}</b> concentra el ` +
           `${(conc * 100).toFixed(0)}% — la cifra depende de uno solo.`);
       }
@@ -5995,11 +6146,13 @@ function analizarLocal(pregunta) {
 
   const huboRanking = partes.length > 0;
 
+  // Se pidió un corte que este reporte no tiene. Decirlo es la respuesta:
+  // callarlo hace creer que lo de abajo contesta la pregunta.
   // ── Sin ranking que mostrar, se abre con los KPIs del reporte
   if (!huboRanking) {
     const k = rd.kpis || [];
     if (k.length) {
-      partes.push(cab + k.map(x =>
+      partes.push(cab + avisoDim + k.map(x =>
         `· ${localEsc(x.label)}: <b>${localEsc(x.valor)}</b>` +
         `${x.meta ? ` (meta ${localEsc(x.meta)})` : ''}`).join('<br>'));
       if (rd.alerta) partes.push(`<br><br>⚠️ ${localEsc(rd.alerta)}`);
