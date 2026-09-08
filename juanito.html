@@ -6253,9 +6253,12 @@ async function preguntarJuanitoIA(pregunta) {
     historial: chatHistorial.slice(-6)
   });
 
-  // Gemini devuelve 503 cuando el modelo está saturado, y es transitorio:
-  // reintentar dos veces con una pausa resuelve la mayoría de los casos.
-  for (let intento = 1; intento <= 3; intento++) {
+  // El Worker desplegado tiene una lista de modelos de respaldo que ya no
+  // existen: cuando el principal se satura un instante, cae a uno muerto y
+  // devuelve 404. Es transitorio —basta que el principal se libere— así que
+  // se insiste más de lo normal. Cuando se despliegue el Worker corregido
+  // esto dejará de hacer falta, pero no estorba.
+  for (let intento = 1; intento <= 6; intento++) {
     try {
       const resp = await fetch(JUANITO_AI_WORKER_URL, {
         method: 'POST',
@@ -6272,17 +6275,20 @@ async function preguntarJuanitoIA(pregunta) {
           const err = await resp.json();
           detalle = err.detalle || err.error || '';
         } catch (_) { /* respuesta no JSON */ }
-        const saturado = /UNAVAILABLE|high demand|503|overload/i.test(detalle)
-                         || resp.status === 502 || resp.status === 503;
-        ultimoFalloIA = saturado
-          ? 'El modelo de IA está saturado en este momento.'
+        // El 404 de 'no longer available' viene del modelo de respaldo, no del
+        // principal: significa que el principal estaba ocupado en ese instante.
+        // Reintentar sirve, aunque el código de error no lo sugiera.
+        const transitorio = /UNAVAILABLE|high demand|503|overload|no longer available/i.test(detalle)
+                            || resp.status === 502 || resp.status === 503;
+        ultimoFalloIA = transitorio
+          ? 'El modelo de IA estaba ocupado.'
           : `El servicio de IA respondió con error ${resp.status}.`;
-        if (!saturado) break;        // un error que no es de saturación no se arregla reintentando
+        if (!transitorio) break;     // un error que no es transitorio no se arregla reintentando
       }
     } catch (e) {
       ultimoFalloIA = 'No se pudo conectar con el servicio de IA.';
     }
-    if (intento < 3) await new Promise(r => setTimeout(r, intento * 1200));
+    if (intento < 6) await new Promise(r => setTimeout(r, Math.min(intento * 1500, 5000)));
   }
   console.warn('Juanito IA no disponible:', ultimoFalloIA);
   return null;
@@ -6317,8 +6323,8 @@ async function sendJuanito() {
     const avisoIA = `<div style="padding:9px 11px;margin-bottom:10px;border-radius:8px;
         background:var(--yellow-soft,#F2E7D2);border:1px solid rgba(0,0,0,.08);
         font-size:12px;line-height:1.5">
-      <b>La IA no pudo responder.</b> ${ultimoFalloIA || 'Servicio no disponible.'}
-      Abajo va un resumen de los datos, no un análisis. Vuelve a intentar en un minuto.
+      <b>La IA no pudo responder tras 6 intentos.</b> ${ultimoFalloIA || 'Servicio no disponible.'}
+      Abajo va un resumen de los datos, no un análisis. Vuelve a preguntar en un minuto.
     </div>`;
     cuerpo = avisoIA + (local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text));
   }
