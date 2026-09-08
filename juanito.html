@@ -5765,7 +5765,8 @@ const DESGLOSES_LOCALES = [
   { clave:'por_sku', entidad:'sku', valor:'exceso', etq:'SKU por exceso sobre el estandar',
     alias:['sku','producto','productos','articulo','item','desviacion','desvio'] },
   { clave:'responsables', entidad:'responsable', valor:'vencido', etq:'responsables de cobranza por vencido',
-    alias:['ejecutivo','ejecutivos','vendedor','vendedores','jefe','responsable','responsables','canal','cobranza'] },
+    alias:['ejecutivo','ejecutivos','vendedor','vendedores','jefe','responsable','responsables',
+           'canal','cobranza','vencido','vencida','mora'] },
   { clave:'por_planta', entidad:'planta', valor:'merma', etq:'plantas por merma',
     alias:['planta','plantas','ate','pachacamac','terceros'] },
   { clave:'por_area', entidad:'jefe', valor:'valor', etq:'jefes de area por cumplimiento',
@@ -5999,8 +6000,15 @@ function localRanking(rd, cfg, tope) {
 // reporte detectado y, si ahí no hay ninguno que encaje, en todos los demás:
 // quien pregunta por "canal" o por "faltantes" nombra el dato, no el reporte
 // donde vive.
-function localElegirDesglose(rp, tipo, tk, det) {
-  const puntaje = (cfg) => tk.filter(t => cfg.alias.some(a => localMismaRaiz(t, a))).length;
+function localElegirDesglose(rp, tipo, tk, det, texto) {
+  // "Quién" pide un nombre. Sin esto, "quién tiene más vencido" respondía con
+  // los tramos de antigüedad, que no tienen dueño.
+  const pidePersona = /\bquien\b|\bquién\b/.test(texto || '');
+  const esNominal = (cfg) =>
+    ['responsable', 'nombre', 'jefe', 'cliente', 'grupo'].includes(cfg.entidad);
+  const puntaje = (cfg) =>
+    tk.filter(t => cfg.alias.some(a => localMismaRaiz(t, a))).length +
+    (pidePersona && esNominal(cfg) ? 1 : 0);
   const enReporte = (t) => DESGLOSES_LOCALES
     .filter(c => Array.isArray(rp[t]?.[c.clave]) && rp[t][c.clave].length);
 
@@ -6147,7 +6155,7 @@ function analizarLocal(pregunta) {
   // ── Ranking / origen: se busca el desglose que responde la pregunta.
   // También se entra aquí en preguntas sin verbo de ranking ("qué materiales
   // me faltan") cuando la pregunta nombra un desglose de forma inequívoca.
-  const sel = localElegirDesglose(rp, tipo, tk, det);
+  const sel = localElegirDesglose(rp, tipo, tk, det, texto);
   if (sel && sel.cfg && (intencion === 'ranking' || intencion === 'origen' ||
       (sel.p >= 1 && intencion !== 'tendencia'))) {
     const elegido = sel.cfg;
