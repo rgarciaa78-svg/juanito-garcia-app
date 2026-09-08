@@ -5702,12 +5702,26 @@ function openChatWith(empresa, tipo, label) {
 // aparecía sin que nadie la hubiera hecho.
 function openChatWithMsg(contexto) {
   showTab('juanito');
+  // El texto que llega desde el reporte NO se envía: solo sirve para saber de
+  // qué reporte viene el clic. Así el chat queda situado en ese tema y la
+  // siguiente pregunta, la que escriba el usuario, se entiende sin repetir
+  // el contexto. Antes se mandaba tal cual y contestaba algo que nadie
+  // preguntó.
+  let tema = null;
+  try { tema = contexto ? localReporte(String(contexto)).tipo : null; } catch (e) {}
+  if (tema) localUltimoTipo = tema;
   setTimeout(() => {
     const input = document.getElementById('juanito-input');
+    if (!input) return;
     input.value = '';
-    input.placeholder = 'Escribe tu pregunta...';
+    const nom = tema && typeof DXP_NOMBRE !== 'undefined' ? DXP_NOMBRE[tema] : null;
+    input.placeholder = nom ? `Pregunta sobre ${nom}...` : 'Escribe tu pregunta...';
     autoResize(input);
     input.focus();
+    if (nom) {
+      addJuanitoMsg('assistant',
+        `Listo, estamos en <b>${nom}</b>. Pregunta lo que quieras sobre este reporte.`);
+    }
   }, 300);
 }
 
@@ -5853,7 +5867,8 @@ const TERMINOS_REPORTE = {
     fuerte: ['cobrar','cxc','mora','morosidad','cobranza','por cobrar'],
     debil: ['cartera','cliente','clientes','vencido','vencida','deben'] },
   cuentas_por_pagar: {
-    fuerte: ['pagar','cxp','proveedor','proveedores','le debo','les debo','por pagar'],
+    fuerte: ['pagar','pagando','pago','pagos','cxp','proveedor','proveedores',
+             'le debo','les debo','por pagar'],
     debil: ['deuda','deudas','debe','acreedor','dias de pago'] },
   margen_variable: {
     fuerte: ['margen','rentabilidad','precio kg','precio por kilo','cuesta el kilo',
