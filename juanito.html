@@ -5973,12 +5973,20 @@ function analizarLocal(pregunta) {
         return `${i + 1}. <b>${x.n}</b> — ${x.crudo}${peso}${ex}`;
       }).join('<br>'));
       const primero = r.items[0];
-      if (!elegido.menorEsPeor && r.total && primero.v / r.total > 0.3) {
+      const conc = r.total ? primero.v / r.total : 0;
+      if (!elegido.menorEsPeor && (conc > 0.5 || (r.n >= 6 && conc > 0.3))) {
         partes.push(`<br><br>⚠️ <b>${primero.n}</b> concentra el ` +
-          `${(primero.v / r.total * 100).toFixed(0)}% — la cifra depende de uno solo.`);
+          `${(conc * 100).toFixed(0)}% — la cifra depende de uno solo.`);
       }
       if (elegido.menorEsPeor) {
         partes.push(`<br><br>El peor es <b>${primero.n}</b> con ${primero.crudo}.`);
+      }
+      const pidePersona = /trabajador|empleado|persona|colaborador|responsable|jefe/
+        .test(pregunta.toLowerCase());
+      if (pidePersona && !['jefe', 'nombre', 'cliente'].includes(elegido.entidad)) {
+        partes.push(`<br><br>ℹ️ Este dato no está abierto por persona, solo por ` +
+          `<b>${elegido.entidad}</b>. Por persona solo hay el % de cumplimiento ` +
+          `de Control Interno (pregunta "qué jefe cumple peor").`);
       }
     }
   }
