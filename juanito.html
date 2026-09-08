@@ -5521,6 +5521,10 @@ METODOLOGÍA:
 - Para causas: relaciona CxC + CxP + Margen + Compras + Inventario
 - Para recomendaciones: ACCIÓN ESPECÍFICA + RESPONSABLE + PLAZO
 - Nunca inventes cifras fuera del contexto
+- ALCANCE: responde solo sobre el holding con los datos de arriba. Si la pregunta
+  no se puede contestar con ellos, dilo en una frase y ofrece la más cercana que sí.
+  Nunca rellenes un dato faltante con benchmarks, promedios de industria ni supuestos:
+  si no está, la respuesta correcta es que no está.
 
 FORMATO para análisis extenso:
 ## SITUACIÓN (1 párrafo)
@@ -6323,7 +6327,17 @@ function construirContexto() {
         'No inventes cifras que no estén aquí. Si falta el dato, dilo.',
         'Un KPI con fuente distinta de "reporte" no está contrastado contra Power BI: avísalo si lo usas.',
         'Revisa avisos_datos antes de afirmar que algo es actual.'
-      ]
+      ],
+      // Sin esto el modelo responde cualquier cosa: por debajo es un modelo
+      // general. El riesgo grave no es que hable de fútbol, es que conteste
+      // una pregunta de negocio con conocimiento genérico —promedios de la
+      // industria, supuestos razonables— en vez de con estos datos, y suene
+      // igual de convincente.
+      alcance: {
+        responde: 'Solo preguntas sobre el holding (PAUNO, AMAUTA, NEOPACK) que puedan contestarse con los datos de este contexto: KPIs, series, desgloses y alertas.',
+        fuera_de_alcance: 'Si la pregunta no se puede responder con estos datos —conocimiento general, otras empresas, temas ajenos al negocio, cálculos que requieran información que no está aquí— dilo en una frase y ofrece la pregunta más cercana que sí puedas responder. No respondas de memoria.',
+        prohibido: 'Nunca completes un dato faltante con promedios de industria, benchmarks o supuestos. Si el dato no está en el contexto, la respuesta correcta es que no está.'
+      }
     },
     fecha: d.fecha,
     verificacion: d.verificacion,
