@@ -6241,24 +6241,51 @@ const JUANITO_AI_WORKER_URL = 'https://autumn-boat-225d.rgarciaa78.workers.dev';
 
 // Llama al Worker (Gemini) con el contexto real del dashboard. Devuelve null si falla
 // (sin internet, Worker caído, clave inválida, etc.) para poder usar el fallback local.
+// Motivo del último fallo de la IA, para poder decirlo en pantalla en vez de
+// caer a una plantilla como si nada hubiera pasado.
+let ultimoFalloIA = null;
+
 async function preguntarJuanitoIA(pregunta) {
-  try {
-    const resp = await fetch(JUANITO_AI_WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pregunta,
-        contexto: construirContexto(),
-        historial: chatHistorial.slice(-6)
-      })
-    });
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    return data.respuesta || null;
-  } catch (e) {
-    console.warn('Juanito IA no disponible, usando respuesta local:', e);
-    return null;
+  ultimoFalloIA = null;
+  const cuerpo = JSON.stringify({
+    pregunta,
+    contexto: construirContexto(),
+    historial: chatHistorial.slice(-6)
+  });
+
+  // Gemini devuelve 503 cuando el modelo está saturado, y es transitorio:
+  // reintentar dos veces con una pausa resuelve la mayoría de los casos.
+  for (let intento = 1; intento <= 3; intento++) {
+    try {
+      const resp = await fetch(JUANITO_AI_WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: cuerpo
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.respuesta) return data.respuesta;
+        ultimoFalloIA = 'El servicio respondió vacío.';
+      } else {
+        let detalle = '';
+        try {
+          const err = await resp.json();
+          detalle = err.detalle || err.error || '';
+        } catch (_) { /* respuesta no JSON */ }
+        const saturado = /UNAVAILABLE|high demand|503|overload/i.test(detalle)
+                         || resp.status === 502 || resp.status === 503;
+        ultimoFalloIA = saturado
+          ? 'El modelo de IA está saturado en este momento.'
+          : `El servicio de IA respondió con error ${resp.status}.`;
+        if (!saturado) break;        // un error que no es de saturación no se arregla reintentando
+      }
+    } catch (e) {
+      ultimoFalloIA = 'No se pudo conectar con el servicio de IA.';
+    }
+    if (intento < 3) await new Promise(r => setTimeout(r, intento * 1200));
   }
+  console.warn('Juanito IA no disponible:', ultimoFalloIA);
+  return null;
 }
 
 async function sendJuanito() {
@@ -6282,9 +6309,18 @@ async function sendJuanito() {
   if (iaResp) {
     cuerpo = iaResp;
   } else {
+    // Sin este aviso la plantilla local se lee como si fuera la respuesta de
+    // la IA: la misma tarjeta sale para cualquier pregunta y no hay forma de
+    // saber que el modelo nunca contestó.
     await new Promise(r => setTimeout(r, 200));
     const local = buscarRespuestaLocal(text);
-    cuerpo = local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text);
+    const avisoIA = `<div style="padding:9px 11px;margin-bottom:10px;border-radius:8px;
+        background:var(--yellow-soft,#F2E7D2);border:1px solid rgba(0,0,0,.08);
+        font-size:12px;line-height:1.5">
+      <b>La IA no pudo responder.</b> ${ultimoFalloIA || 'Servicio no disponible.'}
+      Abajo va un resumen de los datos, no un análisis. Vuelve a intentar en un minuto.
+    </div>`;
+    cuerpo = avisoIA + (local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text));
   }
 
   // Solo mostrar banner y crosscheck en la primera respuesta de la sesión

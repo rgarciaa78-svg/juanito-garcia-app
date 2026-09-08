@@ -2191,6 +2191,14 @@ def reconciliar_kpis(resultado, periodos_str):
             elif actual.get("valor") != texto:
                 print(f"    ~ [{tipo}] {etiqueta}: {actual['valor']} → {texto} "
                       f"({periodo}, de la consulta capturada)")
+                # La alerta del reporte es texto libre que incluye el valor
+                # viejo ("Merma 4.87% — sobre meta 2%"). Si se corrige el KPI
+                # y no la alerta, la misma tarjeta muestra dos cifras
+                # distintas del mismo indicador.
+                anterior = actual.get("valor")
+                if anterior and rep.get("alerta") and anterior in rep["alerta"]:
+                    rep["alerta"] = rep["alerta"].replace(anterior, texto)
+                    print(f"      · alerta de {tipo} actualizada a {texto}")
                 actual["valor"] = texto
                 actual["fuente"] = "reporte"
                 if aviso:
