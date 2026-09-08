@@ -5697,13 +5697,17 @@ function openChatWith(empresa, tipo, label) {
     setTimeout(() => sendJuanito(), 150);
   }, 300);
 }
-function openChatWithMsg(pregunta) {
+// Abre el chat y deja el cursor puesto. No escribe ni envía nada: la pregunta
+// la hace el usuario. Antes mandaba sola una pregunta armada y la respuesta
+// aparecía sin que nadie la hubiera hecho.
+function openChatWithMsg(contexto) {
   showTab('juanito');
   setTimeout(() => {
     const input = document.getElementById('juanito-input');
-    input.value = pregunta;
+    input.value = '';
+    input.placeholder = 'Escribe tu pregunta...';
     autoResize(input);
-    setTimeout(() => sendJuanito(), 150);
+    input.focus();
   }, 300);
 }
 
@@ -6035,8 +6039,10 @@ function localSeriesDe(tipo) {
 
 // Si la pregunta nombra a alguien o algo que está en un desglose ("cuánto le
 // debo a E & M"), lo que se quiere es esa fila, no el total del reporte.
+const EMPRESAS_LOCALES = ['pauno','amauta','neopack'];
+
 function localBuscarEntidad(rp, tk, tipoPref, texto) {
-  const largos = tk.filter(t => t.length >= 4);
+  const largos = tk.filter(t => t.length >= 4 && !EMPRESAS_LOCALES.includes(t));
   const tipos = [tipoPref, ...Object.keys(rp).filter(t => t !== tipoPref)].filter(Boolean);
   for (const t of tipos) {
     for (const cfg of DESGLOSES_LOCALES) {
@@ -6050,6 +6056,7 @@ function localBuscarEntidad(rp, tk, tipoPref, texto) {
         // una palabra que ya sea casi todo el nombre.
         // Nadie escribe "E & M S.R.L." entero: basta con que la pregunta
         // traiga el arranque del nombre.
+        if (EMPRESAS_LOCALES.includes(nom)) continue;
         const cabecera = nom.split(/[,(]/)[0].trim();
         const corto = cabecera.split(/\s+/).slice(0, 3).join(' ');
         const literal = [cabecera, corto]
