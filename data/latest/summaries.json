@@ -86,13 +86,6 @@
           ],
           "responsables": [
             {
-              "responsable": "CANAL TRADICIONAL",
-              "nivel": "canal",
-              "canal": "CANAL TRADICIONAL",
-              "total": "S/2.36M",
-              "vencido": "S/710,143"
-            },
-            {
               "responsable": "VICTOR ASCENCIO",
               "nivel": "jefe",
               "canal": "CANAL TRADICIONAL",
@@ -114,13 +107,6 @@
               "vencido": "S/97,135"
             },
             {
-              "responsable": "HORECA",
-              "nivel": "canal",
-              "canal": "HORECA",
-              "total": "S/364,531",
-              "vencido": "S/86,022"
-            },
-            {
               "responsable": "JOSELYN ASTORAY",
               "nivel": "jefe",
               "canal": "HORECA",
@@ -133,13 +119,6 @@
               "canal": "CANAL TRADICIONAL",
               "total": "S/199,644",
               "vencido": "S/70,620"
-            },
-            {
-              "responsable": "CANAL MODERNO",
-              "nivel": "canal",
-              "canal": "CANAL MODERNO",
-              "total": "S/2.16M",
-              "vencido": "S/54,492"
             },
             {
               "responsable": "JUAN CHAVEZ",
@@ -394,191 +373,96 @@
               "venta": "S/4.64M",
               "pct_venta": 55.1,
               "margen": "43.5%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/2.62M"
             },
             {
               "cliente": "HIPERMERCADOS TOTTUS S.A",
               "venta": "S/717,607",
               "pct_venta": 8.5,
               "margen": "40.6%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/425,936"
             },
             {
               "cliente": "CENCOSUD RETAIL PERU S.A.",
               "venta": "S/627,638",
               "pct_venta": 7.4,
               "margen": "52.9%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/295,508"
             },
             {
               "cliente": "AJILES PERU S.A.C.",
               "venta": "S/371,373",
               "pct_venta": 4.4,
               "margen": "39.4%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/225,126"
             },
             {
               "cliente": "TIENDAS TAMBO S.A.C.",
               "venta": "S/318,013",
               "pct_venta": 3.8,
               "margen": "50.0%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/158,985"
             },
             {
               "cliente": "KL IMPORT EXPORT PERU SAC",
               "venta": "S/137,442",
               "pct_venta": 1.6,
               "margen": "65.6%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/47,267"
             },
             {
               "cliente": "PUNTO BLANCO S.A.C.",
               "venta": "S/104,286",
               "pct_venta": 1.2,
               "margen": "69.3%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/31,990"
             },
             {
               "cliente": "COMERCIAL LA GOLOSINA SAC",
               "venta": "S/78,150",
               "pct_venta": 0.9,
               "margen": "62.2%",
-              "caida": "1.5%"
+              "caida": "1.5%",
+              "costo": "S/30,723"
             },
             {
               "cliente": "J R DISTRIBUCIONES E I R LTDA",
               "venta": "S/77,375",
               "pct_venta": 0.9,
               "margen": "61.5%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/29,818"
             },
             {
               "cliente": "WHITE ROLLING PIN S.R.L.",
               "venta": "S/76,107",
               "pct_venta": 0.9,
               "margen": "44.3%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/42,407"
             },
             {
               "cliente": "RED ORIENTE SOCIEDAD ANONIMA CERRADA",
               "venta": "S/72,600",
               "pct_venta": 0.9,
               "margen": "64.1%",
-              "caida": "0.0%"
+              "caida": "0.0%",
+              "costo": "S/26,072"
             },
             {
               "cliente": "DACORE S.A.C.",
               "venta": "S/64,368",
               "pct_venta": 0.8,
               "margen": "66.8%",
-              "caida": "0.0%"
-            }
-          ],
-          "ordenes_por_cliente": [
-            {
-              "cliente": "SUPERMERCADOS PERUANOS SOCIEDAD ANONIMA 'O ' S.P.S.A.",
-              "venta": "S/4.64M",
-              "costo": "S/2.62M",
-              "margen": "43.5%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "HIPERMERCADOS TOTTUS S.A",
-              "venta": "S/717,607",
-              "costo": "S/425,936",
-              "margen": "40.6%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "CENCOSUD RETAIL PERU S.A.",
-              "venta": "S/627,638",
-              "costo": "S/295,508",
-              "margen": "52.9%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "AJILES PERU S.A.C.",
-              "venta": "S/371,373",
-              "costo": "S/225,126",
-              "margen": "39.4%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "TIENDAS TAMBO S.A.C.",
-              "venta": "S/318,013",
-              "costo": "S/158,985",
-              "margen": "50.0%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "KL IMPORT EXPORT PERU SAC",
-              "venta": "S/137,442",
-              "costo": "S/47,267",
-              "margen": "65.6%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "PUNTO BLANCO S.A.C.",
-              "venta": "S/104,286",
-              "costo": "S/31,990",
-              "margen": "69.3%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "COMERCIAL LA GOLOSINA SAC",
-              "venta": "S/78,150",
-              "costo": "S/30,723",
-              "margen": "62.2%",
-              "caida": "1.5%"
-            },
-            {
-              "cliente": "J R DISTRIBUCIONES E I R LTDA",
-              "venta": "S/77,375",
-              "costo": "S/29,818",
-              "margen": "61.5%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "WHITE ROLLING PIN S.R.L.",
-              "venta": "S/76,107",
-              "costo": "S/42,407",
-              "margen": "44.3%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "RED ORIENTE SOCIEDAD ANONIMA CERRADA",
-              "venta": "S/72,600",
-              "costo": "S/26,072",
-              "margen": "64.1%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "DACORE S.A.C.",
-              "venta": "S/64,368",
-              "costo": "S/21,376",
-              "margen": "66.8%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "COMPAÑIA DINORSA S.A.C.",
-              "venta": "S/63,214",
-              "costo": "S/29,974",
-              "margen": "52.6%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "SODALES DISTRIBUIDORES SOCIEDAD COMERCIAL DE RESPONSABILIDAD LIMITADA - SODALES DISTRIBUIDORES S.R.L",
-              "venta": "S/57,673",
-              "costo": "S/18,558",
-              "margen": "67.8%",
-              "caida": "0.0%"
-            },
-            {
-              "cliente": "COMERCIALIZADORA DE ACEITUNAS Y ESPECERIAS EDUARDO",
-              "venta": "S/53,805",
-              "costo": "S/17,962",
-              "margen": "73.4%",
-              "caida": "6.8%"
+              "caida": "0.0%",
+              "costo": "S/21,376"
             }
           ],
           "por_uen": [
@@ -660,161 +544,161 @@
               "sku": "E001410",
               "almacen": "Lacteos Producción",
               "estandar": 97476.0,
-              "real": -129636.0,
-              "desvio": -32160.0,
-              "pct": -0.32992736673642736
+              "consumido": 129636.0,
+              "exceso": 32160.0,
+              "pct": "33.0%"
             },
             {
               "sku": "E001567",
               "almacen": "Lacteos Producción",
               "estandar": 0.0,
-              "real": -19776.0,
-              "desvio": -19776.0,
+              "consumido": 19776.0,
+              "exceso": 19776.0,
               "pct": null
             },
             {
               "sku": "I000177",
               "almacen": "Lacteos Producción",
-              "estandar": 213911.62942738814,
-              "real": -233203.5167589999,
-              "desvio": -19291.89,
-              "pct": -0.09018624832718915
+              "estandar": 213911.6,
+              "consumido": 233203.5,
+              "exceso": 19291.9,
+              "pct": "9.0%"
             },
             {
               "sku": "E001523",
               "almacen": "Lacteos Producción",
               "estandar": 0.0,
-              "real": -15966.0,
-              "desvio": -15966.0,
+              "consumido": 15966.0,
+              "exceso": 15966.0,
               "pct": null
             },
             {
               "sku": "INT122",
               "almacen": "Lacteos Producción",
-              "estandar": 225570.28634164733,
-              "real": -237714.8341930001,
-              "desvio": -12144.55,
-              "pct": -0.0538393068001809
+              "estandar": 225570.3,
+              "consumido": 237714.8,
+              "exceso": 12144.5,
+              "pct": "5.4%"
             },
             {
               "sku": "E001841",
               "almacen": "Lacteos Producción",
               "estandar": 69368.0,
-              "real": -81466.0,
-              "desvio": -12098.0,
-              "pct": -0.17440318302387275
+              "consumido": 81466.0,
+              "exceso": 12098.0,
+              "pct": "17.4%"
             },
             {
               "sku": "INT121",
               "almacen": "Lacteos Producción",
-              "estandar": 125272.31037459585,
-              "real": -136415.24677499995,
-              "desvio": -11142.94,
-              "pct": -0.08894971575988288
+              "estandar": 125272.3,
+              "consumido": 136415.2,
+              "exceso": 11142.9,
+              "pct": "8.9%"
             },
             {
               "sku": "INT123",
               "almacen": "Lacteos Producción",
               "estandar": 0.0,
-              "real": -10307.564999999999,
-              "desvio": -10307.56,
+              "consumido": 10307.6,
+              "exceso": 10307.6,
               "pct": null
             },
             {
               "sku": "E001840",
               "almacen": "Lacteos Producción",
-              "estandar": 230638.00000000003,
-              "real": -239357.0,
-              "desvio": -8719.0,
-              "pct": -0.03780383111195898
+              "estandar": 230638.0,
+              "consumido": 239357.0,
+              "exceso": 8719.0,
+              "pct": "3.8%"
             },
             {
               "sku": "E001544",
               "almacen": "Lacteos Producción",
               "estandar": 0.0,
-              "real": -7403.0,
-              "desvio": -7403.0,
+              "consumido": 7403.0,
+              "exceso": 7403.0,
               "pct": null
             },
             {
               "sku": "E001837",
               "almacen": "Lacteos Producción",
               "estandar": 53360.0,
-              "real": -59898.0,
-              "desvio": -6538.0,
-              "pct": -0.12252623688155923
+              "consumido": 59898.0,
+              "exceso": 6538.0,
+              "pct": "12.3%"
             },
             {
               "sku": "INT0075",
               "almacen": "Lacteos Producción",
-              "estandar": 19778.14130857972,
-              "real": -24994.306849999994,
-              "desvio": -5216.17,
-              "pct": -0.2637338595188169
+              "estandar": 19778.1,
+              "consumido": 24994.3,
+              "exceso": 5216.2,
+              "pct": "26.4%"
             },
             {
               "sku": "E001846",
               "almacen": "Lacteos Producción",
               "estandar": 55254.0,
-              "real": -59984.0,
-              "desvio": -4730.0,
-              "pct": -0.08560466210591089
+              "consumido": 59984.0,
+              "exceso": 4730.0,
+              "pct": "8.6%"
             },
             {
               "sku": "PP00441",
               "almacen": "Lacteos Producción",
               "estandar": 119256.0,
-              "real": -122761.0,
-              "desvio": -3505.0,
-              "pct": -0.029390554772925473
+              "consumido": 122761.0,
+              "exceso": 3505.0,
+              "pct": "2.9%"
             },
             {
               "sku": "INT0074",
               "almacen": "Lacteos Producción",
-              "estandar": 39340.771656768804,
-              "real": -42638.85881199999,
-              "desvio": -3298.09,
-              "pct": -0.08383381963133725
+              "estandar": 39340.8,
+              "consumido": 42638.9,
+              "exceso": 3298.1,
+              "pct": "8.4%"
             },
             {
               "sku": "INT0008",
               "almacen": "Lacteos Producción",
-              "estandar": 45494.199201326795,
-              "real": -48654.376658,
-              "desvio": -3160.18,
-              "pct": -0.06946330547963626
+              "estandar": 45494.2,
+              "consumido": 48654.4,
+              "exceso": 3160.2,
+              "pct": "6.9%"
             },
             {
               "sku": "PP00357",
               "almacen": "Lacteos Producción",
               "estandar": 0.0,
-              "real": -3027.0,
-              "desvio": -3027.0,
+              "consumido": 3027.0,
+              "exceso": 3027.0,
               "pct": null
             },
             {
               "sku": "MQP00007",
               "almacen": "Lacteos Producción",
               "estandar": 0.0,
-              "real": -2954.0,
-              "desvio": -2954.0,
+              "consumido": 2954.0,
+              "exceso": 2954.0,
               "pct": null
             },
             {
               "sku": "E001991",
               "almacen": "Lacteos Producción",
               "estandar": 0.0,
-              "real": -2920.0,
-              "desvio": -2920.0,
+              "consumido": 2920.0,
+              "exceso": 2920.0,
               "pct": null
             },
             {
               "sku": "E001412",
               "almacen": "Lacteos Producción",
-              "estandar": 164357.55011135858,
-              "real": -167266.664345,
-              "desvio": -2909.11,
-              "pct": -0.01769991236587786
+              "estandar": 164357.6,
+              "consumido": 167266.7,
+              "exceso": 2909.1,
+              "pct": "1.8%"
             }
           ],
           "por_uen": [
