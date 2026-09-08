@@ -78,32 +78,55 @@ def test_orden_carga_build(src):
 
     El margen por cliente salió vacío tres corridas seguidas por esto: la
     consulta funcionaba y guardaba el resultado en `scanned`, pero
-    build_margen() ya se había ejecutado veinte líneas antes. No hay error
-    ni diagnóstico posible — el dato llega tarde y nadie lo lee.
+    build_margen() ya se había ejecutado veinte líneas antes. No hay error ni
+    diagnóstico posible — el dato llega tarde y nadie lo lee.
+
+    Los pares se deducen del código en vez de mantenerse a mano: la lista
+    escrita a mano dejó pasar exactamente el mismo fallo con tres desgloses
+    nuevos, porque nadie se acordó de añadirlos.
     """
     print("\n5. Orden: la carga de datos antes de construir el reporte")
     lineas = src.split("\n")
 
-    def linea_de(texto):
-        for i, l in enumerate(lineas):
-            if texto in l:
-                return i + 1
-        return None
+    # Dónde se guarda cada dato: scanned.setdefault("cxc", {})["__aging"] = …
+    cargas = {}
+    for i, l in enumerate(lineas):
+        m = re.search(r'scanned(?:\.setdefault\(|\[)"([a-z_]+)".*?\["(__[a-z_]+)"\]\s*=', l)
+        if m:
+            cargas.setdefault(m.group(1), []).append((m.group(2), i + 1))
 
-    pares = [
-        ("Margen por cliente (pestaña", "r, ventas, margen = build_margen"),
-        ("Compras: faltantes y necesidad", "r, ratio = build_compras"),
-        ("CxP: top 15 proveedores", "r, dias = build_cxp"),
-        ("CxC: aging real", "r, sem, razon, mora_pct, vencer = build_cxc"),
-        ("S&OP: clasificación del inventario", "r = build_inventario"),
-        ("Avance vs Presupuesto: tabla por canal", "av, avance_pct = build_avance"),
-    ]
-    for carga, build in pares:
-        a, b = linea_de(carga), linea_de(build)
-        if a is None or b is None:
-            revisar(False, f"no se encontró '{carga[:34]}' o su build")
-            continue
-        revisar(a < b, f"{carga[:38]}: carga L{a} → build L{b}")
+    # Qué constructor lee cada clave. Un mismo grupo de `scanned` puede
+    # alimentar a dos constructores distintos (inventario alimenta a
+    # build_inventario y a build_avance), así que la comparación tiene que ser
+    # contra el que de verdad lee esa clave, no contra el primero que aparezca.
+    lector = {}
+    for i, l in enumerate(lineas):
+        m = re.search(r'found\.get\("(__[a-z_]+)"\)', l)
+        if m:
+            lector[m.group(1)] = funcion_contenedora(lineas, i)
+
+    # Dónde se llama cada constructor: build_x(scanned["cxc"])
+    llamada = {}
+    for i, l in enumerate(lineas):
+        m = re.search(r'(build_[a-z_]+)\(scanned\["([a-z_]+)"\]', l)
+        if m and m.group(1) not in llamada:
+            llamada[m.group(1)] = i + 1
+
+    if not cargas:
+        revisar(False, "no se detectó ninguna carga en `scanned`")
+        return
+    for grupo, items in sorted(cargas.items()):
+        for clave, la in items:
+            fn = lector.get(clave)
+            if not fn:
+                revisar(False, f"{clave}: se carga en L{la} y ningún build lo lee")
+                continue
+            lb = llamada.get(fn)
+            if lb is None:
+                revisar(False, f"{clave}: lo lee {fn}(), que nadie llama con scanned[...]")
+                continue
+            revisar(la < lb, f"{clave} (L{la}) → {fn}() en L{lb}"
+                             + ("" if la < lb else "  ← LLEGA TARDE"))
 
 
 def test_funciones_usadas(src, prefijo, archivo):

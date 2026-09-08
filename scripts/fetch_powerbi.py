@@ -2252,7 +2252,6 @@ def build_mermas(found):
         std = to_float(f.get("estandar"))
         sk.append({"sku": nombre,
                    "almacen": (f.get("almacen") or "").strip() or None,
-                   "categoria": (f.get("categoria") or "").strip() or None,
                    "estandar": std, "real": real,
                    "desvio": round(desvio, 2),
                    "pct": (f.get("pct") or None),
@@ -3471,6 +3470,80 @@ def main():
                 DIAGNOSTICO.append({"consulta": "cxc_aging", "http": 0,
                                     "error": f"excepcion en Python: {e!r}"})
 
+        # ── Merma por SKU. Es la pregunta que más se repite ("qué producto
+        # genera más merma") y la respuesta estaba capturada desde el inicio,
+        # sin conectar: la matriz de la pestaña "Declaraciones" abre la merma
+        # por SKU dentro de cada almacén. DIF CANT es la desviación contra el
+        # estándar, que es de donde sale el porcentaje.
+        if empresa == "PAUNO":
+            try:
+                sku = desglose_desde_captura(
+                    token, ws_id,
+                    [ids.get("mermas"), ids.get("planificacion")],
+                    "Matriz#32dc719b5e1f",
+                    {"sku": "[sku]",
+                     "almacen": "[almacen_referencia]",
+                     "estandar": "[SumSTD_CANT]",
+                     "real": "[SumCANT_REAL]",
+                     "desvio": "[SumDIF_CANT]",
+                     "pct": "[v__Merma__Texto_]"})
+                if sku:
+                    scanned.setdefault("mermas", {})["__por_sku"] = sku
+                    print(f"    ✓ Merma por SKU: {len(sku)} filas")
+            except Exception as e:
+                print(f"    ✗ merma por sku: {e}")
+                DIAGNOSTICO.append({"consulta": "merma_por_sku", "http": 0,
+                                    "error": repr(e)[:300]})
+
+        # ── CxC por canal, jefe de venta y ejecutivo, con el aging de cada
+        # uno. Sin esto, la mora es un porcentaje sin dueño: no se puede saber
+        # a quién pedirle la cobranza.
+        if empresa == "PAUNO":
+            try:
+                canal = desglose_desde_captura(
+                    token, ws_id,
+                    [ids.get("cxc")],
+                    "Matriz#38e3644b220b",
+                    {"canal": "[CANAL]",
+                     "jefe": "[JEFE_VENTA]",
+                     "ejecutivo": "[EJECUTIVO]",
+                     "por_vencer": "[POR_VENCER]",
+                     "d0_15": "[v0_A_15_DÍAS]",
+                     "d16_30": "[v16_A_30_DÍAS]",
+                     "mas_30": "[MAS_DE_30_DÍAS]",
+                     "total": "[SumTotal_fact]"})
+                if canal:
+                    scanned.setdefault("cxc", {})["__por_canal"] = canal
+                    print(f"    ✓ CxC por canal/ejecutivo: {len(canal)} filas")
+            except Exception as e:
+                print(f"    ✗ cxc por canal: {e}")
+                DIAGNOSTICO.append({"consulta": "cxc_por_canal", "http": 0,
+                                    "error": repr(e)[:300]})
+
+        # ── Órdenes de venta por cliente con su margen y su caída. Es el
+        # único sitio donde el margen aparece junto a la caída contra lo
+        # cotizado, que es lo que explica por qué el margen del mes baja.
+        if empresa == "PAUNO":
+            try:
+                ov = desglose_desde_captura(
+                    token, ws_id,
+                    [ids.get("margen")],
+                    "ORDENES DE VENTA EN EL SISTEMA POR CLIENTE#feef40c9d4c8",
+                    {"cliente": "[cliente]",
+                     "periodo": "[PERIODO]",
+                     "venta": "[SumMonto_Neto_Venta]",
+                     "costo": "[SumCOSTO_TOTAL]",
+                     "margen": "[v__Margen_Venta__]",
+                     "caida": "[v__MARGEN_CAIDA__]",
+                     "cantidad": "[SumCANTIDAD_VENTA]"})
+                if ov:
+                    scanned.setdefault("margen", {})["__ordenes_cliente"] = ov
+                    print(f"    ✓ Órdenes de venta por cliente: {len(ov)} filas")
+            except Exception as e:
+                print(f"    ✗ ordenes por cliente: {e}")
+                DIAGNOSTICO.append({"consulta": "ordenes_por_cliente", "http": 0,
+                                    "error": repr(e)[:300]})
+
         # ── CxC
         if scanned.get("cxc"):
             r, sem, razon, mora_pct, vencer = build_cxc(scanned["cxc"])
@@ -3669,81 +3742,6 @@ def main():
                 if planta_merma:
                     empresa_data["reportes"]["mermas"]["por_planta"] = planta_merma
                     print(f"  Mermas Planta: {planta_merma}")
-
-        # ── Merma por SKU. Es la pregunta que más se repite ("qué producto
-        # genera más merma") y la respuesta estaba capturada desde el inicio,
-        # sin conectar: la matriz de la pestaña "Declaraciones" abre la merma
-        # por SKU dentro de cada almacén. DIF CANT es la desviación contra el
-        # estándar, que es de donde sale el porcentaje.
-        if empresa == "PAUNO":
-            try:
-                sku = desglose_desde_captura(
-                    token, ws_id,
-                    [ids.get("mermas"), ids.get("planificacion")],
-                    "Matriz#32dc719b5e1f",
-                    {"sku": "[sku]",
-                     "almacen": "[almacen_referencia]",
-                     "categoria": "[categoria_hijo]",
-                     "estandar": "[SumSTD_CANT]",
-                     "real": "[SumCANT_REAL]",
-                     "desvio": "[SumDIF_CANT]",
-                     "pct": "[v__Merma__Texto_]"})
-                if sku:
-                    scanned.setdefault("mermas", {})["__por_sku"] = sku
-                    print(f"    ✓ Merma por SKU: {len(sku)} filas")
-            except Exception as e:
-                print(f"    ✗ merma por sku: {e}")
-                DIAGNOSTICO.append({"consulta": "merma_por_sku", "http": 0,
-                                    "error": repr(e)[:300]})
-
-        # ── CxC por canal, jefe de venta y ejecutivo, con el aging de cada
-        # uno. Sin esto, la mora es un porcentaje sin dueño: no se puede saber
-        # a quién pedirle la cobranza.
-        if empresa == "PAUNO":
-            try:
-                canal = desglose_desde_captura(
-                    token, ws_id,
-                    [ids.get("cxc")],
-                    "Matriz#38e3644b220b",
-                    {"canal": "[CANAL]",
-                     "jefe": "[JEFE_VENTA]",
-                     "ejecutivo": "[EJECUTIVO]",
-                     "por_vencer": "[POR_VENCER]",
-                     "d0_15": "[v0_A_15_DÍAS]",
-                     "d16_30": "[v16_A_30_DÍAS]",
-                     "mas_30": "[MAS_DE_30_DÍAS]",
-                     "total": "[SumTotal_fact]"})
-                if canal:
-                    scanned.setdefault("cuentas_por_cobrar", {})["__por_canal"] = canal
-                    print(f"    ✓ CxC por canal/ejecutivo: {len(canal)} filas")
-            except Exception as e:
-                print(f"    ✗ cxc por canal: {e}")
-                DIAGNOSTICO.append({"consulta": "cxc_por_canal", "http": 0,
-                                    "error": repr(e)[:300]})
-
-        # ── Órdenes de venta por cliente con su margen y su caída. Es el
-        # único sitio donde el margen aparece junto a la caída contra lo
-        # cotizado, que es lo que explica por qué el margen del mes baja.
-        if empresa == "PAUNO":
-            try:
-                ov = desglose_desde_captura(
-                    token, ws_id,
-                    [ids.get("margen")],
-                    "ORDENES DE VENTA EN EL SISTEMA POR CLIENTE#feef40c9d4c8",
-                    {"cliente": "[cliente]",
-                     "periodo": "[PERIODO]",
-                     "venta": "[SumMonto_Neto_Venta]",
-                     "costo": "[SumCOSTO_TOTAL]",
-                     "margen": "[v__Margen_Venta__]",
-                     "caida": "[v__MARGEN_CAIDA__]",
-                     "cantidad": "[SumCANTIDAD_VENTA]"})
-                if ov:
-                    scanned.setdefault("margen_variable", {})["__ordenes_cliente"] = ov
-                    print(f"    ✓ Órdenes de venta por cliente: {len(ov)} filas")
-            except Exception as e:
-                print(f"    ✗ ordenes por cliente: {e}")
-                DIAGNOSTICO.append({"consulta": "ordenes_por_cliente", "http": 0,
-                                    "error": repr(e)[:300]})
 
         # ── Compras: los KPIs de stock salen de la tabla ANALISIS DE
         # MATERIALES sumando sus filas, que es lo que hace la fila Total del
