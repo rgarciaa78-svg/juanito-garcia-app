@@ -76,9 +76,13 @@ Usa HTML simple para formato (negritas <strong>, saltos <br>, listas simples) �
         temperature: 0.3,
         // Los modelos con razonamiento gastan parte de este presupuesto
         // pensando ANTES de escribir, y ese consumo no se ve en la respuesta.
-        // Con 2048 las contestaciones salían cortadas a media frase: el
-        // razonamiento se llevaba casi todo y quedaba sitio para dos líneas.
-        maxOutputTokens: 8192
+        // Con 2048 las contestaciones salían cortadas a media frase; con 8192
+        // seguían cortándose, así que el razonamiento se llevaba casi todo.
+        maxOutputTokens: 16384,
+        // Se acota lo que puede pensar para que quede presupuesto real para
+        // escribir. Estas preguntas se responden leyendo series y desgloses:
+        // no necesitan cadenas de razonamiento largas.
+        thinkingConfig: { thinkingBudget: 1024 }
       }
     });
 
@@ -114,7 +118,14 @@ Usa HTML simple para formato (negritas <strong>, saltos <br>, listas simples) �
         }
         // Por si responde en markdown pese a la instrucción.
         texto = texto.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
-        return json({ respuesta: texto, modelo });
+        // finishReason y el conteo de tokens se devuelven siempre: sin ellos,
+        // diagnosticar por qué una respuesta sale corta es adivinar.
+        return json({
+          respuesta: texto,
+          modelo,
+          finishReason: cand?.finishReason || null,
+          tokens: data?.usageMetadata || null
+        });
       }
 
       ultimoError = await resp.text();
