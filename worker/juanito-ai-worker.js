@@ -72,7 +72,14 @@ Usa HTML simple para formato (negritas <strong>, saltos <br>, listas simples) 鈥
     const cuerpo = JSON.stringify({
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents,
-      generationConfig: { temperature: 0.3, maxOutputTokens: 2048 }
+      generationConfig: {
+        temperature: 0.3,
+        // Los modelos con razonamiento gastan parte de este presupuesto
+        // pensando ANTES de escribir, y ese consumo no se ve en la respuesta.
+        // Con 2048 las contestaciones sal铆an cortadas a media frase: el
+        // razonamiento se llevaba casi todo y quedaba sitio para dos l铆neas.
+        maxOutputTokens: 8192
+      }
     });
 
     let ultimoError = "";
@@ -92,10 +99,18 @@ Usa HTML simple para formato (negritas <strong>, saltos <br>, listas simples) 鈥
 
       if (resp.ok) {
         const data = await resp.json();
-        let texto = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
+        const cand = data?.candidates?.[0];
+        let texto = cand?.content?.parts?.map(p => p.text).join("") || "";
         if (!texto) {
-          ultimoError = `${modelo} devolvi贸 una respuesta vac铆a`;
+          ultimoError = `${modelo} devolvi贸 una respuesta vac铆a `
+            + `(finishReason: ${cand?.finishReason || "desconocido"})`;
           continue;
+        }
+        // Si el modelo se qued贸 sin presupuesto, la respuesta llega cortada a
+        // media frase. Es mejor decirlo que dejar al lector con media idea.
+        if (cand?.finishReason === "MAX_TOKENS") {
+          texto += "\n\n[Respuesta cortada por l铆mite de longitud. "
+                 + "Pregunta por una parte concreta para verla completa.]";
         }
         // Por si responde en markdown pese a la instrucci贸n.
         texto = texto.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
