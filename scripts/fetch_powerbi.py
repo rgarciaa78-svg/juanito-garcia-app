@@ -35,10 +35,21 @@ HIST_DIR   = Path("data/historico")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 HIST_DIR.mkdir(parents=True, exist_ok=True)
 
-HOY = datetime.date.today().strftime("%Y-%m-%d")
+def hoy_lima():
+    """Fecha de hoy en Lima (UTC-5, el Perú no cambia de hora).
+
+    El runner de GitHub corre en UTC, así que `date.today()` adelantaba el día
+    a partir de las 7 de la tarde de Lima: la app llegó a mostrar "datos al
+    09/09" cuando en Lima aún era el 8. Quien lee el tablero está en Lima.
+    """
+    return (datetime.datetime.now(datetime.timezone.utc)
+            - datetime.timedelta(hours=5)).date()
+
+
+HOY = hoy_lima().strftime("%Y-%m-%d")
 
 # Mes anterior completo (para filtros DAX — septiembre sin datos completos)
-_today = datetime.date.today()
+_today = hoy_lima()
 PREV_MONTH = _today.month - 1 if _today.month > 1 else 12
 PREV_YEAR  = _today.year  if _today.month > 1 else _today.year - 1
 
@@ -3245,7 +3256,7 @@ def main():
         print(f"    ERROR: {e}"); sys.exit(1)
 
     summary = {
-        "fecha": datetime.date.today().strftime("%d/%m/%Y"),
+        "fecha": hoy_lima().strftime("%d/%m/%Y"),
         "fecha_actualizacion": HOY,
         "generado_por": "JUANITO — Power BI Direct v3",
         "semaforos": {}, "semaforo_razon": {},
@@ -4017,7 +4028,7 @@ def main():
                                   headers={"Authorization": f"Bearer {token}"}, timeout=25)
                 if rr.ok:
                     ds_av = rr.json().get("datasetId")
-                    hoy = datetime.date.today()
+                    hoy = hoy_lima()
                     mes_ant = hoy.month - 1 or 12
                     cump = dax_cumplimiento_produccion(token, ws_id, ds_av)
                     if cump:
@@ -4201,7 +4212,7 @@ def main():
             "ultima_actualizacion": HOY,
             "empresas": {"PAUNO": {"meses": []}}
         }
-        mes_label = datetime.date.today().strftime("%b-%y")
+        mes_label = hoy_lima().strftime("%b-%y")
         for emp, ed in summary.get("empresas", {}).items():
             meses = historico["empresas"].setdefault(emp, {"meses": []})["meses"]
             ventas_kpi = next((k["valor"] for k in ed.get("reportes",{}).get("margen_variable",{}).get("kpis",[]) if "venta" in k.get("label","").lower()), "—")

@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Comprueba que la corrida produjo un dato de HOY antes de publicarlo.
+
+Existe porque una corrida verde con datos de ayer es peor que una roja: nadie
+mira las verdes. Si el extractor falla a medias y deja el JSON anterior
+intacto, sin esto el workflow publica lo mismo de ayer, termina en verde, y la
+app muestra un dato viejo sin que nadie se entere.
+
+Al fallar, GitHub manda el correo de "workflow failed" al dueño del
+repositorio — que es la única alarma que funciona sin que nadie esté mirando.
+
+Uso:  python scripts/verificar_publicado.py [--dias-max N]
+"""
+
+import datetime
+import json
+import pathlib
+import sys
+
+RUTA = pathlib.Path("data/latest/summaries.json")
+
+
+def fecha_lima(ahora=None):
+    """Hoy en Lima (UTC-5, sin horario de verano) con el formato de la app."""
+    ahora = ahora or datetime.datetime.now(datetime.timezone.utc)
+    return (ahora - datetime.timedelta(hours=5)).strftime("%d/%m/%Y")
+
+
+def revisar(datos, hoy):
+    """Devuelve (motivo_del_fallo | None, resumen_para_el_log)."""
+    fecha = datos.get("fecha")
+    diag = datos.get("diagnostico") or []
+    lineas = [f"fecha publicada: {fecha} · esperada: {hoy} · diagnósticos: {len(diag)}"]
+    for x in diag[:10]:
+        lineas.append(f"  - {x.get('consulta')} [{x.get('http')}] "
+                      f"{str(x.get('error'))[:140]}")
+
+    # Los desgloses son lo primero que desaparece cuando Power BI limita las
+    # peticiones, y desaparecen en silencio: el JSON sigue siendo válido y la
+    # corrida sigue en verde. Se comprueban por nombre.
+    esperados = [
+        ("control_interno", "por_area"),
+        ("control_interno", "planes_por_planta"),
+        ("cuentas_por_cobrar", "tramos"),
+        ("cuentas_por_pagar", "proveedores_criticos"),
+        ("margen_variable", "por_cliente"),
+        ("mermas", "por_uen"),
+        ("compras", "faltantes"),
+        ("fill_rate", "por_grupo"),
+        ("sop_inventario", "dead_por_categoria"),
+    ]
+    reportes = (datos.get("empresas", {}).get("PAUNO", {}) or {}).get("reportes", {})
+    vacios = [f"{r}/{k}" for r, k in esperados if not (reportes.get(r, {}) or {}).get(k)]
+    lineas.append(f"desgloses con datos: {len(esperados) - len(vacios)}/{len(esperados)}")
+
+    if fecha != hoy:
+        return (f"el dato quedó con fecha {fecha}, no {hoy}: la corrida terminó "
+                "sin actualizar nada"), lineas
+    if vacios:
+        return f"desgloses vacíos: {', '.join(vacios)}", lineas
+    return None, lineas
+
+
+def main():
+    if not RUTA.exists():
+        sys.exit(f"ABORTA: no existe {RUTA}")
+    datos = json.loads(RUTA.read_text(encoding="utf-8"))
+    motivo, lineas = revisar(datos, fecha_lima())
+    print("\n".join(lineas))
+    if motivo:
+        sys.exit(f"ABORTA: {motivo}")
+    print("OK — dato de hoy y desgloses completos.")
+
+
+if __name__ == "__main__":
+    main()

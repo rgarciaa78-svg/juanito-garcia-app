@@ -47,13 +47,19 @@ jobs:
         run: python scripts/fetch_series.py
         continue-on-error: true
 
+      # Un heredoc de Python dentro de un `run:` indentado hereda la
+      # indentación del YAML y revienta antes de ejecutar nada; por eso la
+      # comprobación vive en su propio archivo, donde además se puede probar.
+      - name: Verificar que el dato publicado es de hoy
+        run: python scripts/verificar_publicado.py
+
       - name: Commit & push JSON files
         run: |
           git config user.name  "JUANITO Bot"
           git config user.email "juanito@pauno.pe"
           git add data/latest/summaries.json data/latest/measure_cache.json data/latest/series.json data/historico/historico.json || true
           git diff --staged --quiet && echo "sin cambios que publicar" && exit 0
-          git commit -m "data: auto-update Power BI $(date +'%Y-%m-%d %H:%M')"
+          git commit -m "data: auto-update Power BI $(date -u +'%Y-%m-%d %H:%M UTC') [${{ github.event_name }}]"
 
           # La corrida tarda ~10 minutos. Si alguien sube algo al repositorio
           # mientras tanto, el push se rechaza y se pierde toda la extracción
