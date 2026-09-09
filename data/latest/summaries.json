@@ -495,7 +495,7 @@
           "kpis": [
             {
               "label": "Costo Total",
-              "valor": "S/1.14M",
+              "valor": "S/-1.14M",
               "validado": true,
               "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)",
               "fuente": "reporte"
@@ -514,7 +514,7 @@
             },
             {
               "label": "Producción Neta (KG)",
-              "valor": "9,911,995 KG",
+              "valor": "9,911,995 kg",
               "validado": true,
               "fuente": "reporte"
             },
@@ -1055,6 +1055,140 @@
               "valor": "942",
               "fuente": "reporte"
             }
+          ],
+          "por_area": [
+            {
+              "jefe": "Christians Oliva",
+              "valor": "33.3%",
+              "pct": 33.3,
+              "estado": "red"
+            },
+            {
+              "jefe": "Michael Yefersson",
+              "valor": "44.4%",
+              "pct": 44.4,
+              "estado": "red"
+            },
+            {
+              "jefe": "Daniel Pumahuare",
+              "valor": "54.2%",
+              "pct": 54.2,
+              "estado": "red"
+            },
+            {
+              "jefe": "Bladimir Lopez",
+              "valor": "54.2%",
+              "pct": 54.2,
+              "estado": "red"
+            },
+            {
+              "jefe": "William Astete",
+              "valor": "56.1%",
+              "pct": 56.1,
+              "estado": "red"
+            },
+            {
+              "jefe": "Karen Poma",
+              "valor": "59.5%",
+              "pct": 59.5,
+              "estado": "red"
+            },
+            {
+              "jefe": "Richard Garcia",
+              "valor": "62.5%",
+              "pct": 62.5,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Mayra Surco",
+              "valor": "63.3%",
+              "pct": 63.3,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Miguel Bramon",
+              "valor": "69.4%",
+              "pct": 69.4,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Walter Soto",
+              "valor": "69.4%",
+              "pct": 69.4,
+              "estado": "yellow"
+            },
+            {
+              "jefe": "Joselyn Astoray",
+              "valor": "81.0%",
+              "pct": 81.0,
+              "estado": "green"
+            },
+            {
+              "jefe": "Liset Vasquez",
+              "valor": "83.3%",
+              "pct": 83.3,
+              "estado": "green"
+            },
+            {
+              "jefe": "Cecilia Velasquez",
+              "valor": "84.3%",
+              "pct": 84.3,
+              "estado": "green"
+            },
+            {
+              "jefe": "Lennin Tirado",
+              "valor": "89.8%",
+              "pct": 89.8,
+              "estado": "green"
+            },
+            {
+              "jefe": "Yoselyn Wong",
+              "valor": "98.2%",
+              "pct": 98.2,
+              "estado": "green"
+            }
+          ],
+          "planes_por_planta": [
+            {
+              "planta": "PAUNO",
+              "estatus": "Abierto",
+              "planes": 1
+            },
+            {
+              "planta": "PAUNO",
+              "estatus": "Atrasado",
+              "planes": 1
+            },
+            {
+              "planta": "PAUNO",
+              "estatus": "Cerrado",
+              "planes": 1
+            },
+            {
+              "planta": "ATE",
+              "estatus": "Atrasado",
+              "planes": 1
+            },
+            {
+              "planta": "ATE",
+              "estatus": "Cerrado",
+              "planes": 1
+            },
+            {
+              "planta": "PACHACAMAC",
+              "estatus": "Atrasado",
+              "planes": 1
+            },
+            {
+              "planta": "PACHACAMAC",
+              "estatus": "Cerrado",
+              "planes": 1
+            },
+            {
+              "planta": "SOMA",
+              "estatus": "Cerrado",
+              "planes": 1
+            }
           ]
         },
         "productividad": {
@@ -1205,7 +1339,7 @@
           ]
         },
         "margen_variable_pag2": {
-          "estado": "red",
+          "estado": "yellow",
           "alerta": "Avance 239% — la consulta del reporte filtra mes pero no año, así que suma el mismo mes de varios años contra un presupuesto mensual",
           "kpis": [
             {
@@ -1301,67 +1435,5 @@
   "verificacion": {
     "verificados": 63,
     "total": 63
-  },
-  "diagnostico": [
-    {
-      "consulta": "tarjeta:COSTO TOTAL",
-      "http": 429,
-      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 32 seconds.\"}"
-    },
-    {
-      "consulta": "tarjeta:COSTO TOTAL",
-      "http": 400,
-      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (7, 23) Cannot find table '<oii>PLANTA POR CECOS</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
-    },
-    {
-      "consulta": "tarjeta:PRODUCCIÓN NETA (KG)",
-      "http": 429,
-      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 33 seconds.\"}"
-    },
-    {
-      "consulta": "tarjeta:PRODUCCIÓN NETA (KG)",
-      "http": 400,
-      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (7, 23) Cannot find table '<oii>PLANTA POR CECOS</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
-    },
-    {
-      "consulta": "tarjeta:COSTO X TN PRODUCIDA",
-      "http": 429,
-      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 33 seconds.\"}"
-    },
-    {
-      "consulta": "tarjeta:COSTO X TN PRODUCIDA",
-      "http": 400,
-      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (22, 23) Cannot find table '<oii>PLANTA POR CECOS</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
-    },
-    {
-      "consulta": "firma:02-cxp",
-      "http": 429,
-      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
-    },
-    {
-      "consulta": "captura:RESULTADO DE CUMPLIMIENTO ACUMULADO",
-      "http": 429,
-      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
-    },
-    {
-      "consulta": "captura:RESULTADO DE CUMPLIMIENTO ACUMULADO",
-      "http": 200,
-      "error": "ninguna tabla del resultado contiene las columnas ['[Jefe de Area]', '[v__Cumplimento]', '[Color_KPI]']. Devueltas: []"
-    },
-    {
-      "consulta": "captura:ESTADO DE PLANES DE ACCION#1",
-      "http": 429,
-      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
-    },
-    {
-      "consulta": "captura:ESTADO DE PLANES DE ACCION#2",
-      "http": 429,
-      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
-    },
-    {
-      "consulta": "captura:ESTADO DE PLANES DE ACCION",
-      "http": 200,
-      "error": "ninguna tabla del resultado contiene las columnas ['[Planta]', '[Estatus]']. Devueltas: []"
-    }
-  ]
+  }
 }
