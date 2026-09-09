@@ -1104,24 +1104,55 @@ def tablas_de_captura(ejecutor, dax, label):
         tablas.append(filas or [])
     return tablas
 
+def espera_throttle(r):
+    """Segundos a esperar cuando Power BI responde 429, según lo que él pide.
+
+    El límite es por espacio de trabajo, así que basta con que la corrida
+    crezca un poco para cruzarlo. Power BI dice exactamente cuánto esperar
+    —a veces en la cabecera Retry-After, a veces solo en el texto ("Retry in
+    32 seconds")— y hacerle caso es la diferencia entre perder el dato o
+    tenerlo treinta segundos más tarde.
+    """
+    cab = r.headers.get("Retry-After")
+    if cab and str(cab).strip().isdigit():
+        return min(int(cab), 90)
+    m = re.search(r"[Rr]etry in (\d+) second", r.text or "")
+    return min(int(m.group(1)) + 2, 90) if m else 15
+
+
 def _tablas_dax(token, ws, dataset_id, query, label):
     """Como dax(), pero devuelve TODAS las tablas del resultado.
 
     Las consultas del Analizador suelen traer dos EVALUATE (eje y cuerpo).
     """
+    import time
     url = f"{PBI_BASE}/groups/{ws}/datasets/{dataset_id}/executeQueries"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     body = {"queries": [{"query": query}], "serializerSettings": {"includeNulls": True}}
-    try:
-        r = requests.post(url, json=body, headers=headers, timeout=90)
-        if r.status_code != 200:
-            DIAGNOSTICO.append({"consulta": label, "http": r.status_code,
-                                "error": r.text[:400]})
+    # Sin estos reintentos, un 429 borraba el desglose entero: la corrida del
+    # 9 de setiembre perdió los quince jefes de área y los planes por planta
+    # porque tres consultas nuevas empujaron el total sobre el límite.
+    for intento in range(3):
+        try:
+            r = requests.post(url, json=body, headers=headers, timeout=90)
+            if r.status_code == 429:
+                if intento == 2:
+                    DIAGNOSTICO.append({"consulta": label, "http": 429,
+                                        "error": "límite de peticiones tras 3 intentos"})
+                    return []
+                espera = espera_throttle(r)
+                print(f"    · {label}: límite de peticiones, esperando {espera}s")
+                time.sleep(espera)
+                continue
+            if r.status_code != 200:
+                DIAGNOSTICO.append({"consulta": label, "http": r.status_code,
+                                    "error": r.text[:400]})
+                return []
+            return [t.get("rows", []) for t in r.json()["results"][0].get("tables", [])]
+        except Exception as e:
+            DIAGNOSTICO.append({"consulta": label, "http": 0, "error": repr(e)[:300]})
             return []
-        return [t.get("rows", []) for t in r.json()["results"][0].get("tables", [])]
-    except Exception as e:
-        DIAGNOSTICO.append({"consulta": label, "http": 0, "error": repr(e)[:300]})
-        return []
+    return []
 
 
 def desglose_desde_captura(token, ws, candidatos, visual, columnas, limite=None):
@@ -1253,7 +1284,7 @@ def dax(token, ws_id, dataset_id, query, label="query", registrar=True):
         try:
             r = requests.post(url, json=body, headers=headers, timeout=30)
             if r.status_code == 429:
-                wait = int(r.headers.get("Retry-After", 10))
+                wait = espera_throttle(r)
                 print(f"    [dax:{label}] throttled — esperando {wait}s...")
                 time.sleep(wait)
                 continue
