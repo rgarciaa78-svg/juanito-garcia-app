@@ -1,15 +1,15 @@
 {
-  "fecha": "08/09/2026",
-  "fecha_actualizacion": "2026-09-08",
+  "fecha": "09/09/2026",
+  "fecha_actualizacion": "2026-09-09",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "yellow"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 17.4% — sobre meta"
+    "PAUNO": "Morosidad 17.8% — sobre meta"
   },
-  "holding_ventas": "S/7.74M",
-  "holding_mora": "17.4%",
+  "holding_ventas": "S/7.93M",
+  "holding_mora": "17.8%",
   "agenda_ceo": {
     "decidir_hoy": [],
     "escalar_semana": [],
@@ -20,30 +20,30 @@
       "reportes": {
         "cuentas_por_cobrar": {
           "estado": "yellow",
-          "alerta": "Morosidad 17.4% — sobre meta",
+          "alerta": "Morosidad 17.8% — sobre meta",
           "kpis": [
             {
               "label": "Morosidad",
-              "valor": "17.4%",
+              "valor": "17.8%",
               "meta": "15%",
               "estado": "yellow",
               "fuente": "reporte"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/4.04M",
+              "valor": "S/3.92M",
               "meta": "aging confirmado",
               "fuente": "reporte"
             },
             {
               "label": "CxC Total",
-              "valor": "S/4.89M",
+              "valor": "S/4.77M",
               "fuente": "reporte"
             },
             {
               "label": "CxC Vencido",
-              "valor": "S/850,658",
-              "meta": "17.4% de cartera",
+              "valor": "S/847,428",
+              "meta": "17.8% de cartera",
               "estado": "yellow",
               "fuente": "reporte"
             },
@@ -54,34 +54,34 @@
             },
             {
               "label": "Ventas del mes",
-              "valor": "S/690,521",
+              "valor": "S/694,909",
               "fuente": "reporte"
             }
           ],
           "tramos": [
             {
               "label": "Por Vencer",
-              "valor": "S/4.04M",
+              "valor": "S/3.92M",
               "estado": "green",
-              "pct": 82.6
+              "pct": 82.2
             },
             {
               "label": "0 a 15 días",
-              "valor": "S/185,260",
+              "valor": "S/185,595",
               "estado": "yellow",
-              "pct": 3.8
+              "pct": 3.9
             },
             {
               "label": "16 a 30 días",
-              "valor": "S/289,008",
+              "valor": "S/285,442",
               "estado": "yellow",
-              "pct": 5.9
+              "pct": 6.0
             },
             {
               "label": "Más de 30 días",
               "valor": "S/376,390",
               "estado": "red",
-              "pct": 7.7
+              "pct": 7.9
             }
           ],
           "responsables": [
@@ -89,8 +89,8 @@
               "responsable": "VICTOR ASCENCIO",
               "nivel": "jefe",
               "canal": "CANAL TRADICIONAL",
-              "total": "S/485,592",
-              "vencido": "S/268,468"
+              "total": "S/490,468",
+              "vencido": "S/264,903"
             },
             {
               "responsable": "CARLOS MIRANDA",
@@ -110,8 +110,8 @@
               "responsable": "JOSELYN ASTORAY",
               "nivel": "jefe",
               "canal": "HORECA",
-              "total": "S/364,531",
-              "vencido": "S/86,022"
+              "total": "S/340,393",
+              "vencido": "S/86,358"
             },
             {
               "responsable": "GIOVANI O'BRIEN",
@@ -124,7 +124,7 @@
               "responsable": "JUAN CHAVEZ",
               "nivel": "jefe",
               "canal": "CANAL MODERNO",
-              "total": "S/93,269",
+              "total": "S/54,026",
               "vencido": "S/45,741"
             },
             {
@@ -138,7 +138,7 @@
               "responsable": "JUAN CANCHARIS",
               "nivel": "jefe",
               "canal": "CANAL MODERNO",
-              "total": "S/2.07M",
+              "total": "S/2.01M",
               "vencido": "S/8,751"
             },
             {
@@ -163,7 +163,7 @@
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/17.05M",
+              "valor": "S/17.11M",
               "fuente": "reporte"
             },
             {
@@ -179,14 +179,14 @@
             },
             {
               "label": "CxP Vencido",
-              "valor": "S/3.60M",
-              "meta": "35.6% de la deuda viva",
+              "valor": "S/3.50M",
+              "meta": "34.4% de la deuda viva",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "Deuda top 15 proveedores",
-              "valor": "S/12.27M",
+              "valor": "S/12.32M",
               "meta": "concentración",
               "fuente": "reporte"
             },
@@ -200,50 +200,50 @@
           "tramos": [
             {
               "label": "Vigente",
-              "valor": "S/6.52M",
-              "pct": 64.4,
+              "valor": "S/6.67M",
+              "pct": 65.6,
               "estado": "green"
             },
             {
               "label": "16 a 30 días",
-              "valor": "S/1.09M",
-              "pct": 10.7,
+              "valor": "S/1.08M",
+              "pct": 10.6,
               "estado": "yellow"
             },
             {
               "label": "31 a 45 días",
-              "valor": "S/639,177",
-              "pct": 6.3,
+              "valor": "S/635,777",
+              "pct": 6.2,
               "estado": "red"
-            },
-            {
-              "label": "8 a 15 días",
-              "valor": "S/535,276",
-              "pct": 5.3,
-              "estado": "yellow"
             },
             {
               "label": "0 a 7 días",
-              "valor": "S/533,199",
-              "pct": 5.3,
+              "valor": "S/527,822",
+              "pct": 5.2,
               "estado": "yellow"
             },
             {
-              "label": "46 a 60 días",
-              "valor": "S/283,515",
-              "pct": 2.8,
-              "estado": "red"
+              "label": "8 a 15 días",
+              "valor": "S/509,794",
+              "pct": 5.0,
+              "estado": "yellow"
             },
             {
               "label": "61 a 90 días",
-              "valor": "S/278,176",
+              "valor": "S/270,456",
               "pct": 2.7,
               "estado": "red"
             },
             {
-              "label": "Más de 91 días",
-              "valor": "S/242,818",
+              "label": "46 a 60 días",
+              "valor": "S/244,666",
               "pct": 2.4,
+              "estado": "red"
+            },
+            {
+              "label": "Más de 91 días",
+              "valor": "S/232,477",
+              "pct": 2.3,
               "estado": "red"
             }
           ],
@@ -252,7 +252,7 @@
               "nombre": "E & M S.R.L.",
               "categoria": "LECHE DESCREMADA",
               "monto": "S/5.19M",
-              "pct": 42.3
+              "pct": 42.1
             },
             {
               "nombre": "DIVERPLAST S.A.C.",
@@ -264,7 +264,7 @@
               "nombre": "SAN MIGUEL INDUSTRIAS PET S.A.",
               "categoria": "SOBRECOPAS, VASOS Y TAPAS",
               "monto": "S/730,618",
-              "pct": 6.0
+              "pct": 5.9
             },
             {
               "nombre": "CORPORACION DE ALIMENTOS TIERRA BENDITA SOCIEDAD ANONIMA CERRADA",
@@ -291,22 +291,22 @@
               "pct": 4.1
             },
             {
-              "nombre": "TRUPAL S.A.",
-              "categoria": "CAJA CORRUGADA",
-              "monto": "S/453,108",
-              "pct": 3.7
-            },
-            {
               "nombre": "CHR. HANSEN PERU S.A.",
               "categoria": "CULTIVO CASEI",
-              "monto": "S/448,802",
-              "pct": 3.7
+              "monto": "S/480,224",
+              "pct": 3.9
+            },
+            {
+              "nombre": "TRUPAL S.A.",
+              "categoria": "CAJA CORRUGADA",
+              "monto": "S/430,987",
+              "pct": 3.5
             },
             {
               "nombre": "PROLABELS S.A.",
               "categoria": "ETIQUETAS",
-              "monto": "S/364,582",
-              "pct": 3.0
+              "monto": "S/354,241",
+              "pct": 2.9
             },
             {
               "nombre": "QUIMERCO S.A.S. SUCURSAL DEL PERU",
@@ -318,25 +318,25 @@
               "nombre": "ICATOM S.A.",
               "categoria": "PASTA DE TOMATE",
               "monto": "S/326,283",
-              "pct": 2.7
-            },
-            {
-              "nombre": "TRANSPORTES E INVERSIONES YAURI S.A.C.",
-              "categoria": "OT TRANSPORTE",
-              "monto": "S/313,166",
               "pct": 2.6
             },
             {
               "nombre": "INDUSTRIAS ALIMENTARIAS S.A.C.",
               "categoria": "PULPA DE FRUTAS",
-              "monto": "S/282,244",
-              "pct": 2.3
+              "monto": "S/320,436",
+              "pct": 2.6
             },
             {
-              "nombre": "OWENS-ILLINOIS PERU S.A.",
-              "categoria": "",
-              "monto": "S/242,663",
-              "pct": 2.0
+              "nombre": "TRANSPORTES E INVERSIONES YAURI S.A.C.",
+              "categoria": "OT TRANSPORTE",
+              "monto": "S/313,166",
+              "pct": 2.5
+            },
+            {
+              "nombre": "PAPELERA DEL SUR S A",
+              "categoria": "CAJAS",
+              "monto": "S/256,008",
+              "pct": 2.1
             }
           ]
         },
@@ -475,9 +475,9 @@
             },
             {
               "uen": "MAQUILA",
-              "margen": "40.1%",
+              "margen": "39.9%",
               "precio_kg": "S/4.72",
-              "costo_kg": "S/2.83",
+              "costo_kg": "S/2.84",
               "estado": "red"
             },
             {
@@ -495,14 +495,14 @@
           "kpis": [
             {
               "label": "Costo Total",
-              "valor": "S/-1.44M",
+              "valor": "S/1.14M",
               "validado": true,
               "nota": "Filtro exacto confirmado — sin corte de fecha (histórico total)",
               "fuente": "reporte"
             },
             {
               "label": "Venta Neta (KG)",
-              "valor": "16,641,608 KG",
+              "valor": "16,641,024 KG",
               "validado": true,
               "fuente": "reporte"
             },
@@ -514,7 +514,7 @@
             },
             {
               "label": "Producción Neta (KG)",
-              "valor": "9,941,393 kg",
+              "valor": "9,911,995 KG",
               "validado": true,
               "fuente": "reporte"
             },
@@ -752,12 +752,12 @@
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "13,689,367",
+              "valor": "13,694,050",
               "fuente": "reporte"
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "13,830,028",
+              "valor": "13,789,823",
               "fuente": "reporte"
             },
             {
@@ -866,48 +866,48 @@
         },
         "sop_inventario": {
           "estado": "red",
-          "alerta": "Dead Stock 18.8% del inventario",
+          "alerta": "Dead Stock 19.7% del inventario",
           "kpis": [
             {
               "label": "Inventario Total",
-              "valor": "S/6.59M",
+              "valor": "S/6.27M",
               "fuente": "reporte"
             },
             {
               "label": "Dead Stock",
-              "valor": "S/1.24M",
+              "valor": "S/1.23M",
               "meta": "<S/500K",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "% Dead Stock",
-              "valor": "18.8%",
+              "valor": "19.7%",
               "meta": "<5%",
               "estado": "red",
               "fuente": "reporte"
             },
             {
               "label": "Working Stock",
-              "valor": "S/4.26M",
+              "valor": "S/3.95M",
               "fuente": "reporte"
             },
             {
               "label": "Exceso 1 (2-5 meses)",
-              "valor": "S/687,420",
+              "valor": "S/675,602",
               "fuente": "reporte"
             },
             {
               "label": "Exceso 2 (5-12 meses)",
-              "valor": "S/413,463",
+              "valor": "S/409,389",
               "fuente": "reporte"
             }
           ],
           "dead_por_categoria": [
             {
               "categoria": "ENVASES Y EMBALAJES",
-              "valor": "S/920,058",
-              "pct": 74.4
+              "valor": "S/919,691",
+              "pct": 74.5
             },
             {
               "categoria": "MATERIA PRIMA",
@@ -921,8 +921,8 @@
             },
             {
               "categoria": "SUMINISTROS",
-              "valor": "S/53,597",
-              "pct": 4.3
+              "valor": "S/51,965",
+              "pct": 4.2
             },
             {
               "categoria": "REPUESTOS",
@@ -938,33 +938,33 @@
           "working_por_categoria": [
             {
               "categoria": "ENVASES Y EMBALAJES",
-              "valor": "S/1.90M",
-              "pct": 44.5
+              "valor": "S/1.86M",
+              "pct": 47.1
             },
             {
               "categoria": "MATERIA PRIMA",
-              "valor": "S/1.35M",
-              "pct": 31.7
+              "valor": "S/1.15M",
+              "pct": 29.0
             },
             {
               "categoria": "PT SALSAS",
-              "valor": "S/342,984",
-              "pct": 8.1
+              "valor": "S/333,584",
+              "pct": 8.4
             },
             {
               "categoria": "PT YOGURTS",
-              "valor": "S/295,298",
-              "pct": 6.9
+              "valor": "S/275,345",
+              "pct": 7.0
             },
             {
               "categoria": "PROD. EN PROCESO",
-              "valor": "S/210,144",
-              "pct": 4.9
+              "valor": "S/178,455",
+              "pct": 4.5
             },
             {
               "categoria": "SUMINISTROS",
-              "valor": "S/71,989",
-              "pct": 1.7
+              "valor": "S/72,190",
+              "pct": 1.8
             }
           ]
         },
@@ -1055,140 +1055,6 @@
               "valor": "942",
               "fuente": "reporte"
             }
-          ],
-          "por_area": [
-            {
-              "jefe": "Christians Oliva",
-              "valor": "33.3%",
-              "pct": 33.3,
-              "estado": "red"
-            },
-            {
-              "jefe": "Michael Yefersson",
-              "valor": "44.4%",
-              "pct": 44.4,
-              "estado": "red"
-            },
-            {
-              "jefe": "Daniel Pumahuare",
-              "valor": "54.2%",
-              "pct": 54.2,
-              "estado": "red"
-            },
-            {
-              "jefe": "Bladimir Lopez",
-              "valor": "54.2%",
-              "pct": 54.2,
-              "estado": "red"
-            },
-            {
-              "jefe": "William Astete",
-              "valor": "56.1%",
-              "pct": 56.1,
-              "estado": "red"
-            },
-            {
-              "jefe": "Karen Poma",
-              "valor": "59.5%",
-              "pct": 59.5,
-              "estado": "red"
-            },
-            {
-              "jefe": "Richard Garcia",
-              "valor": "62.5%",
-              "pct": 62.5,
-              "estado": "yellow"
-            },
-            {
-              "jefe": "Mayra Surco",
-              "valor": "63.3%",
-              "pct": 63.3,
-              "estado": "yellow"
-            },
-            {
-              "jefe": "Miguel Bramon",
-              "valor": "69.4%",
-              "pct": 69.4,
-              "estado": "yellow"
-            },
-            {
-              "jefe": "Walter Soto",
-              "valor": "69.4%",
-              "pct": 69.4,
-              "estado": "yellow"
-            },
-            {
-              "jefe": "Joselyn Astoray",
-              "valor": "81.0%",
-              "pct": 81.0,
-              "estado": "green"
-            },
-            {
-              "jefe": "Liset Vasquez",
-              "valor": "83.3%",
-              "pct": 83.3,
-              "estado": "green"
-            },
-            {
-              "jefe": "Cecilia Velasquez",
-              "valor": "84.3%",
-              "pct": 84.3,
-              "estado": "green"
-            },
-            {
-              "jefe": "Lennin Tirado",
-              "valor": "89.8%",
-              "pct": 89.8,
-              "estado": "green"
-            },
-            {
-              "jefe": "Yoselyn Wong",
-              "valor": "98.2%",
-              "pct": 98.2,
-              "estado": "green"
-            }
-          ],
-          "planes_por_planta": [
-            {
-              "planta": "PAUNO",
-              "estatus": "Abierto",
-              "planes": 1
-            },
-            {
-              "planta": "PAUNO",
-              "estatus": "Atrasado",
-              "planes": 1
-            },
-            {
-              "planta": "PAUNO",
-              "estatus": "Cerrado",
-              "planes": 1
-            },
-            {
-              "planta": "ATE",
-              "estatus": "Atrasado",
-              "planes": 1
-            },
-            {
-              "planta": "ATE",
-              "estatus": "Cerrado",
-              "planes": 1
-            },
-            {
-              "planta": "PACHACAMAC",
-              "estatus": "Atrasado",
-              "planes": 1
-            },
-            {
-              "planta": "PACHACAMAC",
-              "estatus": "Cerrado",
-              "planes": 1
-            },
-            {
-              "planta": "SOMA",
-              "estatus": "Cerrado",
-              "planes": 1
-            }
           ]
         },
         "productividad": {
@@ -1197,21 +1063,17 @@
           "kpis": [
             {
               "label": "Planilla S/. / KG Producido",
-              "valor": "S/0.10",
-              "fuente": "reporte",
-              "meta": "2026-08 parcial — mediana previa S/0.52",
-              "estado": "yellow"
+              "valor": "S/0.51",
+              "fuente": "reporte"
             },
             {
               "label": "Planilla S/. / KG Vendido",
-              "valor": "S/0.09",
-              "fuente": "reporte",
-              "meta": "2026-08 parcial — mediana previa S/0.53",
-              "estado": "yellow"
+              "valor": "S/0.53",
+              "fuente": "reporte"
             },
             {
               "label": "Producción Total (KG)",
-              "valor": "9,629,256 kg",
+              "valor": "9,570,006 kg",
               "fuente": "reporte"
             },
             {
@@ -1221,7 +1083,7 @@
             },
             {
               "label": "Planilla Total",
-              "valor": "S/4.57M",
+              "valor": "S/3.74M",
               "fuente": "reporte"
             }
           ]
@@ -1372,7 +1234,7 @@
             },
             {
               "label": "Pendiente de facturar",
-              "valor": "S/143,382",
+              "valor": "S/333,702",
               "fuente": "reporte"
             }
           ],
@@ -1407,22 +1269,22 @@
               "canal": "MODERNO",
               "ppto": "S/5.87M",
               "facturado": "S/14.13M",
-              "pendiente": "S/36,982",
+              "pendiente": "S/227,628",
               "avance": 240.8
             },
             {
               "canal": "TRADICIONAL",
               "ppto": "S/1.69M",
               "facturado": "S/3.88M",
-              "pendiente": "S/75,384",
-              "avance": 229.3
+              "pendiente": "S/74,470",
+              "avance": 229.4
             },
             {
               "canal": "HORECA",
               "ppto": "S/270,000",
-              "facturado": "S/739,192",
-              "pendiente": "S/31,016",
-              "avance": 273.8
+              "facturado": "S/737,029",
+              "pendiente": "S/31,604",
+              "avance": 273.0
             }
           ]
         }
@@ -1439,5 +1301,67 @@
   "verificacion": {
     "verificados": 63,
     "total": 63
-  }
+  },
+  "diagnostico": [
+    {
+      "consulta": "tarjeta:COSTO TOTAL",
+      "http": 429,
+      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 32 seconds.\"}"
+    },
+    {
+      "consulta": "tarjeta:COSTO TOTAL",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (7, 23) Cannot find table '<oii>PLANTA POR CECOS</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "tarjeta:PRODUCCIÓN NETA (KG)",
+      "http": 429,
+      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 33 seconds.\"}"
+    },
+    {
+      "consulta": "tarjeta:PRODUCCIÓN NETA (KG)",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (7, 23) Cannot find table '<oii>PLANTA POR CECOS</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "tarjeta:COSTO X TN PRODUCIDA",
+      "http": 429,
+      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 33 seconds.\"}"
+    },
+    {
+      "consulta": "tarjeta:COSTO X TN PRODUCIDA",
+      "http": 400,
+      "error": "{\"error\":{\"code\":\"DatasetExecuteQueriesError\",\"pbi.error\":{\"code\":\"DatasetExecuteQueriesError\",\"parameters\":{},\"details\":[{\"code\":\"DetailsMessage\",\"detail\":{\"type\":1,\"value\":\"Query (22, 23) Cannot find table '<oii>PLANTA POR CECOS</oii>'.\"}},{\"code\":\"AnalysisServicesErrorCode\",\"detail\":{\"type\":1,\"value\":\"3241803779\"}}]}}}"
+    },
+    {
+      "consulta": "firma:02-cxp",
+      "http": 429,
+      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
+    },
+    {
+      "consulta": "captura:RESULTADO DE CUMPLIMIENTO ACUMULADO",
+      "http": 429,
+      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
+    },
+    {
+      "consulta": "captura:RESULTADO DE CUMPLIMIENTO ACUMULADO",
+      "http": 200,
+      "error": "ninguna tabla del resultado contiene las columnas ['[Jefe de Area]', '[v__Cumplimento]', '[Color_KPI]']. Devueltas: []"
+    },
+    {
+      "consulta": "captura:ESTADO DE PLANES DE ACCION#1",
+      "http": 429,
+      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
+    },
+    {
+      "consulta": "captura:ESTADO DE PLANES DE ACCION#2",
+      "http": 429,
+      "error": "{\"message\":\"You have exceeded the amount of requests allowed in the current time frame and further requests will fail. Retry in 60 seconds.\"}"
+    },
+    {
+      "consulta": "captura:ESTADO DE PLANES DE ACCION",
+      "http": 200,
+      "error": "ninguna tabla del resultado contiene las columnas ['[Planta]', '[Estatus]']. Devueltas: []"
+    }
+  ]
 }
