@@ -2,14 +2,18 @@ name: JUANITO — Fetch Power BI Data
 
 on:
   schedule:
-    # 7:30am Lima (UTC-5) = 12:30 UTC, lunes a viernes.
-    - cron: '30 12 * * 1-5'
+    # 7:30am Lima (UTC-5) = 12:30 UTC, todos los días. El Perú no cambia de
+    # hora, así que la conversión es fija todo el año.
+    - cron: '30 12 * * *'
     # Segundo intento a las 10:00 Lima. GitHub no garantiza los horarios: en
     # momentos de carga retrasa o directamente descarta las corridas
     # programadas, y entre el 31 de agosto y el 8 de setiembre no disparo
     # ninguna. Correr dos veces no cuesta nada y no depender de un solo
     # disparo es la diferencia entre tener el dato del dia o el de ayer.
-    - cron: '0 15 * * 1-5'
+    # El sabado y el domingo Power BI devuelve las mismas cifras del viernes;
+    # correr igual evita que el lunes el tablero arranque con dato de tres
+    # dias y con el aviso rojo de antiguedad encendido.
+    - cron: '0 15 * * *'
   workflow_dispatch:  # permite correr manualmente
 
 jobs:
