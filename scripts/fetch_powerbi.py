@@ -5442,7 +5442,12 @@ def main():
                 # B&D" no se podía responder: los clientes venían a nivel
                 # empresa y las unidades sin abrir por cliente.
                 qc = dax_margen_cliente_uen()
-                if qc:
+                if not qc:
+                    DIAGNOSTICO.append({
+                        "consulta": "margen_cliente_uen", "http": 0,
+                        "error": "no se pudo derivar el DAX: la captura base "
+                                 "cambió y la sustitución de columnas no aplicó"})
+                else:
                     cl = _tablas_dax(token, ws_id, margen_ds_id, qc,
                                      "margen_cliente_uen")
                     fc = (cl or [[]])[0]
@@ -5450,6 +5455,15 @@ def main():
                         scanned.setdefault("margen", {})["__cliente_uen"] = fc
                         print(f"    ✓ Cliente por unidad de negocio: {len(fc)} filas")
                     else:
+                        # Una consulta que vuelve vacía en silencio es peor que
+                        # una que falla: el campo simplemente no aparece y nadie
+                        # se entera. Queda en el diagnóstico publicado, que sí
+                        # se puede leer sin entrar al log de Actions.
+                        cols = sorted((fc or [{}])[0].keys()) if fc else []
+                        DIAGNOSTICO.append({
+                            "consulta": "margen_cliente_uen", "http": 200,
+                            "error": f"la consulta no devolvió filas "
+                                     f"(columnas vistas: {cols or 'ninguna'})"})
                         print("    ✗ Cliente por unidad de negocio: sin filas")
             except Exception as e:
                 print(f"    ✗ detalle de costos: {e}")
