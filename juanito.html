@@ -1933,7 +1933,7 @@ small { font-size:13px; line-height:1.4; }
 .cya-intro { font-size:13.5px; color:var(--text2); max-width:80ch; margin:0 0 14px; }
 .cya-ok { color:var(--green); font-weight:600; } .cya-mal { color:var(--red); font-weight:600; }
 .cya-m { color:var(--text3); }
-.cya-lect { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-top:16px; }
+.cya-lect { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-top:16px; max-width:1080px; }
 .cya-l { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
   padding:13px 16px; background:var(--card); }
 .cya-l.cya-ok { border-left-color:var(--green); }
@@ -1956,10 +1956,18 @@ small { font-size:13px; line-height:1.4; }
 .mg-a.top i { background:var(--green); opacity:1; } .mg-a.par i { opacity:.35; }
 .mg-a small { font-size:9.5px; color:var(--text3); margin-top:3px; text-transform:uppercase; }
 .mg-puente { border:1px solid var(--line); border-radius:8px; padding:14px 16px; background:var(--card); }
-.mg-p-row { display:grid; grid-template-columns:130px 1fr 110px; gap:12px; align-items:center;
-  font-size:13.5px; padding:6px 0; }
+/* La etiqueta llevaba 130px y se partía en tres líneas ("Precio lo que se
+   cobra por kilo"), la barra se estiraba 1400px y el valor en 110px dejaba el
+   "pp" colgando solo en la línea de abajo. Columnas con mínimo real y el valor
+   en una sola línea. */
+.mg-p-row { display:grid; grid-template-columns:minmax(190px,230px) minmax(120px,1fr) 165px;
+  gap:14px; align-items:baseline; font-size:13.5px; padding:8px 0; }
 .mg-p-row.tot { border-top:1px solid var(--line); margin-top:5px; padding-top:9px; font-weight:600; }
-.mg-p-k { color:var(--text2); } .mg-p-v { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+.mg-p-k { color:var(--text); font-weight:600; }
+.mg-p-k small { display:block; font-weight:400; color:var(--text3); font-size:11.5px;
+  margin-top:1px; line-height:1.35; }
+.mg-p-v { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; }
+.mg-p-v small { font-weight:400; }
 .mg-bar { display:flex; height:13px; border-radius:3px; overflow:hidden; background:rgba(128,128,128,.12); min-width:60px; }
 .mg-bar i { display:block; height:100%; }
 .mg-bar i.neg { background:var(--red); } .mg-bar i.pos { background:var(--green); }
@@ -1970,6 +1978,8 @@ small { font-size:13px; line-height:1.4; }
 .mg-conc { background:rgba(128,128,128,.10); border-radius:6px; padding:10px 13px; }
 .mg-p-row.falta .mg-p-k { color:var(--text3); }
 .mg-falta { font-size:12px; color:var(--text3); font-style:italic; }
+.mg-guia { font-size:13.5px; color:var(--text2); max-width:80ch; margin:0 0 12px; line-height:1.6; }
+.mg-guia b { color:var(--text); }
 .mg-lect { font-size:13.5px; color:var(--text2); max-width:82ch; margin:10px 0 26px; line-height:1.6; }
 .mg-lect b { color:var(--text); }
 .mg-sub { font-size:11.5px; color:var(--text3); margin-top:2px; }
@@ -2005,7 +2015,7 @@ small { font-size:13px; line-height:1.4; }
 .mg-tabla tr.mg-click:hover { background:rgba(128,128,128,.07); }
 .mg-red { color:var(--red); } .mg-green { color:var(--green); } .mg-warn { color:var(--yellow); }
 .mg-resto { font-size:12.5px; color:var(--text3); margin:6px 0 24px; max-width:72ch; }
-.pr-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-bottom:22px; }
+.pr-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px; margin-bottom:22px; }
 .pr-card { border:1px solid var(--line); border-radius:8px; padding:14px 16px; background:var(--card); }
 .pr-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
 .pr-prod { font-size:14.5px; font-weight:600; letter-spacing:-.01em; line-height:1.3; }
@@ -2027,7 +2037,7 @@ small { font-size:13px; line-height:1.4; }
 .pr-v.pr-rebaja { background:rgba(200,60,30,.14); color:var(--red); }
 .pr-bajo { font-size:12.5px; color:var(--text2); margin-top:9px; line-height:1.5; }
 .pr-bajo i { font-style:normal; font-variant-numeric:tabular-nums; color:var(--red); font-weight:600; }
-.vf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; }
+.vf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; max-width:1080px; }
 .vf-c { border:1px solid var(--line); border-radius:8px; padding:13px 15px; background:var(--card); }
 .vf-k { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); }
 .vf-v { font-size:26px; font-weight:700; letter-spacing:-.02em; margin-top:3px; font-variant-numeric:tabular-nums; }
@@ -2037,7 +2047,7 @@ small { font-size:13px; line-height:1.4; }
   border:1px solid var(--line); border-radius:8px; padding:12px 15px; background:var(--card); }
 .vf-row.vf-bad { border-left:4px solid var(--red); }
 .vf-row.vf-ok { border-left:4px solid var(--green); }
-.vf-why { font-size:12.5px; color:var(--text3); margin-top:3px; line-height:1.5; max-width:74ch; }
+.vf-why { font-size:12.5px; color:var(--text3); margin-top:3px; line-height:1.5; max-width:78ch; }
 .vf-tag { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;
   padding:3px 9px; border-radius:4px; background:rgba(128,128,128,.14); color:var(--text2); white-space:nowrap; }
 .vf-tag.bad { background:rgba(200,60,30,.14); color:var(--red); }
@@ -2050,15 +2060,19 @@ small { font-size:13px; line-height:1.4; }
 .hoy-top h2 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin:0 0 4px; }
 .hoy-top p { font-size:14px; color:var(--text2); margin:0 0 18px; max-width:70ch; }
 .hoy-list { display:flex; flex-direction:column; gap:10px; margin-bottom:26px; }
-.hoy-row { display:grid; grid-template-columns:30px 1fr auto; gap:14px; align-items:start;
+.hoy-row { display:grid; grid-template-columns:30px minmax(0,1fr) 150px; gap:14px; align-items:start;
   padding:14px 16px; border:1px solid var(--line); border-left:4px solid var(--yellow);
   border-radius:8px; background:var(--card); cursor:pointer; }
+/* En pantalla ancha la fila llegaba a 1496px: el texto terminaba a los 420 y el
+   monto quedaba pegado al borde derecho, a casi mil píxeles del hallazgo que
+   describe. Un número lejos de su frase deja de leerse junto a ella. */
+.hoy-list, .vf-list, .hoy-raices, .mg-puente, .mg-tres { max-width:920px; }
 .hoy-row:hover { border-color:var(--text3); }
 .hoy-crit { border-left-color:var(--red); }
 .hoy-n { font-size:17px; font-weight:700; color:var(--text3); font-variant-numeric:tabular-nums; }
 .hoy-t { font-size:16px; font-weight:600; letter-spacing:-.01em; }
 .hoy-seg { font-weight:400; color:var(--text2); font-size:14px; }
-.hoy-des { font-size:13.5px; color:var(--text2); margin-top:3px; }
+.hoy-des { font-size:13.5px; color:var(--text2); margin-top:3px; max-width:78ch; }
 .hoy-dem { font-size:13px; margin-top:7px; padding:5px 9px; border-radius:4px;
   background:rgba(200,60,30,.10); color:var(--red); display:inline-block; }
 .hoy-falta { font-size:12.5px; margin-top:7px; padding:5px 9px; border-radius:4px;
@@ -2082,7 +2096,7 @@ small { font-size:13px; line-height:1.4; }
   font-variant-numeric:tabular-nums; line-height:1.1; }
 .hoy-raiz-d { font-size:13px; color:var(--text2); margin-top:3px; }
 @media (max-width:640px){
-  .hoy-row { grid-template-columns:24px 1fr; }
+  .hoy-row { grid-template-columns:24px minmax(0,1fr); }
   .hoy-sol { grid-column:2; text-align:left; display:flex; gap:8px; align-items:baseline; margin-top:8px; }
   .hoy-sol b { display:inline; }
 }
@@ -3890,14 +3904,19 @@ function dxpMargenView() {
     return `
     <div class="section-label"><span class="num">◆</span><h2>Puente de margen completo</h2>
       <span class="rule"></span><span class="sl-note">${pc.nFam} familias · mezcla medida, no despejada</span></div>
+    <p class="mg-guia">De ${esc(nm(pc.perA))} a ${esc(nm(pc.perB))} el margen se movió por
+      <b>tres razones y solo tres</b>. Cada fila dice cuánto aportó cada una, en soles y en puntos
+      de margen. <b>Verde suma, rojo resta</b>, y las tres suman el cambio total: no queda nada sin
+      explicar. Sirve para saber <b>con quién hablar</b>: precio es comercial, costo es compras o
+      planta, y mezcla no se arregla negociando — se arregla decidiendo qué se empuja.</p>
     <div class="mg-puente">
       <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perA))}
         <small class="mg-nd">canasta de ${pc.nFam} familias</small></span><span class="mg-p-b"></span>
         <span class="mg-p-v">${mgPct(pc.M0*100)}</span></div>
-      ${b(pc.efPrecio, 'Precio', 'lo que se cobra por kilo')}
-      ${b(pc.efCosto, 'Costo', 'lo que cuesta el kilo')}
-      ${b(pc.efMezcla, 'Mezcla', 'cuánto pesa cada familia en la venta')}
-      ${Math.abs(pc.entran) > 1e-9 ? b(pc.entran, 'Altas y bajas', 'familias que entran o salen del mes') : ''}
+      ${b(pc.efPrecio, 'Precio', 'subiste o bajaste el precio por kilo')}
+      ${b(pc.efCosto, 'Costo', 'te cuesta más o menos producir ese kilo')}
+      ${b(pc.efMezcla, 'Mezcla', 'vendes más de lo que deja poco, o menos de lo que deja mucho')}
+      ${Math.abs(pc.entran) > 1e-9 ? b(pc.entran, 'Altas y bajas', 'productos nuevos, o que dejaste de vender') : ''}
       ${Math.abs(pc.residuo) > 1e-6 ? b(pc.residuo, 'Sin asignar', 'debería ser cero') : ''}
       <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perB))}
         <small class="mg-nd">canasta de ${pc.nFam} familias</small></span><span class="mg-p-b"></span>
