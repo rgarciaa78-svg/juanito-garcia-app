@@ -2006,6 +2006,7 @@ small { font-size:13px; line-height:1.4; }
 .mg-sku-tabla td.r, .mg-sku-tabla th.r { text-align:right; font-variant-numeric:tabular-nums; }
 .mg-sku-vacio { font-size:12.5px; color:var(--text3); }
 .mg-v.co { background:rgba(180,120,10,.16); color:var(--yellow); }
+.mast-build { opacity:.55; font-size:11px; letter-spacing:.02em; }
 .sl-note { font-size:12px; color:var(--text3); white-space:nowrap; margin-left:10px; }
 .mg-raiz { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
   padding:16px 18px; background:var(--card); margin-bottom:24px; }
@@ -2202,6 +2203,12 @@ small { font-size:13px; line-height:1.4; }
 <body>
 
 <script>
+// Versión del service worker. Se declara una vez y se usa en los dos lados
+// —la comprobación de arranque y el registro— para que no puedan discrepar.
+const SW_VERSION = 'v=18';
+// Sello de compilación: sirve para confirmar de un vistazo qué versión está
+// cargada. Sin esto, "no me cambió" y "sí cambió" son indistinguibles.
+const APP_BUILD = '2026-09-17-d';
 // Limpiar todo el caché viejo al abrir la app
 (async function() {
   try {
@@ -2210,11 +2217,15 @@ small { font-size:13px; line-height:1.4; }
       await Promise.all(keys.map(k => caches.delete(k)));
     }
     if ('serviceWorker' in navigator) {
+      // OJO: esto comparaba con includes('v18') y la URL real es 'sw.js?v=18',
+      // con signo igual. Nunca acertaba, así que desregistraba el worker BUENO
+      // en cada carga y lo volvía a registrar. En esa ventana quien servía la
+      // página era el worker viejo, y el usuario veía la versión anterior por
+      // más Cmd+Shift+R que hiciera. Se compara contra la versión declarada.
       const regs = await navigator.serviceWorker.getRegistrations();
       for (const r of regs) {
-        if (r.active && r.active.scriptURL && !r.active.scriptURL.includes('v18')) {
-          await r.unregister();
-        }
+        const url = (r.active && r.active.scriptURL) || '';
+        if (url && !url.includes(SW_VERSION)) await r.unregister();
       }
     }
   } catch(e) {}
@@ -7876,7 +7887,8 @@ function renderHome() {
         <h1>PAUNO</h1>
       </div>
       <div class="meta-block">
-        Fuente: Power BI · validado contra las tarjetas del reporte<br>
+        Fuente: Power BI · validado contra las tarjetas del reporte
+        <span class="mast-build" title="Versión cargada. Si no coincide con la última publicada, el navegador está sirviendo una copia vieja.">·&nbsp;${APP_BUILD}</span><br>
         <span id="dxp-context">Vista ejecutiva</span>
       </div>
     </div>
@@ -12031,7 +12043,7 @@ function construirContexto() {
 
 loadData();
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js?v=18').then(r => r.update());
+  navigator.serviceWorker.register('./sw.js?' + SW_VERSION).then(r => r.update());
 }
 </script>
 </body>
