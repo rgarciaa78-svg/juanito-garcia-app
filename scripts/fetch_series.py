@@ -1287,10 +1287,14 @@ CONSUMO_LOCALDATE = "LocalDateTable_98d99889-e9ac-4e68-a26f-5b9fd4115987"
 # Filtros del visual "MIP / TN VENDIDA" del reporte '14. Consumo Materiales
 # indirectos de produccion' (Copiar consulta, 2026-09-06).
 #
-# El tercero es redundante tal como lo genera Power BI —pide TIPO DE OPERACION
-# en {"Costo"} Y ADEMÁS en {"Costo","Gasto"}, que equivale a solo "Costo"— pero
-# se deja textual: simplificarlo sería reescribir la consulta del reporte, y no
-# hay forma de comprobar desde aquí que el modelo lo interprete igual.
+# OJO — corregido 2026-09-17. La captura traía TIPO DE OPERACION en {"Costo"}
+# Y ADEMÁS en {"Costo","Gasto"}, cuya intersección es solo "Costo". Se dejó
+# textual razonando que una captura verbatim siempre es fiel; no lo es: es
+# fiel al ESTADO DE LA PANTALLA al exportar, y en ese momento solo estaba
+# pulsado el botón "Costo". El costo de materiales tiene que sumar los dos, y
+# con solo "Costo" salía 31% por debajo. Es el mismo mecanismo que ya nos
+# mordió con el precio por canal (capturado antes de que existiera la fila de
+# cliente) y con los filtros de mes clavados al export.
 #
 # __ANIO__ es el único parámetro (el segmentador del reporte).
 _CONSUMO_FILTROS = """	VAR __DS0FilterTable =
@@ -1314,7 +1318,8 @@ _CONSUMO_FILTROS = """	VAR __DS0FilterTable =
 		FILTER(
 			KEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),
 			AND(
-				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo"},
+				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo",
+					"Gasto"},
 				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo",
 					"Gasto"}
 			)
@@ -1348,7 +1353,8 @@ _CONSUMO_FILTROS_PROD = """	VAR __DS0FilterTable =
 		FILTER(
 			KEEPFILTERS(VALUES('PLANTA POR CECOS'[TIPO DE OPERACION])),
 			AND(
-				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo"},
+				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo",
+					"Gasto"},
 				'PLANTA POR CECOS'[TIPO DE OPERACION] IN {"Costo",
 					"Gasto"}
 			)

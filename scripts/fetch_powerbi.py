@@ -182,7 +182,9 @@ def _dax_consumo_filtro_kardex(token, ws_id, dataset_id, value_expr, label, anio
     q = (
         'EVALUATE\nROW(\n  "v",\n  CALCULATE(\n    ' + value_expr + ",\n    " +
         filtro_anio +
-        "TREATAS({\"Costo\"}, 'PLANTA POR CECOS'[TIPO DE OPERACION]),\n"
+        # Costo Y Gasto: con solo "Costo" el costo de materiales salía 31% por
+        # debajo. La captura venía con un botón del reporte sin pulsar.
+        "TREATAS({\"Costo\",\"Gasto\"}, 'PLANTA POR CECOS'[TIPO DE OPERACION]),\n"
         "    FILTER(\n"
         "      KEEPFILTERS(VALUES('Maestra de Kardex (Total)'[categoria_hijo])),\n"
         "      NOT('Maestra de Kardex (Total)'[categoria_hijo] IN {\"ACUERDOS COMERCIALES\"})\n"
@@ -3661,6 +3663,47 @@ def build_margen(found):
                      "peso": round(o["peso"], 3), "skus": o["skus"]}
                     for k, o in sorted(mensual.items())]
                 res["margen_mensual_periodos"] = sorted({k[0] for k in mensual})
+
+                # Y el mismo corte a nivel SKU, para poder bajar de familia a
+                # producto en cualquier mes. Solo se publican los SKU que pesan:
+                # con 142 SKU por 9 meses el archivo crece sin que nadie lea la
+                # cola, así que entra el que alguna vez llegó al 0.5% de la
+                # venta de su mes. El resto se cuenta en una fila "otros" para
+                # que los totales por familia sigan cuadrando.
+                por_mes_total = {}
+                for uen, meses in por_uen_mes.items():
+                    for (anio, mes), prods in meses.items():
+                        per = f"{anio}-{mes:02d}"
+                        for _n, (v, _c, _p, _s) in prods.items():
+                            por_mes_total[per] = por_mes_total.get(per, 0.0) + (v or 0.0)
+                relevantes = set()
+                for uen, meses in por_uen_mes.items():
+                    for (anio, mes), prods in meses.items():
+                        per = f"{anio}-{mes:02d}"
+                        tot_per = por_mes_total.get(per) or 0.0
+                        for nombre, (v, _c, _p, _s) in prods.items():
+                            if tot_per and (v or 0.0) / tot_per >= 0.005:
+                                relevantes.add(nombre)
+                sku_mes = {}
+                for uen, meses in por_uen_mes.items():
+                    for (anio, mes), prods in meses.items():
+                        per = f"{anio}-{mes:02d}"
+                        for nombre, (v, c, pe, sub) in prods.items():
+                            clave = nombre if nombre in relevantes else "· otros"
+                            k = (per, uen, (sub or "—"), clave)
+                            o = sku_mes.setdefault(k, {"venta": 0.0, "costo": 0.0,
+                                                       "peso": 0.0, "n": 0})
+                            o["venta"] += v or 0.0
+                            o["costo"] += c or 0.0
+                            o["peso"] += pe or 0.0
+                            o["n"] += 1
+                res["sku_mensual"] = [
+                    {"periodo": k[0], "uen": k[1], "familia": k[2], "producto": k[3],
+                     "venta": round(o["venta"], 2), "costo": round(o["costo"], 2),
+                     "peso": round(o["peso"], 3), "skus": o["n"]}
+                    for k, o in sorted(sku_mes.items())]
+                print(f"    · serie mensual: {len(res['margen_mensual'])} filas por familia, "
+                      f"{len(res['sku_mensual'])} por SKU ({len(relevantes)} SKU relevantes)")
                 anotar_derivado(
                     "margen_variable", "margen_mensual", "venta",
                     "suma de venta, costo y peso de los SKU de cada familia, por mes",

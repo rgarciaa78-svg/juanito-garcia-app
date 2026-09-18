@@ -1977,6 +1977,14 @@ small { font-size:13px; line-height:1.4; }
 .mg-v { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em;
   padding:2px 8px; border-radius:3px; background:rgba(128,128,128,.14); color:var(--text2); white-space:nowrap; }
 .mg-v.pr { background:rgba(200,60,30,.14); color:var(--red); }
+.mg-chev { color:var(--text3); font-size:11px; }
+.mg-sku-fila td { background:rgba(128,128,128,.06); padding:10px 13px; }
+.mg-sku-tabla { width:100%; border-collapse:collapse; font-size:12.5px; }
+.mg-sku-tabla th { font-size:10px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--text3); padding:4px 8px; text-align:left; }
+.mg-sku-tabla td { padding:4px 8px; border-top:1px solid var(--line); }
+.mg-sku-tabla td.r, .mg-sku-tabla th.r { text-align:right; font-variant-numeric:tabular-nums; }
+.mg-sku-vacio { font-size:12.5px; color:var(--text3); }
 .mg-v.co { background:rgba(180,120,10,.16); color:var(--yellow); }
 .sl-note { font-size:12px; color:var(--text3); white-space:nowrap; margin-left:10px; }
 .mg-raiz { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
@@ -2033,6 +2041,10 @@ small { font-size:13px; line-height:1.4; }
 .vf-tag { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;
   padding:3px 9px; border-radius:4px; background:rgba(128,128,128,.14); color:var(--text2); white-space:nowrap; }
 .vf-tag.bad { background:rgba(200,60,30,.14); color:var(--red); }
+.vf-prop { margin-top:7px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.vf-btn { font:inherit; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--line);
+  background:transparent; color:var(--text2); border-radius:5px; padding:3px 10px; }
+.vf-btn:hover { border-color:var(--text3); color:var(--text); }
 .vf-tag.ok { background:rgba(60,120,80,.16); color:var(--green); }
 /* ── Vista HOY ── */
 .hoy-top h2 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin:0 0 4px; }
@@ -3757,6 +3769,56 @@ function mgBarra(sP, sC) {
     <i class="${sC < 0 ? 'neg' : 'pos'} b" style="width:${wC.toFixed(1)}%"></i></span>`;
 }
 
+// Abre el detalle por SKU de una familia del puente. El dato llega en
+// `sku_mensual`, con los SKU que alguna vez pesaron 0.5% de la venta de su
+// mes y el resto agrupado en "· otros" para que los totales sigan cuadrando.
+function mgAbrirSku(ix, perA, perB) {
+  const tr = document.getElementById('sku-' + ix);
+  const chev = document.getElementById('chev-' + ix);
+  if (!tr) return;
+  if (!tr.hidden) { tr.hidden = true; if (chev) chev.textContent = '▸'; return; }
+  const td = tr.firstElementChild;
+  const fam = td.dataset.fam || '';
+  const [uen, familia] = fam.split(' · ');
+  const sm = (avReporte('margen_variable') || {}).sku_mensual;
+  if (!sm || !sm.length) {
+    td.innerHTML = `<div class="mg-sku-vacio">El detalle por SKU se publica en
+      <code>sku_mensual</code> y llega en la próxima corrida del workflow.</div>`;
+  } else {
+    const de = per => { const o = {};
+      sm.filter(r => r.periodo === per && r.uen === uen && r.familia === familia)
+        .forEach(r => { o[r.producto] = r; }); return o; };
+    const A = de(perA), B = de(perB);
+    const filas = [...new Set([...Object.keys(A), ...Object.keys(B)])].map(k => {
+      const a = A[k], b = B[k];
+      const m0 = a && a.venta ? 1 - a.costo / a.venta : null;
+      const m1 = b && b.venta ? 1 - b.costo / b.venta : null;
+      const c0 = a && a.peso ? a.costo / a.peso : null;
+      const c1 = b && b.peso ? b.costo / b.peso : null;
+      return { k, a, b, m0, m1, c0, c1,
+               d: (m1 != null && m0 != null && b) ? (m1 - m0) * b.venta : null };
+    }).sort((x, y) => (x.d ?? 0) - (y.d ?? 0));
+    td.innerHTML = filas.length ? `<table class="mg-sku-tabla">
+      <thead><tr><th>SKU</th><th class="r">Venta ${esc(nombreMes(perB)||perB)}</th>
+        <th class="r">Margen ${esc((nombreMes(perA)||perA)).slice(0,3)}</th>
+        <th class="r">Margen ${esc((nombreMes(perB)||perB)).slice(0,3)}</th>
+        <th class="r">Costo/kg</th><th class="r">S/ margen</th></tr></thead>
+      <tbody>${filas.map(f => `<tr>
+        <td>${esc(f.k)}</td>
+        <td class="r">${f.b ? mgSoles(f.b.venta).replace('+','') : '—'}</td>
+        <td class="r">${f.m0 != null ? mgPct(f.m0*100) : '—'}</td>
+        <td class="r"><b>${f.m1 != null ? mgPct(f.m1*100) : '—'}</b></td>
+        <td class="r">${f.c0 && f.c1
+          ? `S/${f.c0.toFixed(2)} → <b>S/${f.c1.toFixed(2)}</b>
+             <span class="${f.c1>f.c0?'mg-red':'mg-green'}">${((f.c1/f.c0-1)*100).toFixed(0)}%</span>`
+          : '—'}</td>
+        <td class="r ${mgCls(f.d)}">${f.d != null ? mgSoles(f.d) : '—'}</td></tr>`).join('')}</tbody>
+    </table>` : `<div class="mg-sku-vacio">Sin detalle por SKU para esta familia en estos meses.</div>`;
+  }
+  tr.hidden = false;
+  if (chev) chev.textContent = '▾';
+}
+
 function dxpMargenView() {
   const mv = avReporte('margen_variable');
   const filas = mgDescompone();
@@ -3918,15 +3980,16 @@ function dxpMargenView() {
         <th class="r">Peso</th><th class="r">Margen ${esc(nm(pc.perA)).slice(0,3)}</th>
         <th class="r">Margen ${esc(nm(pc.perB)).slice(0,3)}</th>
         <th class="r">Ef. margen</th><th class="r">Ef. mezcla</th></tr></thead>
-      <tbody>${pc.detalle.slice(0, 14).map(d => `<tr>
-        <td>${esc(d.k)}${d.nueva ? ' <b class="mg-green">nueva</b>' : d.sale ? ' <b class="mg-red">sale</b>' : ''}</td>
+      <tbody>${pc.detalle.slice(0, 14).map((d, ix) => `<tr class="mg-click" onclick="mgAbrirSku(${ix},'${pc.perA}','${pc.perB}')">
+        <td><span class="mg-chev" id="chev-${ix}">▸</span> ${esc(d.k)}${d.nueva ? ' <b class="mg-green">nueva</b>' : d.sale ? ' <b class="mg-red">sale</b>' : ''}</td>
         <td class="r">${d.vA != null ? mgSoles(d.vA).replace('+','') : '—'}</td>
         <td class="r">${d.vB != null ? mgSoles(d.vB).replace('+','') : '—'}</td>
         <td class="r">${(d.w1*100).toFixed(1)}%<small class="mg-nd"> de ${(d.w0*100).toFixed(1)}%</small></td>
         <td class="r">${d.m0 != null ? mgPct(d.m0*100) : '—'}</td>
         <td class="r">${d.m1 != null ? mgPct(d.m1*100) : '—'}</td>
         <td class="r ${mgCls(d.dm)}">${d.dm != null ? mgSoles(d.dm*pc.vB) : '—'}</td>
-        <td class="r ${mgCls(d.mez)}">${d.mez != null ? mgSoles(d.mez*pc.vB) : '—'}</td></tr>`).join('')}</tbody>
+        <td class="r ${mgCls(d.mez)}">${d.mez != null ? mgSoles(d.mez*pc.vB) : '—'}</td></tr>
+        <tr class="mg-sku-fila" id="sku-${ix}" hidden><td colspan="8" data-fam="${esc(d.k)}"></td></tr>`).join('')}</tbody>
     </table></div>`;
   })() : '';
 
@@ -4141,6 +4204,36 @@ function dxpBanda(vals) {
   return { mu, sd, ult, z: (ult - mu) / sd, n: hist.length };
 }
 
+// Meta operativa propuesta: la mediana del mejor cuartil de la propia serie.
+// No es una meta de directorio ni sale de ningún lado externo — es "lo mejor
+// que este indicador ha hecho de forma sostenida", que es contra lo que se
+// puede pedir cuentas. Una meta que no se cumple hace doce meses deja de
+// significar "actúa" y el tablero gasta su señal más fuerte en ruido.
+//
+// Se PROPONE, no se fija: las metas son lo único que se escribe a mano.
+function metaPropuesta(ind) {
+  if (!ind || !ind.serie || !SERIES) return null;
+  const [rep, med] = ind.serie;
+  const s = ((SERIES.datasets || {})[rep] || {})[med];
+  if (!Array.isArray(s)) return null;
+  const ps = SERIES.periodos || [];
+  // El mes en curso va a medias: no entra en el cálculo de lo alcanzable.
+  const v = s.map((x, i) => ({ x, p: ps[i] }))
+             .filter(o => o.x != null && isFinite(o.x) && o.p !== SERIES.parcial)
+             .map(o => o.x);
+  if (v.length < 6) return null;
+  const mejorArriba = ind.direccion !== 'menor';
+  const orden = v.slice().sort((a, b) => mejorArriba ? b - a : a - b);
+  const cuartil = orden.slice(0, Math.max(3, Math.ceil(orden.length / 4)));
+  const med2 = cuartil.slice().sort((a, b) => a - b);
+  const mediana = med2.length % 2
+    ? med2[(med2.length - 1) / 2]
+    : (med2[med2.length / 2 - 1] + med2[med2.length / 2]) / 2;
+  const actual = v[v.length - 1];
+  return { valor: mediana, n: v.length, nCuartil: cuartil.length, actual,
+           mejor: orden[0], peor: orden[orden.length - 1] };
+}
+
 function dxpVerificarView() {
   const val = DATA?.validacion || {};
   const cob = DATA?.cobertura || {};
@@ -4233,11 +4326,26 @@ function dxpVerificarView() {
   </div>
 
   ${sinMeta.length ? `
-  <div class="section-label"><span class="num">◆</span><h2>Metas sin fijar — ${sinMeta.length}</h2><span class="rule"></span></div>
-  <div class="vf-list">${sinMeta.map(i => `<div class="vf-row">
-    <div><b>${esc(i.label)}</b><div class="vf-why">Sin meta, la app no puede decir si está bien o mal:
-      solo muestra el valor. Las metas son lo único que se escribe a mano.</div></div>
-    <span class="vf-tag">tu decisión</span></div>`).join('')}</div>` : ''}
+  <div class="section-label"><span class="num">◆</span><h2>Metas sin fijar — ${sinMeta.length}</h2>
+    <span class="rule"></span><span class="sl-note">con una propuesta calculada desde tu propia historia</span></div>
+  <div class="vf-list">${sinMeta.map(i => {
+    const mp = metaPropuesta(i);
+    return `<div class="vf-row">
+      <div><b>${esc(i.label)}</b>
+        <div class="vf-why">${mp
+          ? `Hoy va en <b>${esc(ejeFmt(i, mp.actual))}</b>. En ${mp.n} meses su mejor cuartil
+             (${mp.nCuartil} meses) tiene mediana <b>${esc(ejeFmt(i, mp.valor))}</b>, y su mejor
+             mes fue ${esc(ejeFmt(i, mp.mejor))}. Esa mediana es lo que este indicador ya demostró
+             que puede sostener — no un número aspiracional.`
+          : `Sin serie mensual suficiente para proponer un valor. Hay que fijarla a mano.`}</div>
+        ${mp ? `<div class="vf-prop">Propuesta: <b>${esc(ejeFmt(i, mp.valor))}</b>
+          <button type="button" class="vf-btn" onclick="editarMeta('${i.clave}')">Fijar meta</button></div>` : ''}
+      </div>
+      <span class="vf-tag">tu decisión</span></div>`;
+  }).join('')}</div>
+  <p class="mg-resto">La propuesta es la <b>mediana del mejor cuartil</b> de la propia serie, sin
+    contar el mes en curso. Se usa la mediana y no el promedio para que un mes atípico no afloje la
+    meta. Nada se fija solo: el botón abre el mismo editor de siempre.</p>` : ''}
 
   <p class="eje-legal">La banda histórica compara el último valor de cada serie contra el promedio
     y la desviación de sus periodos anteriores. Es la comprobación que faltaba: las otras verifican

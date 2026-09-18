@@ -276,11 +276,11 @@
     },
     {
       "clave": "mip_tn",
-      "label": "Costo de materiales por tonelada vendida",
+      "label": "Costo de materiales por tonelada producida",
       "reporte": "consumo_materiales",
       "serie": [
         "consumo",
-        "MIP / TN Vendida"
+        "MIP / TN Producida"
       ],
       "meta": null,
       "direccion": "menor",
