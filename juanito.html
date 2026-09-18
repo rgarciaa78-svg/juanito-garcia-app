@@ -1980,6 +1980,16 @@ small { font-size:13px; line-height:1.4; }
 .mg-falta { font-size:12px; color:var(--text3); font-style:italic; }
 .mg-guia { font-size:13.5px; color:var(--text2); max-width:80ch; margin:0 0 12px; line-height:1.6; }
 .mg-guia b { color:var(--text); }
+.mg-mez { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
+  padding:14px 16px; background:var(--card); margin:0 0 18px; max-width:920px; }
+.mg-mez h3 { margin:0 0 7px; font-size:15px; font-weight:700; letter-spacing:-.01em; }
+.mg-mez p { font-size:13.5px; color:var(--text2); margin:0 0 9px; line-height:1.6; max-width:78ch; }
+.mg-mez p:last-child { margin-bottom:0; }
+.mg-mez p b { color:var(--text); }
+.mg-mez-t { width:100%; border-collapse:collapse; font-size:13px; margin:10px 0 12px; }
+.mg-mez-t td { padding:5px 8px; border-top:1px solid var(--line); }
+.mg-mez-t td.r { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.mg-mez-t tr td:first-child { font-weight:600; }
 .mg-lect { font-size:13.5px; color:var(--text2); max-width:82ch; margin:10px 0 26px; line-height:1.6; }
 .mg-lect b { color:var(--text); }
 .mg-sub { font-size:11.5px; color:var(--text3); margin-top:2px; }
@@ -3991,6 +4001,49 @@ function dxpMargenView() {
           ${desdeMejor && desdeMejor.perA !== pc.perA ? fila(desdeMejor, 'Desde el mejor mes') : ''}
         </tbody>
       </table></div>`;
+    })()}
+
+    ${(() => {
+      // La mezcla es la palanca que nadie entiende de golpe: "cuánto pesa cada
+      // familia" no dice nada a las siete de la mañana. Esta lectura la cuenta
+      // con nombres propios —qué se encogió, qué creció, y cuánto costó— en vez
+      // de dejar al lector deducirla de una tabla de 14 filas.
+      const comp = pc.detalle.filter(d => d.mez != null && d.m0 != null && !d.nueva && !d.sale);
+      if (comp.length < 4) return '';
+      const S = x => mgSoles(x * pc.vB);
+      const bajan = comp.filter(d => d.mez < 0).sort((a, b) => a.mez - b.mez).slice(0, 2);
+      const suben = comp.filter(d => d.mez > 0).sort((a, b) => b.mez - a.mez).slice(0, 2);
+      if (!bajan.length || !suben.length) return '';
+      const nom = d => esc(d.k);
+      const pesoTxt = d => `${(d.w0*100).toFixed(1)}% → ${(d.w1*100).toFixed(1)}%`;
+      const costoMezcla = comp.filter(d => d.mez < 0).reduce((a, d) => a + d.mez, 0);
+      // ¿El movimiento va de familias de margen alto a margen bajo?
+      const mAlto = bajan.reduce((a,d)=>a+d.m0,0)/bajan.length;
+      const mBajo = suben.reduce((a,d)=>a+d.m0,0)/suben.length;
+      const uenBaja = [...new Set(bajan.map(d => d.k.split(' · ')[0]))];
+      const uenSube = [...new Set(suben.map(d => d.k.split(' · ')[0]))];
+      const mismoUen = uenBaja.length === 1 && uenSube.length === 1 && uenBaja[0] !== uenSube[0];
+      return `
+      <div class="mg-mez">
+        <h3>Qué es la mezcla, con estos números</h3>
+        <p><b>Ninguna de estas familias cambió su margen de forma importante.</b> Lo que cambió es
+          cuánto pesa cada una en la venta, y eso solo mueve el promedio.</p>
+        <table class="mg-mez-t"><tbody>
+          ${bajan.map(d => `<tr><td>${nom(d)}</td><td class="r">deja <b>${mgPct(d.m0*100)}</b></td>
+            <td class="r">pesó ${pesoTxt(d)}</td><td class="r mg-red"><b>${S(d.mez)}</b></td></tr>`).join('')}
+          ${suben.map(d => `<tr><td>${nom(d)}</td><td class="r">deja <b>${mgPct(d.m0*100)}</b></td>
+            <td class="r">pesó ${pesoTxt(d)}</td><td class="r mg-green"><b>${S(d.mez)}</b></td></tr>`).join('')}
+        </tbody></table>
+        <p>Se vendió <b>menos de lo que deja ${mgPct(mAlto*100)}</b> y <b>más de lo que deja
+          ${mgPct(mBajo*100)}</b>. El promedio baja aunque ningún producto haya empeorado: es como
+          una tienda que vende menos joyas y más caramelos — la ganancia por venta cae sin que
+          ningún precio se haya movido.</p>
+        <p><b>En total, las familias que perdieron peso cuestan ${S(costoMezcla)}.</b>
+          ${mismoUen ? `Y no es un producto suelto: se está corriendo de <b>${esc(uenBaja[0])}</b>
+          hacia <b>${esc(uenSube[0])}</b>. Esa es una pregunta de qué se empuja y de en qué se
+          ocupa la planta, no de negociar con nadie.`
+          : `No se arregla negociando precio ni costo: se arregla decidiendo qué se empuja.`}</p>
+      </div>`;
     })()}
 
     <div class="mg-tabla"><table>
