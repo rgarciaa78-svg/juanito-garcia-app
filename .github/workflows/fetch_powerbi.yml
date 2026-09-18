@@ -63,8 +63,15 @@ jobs:
       # No corta la corrida. Congelar el tablero por un descuadre ya costo
       # cuatro dias en setiembre, y un dato con una advertencia visible sirve
       # mas que ningun dato.
+      # El traceback se guarda en un archivo y se publica aunque el paso
+      # falle. Sin esto, cuando la validacion revienta el motivo se queda
+      # dentro del runner: desde fuera solo se ve "exit code 1", y diagnosticar
+      # a ciegas nos costo tres corridas.
       - name: Validar coherencia de las cifras
-        run: python scripts/validar_datos.py --anotar
+        run: |
+          set -o pipefail
+          python scripts/validar_datos.py --anotar 2>&1 \
+            | tee data/latest/ultimo_log_validacion.txt
 
       # Ejecuta las tarjetas capturadas del reporte —la misma consulta que
       # Power BI usa para pintar el numero en pantalla— y las compara con lo
@@ -121,6 +128,24 @@ jobs:
       # traceback se queda dentro del runner: leerlo exige permisos sobre el
       # log de Actions. Este paso publica solo el archivo del error — nunca
       # los datos, que en ese momento estan a medio escribir.
+      # Publica el log de la validacion aunque el paso haya fallado: es la
+      # unica forma de ver el traceback sin entrar a Actions.
+      - name: Publicar el log de validacion si fallo
+        if: failure()
+        run: |
+          test -f data/latest/ultimo_log_validacion.txt || exit 0
+          cp data/latest/ultimo_log_validacion.txt /tmp/log_val.txt
+          git checkout -- . || true
+          git clean -fd data/latest || true
+          mkdir -p data/latest
+          cp /tmp/log_val.txt data/latest/ultimo_log_validacion.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest/ultimo_log_validacion.txt
+          git commit -m "log de validacion de la corrida que fallo" || exit 0
+          git pull --rebase origin main || true
+          git push "https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git" HEAD:main || true
+
       - name: Publicar el error si la corrida murio
         if: failure()
         run: |
