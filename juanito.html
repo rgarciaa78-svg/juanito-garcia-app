@@ -10681,6 +10681,11 @@ const DESGLOSES_LOCALES = [
     alias:['uen','unidad','unidades','negocio','tigo','maquila','bd'] },
   { clave:'por_sku', entidad:'sku', valor:'exceso', etq:'SKU por exceso sobre el estandar',
     alias:['sku','producto','productos','articulo','item','desviacion','desvio'] },
+  { clave:'precio_kg_sku', entidad:'producto', valor:'precio_kg', etq:'productos por precio por kilo',
+    alias:['precio','precios','kilo','kilos','kg','unitario','caro','caros','barato','baratos',
+           'vende','vendemos','cobra','cobramos'] },
+  { clave:'margen_sku', entidad:'producto', valor:'margen', etq:'productos por margen',
+    alias:['margen','margenes','rentable','rentables','rentabilidad','deja','dejan'] },
   { clave:'responsables', entidad:'responsable', valor:'vencido', etq:'responsables de cobranza por vencido',
     alias:['ejecutivo','ejecutivos','vendedor','vendedores','jefe','responsable','responsables',
            'canal','cobranza','vencido','vencida','mora'] },
@@ -10892,7 +10897,17 @@ function localIntencion(p) {
 }
 
 // Ranking de un desglose: ordena y devuelve los primeros, con su peso.
-function localRanking(rd, cfg, tope) {
+// `dirPregunta` viene de la propia pregunta: "menor precio por kilo" y "el más
+// caro" son la misma lista al revés, y antes el orden lo fijaba la config, así
+// que preguntar por los más baratos devolvía los más caros sin avisar.
+function localDireccion(texto) {
+  const t = localNormalizar(texto || '');
+  if (/\b(menor|menores|menos|mas bajo|mas bajos|mas barato|mas baratos|barato|baratos|minimo|minimos|ultimo|ultimos|peores)\b/.test(t)) return 'asc';
+  if (/\b(mayor|mayores|mas|mas alto|mas altos|mas caro|mas caros|caro|caros|maximo|maximos|top|mejores)\b/.test(t)) return 'desc';
+  return null;
+}
+
+function localRanking(rd, cfg, tope, dirPregunta) {
   const filas = rd[cfg.clave] || [];
   const items = [];
   filas.forEach(f => {
@@ -10908,7 +10923,8 @@ function localRanking(rd, cfg, tope) {
       extra: f.pct != null ? f.pct : (f.margen ?? f.pedidos ?? null) });
   });
   if (!items.length) return null;
-  items.sort((a, b) => cfg.menorEsPeor ? a.v - b.v : b.v - a.v);
+  const asc = dirPregunta ? dirPregunta === 'asc' : !!cfg.menorEsPeor;
+  items.sort((a, b) => asc ? a.v - b.v : b.v - a.v);
   const total = items.reduce((a, b) => a + b.v, 0);
   return { items: items.slice(0, tope || 6), total, n: items.length };
 }
@@ -10995,8 +11011,18 @@ function localSeriesDe(tipo) {
 // debo a E & M"), lo que se quiere es esa fila, no el total del reporte.
 const EMPRESAS_LOCALES = ['pauno','amauta','neopack'];
 
+// Palabras que nombran una MEDIDA, no una entidad. Sin esta lista, "menor
+// precio por kilo" encontraba el producto "PRECIO UNO YOG BEB..." —hay una
+// marca que se llama así— y respondía con esa ficha en vez del ranking.
+const MEDIDAS_LOCALES = new Set([
+  'precio','precios','costo','costos','margen','margenes','venta','ventas',
+  'kilo','kilos','unitario','merma','mermas','stock','deuda','deudas',
+  'vencido','vencida','monto','montos','total','totales','peso','pesos',
+  'exceso','excesos','cumplimiento','rotacion','avance']);
+
 function localBuscarEntidad(rp, tk, tipoPref, texto) {
-  const largos = tk.filter(t => t.length >= 4 && !EMPRESAS_LOCALES.includes(t));
+  const largos = tk.filter(t => t.length >= 4 && !EMPRESAS_LOCALES.includes(t)
+                               && !MEDIDAS_LOCALES.has(t));
   const tipos = [tipoPref, ...Object.keys(rp).filter(t => t !== tipoPref)].filter(Boolean);
   for (const t of tipos) {
     for (const cfg of DESGLOSES_LOCALES) {
@@ -11039,9 +11065,27 @@ function localFichaEntidad(rp, ent, aviso) {
 }
 
 // Punto de entrada. Devuelve HTML o null si no sabe responder.
+// sku_por_uen llega como un objeto por unidad de negocio y el buscador del
+// chat solo recorre arreglos, así que estos dos desgloses no existían para él
+// aunque el dato sí estuviera publicado. Se aplanan una vez, al vuelo.
+function localAplanarSku(rp) {
+  const mv = rp.margen_variable;
+  if (!mv || mv.precio_kg_sku || !mv.sku_por_uen) return;
+  const filas = [];
+  Object.entries(mv.sku_por_uen).forEach(([uen, fs]) => (fs || []).forEach(f => {
+    if (f.sospechoso) return;   // el dato marcado no entra en rankings
+    filas.push({ producto: f.producto, uen, subcategoria: f.subcategoria,
+                 precio_kg: f.precio_kg, margen: f.margen, venta: f.venta });
+  }));
+  if (!filas.length) return;
+  mv.precio_kg_sku = filas.filter(f => f.precio_kg != null);
+  mv.margen_sku = filas.filter(f => f.margen != null);
+}
+
 function analizarLocal(pregunta) {
   const emp = 'PAUNO';
   const rp = (DATA?.empresas || {})[emp]?.reportes || {};
+  localAplanarSku(rp);
   const det = localReporte(pregunta);
   const tipo = det.tipo;
   const texto = localNormalizar(pregunta);
@@ -11083,16 +11127,25 @@ function analizarLocal(pregunta) {
   if (sel && sel.cfg && (intencion === 'ranking' || intencion === 'origen' ||
       (sel.p >= 1 && intencion !== 'tendencia'))) {
     const elegido = sel.cfg;
-    const r = localRanking(rp[sel.tipo], elegido, 6);
+    const r = localRanking(rp[sel.tipo], elegido, 6, localDireccion(pregunta));
     if (r) {
       const nomSec = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[sel.tipo]) || sel.tipo;
       const esPct = /%/.test(String(r.items[0].crudo || ''));
-      const dir = elegido.menorEsPeor ? 'de peor a mejor' : 'de mayor a menor';
+      // El rótulo tiene que decir el orden REAL, no el de la config: si la
+      // pregunta pidió los de menor precio, decía "de mayor a menor" encima de
+      // una lista ascendente. Un encabezado que contradice a su propia lista
+      // es peor que no ponerlo.
+      const dirPreg = localDireccion(pregunta);
+      const asc = dirPreg ? dirPreg === 'asc' : !!elegido.menorEsPeor;
+      const dir = asc ? 'de menor a mayor' : 'de mayor a menor';
+      // Un precio o un margen no son partes de un total: sumarlos y sacar
+      // "% del total" no significa nada. Solo los montos lo llevan.
+      const aditivo = !esPct && !/precio|margen/.test(elegido.clave);
       partes.push(`<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
         (sel.tipo === tipo ? avisoDim : '') +
         `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>`);
       partes.push(r.items.map((x, i) => {
-        const peso = (!elegido.menorEsPeor && r.total)
+        const peso = (aditivo && !asc && r.total)
           ? ` · ${(x.v / r.total * 100).toFixed(1)}% del total` : '';
         const ex = (x.extra == null || esPct) ? ''
           : ` · ${typeof x.extra === 'number' ? x.extra.toFixed(1) + '%' : x.extra}`;
@@ -11102,7 +11155,7 @@ function analizarLocal(pregunta) {
       // En una lista de tres, tener el 56% no es una concentración: es
       // aritmética. La alerta pide lista suficientemente larga.
       const conc = r.total ? primero.v / r.total : 0;
-      if (!elegido.menorEsPeor && ((r.n >= 4 && conc > 0.5) || (r.n >= 6 && conc > 0.3))) {
+      if (aditivo && !asc && ((r.n >= 4 && conc > 0.5) || (r.n >= 6 && conc > 0.3))) {
         partes.push(`<br><br>⚠️ <b>${localEsc(primero.n)}</b> concentra el ` +
           `${(conc * 100).toFixed(0)}% — la cifra depende de uno solo.`);
       }
