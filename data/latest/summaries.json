@@ -1,16 +1,16 @@
 {
   "fecha": "17/09/2026",
   "fecha_actualizacion": "2026-09-17",
-  "hora_actualizacion": "07:39",
+  "hora_actualizacion": "20:09",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "green"
   },
   "semaforo_razon": {
-    "PAUNO": "Morosidad 14.4% — OK"
+    "PAUNO": "Morosidad 14.3% — OK"
   },
   "holding_ventas": "S/8.23M",
-  "holding_mora": "14.4%",
+  "holding_mora": "14.3%",
   "agenda_ceo": {
     "decidir_hoy": [],
     "escalar_semana": [],
@@ -25,44 +25,44 @@
           "kpis": [
             {
               "label": "Morosidad · hoy",
-              "valor": "14.4%",
+              "valor": "14.3%",
               "meta": "15%",
               "estado": "green",
-              "fuente": "sondeo",
+              "fuente": "reporte",
               "nota_periodo": "saldo del día. El cierre de 2026-08 fue 21.9%.",
               "periodo": "2026-09",
               "periodo_fuente": "cxc/% Morosidad"
             },
             {
               "label": "CxC por vencer",
-              "valor": "S/4.20M",
+              "valor": "S/4.09M",
               "meta": "aging confirmado",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "CxC Total",
-              "valor": "S/4.91M",
+              "valor": "S/4.77M",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "CxC Vencido",
-              "valor": "S/706,768",
-              "meta": "14.4% de cartera",
+              "valor": "S/681,604",
+              "meta": "14.3% de cartera",
               "estado": "yellow",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Clientes",
-              "valor": "219",
+              "valor": "218",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Ventas del mes",
-              "valor": "S/2.56M",
+              "valor": "S/2.72M",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             }
@@ -70,19 +70,19 @@
           "tramos": [
             {
               "label": "Por Vencer",
-              "valor": "S/4.20M",
+              "valor": "S/4.09M",
               "estado": "green",
-              "pct": 85.6
+              "pct": 85.7
             },
             {
               "label": "0 a 15 días",
-              "valor": "S/146,296",
+              "valor": "S/126,635",
               "estado": "yellow",
-              "pct": 3.0
+              "pct": 2.7
             },
             {
               "label": "16 a 30 días",
-              "valor": "S/224,378",
+              "valor": "S/218,874",
               "estado": "yellow",
               "pct": 4.6
             },
@@ -90,7 +90,7 @@
               "label": "Más de 30 días",
               "valor": "S/336,094",
               "estado": "red",
-              "pct": 6.8
+              "pct": 7.0
             }
           ],
           "responsables": [
@@ -105,29 +105,29 @@
               "responsable": "CARLOS MIRANDA",
               "nivel": "jefe",
               "canal": "CANAL TRADICIONAL",
-              "total": "S/744,615",
-              "vencido": "S/165,146"
-            },
-            {
-              "responsable": "MORI COLLAZOS MARTIN",
-              "nivel": "jefe",
-              "canal": "CANAL TRADICIONAL",
-              "total": "S/157,007",
-              "vencido": "S/114,106"
+              "total": "S/739,111",
+              "vencido": "S/159,642"
             },
             {
               "responsable": "JOSELYN ASTORAY",
               "nivel": "jefe",
               "canal": "HORECA",
-              "total": "S/406,619",
-              "vencido": "S/105,077"
+              "total": "S/396,186",
+              "vencido": "S/97,540"
+            },
+            {
+              "responsable": "MORI COLLAZOS MARTIN",
+              "nivel": "jefe",
+              "canal": "CANAL TRADICIONAL",
+              "total": "S/135,047",
+              "vencido": "S/92,146"
             },
             {
               "responsable": "GIOVANI O'BRIEN",
               "nivel": "jefe",
               "canal": "CANAL TRADICIONAL",
-              "total": "S/188,610",
-              "vencido": "S/57,406"
+              "total": "S/198,447",
+              "vencido": "S/67,244"
             },
             {
               "responsable": "JUAN CHAVEZ",
@@ -140,14 +140,14 @@
               "responsable": "YAQUELINE VALDIVIA",
               "nivel": "jefe",
               "canal": "CANAL TRADICIONAL",
-              "total": "S/218,873",
+              "total": "S/213,953",
               "vencido": "S/26,019"
             },
             {
               "responsable": "JUAN CANCHARIS",
               "nivel": "jefe",
               "canal": "CANAL MODERNO",
-              "total": "S/2.44M",
+              "total": "S/2.41M",
               "vencido": "S/10,159"
             },
             {
@@ -161,7 +161,7 @@
               "responsable": "OCTAVIO ESPINOZA",
               "nivel": "jefe",
               "canal": "CANAL TRADICIONAL",
-              "total": "S/165,066",
+              "total": "S/98,914",
               "vencido": "S/-13,025"
             }
           ]
@@ -172,7 +172,7 @@
           "kpis": [
             {
               "label": "CxP Total",
-              "valor": "S/16.83M",
+              "valor": "S/17.05M",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
@@ -185,28 +185,28 @@
             },
             {
               "label": "# Proveedores",
-              "valor": "186",
+              "valor": "187",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "CxP Vencido",
-              "valor": "S/3.43M",
-              "meta": "33.1% de la deuda viva",
+              "valor": "S/3.45M",
+              "meta": "32.5% de la deuda viva",
               "estado": "red",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Deuda top 15 proveedores",
-              "valor": "S/12.29M",
+              "valor": "S/12.44M",
               "meta": "concentración",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Días CxP",
-              "valor": "107d",
+              "valor": "117d",
               "meta": "<90d",
               "fuente": "reporte",
               "periodo": "2026-08",
@@ -216,50 +216,50 @@
           "tramos": [
             {
               "label": "Vigente",
-              "valor": "S/6.94M",
-              "pct": 66.9,
+              "valor": "S/7.15M",
+              "pct": 67.5,
               "estado": "green"
             },
             {
               "label": "31 a 45 días",
-              "valor": "S/1.12M",
-              "pct": 10.8,
+              "valor": "S/1.04M",
+              "pct": 9.8,
               "estado": "red"
             },
             {
               "label": "16 a 30 días",
-              "valor": "S/730,646",
+              "valor": "S/760,941",
+              "pct": 7.2,
+              "estado": "yellow"
+            },
+            {
+              "label": "8 a 15 días",
+              "valor": "S/743,202",
               "pct": 7.0,
               "estado": "yellow"
             },
             {
               "label": "0 a 7 días",
-              "valor": "S/656,575",
-              "pct": 6.3,
+              "valor": "S/515,945",
+              "pct": 4.9,
               "estado": "yellow"
-            },
-            {
-              "label": "8 a 15 días",
-              "valor": "S/597,833",
-              "pct": 5.8,
-              "estado": "yellow"
-            },
-            {
-              "label": "61 a 90 días",
-              "valor": "S/360,221",
-              "pct": 3.5,
-              "estado": "red"
             },
             {
               "label": "46 a 60 días",
-              "valor": "S/296,518",
-              "pct": 2.9,
+              "valor": "S/378,838",
+              "pct": 3.6,
+              "estado": "red"
+            },
+            {
+              "label": "61 a 90 días",
+              "valor": "S/361,908",
+              "pct": 3.4,
               "estado": "red"
             },
             {
               "label": "Más de 91 días",
-              "valor": "S/-326,973",
-              "pct": -3.2,
+              "valor": "S/-355,670",
+              "pct": -3.4,
               "estado": "red"
             }
           ],
@@ -268,19 +268,25 @@
               "nombre": "E & M S.R.L.",
               "categoria": "LECHE DESCREMADA",
               "monto": "S/5.25M",
-              "pct": 42.7
+              "pct": 42.2
             },
             {
               "nombre": "DIVERPLAST S.A.C.",
               "categoria": "BOTELLAS",
               "monto": "S/1.03M",
-              "pct": 8.4
+              "pct": 8.3
+            },
+            {
+              "nombre": "SOCIEDAD GANADERA EL SEQUION S A",
+              "categoria": "LECHE FRESCA",
+              "monto": "S/758,251",
+              "pct": 6.1
             },
             {
               "nombre": "SAN MIGUEL INDUSTRIAS PET S.A.",
               "categoria": "SOBRECOPAS, VASOS Y TAPAS",
               "monto": "S/751,998",
-              "pct": 6.1
+              "pct": 6.0
             },
             {
               "nombre": "CORPORACION DE ALIMENTOS TIERRA BENDITA SOCIEDAD ANONIMA CERRADA",
@@ -292,19 +298,13 @@
               "nombre": "INTERLOOM S.A.C.",
               "categoria": "AZUCAR BLANCA",
               "monto": "S/674,296",
-              "pct": 5.5
-            },
-            {
-              "nombre": "SOCIEDAD GANADERA EL SEQUION S A",
-              "categoria": "LECHE FRESCA",
-              "monto": "S/638,391",
-              "pct": 5.2
+              "pct": 5.4
             },
             {
               "nombre": "CHR. HANSEN PERU S.A.",
               "categoria": "CULTIVO CASEI",
               "monto": "S/511,691",
-              "pct": 4.2
+              "pct": 4.1
             },
             {
               "nombre": "TRUPAL S.A.",
@@ -315,14 +315,14 @@
             {
               "nombre": "QUIMERCO S.A.S. SUCURSAL DEL PERU",
               "categoria": "ESPESANTE",
-              "monto": "S/375,465",
-              "pct": 3.1
+              "monto": "S/392,579",
+              "pct": 3.2
             },
             {
               "nombre": "PROLABELS S.A.",
               "categoria": "ETIQUETAS",
-              "monto": "S/340,126",
-              "pct": 2.8
+              "monto": "S/355,532",
+              "pct": 2.9
             },
             {
               "nombre": "GEKA CORP S.A.C",
@@ -340,7 +340,7 @@
               "nombre": "ICATOM S.A.",
               "categoria": "PASTA DE TOMATE",
               "monto": "S/326,283",
-              "pct": 2.7
+              "pct": 2.6
             },
             {
               "nombre": "TRANSPORTES E INVERSIONES YAURI S.A.C.",
@@ -358,8 +358,8 @@
           "_no_cuadran": {
             "tramos": {
               "kpi": "CxP Total",
-              "suma": 10374820,
-              "kpi_valor": 16830000,
+              "suma": 10595164,
+              "kpi_valor": 17050000,
               "motivo": "el aging son los vencimientos corrientes; el total incluye además la deuda refinanciada, que no vence por tramos"
             }
           }
@@ -3368,6 +3368,2368 @@
               }
             ]
           },
+          "margen_mensual": [
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 48380.73,
+              "costo": 19358.04,
+              "peso": 2072.67,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 17597.78,
+              "costo": 5978.59,
+              "peso": 1185.0,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 93515.24,
+              "costo": 32741.52,
+              "peso": 10403.21,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 24821.46,
+              "costo": 11147.99,
+              "peso": 2183.91,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 614900.27,
+              "costo": 201817.01,
+              "peso": 119299.138,
+              "skus": 25
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 158525.97,
+              "costo": 87162.65,
+              "peso": 10864.78,
+              "skus": 15
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 510330.72,
+              "costo": 156031.09,
+              "peso": 99885.644,
+              "skus": 23
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 40966.38,
+              "costo": 12371.1,
+              "peso": 4848.2,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 116199.8,
+              "costo": 40495.52,
+              "peso": 11231.5,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 10416.0,
+              "costo": 6206.24,
+              "peso": 744.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 1925389.29,
+              "costo": 1044786.51,
+              "peso": 521861.64,
+              "skus": 46
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 45217.2,
+              "costo": 27219.72,
+              "peso": 7382.4,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 532072.56,
+              "costo": 297826.83,
+              "peso": 64896.96,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 10253.28,
+              "costo": 1981.41,
+              "peso": 1226.4,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 25909.2,
+              "costo": 20443.08,
+              "peso": 3240.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 246078.48,
+              "costo": 146678.18,
+              "peso": 18063.504,
+              "skus": 12
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 7475.52,
+              "costo": 1445.48,
+              "peso": 1017.6,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 92538.72,
+              "costo": 35151.41,
+              "peso": 15164.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "MAQUILA",
+              "familia": "REGULAR",
+              "venta": 6963.9,
+              "costo": 3619.14,
+              "peso": 981.96,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 167334.12,
+              "costo": 93112.4,
+              "peso": 18838.97,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "CHEF",
+              "venta": 2208.95,
+              "costo": 708.83,
+              "peso": 144.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 258353.66,
+              "costo": 111646.78,
+              "peso": 12660.375,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 174448.88,
+              "costo": 57006.31,
+              "peso": 7959.278,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "MIELES",
+              "venta": 3819.01,
+              "costo": 1455.21,
+              "peso": 196.55,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 273020.87,
+              "costo": 137014.74,
+              "peso": 23992.42,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 207803.79,
+              "costo": 81507.4,
+              "peso": 18327.02,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 101680.23,
+              "costo": 35372.86,
+              "peso": 9875.5,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 39288.82,
+              "costo": 24168.07,
+              "peso": 2432.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "SENSACIONES",
+              "venta": -20.64,
+              "costo": 0.0,
+              "peso": -1.26,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-01",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 475628.77,
+              "costo": 256509.64,
+              "peso": 47656.95,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 30523.24,
+              "costo": 13244.69,
+              "peso": 1404.2,
+              "skus": 9
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 11685.34,
+              "costo": 3957.03,
+              "peso": 782.4,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 88448.88,
+              "costo": 29567.17,
+              "peso": 10025.18,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 21053.74,
+              "costo": 10013.54,
+              "peso": 2010.83,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 871052.5,
+              "costo": 302938.1,
+              "peso": 191884.877,
+              "skus": 27
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 108561.0,
+              "costo": 63680.07,
+              "peso": 7463.96,
+              "skus": 18
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 672096.36,
+              "costo": 213343.25,
+              "peso": 145555.205,
+              "skus": 25
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 26442.42,
+              "costo": 7379.95,
+              "peso": 3294.0,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 39465.67,
+              "costo": 12479.87,
+              "peso": 3699.5,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 10550.4,
+              "costo": 6233.43,
+              "peso": 753.6,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 1864756.74,
+              "costo": 1027438.58,
+              "peso": 508970.64,
+              "skus": 39
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 55389.6,
+              "costo": 53992.89,
+              "peso": 9043.2,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 579090.24,
+              "costo": 322019.98,
+              "peso": 70725.84,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 15818.88,
+              "costo": 2912.0,
+              "peso": 1900.8,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 19152.72,
+              "costo": 14078.69,
+              "peso": 2361.6,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 396042.96,
+              "costo": 234414.94,
+              "peso": 27853.584,
+              "skus": 19
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 8239.2,
+              "costo": 1532.69,
+              "peso": 1116.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 81318.64,
+              "costo": 30915.62,
+              "peso": 13472.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "MAQUILA",
+              "familia": "REGULAR",
+              "venta": 750.6,
+              "costo": 390.09,
+              "peso": 105.84,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 189888.99,
+              "costo": 111859.54,
+              "peso": 19014.06,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "CHEF",
+              "venta": 5614.43,
+              "costo": 1724.21,
+              "peso": 366.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 280910.71,
+              "costo": 118974.93,
+              "peso": 13354.425,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 148468.71,
+              "costo": 60870.04,
+              "peso": 8402.344,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "MIELES",
+              "venta": 23579.56,
+              "costo": 7544.04,
+              "peso": 992.14,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 227996.04,
+              "costo": 113439.26,
+              "peso": 19507.02,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 239373.69,
+              "costo": 91967.29,
+              "peso": 21105.16,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 150453.82,
+              "costo": 56606.78,
+              "peso": 14317.5,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 45025.53,
+              "costo": 22371.77,
+              "peso": 2816.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "SENSACIONES",
+              "venta": -25.92,
+              "costo": 0.0,
+              "peso": -1.62,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "STRAAL",
+              "venta": 9368.64,
+              "costo": 4588.18,
+              "peso": -0.9,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-02",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 463362.92,
+              "costo": 238129.81,
+              "peso": 43052.5,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 55809.58,
+              "costo": 22573.27,
+              "peso": 2418.97,
+              "skus": 8
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 15310.25,
+              "costo": 4990.23,
+              "peso": 972.0,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 108767.9,
+              "costo": 37104.95,
+              "peso": 12022.03,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 16485.9,
+              "costo": 4197.72,
+              "peso": 918.96,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 860950.54,
+              "costo": 298918.58,
+              "peso": 181328.945,
+              "skus": 22
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 182724.49,
+              "costo": 98649.05,
+              "peso": 13407.605,
+              "skus": 16
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 592138.96,
+              "costo": 182932.25,
+              "peso": 122823.078,
+              "skus": 20
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 43425.83,
+              "costo": 11948.09,
+              "peso": 4944.6,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 128140.88,
+              "costo": 46789.01,
+              "peso": 13224.0,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 4032.0,
+              "costo": 2407.21,
+              "peso": 288.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 2044444.56,
+              "costo": 1123106.69,
+              "peso": 569649.76,
+              "skus": 38
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 72618.0,
+              "costo": 49722.35,
+              "peso": 11856.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 674871.12,
+              "costo": 372731.67,
+              "peso": 81866.4,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 9880.8,
+              "costo": 2437.23,
+              "peso": 1188.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 23728.8,
+              "costo": 18302.22,
+              "peso": 2952.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 549411.48,
+              "costo": 334081.92,
+              "peso": 39298.332,
+              "skus": 20
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 4646.64,
+              "costo": 849.99,
+              "peso": 631.2,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 102607.76,
+              "costo": 38223.19,
+              "peso": 16740.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "MAQUILA",
+              "familia": "REGULAR",
+              "venta": 6630.3,
+              "costo": 3658.83,
+              "peso": 934.92,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 211752.46,
+              "costo": 119267.22,
+              "peso": 22946.835,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "CHEF",
+              "venta": 1196.52,
+              "costo": 374.07,
+              "peso": 78.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 345824.51,
+              "costo": 142076.22,
+              "peso": 15965.6,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 115810.47,
+              "costo": 47783.42,
+              "peso": 6441.453,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "MIELES",
+              "venta": 1809.78,
+              "costo": 704.97,
+              "peso": 89.455,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 241462.1,
+              "costo": 116913.13,
+              "peso": 19783.16,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 159733.53,
+              "costo": 60843.81,
+              "peso": 14617.88,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 112843.79,
+              "costo": 41759.25,
+              "peso": 10350.5,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 54846.9,
+              "costo": 31775.5,
+              "peso": 3572.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "SENSACIONES",
+              "venta": -29.0,
+              "costo": 0.0,
+              "peso": -1.8,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "STRAAL",
+              "venta": 10950.25,
+              "costo": 4835.13,
+              "peso": 0.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-03",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 625346.59,
+              "costo": 324398.05,
+              "peso": 58253.05,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 68127.89,
+              "costo": 28850.17,
+              "peso": 3096.26,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 12721.6,
+              "costo": 4255.09,
+              "peso": 832.8,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 78733.93,
+              "costo": 32165.04,
+              "peso": 9122.53,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 10920.3,
+              "costo": 4313.07,
+              "peso": 902.9,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 803424.26,
+              "costo": 283969.89,
+              "peso": 170237.485,
+              "skus": 23
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 245961.33,
+              "costo": 117958.89,
+              "peso": 16760.245,
+              "skus": 16
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 762281.08,
+              "costo": 248286.43,
+              "peso": 167613.369,
+              "skus": 21
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 28220.18,
+              "costo": 9308.09,
+              "peso": 3882.6,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 164815.61,
+              "costo": 66282.12,
+              "peso": 18126.0,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 22881.6,
+              "costo": 13752.03,
+              "peso": 1634.4,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 2021938.24,
+              "costo": 1310389.32,
+              "peso": 563823.28,
+              "skus": 30
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 91639.8,
+              "costo": 73133.39,
+              "peso": 14961.6,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 643825.68,
+              "costo": 376554.25,
+              "peso": 79221.12,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 29309.28,
+              "costo": 8740.15,
+              "peso": 3520.8,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 49724.4,
+              "costo": 38942.81,
+              "peso": 6168.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 383164.56,
+              "costo": 235556.09,
+              "peso": 27948.72,
+              "skus": 14
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 17356.8,
+              "costo": 3194.25,
+              "peso": 2352.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 101598.72,
+              "costo": 39026.09,
+              "peso": 16832.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 131298.2,
+              "costo": 74529.46,
+              "peso": 15063.94,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 190060.41,
+              "costo": 81133.44,
+              "peso": 8880.025,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 48582.32,
+              "costo": 20574.72,
+              "peso": 2703.398,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "MIELES",
+              "venta": 92.49,
+              "costo": 86.85,
+              "peso": 8.42,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 116826.71,
+              "costo": 61256.12,
+              "peso": 10093.68,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 49760.4,
+              "costo": 18559.96,
+              "peso": 4551.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 84009.19,
+              "costo": 32969.04,
+              "peso": 7734.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 76526.0,
+              "costo": 36962.32,
+              "peso": 5395.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "STRAAL",
+              "venta": 6626.83,
+              "costo": 2898.38,
+              "peso": 0.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-04",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 545901.73,
+              "costo": 318165.54,
+              "peso": 52189.15,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 52578.73,
+              "costo": 22441.94,
+              "peso": 2389.17,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 10101.04,
+              "costo": 3367.21,
+              "peso": 681.6,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 108850.3,
+              "costo": 42354.45,
+              "peso": 12671.4,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 7786.9,
+              "costo": 3119.06,
+              "peso": 665.75,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 826238.21,
+              "costo": 287970.37,
+              "peso": 174372.903,
+              "skus": 21
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 202907.56,
+              "costo": 105483.81,
+              "peso": 15573.11,
+              "skus": 16
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 743514.11,
+              "costo": 250177.11,
+              "peso": 141578.933,
+              "skus": 24
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 53390.15,
+              "costo": 15013.97,
+              "peso": 5680.6,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 119226.78,
+              "costo": 47923.55,
+              "peso": 12884.0,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 23486.4,
+              "costo": 16779.31,
+              "peso": 1677.6,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 2133695.82,
+              "costo": 1408800.3,
+              "peso": 618990.8,
+              "skus": 33
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 88376.4,
+              "costo": 70942.04,
+              "peso": 14428.8,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 753228.96,
+              "costo": 440141.4,
+              "peso": 84895.92,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 20066.88,
+              "costo": 5667.81,
+              "peso": 2378.4,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 53829.12,
+              "costo": 41930.36,
+              "peso": 6595.2,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 418779.96,
+              "costo": 248654.88,
+              "peso": 30755.184,
+              "skus": 11
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 13327.44,
+              "costo": 2501.76,
+              "peso": 1807.2,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 108146.16,
+              "costo": 40944.43,
+              "peso": 17800.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "MAQUILA",
+              "familia": "SALSA DE TOMATE",
+              "venta": 1302.4,
+              "costo": 498.23,
+              "peso": 176.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 112531.66,
+              "costo": 72285.64,
+              "peso": 13645.525,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 342508.87,
+              "costo": 149617.88,
+              "peso": 16202.025,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 90883.37,
+              "costo": 38626.6,
+              "peso": 5115.541,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "MIELES",
+              "venta": -1.41,
+              "costo": 1.13,
+              "peso": -0.035,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 133764.35,
+              "costo": 73431.4,
+              "peso": 12416.16,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 127816.63,
+              "costo": 55837.08,
+              "peso": 11627.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 136650.63,
+              "costo": 55013.22,
+              "peso": 12486.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 86686.82,
+              "costo": 51361.59,
+              "peso": 5998.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-05",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 611119.99,
+              "costo": 353424.18,
+              "peso": 57155.7,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 50218.83,
+              "costo": 22987.15,
+              "peso": 2322.0,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 11856.69,
+              "costo": 4095.84,
+              "peso": 792.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 85766.11,
+              "costo": 33391.66,
+              "peso": 9874.92,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 6067.52,
+              "costo": 2257.98,
+              "peso": 496.78,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 821056.78,
+              "costo": 294023.58,
+              "peso": 171877.232,
+              "skus": 23
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 194499.85,
+              "costo": 108643.41,
+              "peso": 16416.3,
+              "skus": 14
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 616312.81,
+              "costo": 196750.72,
+              "peso": 134524.7,
+              "skus": 17
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 36869.11,
+              "costo": 10676.31,
+              "peso": 4263.2,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 127924.64,
+              "costo": 57088.82,
+              "peso": 14625.0,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 29097.6,
+              "costo": 17586.84,
+              "peso": 2078.4,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 2354898.46,
+              "costo": 1511071.76,
+              "peso": 653109.36,
+              "skus": 37
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 101812.2,
+              "costo": 81447.81,
+              "peso": 16622.4,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 751285.84,
+              "costo": 445587.31,
+              "peso": 90408.48,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 12042.24,
+              "costo": 2999.31,
+              "peso": 1394.4,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 63235.2,
+              "costo": 48822.26,
+              "peso": 7678.2,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 459102.72,
+              "costo": 278439.68,
+              "peso": 33586.236,
+              "skus": 11
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 18165.6,
+              "costo": 3393.45,
+              "peso": 2448.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 116610.56,
+              "costo": 44851.84,
+              "peso": 19216.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "MAQUILA",
+              "familia": "SALSA DE TOMATE",
+              "venta": 1687.2,
+              "costo": 634.48,
+              "peso": 228.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 167420.36,
+              "costo": 94683.29,
+              "peso": 19377.665,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 332884.9,
+              "costo": 141590.46,
+              "peso": 15608.6,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 99086.59,
+              "costo": 43335.25,
+              "peso": 5543.566,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 171025.37,
+              "costo": 88748.33,
+              "peso": 14668.44,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 158972.96,
+              "costo": 65341.9,
+              "peso": 14550.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 110594.97,
+              "costo": 44512.03,
+              "peso": 10137.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 58883.51,
+              "costo": 30668.14,
+              "peso": 3969.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-06",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 450664.28,
+              "costo": 252809.27,
+              "peso": 41521.65,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 44796.52,
+              "costo": 19968.16,
+              "peso": 2036.52,
+              "skus": 7
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 12522.71,
+              "costo": 3933.7,
+              "peso": 760.8,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 117920.94,
+              "costo": 44526.43,
+              "peso": 13390.98,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 10885.96,
+              "costo": 4032.21,
+              "peso": 886.52,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 868882.9,
+              "costo": 305804.16,
+              "peso": 189829.836,
+              "skus": 21
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 176876.35,
+              "costo": 91800.38,
+              "peso": 14285.86,
+              "skus": 13
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 730334.28,
+              "costo": 225065.88,
+              "peso": 169995.392,
+              "skus": 16
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 35392.2,
+              "costo": 9886.2,
+              "peso": 4382.8,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 90289.98,
+              "costo": 38176.61,
+              "peso": 9924.5,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 33566.4,
+              "costo": 19457.34,
+              "peso": 2397.6,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 2189586.48,
+              "costo": 1423839.45,
+              "peso": 628650.2,
+              "skus": 36
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 64003.8,
+              "costo": 29832.28,
+              "peso": 10449.6,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 778813.68,
+              "costo": 470820.0,
+              "peso": 95742.96,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 17669.76,
+              "costo": 5908.24,
+              "peso": 2116.8,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 33077.28,
+              "costo": 22851.11,
+              "peso": 4054.32,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 447067.08,
+              "costo": 272812.09,
+              "peso": 32867.892,
+              "skus": 11
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 10660.8,
+              "costo": 1906.79,
+              "peso": 1464.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 81863.68,
+              "costo": 32213.76,
+              "peso": 13408.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "MAQUILA",
+              "familia": "SALSA DE TOMATE",
+              "venta": 1628.0,
+              "costo": 612.22,
+              "peso": 220.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 166197.91,
+              "costo": 71550.1,
+              "peso": 19452.865,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 361892.45,
+              "costo": 156085.37,
+              "peso": 17087.525,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 72883.93,
+              "costo": 31033.31,
+              "peso": 4120.397,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 188660.08,
+              "costo": 96517.68,
+              "peso": 16114.56,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 149463.36,
+              "costo": 61199.55,
+              "peso": 13647.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 112134.99,
+              "costo": 44878.84,
+              "peso": 10333.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 72286.51,
+              "costo": 38046.21,
+              "peso": 4530.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "STRAAL",
+              "venta": 12982.18,
+              "costo": 11375.59,
+              "peso": 0.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-07",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 448705.11,
+              "costo": 245279.55,
+              "peso": 40914.75,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": 52327.49,
+              "costo": 23985.53,
+              "peso": 2386.98,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 12841.26,
+              "costo": 4355.47,
+              "peso": 840.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 99022.36,
+              "costo": 37189.09,
+              "peso": 10983.42,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 9190.88,
+              "costo": 3431.01,
+              "peso": 755.56,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 821232.35,
+              "costo": 295855.32,
+              "peso": 162186.708,
+              "skus": 19
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 206339.03,
+              "costo": 118216.16,
+              "peso": 16950.62,
+              "skus": 13
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 635541.06,
+              "costo": 208388.27,
+              "peso": 136720.776,
+              "skus": 15
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 47045.36,
+              "costo": 13804.09,
+              "peso": 5922.8,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 143831.28,
+              "costo": 59071.29,
+              "peso": 14536.0,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 16128.0,
+              "costo": 10026.94,
+              "peso": 1152.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 2459686.52,
+              "costo": 1611575.64,
+              "peso": 659531.04,
+              "skus": 42
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 72647.4,
+              "costo": 39164.38,
+              "peso": 11860.8,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 730001.28,
+              "costo": 420595.98,
+              "peso": 85093.68,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 22522.56,
+              "costo": 6783.66,
+              "peso": 2656.8,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 24057.84,
+              "costo": 18376.59,
+              "peso": 2842.56,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 541935.6,
+              "costo": 346593.9,
+              "peso": 38864.508,
+              "skus": 12
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 6132.0,
+              "costo": 1120.95,
+              "peso": 840.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 123649.04,
+              "costo": 48274.75,
+              "peso": 20348.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "REGULAR",
+              "venta": 3461.1,
+              "costo": 1821.17,
+              "peso": 488.04,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "MAQUILA",
+              "familia": "SALSA DE TOMATE",
+              "venta": 2693.6,
+              "costo": 1012.94,
+              "peso": 364.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 125165.92,
+              "costo": 62978.22,
+              "peso": 15081.19,
+              "skus": 5
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 377828.46,
+              "costo": 170814.31,
+              "peso": 17819.025,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 126932.24,
+              "costo": 52327.87,
+              "peso": 6245.095,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 196496.4,
+              "costo": 100907.46,
+              "peso": 16483.68,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 128533.72,
+              "costo": 55131.49,
+              "peso": 11777.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 116227.85,
+              "costo": 47495.72,
+              "peso": 10710.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 64804.02,
+              "costo": 39255.99,
+              "peso": 3972.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "STRAAL",
+              "venta": 5494.28,
+              "costo": 4839.88,
+              "peso": 0.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-08",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 530913.22,
+              "costo": 303092.2,
+              "peso": 48929.4,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "AJI",
+              "venta": -808.49,
+              "costo": -262.21,
+              "peso": -11.64,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "BARBECUE",
+              "venta": 2507.21,
+              "costo": 819.82,
+              "peso": 158.4,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "CREMA PACK DUO",
+              "venta": 21715.99,
+              "costo": 8058.84,
+              "peso": 2358.54,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "CREMA PACK TRIO",
+              "venta": 2460.78,
+              "costo": 933.6,
+              "peso": 200.61,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "KETCHUP",
+              "venta": 138829.1,
+              "costo": 63417.81,
+              "peso": 30490.548,
+              "skus": 15
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "MAYONESA",
+              "venta": 34565.11,
+              "costo": 21731.61,
+              "peso": 3453.548,
+              "skus": 12
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "MOSTAZA",
+              "venta": 106297.43,
+              "costo": 37108.86,
+              "peso": 20226.404,
+              "skus": 14
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "PASTA DE TOMATE",
+              "venta": 9340.9,
+              "costo": 2687.14,
+              "peso": 1162.4,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "B&D",
+              "familia": "SALSA INGLESA",
+              "venta": 20140.68,
+              "costo": 8954.83,
+              "peso": 2664.5,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "AJI",
+              "venta": 13876.8,
+              "costo": 7869.91,
+              "peso": 991.2,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "BEBIBLE",
+              "venta": 870501.26,
+              "costo": 502685.56,
+              "peso": 231477.2,
+              "skus": 32
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "FRUTADO",
+              "venta": 26636.4,
+              "costo": 14314.52,
+              "peso": 4348.8,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "GRIEGO",
+              "venta": 334441.92,
+              "costo": 189109.37,
+              "peso": 40768.8,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "KETCHUP",
+              "venta": 13028.16,
+              "costo": 4156.35,
+              "peso": 1552.8,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "MAYONESA",
+              "venta": 21929.52,
+              "costo": 18452.09,
+              "peso": 2710.68,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "MIX",
+              "venta": 255421.32,
+              "costo": 152484.97,
+              "peso": 17784.696,
+              "skus": 11
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "MOSTAZA",
+              "venta": 8197.2,
+              "costo": 1501.18,
+              "peso": 1116.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "PASTA DE TOMATE",
+              "venta": 34870.96,
+              "costo": 13634.5,
+              "peso": 5756.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "REGULAR",
+              "venta": 9048.9,
+              "costo": 4735.78,
+              "peso": 1275.96,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "MAQUILA",
+              "familia": "SALSA DE TOMATE",
+              "venta": 917.6,
+              "costo": 345.07,
+              "peso": 124.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "BEBIBLE",
+              "venta": 33569.78,
+              "costo": 15683.43,
+              "peso": 3684.02,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "GRANOLA",
+              "venta": 154821.18,
+              "costo": 67918.85,
+              "peso": 7314.475,
+              "skus": 3
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "KIDS",
+              "venta": 27400.76,
+              "costo": 10172.9,
+              "peso": 1090.867,
+              "skus": 4
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "PREMIUM",
+              "venta": 61209.37,
+              "costo": 29113.53,
+              "peso": 5133.64,
+              "skus": 6
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "PREMIUM LIGHT",
+              "venta": 71868.21,
+              "costo": 28306.3,
+              "peso": 6559.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "PREMIUM SIN AZUCAR",
+              "venta": 58585.23,
+              "costo": 22790.26,
+              "peso": 5434.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "QUESO CREMA",
+              "venta": 16439.73,
+              "costo": 9716.72,
+              "peso": 1006.0,
+              "skus": 1
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "STRAAL",
+              "venta": 5596.59,
+              "costo": 4568.07,
+              "peso": 0.0,
+              "skus": 2
+            },
+            {
+              "periodo": "2026-09",
+              "uen": "TIGO",
+              "familia": "VIDRIOS",
+              "venta": 186944.23,
+              "costo": 95732.46,
+              "peso": 16345.5,
+              "skus": 6
+            }
+          ],
+          "margen_mensual_periodos": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06",
+            "2026-07",
+            "2026-08",
+            "2026-09"
+          ],
           "sku_por_uen_meses": [
             "2026-08",
             "2026-09"
@@ -3428,18 +5790,17 @@
             },
             {
               "label": "Venta Neta (KG) · acumulado 2026",
-              "valor": "10,332,034 KG",
+              "valor": "10,358,478 KG",
               "validado": true,
               "fuente": "reporte",
               "nota_periodo": "la consulta filtra solo por año, sin mes"
             },
             {
               "label": "Costo x TN Vendida",
-              "valor": "S/144",
+              "valor": "S/143",
               "validado": true,
               "fuente": "reporte",
-              "periodo": "2026-08",
-              "periodo_fuente": "consumo/MIP / TN Vendida"
+              "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Producción Neta (KG) · acumulado 2026",
@@ -3688,19 +6049,19 @@
             },
             {
               "label": "Consumo Prom 3M",
-              "valor": "13,980,145",
+              "valor": "13,685,576",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Consumo Prom 6M",
-              "valor": "13,832,304",
+              "valor": "13,774,305",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Materiales en quiebre",
-              "valor": "33",
+              "valor": "38",
               "meta": "explosión de materiales",
               "estado": "red",
               "fuente": "reporte",
@@ -3717,43 +6078,50 @@
             {
               "producto": "LECHE FRESCA",
               "categoria": "Lácteos base y derivados",
-              "faltante": "89,344",
+              "faltante": "86,854",
               "stock": "5,000",
               "lead_time": null
             },
             {
               "producto": "BOTELLA 1.7KG (GALONERA)",
               "categoria": "Envases rígidos (botellas, frascos, potes, vasos)",
-              "faltante": "40,214",
+              "faltante": "31,288",
               "stock": "76,568",
               "lead_time": null
             },
             {
               "producto": "LECHE DESCREMADA EN POLVO LH",
               "categoria": "Lácteos base y derivados",
-              "faltante": "19,990",
+              "faltante": "17,857",
               "stock": "6,371",
               "lead_time": null
             },
             {
               "producto": "AZUCAR BLANCA",
               "categoria": "Azúcares y edulcorantes",
-              "faltante": "9,304",
+              "faltante": "7,735",
               "stock": "16,150",
               "lead_time": null
             },
             {
               "producto": "SEPARADOR DE CARTON 27.6 CM X 17.2 CM",
               "categoria": "Cajas y embalaje secundario",
-              "faltante": "6,011",
+              "faltante": "5,260",
               "stock": "0",
               "lead_time": null
             },
             {
-              "producto": "CAJA CORRUGADA GRANOLA (375X280X92MM)",
-              "categoria": "Cajas y embalaje secundario",
-              "faltante": "3,541",
-              "stock": "1,500",
+              "producto": "ACEITE DE SOYA",
+              "categoria": "Aceites, grasas y proteínas vegetales",
+              "faltante": "4,348",
+              "stock": "4,416",
+              "lead_time": null
+            },
+            {
+              "producto": "ETIQ B&D MOSTAZA 220G ND",
+              "categoria": "Etiquetas",
+              "faltante": "4,240",
+              "stock": "3,200",
               "lead_time": null
             },
             {
@@ -3764,38 +6132,31 @@
               "lead_time": null
             },
             {
-              "producto": "ETIQ YOGURTGRIEGO - MANGO MARACUYÁ 1KG",
+              "producto": "ETIQ B&D KETCHUP 425 ND",
               "categoria": "Etiquetas",
-              "faltante": "1,181",
-              "stock": "0",
+              "faltante": "2,800",
+              "stock": "800",
               "lead_time": null
             },
             {
-              "producto": "ETIQ CUISINE & CO X 500GR GRIEGO - FRESA",
-              "categoria": "Etiquetas",
-              "faltante": "817",
-              "stock": "0",
-              "lead_time": null
-            },
-            {
-              "producto": "CAJA CORRUGADA BALDE 1K - 0.500 G (268X400X137MM)",
+              "producto": "CAJA CORRUGADA GRANOLA (375X280X92MM)",
               "categoria": "Cajas y embalaje secundario",
-              "faltante": "792",
-              "stock": "3,232",
+              "faltante": "2,702",
+              "stock": "1,500",
               "lead_time": null
             },
             {
               "producto": "CAJA CORRUGADA DOYPACK 1KG (270X220X275MM)",
               "categoria": "Cajas y embalaje secundario",
-              "faltante": "550",
+              "faltante": "1,650",
               "stock": "0",
               "lead_time": null
             },
             {
-              "producto": "PULPA DE ARANDANOS / CHIA",
-              "categoria": "Pulpas y frutas procesadas",
-              "faltante": "481",
-              "stock": "1,300",
+              "producto": "YEMA DE HUEVO LIQUIDA YL12",
+              "categoria": "Lácteos base y derivados",
+              "faltante": "946",
+              "stock": "180",
               "lead_time": null
             }
           ],
@@ -3820,7 +6181,7 @@
         },
         "sop_inventario": {
           "estado": "red",
-          "alerta": "Dead Stock 18.5% del inventario",
+          "alerta": "Dead Stock 15.8% del inventario",
           "kpis": [
             {
               "label": "Inventario Total",
@@ -3830,7 +6191,7 @@
             },
             {
               "label": "Dead Stock",
-              "valor": "S/1.24M",
+              "valor": "S/1.07M",
               "meta": "<S/500K",
               "estado": "red",
               "fuente": "reporte",
@@ -3838,7 +6199,7 @@
             },
             {
               "label": "% Dead Stock",
-              "valor": "18.5%",
+              "valor": "15.8%",
               "meta": "<5%",
               "estado": "red",
               "fuente": "reporte",
@@ -3846,19 +6207,19 @@
             },
             {
               "label": "Working Stock",
-              "valor": "S/4.44M",
+              "valor": "S/4.80M",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Exceso 1 (2-5 meses)",
-              "valor": "S/650,592",
+              "valor": "S/529,510",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             },
             {
               "label": "Exceso 2 (5-12 meses)",
-              "valor": "S/395,869",
+              "valor": "S/335,102",
               "fuente": "reporte",
               "nota_periodo": "no corresponde a ningún mes del eje: es un saldo al corte o un acumulado. Dato al 17/09/2026."
             }
@@ -3866,64 +6227,64 @@
           "dead_por_categoria": [
             {
               "categoria": "ENVASES Y EMBALAJES",
-              "valor": "S/923,165",
-              "pct": 74.3
+              "valor": "S/788,093",
+              "pct": 73.9
             },
             {
               "categoria": "PROD. EN PROCESO",
-              "valor": "S/97,152",
-              "pct": 7.8
+              "valor": "S/85,070",
+              "pct": 8.0
             },
             {
               "categoria": "MATERIA PRIMA",
-              "valor": "S/90,752",
-              "pct": 7.3
+              "valor": "S/79,370",
+              "pct": 7.4
             },
             {
               "categoria": "SUMINISTROS",
-              "valor": "S/55,365",
-              "pct": 4.5
+              "valor": "S/50,054",
+              "pct": 4.7
             },
             {
               "categoria": "REPUESTOS",
               "valor": "S/32,520",
-              "pct": 2.6
+              "pct": 3.0
             },
             {
               "categoria": "PT SALSAS",
-              "valor": "S/20,491",
-              "pct": 1.6
+              "valor": "S/15,734",
+              "pct": 1.5
             }
           ],
           "working_por_categoria": [
             {
               "categoria": "ENVASES Y EMBALAJES",
-              "valor": "S/1.74M",
-              "pct": 39.1
+              "valor": "S/2.01M",
+              "pct": 41.9
             },
             {
               "categoria": "MATERIA PRIMA",
-              "valor": "S/1.33M",
-              "pct": 30.0
+              "valor": "S/1.36M",
+              "pct": 28.3
             },
             {
               "categoria": "PT SALSAS",
-              "valor": "S/493,813",
-              "pct": 11.1
+              "valor": "S/512,259",
+              "pct": 10.7
             },
             {
               "categoria": "PT YOGURTS",
-              "valor": "S/467,307",
-              "pct": 10.5
+              "valor": "S/471,804",
+              "pct": 9.8
             },
             {
               "categoria": "PROD. EN PROCESO",
-              "valor": "S/240,687",
-              "pct": 5.4
+              "valor": "S/267,811",
+              "pct": 5.6
             },
             {
               "categoria": "SUMINISTROS",
-              "valor": "S/74,168",
+              "valor": "S/80,703",
               "pct": 1.7
             }
           ]
@@ -4486,7 +6847,7 @@
                 17
               ],
               "valor": [
-                0.034963763797710753,
+                0.03496376379771077,
                 0.030953440194960234,
                 0.019204670757321855,
                 0.024650779974193314,
@@ -4496,7 +6857,7 @@
                 0.018259998627673846,
                 0.018526854650446588,
                 0.026446919685712215,
-                0.020121043318844088,
+                0.020121043318844085,
                 0.027970978720304806,
                 0.03379258027055928,
                 0.019727315514508348,
@@ -4540,19 +6901,19 @@
                 31
               ],
               "valor": [
-                0.016175515558884634,
+                0.01617551555888464,
                 0.021242797882297836,
-                0.01264055837818892,
-                0.02065116579565291,
-                0.0210549631356511,
-                0.01459968286963943,
+                0.012640558378188923,
+                0.020651165795652914,
+                0.021054963135651097,
+                0.014599682869639438,
                 0.021136022415478177,
                 0.0,
                 0.012695686932539096,
                 0.019858578711071898,
                 0.019823666929006546,
                 0.007901269900171518,
-                0.021181168314617554,
+                0.021181168314617548,
                 0.01964239290006582,
                 0.01980175474624114,
                 0.030774773258854752,
@@ -4561,13 +6922,13 @@
                 0.008180022101898998,
                 0.019632722714284262,
                 0.033740637081045556,
-                0.0566062591318416,
+                0.056606259131841585,
                 0.05958515857828246,
                 0.03421056087872813,
-                0.03083057131582723,
+                0.030830571315827216,
                 0.028462557821880622,
                 0.021053398828406802,
-                0.03746842049198904,
+                0.037468420491989056,
                 0.04650047816403052,
                 0.019068043185547837,
                 0.04411681118458833
@@ -4598,22 +6959,22 @@
                 17
               ],
               "valor": [
-                52834.899999999994,
+                52834.89999999999,
                 47797.32800000001,
-                53415.115,
+                53415.11499999999,
                 46053.595,
                 57608.40999999999,
                 16867.225000000002,
-                31198.890000000003,
-                55966.850000000006,
-                48559.23400000001,
+                31198.89,
+                55966.84999999999,
+                48559.234000000004,
                 64926.012,
                 54734.853999999985,
                 52521.948,
                 13589.565,
                 39559.295,
                 56227.842000000004,
-                48239.041999999994,
+                48239.042,
                 4672.46
               ]
             },
@@ -4652,25 +7013,25 @@
                 31
               ],
               "valor": [
-                62475.850000000006,
+                62475.85,
                 16437.0,
                 41164.48,
                 53209.38,
-                62648.89499999999,
+                62648.895000000004,
                 52521.275,
-                43708.68200000001,
+                43708.682000000015,
                 776.0,
                 799.7,
                 7719.485,
                 40947.22,
                 45950.375,
-                53115.888,
+                53115.88799999999,
                 50459.26499999999,
-                50076.37999999999,
+                50076.38,
                 19071.83,
                 24324.528,
                 40210.376000000004,
-                54126.68499999999,
+                54126.685,
                 57239.91,
                 52503.62000000001,
                 51121.04400000001,
@@ -4681,7 +7042,7 @@
                 38897.678,
                 68267.49,
                 41679.36800000001,
-                18187.310000000005,
+                18187.31,
                 35523.03999999999
               ]
             }
@@ -11530,13 +13891,13 @@
     "avance": 0.6295519287006067
   },
   "verificacion": {
-    "verificados": 59,
+    "verificados": 60,
     "total": 62
   },
   "cobertura": {
-    "kpis_del_reporte": 59,
+    "kpis_del_reporte": 60,
     "kpis_totales": 62,
-    "pct": 95.2
+    "pct": 96.8
   },
   "diagnostico": [
     {
@@ -11651,6 +14012,13 @@
       "campo": "precio_kg",
       "formula": "venta del SKU / kilos del SKU",
       "razon": "el cruce de SKU con unidad de negocio no existe en ningún visual: se arma con los filtros del reporte y el precio por kilo se deriva de venta y peso"
+    },
+    {
+      "reporte": "margen_variable",
+      "desglose": "margen_mensual",
+      "campo": "venta",
+      "formula": "suma de venta, costo y peso de los SKU de cada familia, por mes",
+      "razon": "la consulta de SKU ya traía el año entero con kilos; sin los kilos del mes anterior la mezcla solo se puede despejar por residuo, que es una cifra de cuadre y no una medición"
     },
     {
       "reporte": "margen_variable",
