@@ -1428,6 +1428,29 @@ def dax_precio_producto_cliente():
     )
 
 
+def dax_margen_cliente_uen():
+    """Margen por CLIENTE dentro de cada unidad de negocio, por mes.
+
+    Ningún visual del reporte hace ese cruce: el de clientes los da a nivel
+    empresa y el de unidades no los abre por cliente. Pero salen de la misma
+    tabla de facturas, así que el cruce existe en el modelo aunque no exista
+    en pantalla. Es la misma mecánica de dax_sku_por_uen y hereda sus filtros
+    literalmente: lo único que se escribe a mano son las columnas por las que
+    se agrupa.
+
+    Con esto se puede responder "el margen de mis clientes en B&D", que es una
+    pregunta distinta de "el margen de mis clientes" — y la respuesta también,
+    porque un cliente puede dejar bien en una unidad y mal en otra.
+    """
+    base = dax_sku_por_uen()
+    if not base:
+        return None
+    return base.replace(
+        "'Exl A Maestra de Facturas de Venta'[producto],\n        "
+        "'Exl A Maestra de Facturas de Venta'[Subcategoria],",
+        "'Exl A Maestra de Facturas de Venta'[contacto_factura],")
+
+
 def dax_sku_por_uen():
     """Arma la consulta que cruza SKU con unidad de negocio.
 
@@ -3523,6 +3546,44 @@ def build_margen(found):
     # ── SKU por unidad de negocio: qué producto mueve el margen DENTRO de
     # cada UEN. Mismo criterio de orden que por_producto: puntos de margen
     # sobre el total de su unidad, no caída porcentual.
+    # Cliente cruzado con unidad de negocio, por mes.
+    cu = found.get("__cliente_uen") or []
+    if cu:
+        def _b(f, suf):
+            for k, v in f.items():
+                if k.endswith(suf):
+                    return v
+            return None
+        acum = {}
+        for f in cu:
+            cli = (_b(f, "[contacto_factura]") or "").strip()
+            uen = (_b(f, "[TIPO DE NEGOCIO N1]") or "").strip()
+            v_, c_ = to_float(_b(f, "[Venta]")), to_float(_b(f, "[Costo]"))
+            anio, mes = to_float(_b(f, "[Año]")), to_float(_b(f, "[NroMes]"))
+            if not cli or not uen or v_ is None or c_ is None or not v_:
+                continue
+            if not anio or not mes:
+                continue
+            # La forma canónica agrupa —une "S.A." con "SA"— pero no se
+            # muestra: el nombre legible es el que el usuario reconoce.
+            k = (f"{int(anio)}-{int(mes):02d}", uen, nombre_canonico(cli))
+            o = acum.setdefault(k, {"venta": 0.0, "costo": 0.0, "nombre": cli})
+            o["venta"] += v_
+            o["costo"] += c_
+        if acum:
+            res["margen_cliente_uen"] = [
+                {"periodo": k[0], "uen": k[1], "cliente": o["nombre"],
+                 "venta": round(o["venta"], 2), "costo": round(o["costo"], 2),
+                 "margen": f"{(1 - o['costo'] / o['venta']) * 100:.1f}%"}
+                for k, o in sorted(acum.items()) if o["venta"]]
+            res["margen_cliente_uen_periodos"] = sorted({k[0] for k in acum})
+            anotar_derivado(
+                "margen_variable", "margen_cliente_uen", "margen",
+                "1 - costo/venta del cliente dentro de esa unidad de negocio",
+                "ningún visual cruza cliente con unidad: los clientes venían a "
+                "nivel empresa y las unidades sin abrir por cliente")
+            print(f"    · margen por cliente y unidad: {len(res['margen_cliente_uen'])} filas")
+
     sku = found.get("__sku_por_uen") or []
     if sku:
         def _busca(f, suf):
@@ -5376,6 +5437,20 @@ def main():
                         print(f"    ✓ SKU por unidad de negocio: {len(filas)} filas")
                     else:
                         print("    ✗ SKU por unidad de negocio: sin filas")
+
+                # Y el mismo cruce por CLIENTE. "El margen de mis clientes en
+                # B&D" no se podía responder: los clientes venían a nivel
+                # empresa y las unidades sin abrir por cliente.
+                qc = dax_margen_cliente_uen()
+                if qc:
+                    cl = _tablas_dax(token, ws_id, margen_ds_id, qc,
+                                     "margen_cliente_uen")
+                    fc = (cl or [[]])[0]
+                    if fc:
+                        scanned.setdefault("margen", {})["__cliente_uen"] = fc
+                        print(f"    ✓ Cliente por unidad de negocio: {len(fc)} filas")
+                    else:
+                        print("    ✗ Cliente por unidad de negocio: sin filas")
             except Exception as e:
                 print(f"    ✗ detalle de costos: {e}")
                 DIAGNOSTICO.append({"consulta": "detalle_costos", "http": 0,

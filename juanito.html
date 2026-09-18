@@ -2210,7 +2210,7 @@ small { font-size:13px; line-height:1.4; }
 const SW_VERSION = 'v=19';
 // Sello de compilación: sirve para confirmar de un vistazo qué versión está
 // cargada. Sin esto, "no me cambió" y "sí cambió" son indistinguibles.
-const APP_BUILD = '2026-09-17-h';
+const APP_BUILD = '2026-09-18-a';
 // Limpiar todo el caché viejo al abrir la app
 (async function() {
   try {
@@ -12100,6 +12100,7 @@ function construirContexto() {
         'Para "por qué" o "de dónde viene": busca en desgloses (por_cliente, por_uen, por_area, dead_por_categoria, tramos, faltantes) y en series por segmento.',
         'Para preguntas de PRODUCTO —precio por kilo, margen por SKU, qué subió o bajó— usa margen_variable.sku_detalle: es una tabla con "columnas" y "filas", donde cada fila trae los valores en el orden de columnas. Trae el mes actual y el previo, así que también responde qué cambió.',
         'Las filas marcadas con aviso "DATO EN REVISION" no se usan en rankings ni promedios: su cifra está mal en el origen.',
+        'Para "margen de los clientes en B&D" o cualquier cruce de cliente con unidad de negocio usa margen_variable.margen_cliente_uen: trae periodo, uen, cliente, venta, costo y margen. Un cliente puede dejar bien en una unidad y mal en otra, así que el margen de empresa no responde esa pregunta.',
         'Para "desde cuándo" o "cómo viene": recorre la serie mensual y di en qué mes cambió la tendencia.',
         'Compara segmentos entre sí antes de dar un promedio: el promedio esconde al que está mal.',
         'Cita siempre el mes de cada cifra. Los períodos están en series.periodos, alineados por posición con cada array.',
@@ -12149,6 +12150,12 @@ function construirContexto() {
         cumplimiento_produccion: rd.cumplimiento_produccion,
         faltantes: rd.faltantes,
         por_cliente: rd.por_cliente,
+        // Cliente cruzado con unidad de negocio. Sin esto la IA contestaba,
+        // con razón, que no tenía el margen de los clientes DENTRO de B&D:
+        // los clientes venían a nivel empresa y las unidades sin abrir por
+        // cliente. Y son preguntas distintas — un cliente puede dejar bien en
+        // una unidad y mal en otra.
+        margen_cliente_uen: rd.margen_cliente_uen,
         // El detalle por SKU no viajaba, y sin él la IA contestaba con toda
         // honestidad "no dispongo del precio por kilo a nivel de producto".
         // Va en filas y no en objetos: son 142 productos y repetir el nombre
