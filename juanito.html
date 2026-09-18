@@ -1967,6 +1967,7 @@ small { font-size:13px; line-height:1.4; }
 .mg-esc { display:block; height:13px; background:rgba(128,128,128,.12); border-radius:3px; }
 .mg-esc i { display:block; height:100%; border-radius:3px; }
 .mg-esc i.neg { background:var(--red); } .mg-esc i.pos { background:var(--green); }
+.mg-conc { background:rgba(128,128,128,.10); border-radius:6px; padding:10px 13px; }
 .mg-p-row.falta .mg-p-k { color:var(--text3); }
 .mg-falta { font-size:12px; color:var(--text3); font-style:italic; }
 .mg-lect { font-size:13.5px; color:var(--text2); max-width:82ch; margin:10px 0 26px; line-height:1.6; }
@@ -3828,18 +3829,36 @@ function dxpMargenView() {
     <div class="section-label"><span class="num">◆</span><h2>Puente de margen completo</h2>
       <span class="rule"></span><span class="sl-note">${pc.nFam} familias · mezcla medida, no despejada</span></div>
     <div class="mg-puente">
-      <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perA))}</span><span class="mg-p-b"></span>
+      <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perA))}
+        <small class="mg-nd">canasta de ${pc.nFam} familias</small></span><span class="mg-p-b"></span>
         <span class="mg-p-v">${mgPct(pc.M0*100)}</span></div>
       ${b(pc.efPrecio, 'Precio', 'lo que se cobra por kilo')}
       ${b(pc.efCosto, 'Costo', 'lo que cuesta el kilo')}
       ${b(pc.efMezcla, 'Mezcla', 'cuánto pesa cada familia en la venta')}
       ${Math.abs(pc.entran) > 1e-9 ? b(pc.entran, 'Altas y bajas', 'familias que entran o salen del mes') : ''}
       ${Math.abs(pc.residuo) > 1e-6 ? b(pc.residuo, 'Sin asignar', 'debería ser cero') : ''}
-      <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perB))}</span><span class="mg-p-b"></span>
+      <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perB))}
+        <small class="mg-nd">canasta de ${pc.nFam} familias</small></span><span class="mg-p-b"></span>
         <span class="mg-p-v">${mgPct(pc.M1*100)}</span></div>
       <div class="mg-p-row tot"><span class="mg-p-k">Cambio total</span><span class="mg-p-b"></span>
         <span class="mg-p-v ${mgCls(pc.total)}">${S(pc.total)}<small class="mg-nd"> ${mgPp(pc.total*100)} pp</small></span></div>
     </div>
+    ${(() => {
+      // La canasta del puente son las familias con detalle de SKU; el margen
+      // que publica el reporte incluye todo lo demás. Si no se dice, la
+      // pantalla muestra dos cifras distintas del mismo mes y se pierde la
+      // confianza en las dos.
+      const emp = actual ? actual.v : null;
+      if (emp == null) return '';
+      const dif = (pc.M1 - emp) * 100;
+      if (Math.abs(dif) < 0.15) return '';
+      return `<p class="mg-lect mg-conc"><b>Por qué esta cifra no es la de arriba.</b>
+        El puente se calcula sobre la canasta de ${pc.nFam} familias con detalle de SKU
+        (${mgPct(pc.M1*100)} en ${esc(nm(pc.perB))}). El reporte publica
+        <b>${mgPct(emp*100)}</b> para el mismo mes, porque su margen incluye todo lo que
+        queda fuera de esa canasta. La diferencia es de <b>${mgPp(dif)} pp</b>: el puente
+        explica el <b>movimiento</b> de la canasta, no el nivel de la empresa.</p>`;
+    })()}
     <p class="mg-lect">${(() => {
       const palancas = [['precio', pc.efPrecio], ['costo', pc.efCosto], ['mezcla', pc.efMezcla]]
         .sort((a,b) => a[1] - b[1]);
@@ -3852,6 +3871,47 @@ function dxpMargenView() {
              negociando, se arregla decidiendo qué se empuja.`
           : `Los tres efectos suman el cambio total sin residuo, así que no queda nada sin explicar.`}`;
     })()}</p>
+    ${(() => {
+      // Con la serie mensual completa se pueden medir otros dos tramos que
+      // dicen más que el último mes: el salto que rompió el año, y el
+      // recorrido desde el mejor mes hasta hoy.
+      const pers = (mv.margen_mensual_periodos || []);
+      if (pers.length < 3) return '';
+      // El salto más grande entre meses consecutivos de la serie.
+      let salto = null;
+      for (let i = 1; i < pers.length; i++) {
+        const q = mgPuenteCompleto(pers[i-1], pers[i]);
+        if (q && (!salto || q.total < salto.total)) salto = q;
+      }
+      const desdeMejor = mejor ? mgPuenteCompleto(mejor.p, pc.perB) : null;
+      const fila = (q, etq) => {
+        if (!q) return '';
+        const S = x => mgSoles(x * q.vB);
+        const pal = [['precio', q.efPrecio], ['costo', q.efCosto], ['mezcla', q.efMezcla]]
+          .sort((a,b) => a[1] - b[1])[0];
+        return `<tr>
+          <td><b>${etq}</b><div class="mg-sub">${esc(nm(q.perA))} → ${esc(nm(q.perB))}</div></td>
+          <td class="r ${mgCls(q.total)}"><b>${mgPp(q.total*100)} pp</b><div class="mg-sub">${S(q.total)}</div></td>
+          <td class="r ${mgCls(q.efPrecio)}">${mgPp(q.efPrecio*100)}</td>
+          <td class="r ${mgCls(q.efCosto)}">${mgPp(q.efCosto*100)}</td>
+          <td class="r ${mgCls(q.efMezcla)}">${mgPp(q.efMezcla*100)}</td>
+          <td><span class="mg-v ${pal[0]==='precio'?'pr':pal[0]==='costo'?'co':''}">manda ${pal[0]}</span></td>
+        </tr>`;
+      };
+      return `
+      <div class="section-label"><span class="num">◆</span><h2>Los tres tramos que importan</h2>
+        <span class="rule"></span><span class="sl-note">el mismo puente, en otros periodos</span></div>
+      <div class="mg-tabla"><table>
+        <thead><tr><th>Tramo</th><th class="r">Cambio</th><th class="r">Precio</th>
+          <th class="r">Costo</th><th class="r">Mezcla</th><th>Veredicto</th></tr></thead>
+        <tbody>
+          ${fila(pc, 'Último mes')}
+          ${salto && salto.perA !== pc.perA ? fila(salto, 'El peor salto del año') : ''}
+          ${desdeMejor && desdeMejor.perA !== pc.perA ? fila(desdeMejor, 'Desde el mejor mes') : ''}
+        </tbody>
+      </table></div>`;
+    })()}
+
     <div class="mg-tabla"><table>
       <thead><tr><th>Unidad · Familia</th>
         <th class="r">Venta ${esc(nm(pc.perA)).slice(0,3)}</th><th class="r">Venta ${esc(nm(pc.perB)).slice(0,3)}</th>
