@@ -282,11 +282,11 @@
         "consumo",
         "MIP / TN Producida"
       ],
-      "meta": null,
+      "meta": 173.21,
       "direccion": "menor",
       "tipo": "tasa",
       "unidad": "soles",
-      "origen": null
+      "origen": "Promedio del propio ratio de ago-dic 2025 con el filtro corregido (Costo + Gasto): 165.38, 173.19, 160.76, 149.14 y 217.57. Validado a mano contra la matriz 'MIP (S/.) / TN PRODUCIDA' del reporte 14 con los dos botones de TIPO DE OPERACION activados, y reproducido por la serie publicada. OJO: diciembre (217.57) está 25% sobre el resto y arrastra el promedio 8 puntos; la mediana de esos cinco meses es 165.38 y sería una meta más exigente y menos sensible a un mes atípico. Se deja el promedio por ser lo acordado en el PR; cambiarla es un clic en la tarjeta."
     },
     {
       "clave": "planilla_kg",
