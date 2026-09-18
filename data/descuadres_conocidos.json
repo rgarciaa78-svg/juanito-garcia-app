@@ -1,43 +1,55 @@
 {
- "_leeme": [
-  "Diferencias ya investigadas que NO deben encender la alarma.",
-  "",
-  "Sin esta lista, la corrida terminaba en rojo todos los días por las mismas",
-  "dos diferencias de siempre. Una alarma que suena siempre deja de mirarse, y",
-  "entonces el día que aparece algo nuevo tampoco se ve.",
-  "",
-  "Para entrar aquí, una diferencia tiene que estar explicada: no basta con",
-  "que moleste. Si no se sabe por qué difiere, se queda fuera y sigue sonando.",
-  "",
-  "Quitar una entrada vuelve a encender la alarma para esa diferencia."
- ],
- "conocidos": [
-  {
-   "prueba": "Ventas del mes: Margen vs Fill Rate",
-   "desde": "2026-09-13",
-   "resuelto": "2026-09-14",
-   "explicacion": "No era un descuadre. Confirmado por gerencia el 14/09/2026: la venta del mes es la del reporte de Margen (agosto S/7.69M) y la facturación de Fill Rate mide el cumplimiento del pedido, no la venta. La comparación se quitó de validar_datos.py y la fila del tablero pasó a leer la serie de Margen.",
-   "pendiente": null
-  },
-  {
-   "prueba": "Presupuesto acumulado al día (FACTURACION AL 05 SETIEMBRE)",
-   "desde": "2026-09-15",
-   "explicacion": "La captura devuelve el presupuesto acumulado hasta ayer en cero y el facturado del AÑO (S/18.63M contra una cuota mensual de S/7.79M): ese visual no filtra el mes. No es un fallo de la consulta, es el alcance del visual de origen. RESUELTO: no era que el visual no filtrara mes, sino que su filtro se llama 'Calendario'[Mes Nº] y viajaba clavado en julio. Ahora se reescribe al mes en curso.",
-   "pendiente": null,
-   "resuelto": "2026-09-15"
-  },
-  {
-   "prueba": "Serie mensual de Fill Rate y Pedidos no atendidos",
-   "desde": "2026-09-15",
-   "explicacion": "La consulta del visual 'FILLRATE POR MES' agrupa por 'CALENDARIO'[MES] y el año se resuelve aparte. Pedido con el año en la propia consulta, la medida solo devuelve de 2024-02 a 2025-04: no trae el mes en curso. Los cuatro puntos quedaban dibujados en el tramo viejo de un eje que llega a 2026-09, y se leían como si fueran de este año. Se dejó de publicar la serie: el gráfico muestra el hueco en vez de una línea mal ubicada. El KPI del mes no depende de esto, se lee del reporte. RESUELTO el mismo día sin necesidad de recapturar: la captura 'EVOLUTIVO DE % FILL RATE' sí trae el año y los nueve meses de 2026, con su meta. Pasó a ser la fuente principal; la consulta vieja queda de respaldo.",
-   "pendiente": null,
-   "resuelto": "2026-09-15"
-  },
-  {
-   "prueba": "B&D MOSTAZA BALDE 4K   ND: precio por kilo fuera de rango",
-   "desde": "2026-09-16",
-   "explicacion": "El precio por kilo salta de S/4.01 a S/31-34 según el mes, con el margen pasando de 64% a más de 90% cuando sus hermanos están entre 64% y 72%. No es un precio: es el peso registrado del producto. La app lo marca con ⚠ y lo deja fuera de todas las lecturas y rankings. El múltiplo cambia cada mes, así que la clave de esta entrada NO lo lleva.",
-   "pendiente": "Corregir el peso de ese SKU en el maestro de productos. Es dato de origen; desde la app no se puede arreglar."
-  }
- ]
+  "_leeme": [
+    "Diferencias ya investigadas que NO deben encender la alarma.",
+    "",
+    "Sin esta lista, la corrida terminaba en rojo todos los días por las mismas",
+    "dos diferencias de siempre. Una alarma que suena siempre deja de mirarse, y",
+    "entonces el día que aparece algo nuevo tampoco se ve.",
+    "",
+    "Para entrar aquí, una diferencia tiene que estar explicada: no basta con",
+    "que moleste. Si no se sabe por qué difiere, se queda fuera y sigue sonando.",
+    "",
+    "Quitar una entrada vuelve a encender la alarma para esa diferencia."
+  ],
+  "conocidos": [
+    {
+      "prueba": "Ventas del mes: Margen vs Fill Rate",
+      "desde": "2026-09-13",
+      "resuelto": "2026-09-14",
+      "explicacion": "No era un descuadre. Confirmado por gerencia el 14/09/2026: la venta del mes es la del reporte de Margen (agosto S/7.69M) y la facturación de Fill Rate mide el cumplimiento del pedido, no la venta. La comparación se quitó de validar_datos.py y la fila del tablero pasó a leer la serie de Margen.",
+      "pendiente": null
+    },
+    {
+      "prueba": "Presupuesto acumulado al día (FACTURACION AL 05 SETIEMBRE)",
+      "desde": "2026-09-15",
+      "explicacion": "La captura devuelve el presupuesto acumulado hasta ayer en cero y el facturado del AÑO (S/18.63M contra una cuota mensual de S/7.79M): ese visual no filtra el mes. No es un fallo de la consulta, es el alcance del visual de origen. RESUELTO: no era que el visual no filtrara mes, sino que su filtro se llama 'Calendario'[Mes Nº] y viajaba clavado en julio. Ahora se reescribe al mes en curso.",
+      "pendiente": null,
+      "resuelto": "2026-09-15"
+    },
+    {
+      "prueba": "Serie mensual de Fill Rate y Pedidos no atendidos",
+      "desde": "2026-09-15",
+      "explicacion": "La consulta del visual 'FILLRATE POR MES' agrupa por 'CALENDARIO'[MES] y el año se resuelve aparte. Pedido con el año en la propia consulta, la medida solo devuelve de 2024-02 a 2025-04: no trae el mes en curso. Los cuatro puntos quedaban dibujados en el tramo viejo de un eje que llega a 2026-09, y se leían como si fueran de este año. Se dejó de publicar la serie: el gráfico muestra el hueco en vez de una línea mal ubicada. El KPI del mes no depende de esto, se lee del reporte. RESUELTO el mismo día sin necesidad de recapturar: la captura 'EVOLUTIVO DE % FILL RATE' sí trae el año y los nueve meses de 2026, con su meta. Pasó a ser la fuente principal; la consulta vieja queda de respaldo.",
+      "pendiente": null,
+      "resuelto": "2026-09-15"
+    },
+    {
+      "prueba": "B&D MOSTAZA BALDE 4K   ND: precio por kilo fuera de rango",
+      "desde": "2026-09-16",
+      "explicacion": "El precio por kilo salta de S/4.01 a S/31-34 según el mes, con el margen pasando de 64% a más de 90% cuando sus hermanos están entre 64% y 72%. No es un precio: es el peso registrado del producto. La app lo marca con ⚠ y lo deja fuera de todas las lecturas y rankings. El múltiplo cambia cada mes, así que la clave de esta entrada NO lo lleva.",
+      "pendiente": "Corregir el peso de ese SKU en el maestro de productos. Es dato de origen; desde la app no se puede arreglar."
+    },
+    {
+      "prueba": "Costo x TN Vendida: tarjeta vs serie",
+      "desde": "2026-09-17",
+      "explicacion": "Apareció al corregir el filtro TIPO DE OPERACION, que pedía solo \"Costo\" cuando el costo de materiales tiene que sumar Costo y Gasto. La SERIE tomó la corrección y pasó de 143.6 a 157.1 en agosto; la TARJETA no cambió, porque no sale de una consulta del reporte: es la medida 'Ratio costo / kg' del modelo evaluada SIN los filtros del reporte (sin excluir chatarra, servicios ni facturas anuladas, y sin el segmentador de tipo de operación). Antes coincidían por casualidad. La cifra buena es la de la serie, que aplica los filtros del reporte; la tarjeta queda como referencia del modelo crudo y por eso tampoco lleva periodo. Lo confirma otra cifra del mismo bloque: 'Costo Total acumulado' sale en S/-1.48M, y un costo negativo no tiene lectura física — es la misma medida sin filtrar.",
+      "pendiente": "Dejar de derivar estas tarjetas de la medida cruda y leerlas del mismo camino que la serie. Requiere validar contra Power BI en vivo, porque el bloque completo (Costo Total, Venta Neta KG, Producción Neta KG y los dos ratios) sale de ahí."
+    },
+    {
+      "prueba": "Costo x TN Producida: tarjeta vs serie",
+      "desde": "2026-09-17",
+      "explicacion": "Misma causa que 'Costo x TN Vendida: tarjeta vs serie': las dos tarjetas se derivan del mismo bloque de medidas crudas del modelo, sin los filtros del reporte, y salen iguales entre sí (S/143 las dos) porque comparten numerador. La serie, que sí aplica los filtros, da 165.9 en agosto.",
+      "pendiente": "Dejar de derivar estas tarjetas de la medida cruda y leerlas del mismo camino que la serie. Requiere validar contra Power BI en vivo, porque el bloque completo (Costo Total, Venta Neta KG, Producción Neta KG y los dos ratios) sale de ahí."
+    }
+  ]
 }
