@@ -2066,17 +2066,16 @@ small { font-size:13px; line-height:1.4; }
   background:transparent; color:var(--text2); border-radius:5px; padding:3px 10px; }
 .vf-btn:hover { border-color:var(--text3); color:var(--text); }
 .vf-tag.ok { background:rgba(60,120,80,.16); color:var(--green); }
-/* Un solo ancho para todo lo que va dentro de las vistas nuevas. Antes las
-   tarjetas se topaban en 920px y los títulos de sección con su línea seguían
-   hasta el borde del contenedor: dos bordes derechos distintos en la misma
-   pantalla, que es lo que se veía descuadrado. El tope va en la vista, no en
-   cada bloque, para que nada se pueda desalinear. */
-#dxp-view-hoy, #dxp-view-margen, #dxp-view-precio, #dxp-view-verificar, .cya { max-width:1120px; }
+/* NADA de topes de ancho propios en las vistas nuevas. Un tope aquí dejaba el
+   contenido terminando antes que el encabezado PAUNO y que la barra de
+   pestañas: margen izquierdo de 80px contra uno derecho de casi 600, que es
+   lo que se veía descuadrado. Todo hereda el ancho del contenedor de la app,
+   así que el borde derecho del contenido es el mismo del título. */
 /* ── Vista HOY ── */
 .hoy-top h2 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin:0 0 4px; }
 .hoy-top p { font-size:14px; color:var(--text2); margin:0 0 18px; max-width:70ch; }
 .hoy-list { display:flex; flex-direction:column; gap:10px; margin-bottom:26px; }
-.hoy-row { display:grid; grid-template-columns:30px minmax(0,1fr) 150px; gap:14px; align-items:start;
+.hoy-row { display:grid; grid-template-columns:30px minmax(0,1fr) 160px; gap:14px; align-items:start;
   padding:14px 16px; border:1px solid var(--line); border-left:4px solid var(--yellow);
   border-radius:8px; background:var(--card); cursor:pointer; }
 /* En pantalla ancha la fila llegaba a 1496px: el texto terminaba a los 420 y el
