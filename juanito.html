@@ -2208,7 +2208,7 @@ small { font-size:13px; line-height:1.4; }
 const SW_VERSION = 'v=18';
 // Sello de compilación: sirve para confirmar de un vistazo qué versión está
 // cargada. Sin esto, "no me cambió" y "sí cambió" son indistinguibles.
-const APP_BUILD = '2026-09-17-d';
+const APP_BUILD = '2026-09-17-e';
 // Limpiar todo el caché viejo al abrir la app
 (async function() {
   try {
@@ -10912,15 +10912,126 @@ function localIntencion(p) {
 // `dirPregunta` viene de la propia pregunta: "menor precio por kilo" y "el más
 // caro" son la misma lista al revés, y antes el orden lo fijaba la config, así
 // que preguntar por los más baratos devolvía los más caros sin avisar.
+// ── Buscador genérico ──────────────────────────────────────────────────────
+// Las rutas escritas a mano cubren lo que alguien previó, y cada pregunta
+// nueva chocaba contra ese límite: el chat contestaba lo más parecido en vez
+// de decir que no sabía. Esto recorre TODO lo publicado y arma una ruta por
+// cada desglose y cada campo numérico que encuentra, con los alias sacados
+// del propio nombre del campo. Lo escrito a mano manda —tiene mejores
+// etiquetas—; esto cubre el resto.
+
+// Palabra -> sinónimos con los que la gente pregunta por ese campo.
+const SINONIMOS_CAMPO = {
+  precio:['precio','precios','cobra','cobramos','vende','vendemos','caro','barato'],
+  costo:['costo','costos','cuesta','cuestan'],
+  margen:['margen','margenes','rentable','rentabilidad','deja','dejan','gana'],
+  venta:['venta','ventas','factura','facturacion','vendido'],
+  peso:['peso','pesos','kilo','kilos','kg','tonelada','toneladas'],
+  monto:['monto','montos','importe','deuda','saldo'],
+  vencido:['vencido','vencida','mora','morosidad','atrasado'],
+  merma:['merma','mermas','perdida','desperdicio'],
+  exceso:['exceso','excesos','sobrante','sobre'],
+  pedidos:['pedido','pedidos','orden','ordenes'],
+  stock:['stock','inventario','existencia'],
+  faltante:['faltante','faltantes','falta','quiebre','quiebres'],
+  pct:['porcentaje','participacion','peso','concentracion'],
+  dias:['dia','dias','plazo','antiguedad'],
+  cumplimiento:['cumplimiento','cumple','avance'],
+};
+
+function aliasDeCampo(campo) {
+  const base = localNormalizar(String(campo)).replace(/[^a-z0-9]+/g, ' ').trim();
+  const out = new Set(base.split(/\s+/).filter(w => w.length >= 2));
+  Object.entries(SINONIMOS_CAMPO).forEach(([k, syn]) => {
+    if (base.includes(k)) syn.forEach(x => out.add(x));
+  });
+  return [...out];
+}
+
+// ¿Es un campo que nombra a la entidad, o uno que la mide?
+const CAMPOS_ENTIDAD = ['producto','sku','cliente','contacto','nombre','proveedor','uen',
+  'familia','subcategoria','categoria','canal','planta','grupo','marca','jefe','responsable',
+  'label','area','material','item','periodo','mes','tramo'];
+
+function localAutoDesgloses(rp) {
+  if (localAutoDesgloses._cache) return localAutoDesgloses._cache;
+  const manuales = new Set(DESGLOSES_LOCALES.map(d => d.clave));
+  const autos = [];
+  // 'kpis' son las tarjetas del reporte, no un desglose: tomarlas como tal
+  // hacía que "qué materiales me faltan" encontrara la TARJETA "Materiales en
+  // quiebre" y respondiera con su ficha en vez del ranking de faltantes.
+  const NO_SON_DESGLOSE = new Set(['kpis','_no_cuadran','meses','periodos','dias','valor']);
+  Object.entries(rp).forEach(([tipo, rd]) => {
+    Object.entries(rd || {}).forEach(([clave, val]) => {
+      if (NO_SON_DESGLOSE.has(clave)) return;
+      // Un objeto de listas (sku_por_uen) se aplana; una lista se usa tal cual.
+      let filas = null;
+      if (Array.isArray(val)) filas = val;
+      else if (val && typeof val === 'object' && !Array.isArray(val)) {
+        const partes = Object.values(val).filter(Array.isArray);
+        if (partes.length && partes.length === Object.keys(val).length) filas = partes.flat();
+      }
+      if (!filas || filas.length < 2 || typeof filas[0] !== 'object') return;
+      const campos = Object.keys(filas[0] || {});
+      const ent = campos.find(c => CAMPOS_ENTIDAD.includes(localNormalizar(c)))
+               || campos.find(c => typeof filas[0][c] === 'string' && localNum(filas[0][c]) == null);
+      if (!ent) return;
+      campos.forEach(campo => {
+        if (campo === ent) return;
+        if (filas.filter(f => localNum(f[campo]) != null).length < Math.max(2, filas.length * 0.5)) return;
+        const clv = `${clave}::${campo}`;
+        if (manuales.has(clave) && campos.indexOf(campo) === 1) return;  // ya cubierto a mano
+        autos.push({
+          clave: clv, entidad: ent, valor: campo, auto: true, tipoAuto: tipo,
+          filasAuto: filas,
+          etq: `${localNormalizar(ent).replace(/_/g,' ')} por ${localNormalizar(campo).replace(/_/g,' ')}`,
+          alias: aliasDeCampo(campo).concat(aliasDeCampo(ent)),
+        });
+      });
+      // Comparación contra el mes anterior, donde exista el par campo/previo.
+      campos.forEach(campo => {
+        const prev = campos.find(c => c === campo + '_previo' || c === campo + '_cerrado');
+        if (!prev) return;
+        const filasVar = filas.map(f => {
+          const a = localNum(f[prev]), b = localNum(f[campo]);
+          if (a == null || b == null || !a) return null;
+          const pct = (b / a - 1) * 100;
+          if (Math.abs(pct) < 0.5) return null;
+          return { ...f, __var: pct, __de: f[prev], __a: f[campo] };
+        }).filter(Boolean);
+        if (filasVar.length < 2) return;
+        autos.push({
+          clave: `${clave}::${campo}::var`, entidad: ent, valor: '__var', auto: true,
+          tipoAuto: tipo, filasAuto: filasVar, variacion: true,
+          etq: `variación de ${localNormalizar(campo).replace(/_/g,' ')} contra el mes anterior`,
+          alias: aliasDeCampo(campo).concat(['bajado','bajaron','bajo','subido','subieron',
+            'subio','vario','variacion','variaron','cambio','cambiaron','respecto','comparado',
+            'anterior','diferencia']),
+        });
+      });
+    });
+  });
+  localAutoDesgloses._cache = autos;
+  return autos;
+}
+
+// Filas de un desglose, venga de donde venga.
+function localFilasDe(rd, cfg) {
+  return cfg.auto ? (cfg.filasAuto || []) : (rd[cfg.clave] || []);
+}
+
 function localDireccion(texto) {
   const t = localNormalizar(texto || '');
+  // Verbos de cambio: "qué precios bajaron" pide los que más cayeron.
+  if (/\b(bajado|bajaron|bajan|baja|bajo|cayo|cayeron|caido|caida|redujo|redujeron|disminuyo)\b/.test(t)) return 'asc';
+  if (/\b(subido|subieron|suben|sube|aumento|aumentaron|crecio|crecieron|incremento)\b/.test(t)) return 'desc';
   if (/\b(menor|menores|menos|mas bajo|mas bajos|mas barato|mas baratos|barato|baratos|minimo|minimos|ultimo|ultimos|peores)\b/.test(t)) return 'asc';
   if (/\b(mayor|mayores|mas|mas alto|mas altos|mas caro|mas caros|caro|caros|maximo|maximos|top|mejores)\b/.test(t)) return 'desc';
   return null;
 }
 
 function localRanking(rd, cfg, tope, dirPregunta) {
-  const filas = rd[cfg.clave] || [];
+  const filas = localFilasDe(rd, cfg);
   const items = [];
   filas.forEach(f => {
     const campo = localCampoValor(cfg, f);
@@ -10931,7 +11042,8 @@ function localRanking(rd, cfg, tope, dirPregunta) {
     // estado). Sumarlas evita un ranking donde el primer puesto se repite.
     const previo = cfg.sumar ? items.find(x => x.n === n) : null;
     if (previo) { previo.v += v; previo.crudo = previo.v; return; }
-    items.push({ n, v, crudo: f[campo],
+    items.push({ n, v, fila: f,
+      crudo: cfg.variacion ? `${f.__var > 0 ? '+' : ''}${f.__var.toFixed(1)}%` : f[campo],
       extra: f.pct != null ? f.pct : (f.margen ?? f.pedidos ?? null) });
   });
   if (!items.length) return null;
@@ -10954,10 +11066,16 @@ function localElegirDesglose(rp, tipo, tk, det, texto) {
   const puntaje = (cfg) =>
     tk.filter(t => cfg.alias.some(a => localMismaRaiz(t, a))).length +
     (pidePersona && esNominal(cfg) ? 1 : 0);
+  // Lo escrito a mano primero: tiene mejores etiquetas y reglas afinadas. Los
+  // automáticos entran después y solo ganan por puntaje.
+  const autos = localAutoDesgloses(rp);
   const enReporte = (t) => DESGLOSES_LOCALES
-    .filter(c => Array.isArray(rp[t]?.[c.clave]) && rp[t][c.clave].length);
+    .filter(c => Array.isArray(rp[t]?.[c.clave]) && rp[t][c.clave].length)
+    .concat(autos.filter(c => c.tipoAuto === t));
 
-  const propios = enReporte(tipo).map(c => ({ tipo, cfg: c, p: puntaje(c) }));
+  // Empate entre uno escrito a mano y uno automático lo gana el manual: sus
+  // etiquetas y reglas están afinadas. El automático tiene que sacar ventaja.
+  const propios = enReporte(tipo).map(c => ({ tipo, cfg: c, p: puntaje(c) - (c.auto ? 0.5 : 0) }));
   const mejorPropio = propios.slice().sort((x, y) => y.p - x.p)[0];
   if (mejorPropio && mejorPropio.p > 0) return mejorPropio;
 
@@ -11037,9 +11155,12 @@ function localBuscarEntidad(rp, tk, tipoPref, texto) {
                                && !MEDIDAS_LOCALES.has(t));
   const tipos = [tipoPref, ...Object.keys(rp).filter(t => t !== tipoPref)].filter(Boolean);
   for (const t of tipos) {
+    // Solo los desgloses escritos a mano identifican entidades. Los
+    // automáticos sirven para rankear, no para reconocer nombres: al dejarlos
+    // entrar, cualquier fila con un texto parecido secuestraba la pregunta.
     for (const cfg of DESGLOSES_LOCALES) {
-      const filas = rp[t]?.[cfg.clave];
-      if (!Array.isArray(filas)) continue;
+      const filas = rp[t] ? localFilasDe(rp[t], cfg) : null;
+      if (!Array.isArray(filas) || !filas.length) continue;
       for (const f of filas) {
         const nom = localNormalizar(String(f[cfg.entidad] ?? ''));
         if (nom.length < 3) continue;
@@ -11094,6 +11215,35 @@ function localAplanarSku(rp) {
   mv.margen_sku = filas.filter(f => f.margen != null);
 }
 
+// El bloque de ranking, reutilizable: lo usan tanto la ruta normal como la
+// que responde cuando la pregunta no nombra ningún reporte.
+analizarLocal.__ranking = function (rp, sel, pregunta, texto, avisoDim) {
+  const elegido = sel.cfg;
+  const r = localRanking(rp[sel.tipo], elegido, 6, localDireccion(pregunta));
+  if (!r) return null;
+  const nomSec = (typeof DXP_NOMBRE !== 'undefined' && DXP_NOMBRE[sel.tipo]) || sel.tipo;
+  const esPct = /%/.test(String(r.items[0].crudo || ''));
+  const dirPreg = localDireccion(pregunta);
+  const asc = dirPreg ? dirPreg === 'asc' : !!elegido.menorEsPeor;
+  const dir = asc ? 'de menor a mayor' : 'de mayor a menor';
+  const noSumable = elegido.variacion ||
+    /precio|margen|ratio|dias|cumplimiento|rotacion/.test(elegido.clave + elegido.valor);
+  const aditivo = !esPct && !noSumable;
+  const cuerpo = r.items.map((x, i) => {
+    const peso = (aditivo && !asc && r.total)
+      ? ` · ${(x.v / r.total * 100).toFixed(1)}% del total` : '';
+    let ex = (x.extra == null || esPct) ? ''
+      : ` · ${typeof x.extra === 'number' ? x.extra.toFixed(1) + '%' : x.extra}`;
+    if (x.fila && x.fila.__de != null && x.fila.__a != null) {
+      ex = ` · de <b>${localEsc(x.fila.__de)}</b> a <b>${localEsc(x.fila.__a)}</b>`;
+    }
+    return `${i + 1}. <b>${localEsc(x.n)}</b> — ${localEsc(x.crudo)}${peso}${ex}`;
+  }).join('<br>');
+  localUltimoTipo = sel.tipo;
+  return `<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
+    (avisoDim || '') + `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>` + cuerpo;
+};
+
 function analizarLocal(pregunta) {
   const emp = 'PAUNO';
   const rp = (DATA?.empresas || {})[emp]?.reportes || {};
@@ -11103,9 +11253,18 @@ function analizarLocal(pregunta) {
   const texto = localNormalizar(pregunta);
   if (!tipo) {
     const solo = localBuscarEntidad(rp, localTokens(pregunta), null, texto);
-    if (!solo) return null;
-    localUltimoTipo = solo.tipo;
-    return localFichaEntidad(rp, solo);
+    if (solo) { localUltimoTipo = solo.tipo; return localFichaEntidad(rp, solo); }
+    // Sin reporte detectado y sin entidad nombrada, antes se rendía. Pero la
+    // pregunta puede nombrar perfectamente un DATO —"qué precios por kilo
+    // bajaron"— sin nombrar el reporte donde vive. Se busca el desglose que
+    // mejor encaje en todo lo publicado y se responde desde ahí. Funcionaba
+    // solo cuando el chat heredaba el tema de la pregunta anterior, lo que
+    // hacía que la misma pregunta respondiera o no según lo que se hubiera
+    // preguntado antes.
+    const tkS = localTokens(pregunta);
+    const cand = localElegirDesglose(rp, null, tkS, { nombrado: false, puntaje: 0 }, texto);
+    if (cand && cand.cfg && cand.p >= 1) return analizarLocal.__ranking(rp, cand, pregunta, texto, '');
+    return null;
   }
   if (!tipo || !rp[tipo]) return null;
   const rd = rp[tipo];
@@ -11136,8 +11295,16 @@ function analizarLocal(pregunta) {
   // También se entra aquí en preguntas sin verbo de ranking ("qué materiales
   // me faltan") cuando la pregunta nombra un desglose de forma inequívoca.
   const sel = localElegirDesglose(rp, tipo, tk, det, texto);
+  if (sel && sel.cfg && sel.cfg.variacion && sel.p >= 1) {
+    const html = analizarLocal.__ranking(rp, sel, pregunta, texto, avisoDim);
+    if (html) return html;
+  }
+  // Un desglose de variación YA ES la comparación que se pide. Se clasificaba
+  // como tendencia —lleva palabras de cambio— y la tendencia es de UN
+  // indicador en el tiempo, no de muchos productos entre dos meses.
+  const esVariacion = !!(sel && sel.cfg && sel.cfg.variacion);
   if (sel && sel.cfg && (intencion === 'ranking' || intencion === 'origen' ||
-      (sel.p >= 1 && intencion !== 'tendencia'))) {
+      (sel.p >= 1 && (esVariacion || intencion !== 'tendencia')))) {
     const elegido = sel.cfg;
     const r = localRanking(rp[sel.tipo], elegido, 6, localDireccion(pregunta));
     if (r) {
@@ -11150,17 +11317,23 @@ function analizarLocal(pregunta) {
       const dirPreg = localDireccion(pregunta);
       const asc = dirPreg ? dirPreg === 'asc' : !!elegido.menorEsPeor;
       const dir = asc ? 'de menor a mayor' : 'de mayor a menor';
+      const noSumable = elegido.variacion ||
+        /precio|margen|ratio|dias|cumplimiento|rotacion/.test(elegido.clave + elegido.valor);
       // Un precio o un margen no son partes de un total: sumarlos y sacar
       // "% del total" no significa nada. Solo los montos lo llevan.
-      const aditivo = !esPct && !/precio|margen/.test(elegido.clave);
+      const aditivo = !esPct && !noSumable;
       partes.push(`<b>${nomSec}</b> — datos al ${DATA?.fecha || 'último corte'}<br><br>` +
         (sel.tipo === tipo ? avisoDim : '') +
         `<b>${elegido.etq}</b> (${dir}, ${r.n} en total):<br>`);
       partes.push(r.items.map((x, i) => {
         const peso = (aditivo && !asc && r.total)
           ? ` · ${(x.v / r.total * 100).toFixed(1)}% del total` : '';
-        const ex = (x.extra == null || esPct) ? ''
+        let ex = (x.extra == null || esPct) ? ''
           : ` · ${typeof x.extra === 'number' ? x.extra.toFixed(1) + '%' : x.extra}`;
+        // "−29.5%" solo no dice de cuánto a cuánto, que es lo que se pregunta.
+        if (x.fila && x.fila.__de != null && x.fila.__a != null) {
+          ex = ` · de <b>${localEsc(x.fila.__de)}</b> a <b>${localEsc(x.fila.__a)}</b>`;
+        }
         return `${i + 1}. <b>${localEsc(x.n)}</b> — ${localEsc(x.crudo)}${peso}${ex}`;
       }).join('<br>'));
       const primero = r.items[0];
