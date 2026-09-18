@@ -288,7 +288,7 @@ def valor_tarjeta_por_hash(token, ws, dataset_id, hash_visual, label):
         return None
     tablas = tablas_de_captura(
         lambda dax, lb: (_tablas_dax(token, ws, dataset_id, dax, lb) or [[]])[0],
-        entrada["dax"], f"tarjeta:{label}")
+        corregir_tipo_operacion(entrada["dax"]), f"tarjeta:{label}")
     filas = tablas[0] if tablas else []
     if not filas:
         return None
@@ -299,6 +299,31 @@ def valor_tarjeta_por_hash(token, ws, dataset_id, hash_visual, label):
 
 
 _CAT_HASH = None
+
+
+# El reporte de Consumo tiene un segmentador TIPO DE OPERACION con dos botones
+# excluyentes, Costo y Gasto, y las capturas del Analizador se exportaron con
+# solo "Costo" pulsado. Una captura es fiel al ESTADO DE LA PANTALLA, no al
+# dato correcto: el costo de materiales tiene que sumar los dos. Como las
+# capturas no se editan a mano (son la fuente de verdad de los filtros), la
+# corrección se aplica al vuelo, en un solo lugar y declarada, en vez de
+# repartirla por cada consulta que las use.
+_RX_SOLO_COSTO = re.compile(
+    r"""('PLANTA POR CECOS'\[TIPO DE OPERACION\]\s*IN\s*\{)\s*"Costo"\s*(\})""")
+_TREATAS_SOLO_COSTO = """TREATAS({"Costo"}, 'PLANTA POR CECOS'[TIPO DE OPERACION])"""
+_TREATAS_AMBOS = """TREATAS({"Costo","Gasto"}, 'PLANTA POR CECOS'[TIPO DE OPERACION])"""
+
+
+def corregir_tipo_operacion(dax):
+    """Hace que TIPO DE OPERACION incluya Costo Y Gasto en un DAX capturado.
+
+    Cubre las dos formas en que aparece: el FILTER con dos condiciones cuya
+    intersección era solo "Costo", y el TREATAS de una sola lista.
+    """
+    if not dax or "TIPO DE OPERACION" not in dax:
+        return dax
+    nuevo = _RX_SOLO_COSTO.sub(r'\1"Costo", "Gasto"\2', dax)
+    return nuevo.replace(_TREATAS_SOLO_COSTO, _TREATAS_AMBOS)
 
 
 def _catalogo_por_hash():
