@@ -1451,6 +1451,29 @@ def dax_margen_cliente_uen():
         "'Exl A Maestra de Facturas de Venta'[contacto_factura],")
 
 
+def dax_cliente_producto():
+    """Qué compró cada cliente: cliente × producto × unidad, por mes.
+
+    margen_cliente_uen responde "cuánto me deja este cliente"; esta responde
+    la siguiente pregunta, que es la que se hace siempre después: "¿y qué me
+    compró?". Ningún visual del reporte la cruza —el de clientes no abre por
+    producto y el de productos no abre por cliente— pero las dos salen de la
+    misma tabla de facturas, así que el cruce existe en el modelo.
+
+    Hereda los filtros de dax_sku_por_uen literalmente; lo único escrito a
+    mano es agregar [contacto_factura] a las columnas de agrupación.
+    """
+    base = dax_sku_por_uen()
+    if not base:
+        return None
+    ancla = "'Exl A Maestra de Facturas de Venta'[producto],\n        "
+    if base.count(ancla) != 1:
+        return None
+    return base.replace(
+        ancla,
+        ancla + "'Exl A Maestra de Facturas de Venta'[contacto_factura],\n        ")
+
+
 def dax_sku_por_uen():
     """Arma la consulta que cruza SKU con unidad de negocio.
 
@@ -3593,6 +3616,88 @@ def build_margen(found):
                 "nivel empresa y las unidades sin abrir por cliente")
             print(f"    · margen por cliente y unidad: {len(res['margen_cliente_uen'])} filas")
 
+    # ── Qué compró cada cliente. Es la pregunta que viene SIEMPRE después de
+    # "cuánto me deja este cliente", y hasta ahora la respuesta honesta era
+    # que no teníamos el cruce.
+    cp = found.get("__cliente_producto") or []
+    if cp:
+        def _c(f, suf):
+            for k, v in f.items():
+                if k.endswith(suf):
+                    return v
+            return None
+        bruto = {}
+        for f in cp:
+            cli = (_c(f, "[contacto_factura]") or "").strip()
+            uen = (_c(f, "[TIPO DE NEGOCIO N1]") or "").strip()
+            prod = (_c(f, "[producto]") or "").strip()
+            v_, c_ = to_float(_c(f, "[Venta]")), to_float(_c(f, "[Costo]"))
+            pe = to_float(_c(f, "[Peso]"))
+            anio, mes = to_float(_c(f, "[Año]")), to_float(_c(f, "[NroMes]"))
+            if not cli or not uen or not prod or v_ is None or c_ is None:
+                continue
+            if not anio or not mes or not v_:
+                continue
+            k = (f"{int(anio)}-{int(mes):02d}", uen, nombre_canonico(cli))
+            o = bruto.setdefault(k, {"nombre": cli, "prods": {}})
+            q = o["prods"].setdefault(prod, {"venta": 0.0, "costo": 0.0, "kg": 0.0})
+            q["venta"] += v_
+            q["costo"] += c_
+            q["kg"] += (pe or 0.0)
+
+        # No se publican los 142 productos de cada cliente: se publican los que
+        # explican su compra. El resto se agrupa —no se borra— para que los
+        # totales por cliente sigan cuadrando con margen_cliente_uen.
+        MAX_PROD, CORTE = 8, 0.90
+        filas = []
+        for (per, uen, _canon), o in sorted(bruto.items()):
+            items = sorted(o["prods"].items(),
+                           key=lambda kv: -abs(kv[1]["venta"]))
+            total = sum(abs(q["venta"]) for _, q in items) or 1.0
+            corte, acum = len(items), 0.0
+            for i, (_, q) in enumerate(items):
+                acum += abs(q["venta"])
+                if acum / total >= CORTE or i + 1 >= MAX_PROD:
+                    corte = i + 1
+                    break
+            def _fila(nombre, q, n=None):
+                v_, c_ = q["venta"], q["costo"]
+                return {
+                    "periodo": per, "uen": uen, "cliente": o["nombre"],
+                    "producto": nombre, "productos_agrupados": n,
+                    "venta": round(v_, 2), "costo": round(c_, 2),
+                    "kg": round(q["kg"], 1) or None,
+                    # Misma regla que en margen_cliente_uen: un porcentaje
+                    # sobre venta negativa se lee al revés.
+                    "margen": (f"{(1 - c_ / v_) * 100:.1f}%" if v_ > 0 else None),
+                    "nota": (None if v_ > 0 else
+                             "devolución neta del mes: sin margen, un "
+                             "porcentaje sobre venta negativa se lee al revés"),
+                }
+            for nombre, q in items[:corte]:
+                filas.append(_fila(nombre, q))
+            resto = items[corte:]
+            if resto:
+                ag = {"venta": sum(q["venta"] for _, q in resto),
+                      "costo": sum(q["costo"] for _, q in resto),
+                      "kg": sum(q["kg"] for _, q in resto)}
+                filas.append(_fila(f"· otros {len(resto)} productos", ag,
+                                   len(resto)))
+        if filas:
+            res["cliente_producto"] = filas
+            res["cliente_producto_periodos"] = sorted({f["periodo"] for f in filas})
+            anotar_derivado(
+                "margen_variable", "cliente_producto", "margen",
+                "1 - costo/venta de ese producto para ese cliente en esa unidad",
+                "el cruce no existe en ningún visual: el reporte de clientes no "
+                "abre por producto y el de productos no abre por cliente")
+            anotar_derivado(
+                "margen_variable", "cliente_producto", "· otros N productos",
+                "suma de los productos fuera del 90% de la compra del cliente",
+                "se agrupan en vez de borrarse para que el total por cliente "
+                "siga cuadrando con margen_cliente_uen")
+            print(f"    · cliente × producto: {len(filas)} filas")
+
     sku = found.get("__sku_por_uen") or []
     if sku:
         def _busca(f, suf):
@@ -5474,6 +5579,26 @@ def main():
                             "error": f"la consulta no devolvió filas "
                                      f"(columnas vistas: {cols or 'ninguna'})"})
                         print("    ✗ Cliente por unidad de negocio: sin filas")
+
+                # Y el cruce completo: qué producto le compró cada cliente.
+                qcp = dax_cliente_producto()
+                if not qcp:
+                    DIAGNOSTICO.append({
+                        "consulta": "cliente_producto", "http": 0,
+                        "error": "no se pudo derivar el DAX: la captura base "
+                                 "cambió y la sustitución de columnas no aplicó"})
+                else:
+                    cp = _tablas_dax(token, ws_id, margen_ds_id, qcp,
+                                     "cliente_producto")
+                    fcp = (cp or [[]])[0]
+                    if fcp:
+                        scanned.setdefault("margen", {})["__cliente_producto"] = fcp
+                        print(f"    ✓ Cliente × producto: {len(fcp)} filas")
+                    else:
+                        DIAGNOSTICO.append({
+                            "consulta": "cliente_producto", "http": 200,
+                            "error": "la consulta no devolvió filas"})
+                        print("    ✗ Cliente × producto: sin filas")
             except Exception as e:
                 print(f"    ✗ detalle de costos: {e}")
                 DIAGNOSTICO.append({"consulta": "detalle_costos", "http": 0,
