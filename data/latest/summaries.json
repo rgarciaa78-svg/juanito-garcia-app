@@ -1,7 +1,7 @@
 {
   "fecha": "17/09/2026",
   "fecha_actualizacion": "2026-09-17",
-  "hora_actualizacion": "21:00",
+  "hora_actualizacion": "21:18",
   "generado_por": "JUANITO — Power BI Direct v3",
   "semaforos": {
     "PAUNO": "green"
@@ -22942,7 +22942,7 @@
         "esperado": 157.1085,
         "diferencia_pct": 9.0,
         "detalle": "consumo_materiales · consumo/MIP / TN Vendida",
-        "conocido": false
+        "conocido": true
       },
       {
         "prueba": "B&D MOSTAZA BALDE 4K   ND: precio por kilo fuera de rango",
