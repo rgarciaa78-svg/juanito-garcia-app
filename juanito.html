@@ -2210,7 +2210,7 @@ small { font-size:13px; line-height:1.4; }
 const SW_VERSION = 'v=19';
 // Sello de compilación: sirve para confirmar de un vistazo qué versión está
 // cargada. Sin esto, "no me cambió" y "sí cambió" son indistinguibles.
-const APP_BUILD = '2026-09-17-g';
+const APP_BUILD = '2026-09-17-h';
 // Limpiar todo el caché viejo al abrir la app
 (async function() {
   try {
@@ -12098,6 +12098,8 @@ function construirContexto() {
       que_hay: 'KPIs del último mes, desgloses por segmento y series mensuales completas.',
       como_responder: [
         'Para "por qué" o "de dónde viene": busca en desgloses (por_cliente, por_uen, por_area, dead_por_categoria, tramos, faltantes) y en series por segmento.',
+        'Para preguntas de PRODUCTO —precio por kilo, margen por SKU, qué subió o bajó— usa margen_variable.sku_detalle: es una tabla con "columnas" y "filas", donde cada fila trae los valores en el orden de columnas. Trae el mes actual y el previo, así que también responde qué cambió.',
+        'Las filas marcadas con aviso "DATO EN REVISION" no se usan en rankings ni promedios: su cifra está mal en el origen.',
         'Para "desde cuándo" o "cómo viene": recorre la serie mensual y di en qué mes cambió la tendencia.',
         'Compara segmentos entre sí antes de dar un promedio: el promedio esconde al que está mal.',
         'Cita siempre el mes de cada cifra. Los períodos están en series.periodos, alineados por posición con cada array.',
@@ -12147,6 +12149,21 @@ function construirContexto() {
         cumplimiento_produccion: rd.cumplimiento_produccion,
         faltantes: rd.faltantes,
         por_cliente: rd.por_cliente,
+        // El detalle por SKU no viajaba, y sin él la IA contestaba con toda
+        // honestidad "no dispongo del precio por kilo a nivel de producto".
+        // Va en filas y no en objetos: son 142 productos y repetir el nombre
+        // de cada campo en cada uno costaba más contexto que los datos.
+        sku_detalle: (() => {
+          const fs = [];
+          Object.entries(rd.sku_por_uen || {}).forEach(([uen, arr]) =>
+            (arr || []).forEach(f => fs.push([
+              f.producto, uen, f.subcategoria || '', f.precio_kg, f.precio_kg_previo,
+              f.margen, f.margen_previo, f.venta, f.soles_mes,
+              f.sospechoso ? 'DATO EN REVISION' : ''])));
+          return fs.length ? { columnas:
+            ['producto','uen','familia','precio_kg','precio_kg_mes_previo','margen',
+             'margen_mes_previo','venta','soles_margen_mes','aviso'], filas: fs } : undefined;
+        })(),
         por_area: rd.por_area,
         planes_por_planta: rd.planes_por_planta,
         necesidad_compra: rd.necesidad_compra,
