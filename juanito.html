@@ -1933,7 +1933,7 @@ small { font-size:13px; line-height:1.4; }
 .cya-intro { font-size:13.5px; color:var(--text2); max-width:80ch; margin:0 0 14px; }
 .cya-ok { color:var(--green); font-weight:600; } .cya-mal { color:var(--red); font-weight:600; }
 .cya-m { color:var(--text3); }
-.cya-lect { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-top:16px; max-width:1080px; }
+.cya-lect { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-top:16px; }
 .cya-l { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
   padding:13px 16px; background:var(--card); }
 .cya-l.cya-ok { border-left-color:var(--green); }
@@ -1981,7 +1981,7 @@ small { font-size:13px; line-height:1.4; }
 .mg-guia { font-size:13.5px; color:var(--text2); max-width:80ch; margin:0 0 12px; line-height:1.6; }
 .mg-guia b { color:var(--text); }
 .mg-mez { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
-  padding:14px 16px; background:var(--card); margin:0 0 18px; max-width:920px; }
+  padding:14px 16px; background:var(--card); margin:0 0 18px; }
 .mg-mez h3 { margin:0 0 7px; font-size:15px; font-weight:700; letter-spacing:-.01em; }
 .mg-mez p { font-size:13.5px; color:var(--text2); margin:0 0 9px; line-height:1.6; max-width:78ch; }
 .mg-mez p:last-child { margin-bottom:0; }
@@ -2047,7 +2047,7 @@ small { font-size:13px; line-height:1.4; }
 .pr-v.pr-rebaja { background:rgba(200,60,30,.14); color:var(--red); }
 .pr-bajo { font-size:12.5px; color:var(--text2); margin-top:9px; line-height:1.5; }
 .pr-bajo i { font-style:normal; font-variant-numeric:tabular-nums; color:var(--red); font-weight:600; }
-.vf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; max-width:1080px; }
+.vf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; }
 .vf-c { border:1px solid var(--line); border-radius:8px; padding:13px 15px; background:var(--card); }
 .vf-k { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); }
 .vf-v { font-size:26px; font-weight:700; letter-spacing:-.02em; margin-top:3px; font-variant-numeric:tabular-nums; }
@@ -2066,6 +2066,12 @@ small { font-size:13px; line-height:1.4; }
   background:transparent; color:var(--text2); border-radius:5px; padding:3px 10px; }
 .vf-btn:hover { border-color:var(--text3); color:var(--text); }
 .vf-tag.ok { background:rgba(60,120,80,.16); color:var(--green); }
+/* Un solo ancho para todo lo que va dentro de las vistas nuevas. Antes las
+   tarjetas se topaban en 920px y los títulos de sección con su línea seguían
+   hasta el borde del contenedor: dos bordes derechos distintos en la misma
+   pantalla, que es lo que se veía descuadrado. El tope va en la vista, no en
+   cada bloque, para que nada se pueda desalinear. */
+#dxp-view-hoy, #dxp-view-margen, #dxp-view-precio, #dxp-view-verificar, .cya { max-width:1120px; }
 /* ── Vista HOY ── */
 .hoy-top h2 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin:0 0 4px; }
 .hoy-top p { font-size:14px; color:var(--text2); margin:0 0 18px; max-width:70ch; }
@@ -2076,7 +2082,7 @@ small { font-size:13px; line-height:1.4; }
 /* En pantalla ancha la fila llegaba a 1496px: el texto terminaba a los 420 y el
    monto quedaba pegado al borde derecho, a casi mil píxeles del hallazgo que
    describe. Un número lejos de su frase deja de leerse junto a ella. */
-.hoy-list, .vf-list, .hoy-raices, .mg-puente, .mg-tres { max-width:920px; }
+
 .hoy-row:hover { border-color:var(--text3); }
 .hoy-crit { border-left-color:var(--red); }
 .hoy-n { font-size:17px; font-weight:700; color:var(--text3); font-variant-numeric:tabular-nums; }
