@@ -8,3 +8,6 @@ capturas/*.json
 .env
 
 .DS_Store
+
+# Configuración local del entorno de desarrollo
+.claude/

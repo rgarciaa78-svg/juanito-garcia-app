@@ -1929,6 +1929,154 @@ small { font-size:13px; line-height:1.4; }
 .eje-h-des { font-size:13px; color:var(--text2); font-variant-numeric:tabular-nums; }
 .eje-h-sol { font-size:15px; font-weight:700; color:var(--red); font-variant-numeric:tabular-nums; }
 .eje-h-ten { font-size:13px; color:var(--text3); margin-top:3px; }
+.eje-h-nota { font-size:12.5px; color:var(--text3); margin-top:2px; }
+.cya-intro { font-size:13.5px; color:var(--text2); max-width:80ch; margin:0 0 14px; }
+.cya-ok { color:var(--green); font-weight:600; } .cya-mal { color:var(--red); font-weight:600; }
+.cya-m { color:var(--text3); }
+.cya-lect { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-top:16px; }
+.cya-l { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
+  padding:13px 16px; background:var(--card); }
+.cya-l.cya-ok { border-left-color:var(--green); }
+.cya-l h3 { font-size:14.5px; font-weight:600; margin:0 0 5px; letter-spacing:-.01em; }
+.cya-l p { font-size:13.5px; color:var(--text2); margin:0; line-height:1.55; }
+.cya-l p b { color:var(--text); }
+/* ── Vistas Margen / Precio / Verificar ── */
+.mg-tres { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:14px; }
+.mg-t { border:1px solid var(--line); border-radius:8px; padding:13px 15px; background:var(--card); }
+.mg-t.best { border-left:4px solid var(--green); } .mg-t.now { border-left:4px solid var(--red); }
+.mg-t.caida { background:rgba(200,60,30,.06); }
+.mg-t-k { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); }
+.mg-t-v { font-size:30px; font-weight:700; letter-spacing:-.03em; margin-top:3px; line-height:1.08;
+  font-variant-numeric:tabular-nums; }
+.mg-t-d { font-size:12px; color:var(--text2); margin-top:3px; }
+.mg-anio { display:flex; gap:4px; align-items:flex-end; height:72px; margin-bottom:26px;
+  padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--card); }
+.mg-a { flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; }
+.mg-a i { display:block; width:100%; background:var(--mk-navy,#1e3a5f); border-radius:2px 2px 0 0; opacity:.55; }
+.mg-a.top i { background:var(--green); opacity:1; } .mg-a.par i { opacity:.35; }
+.mg-a small { font-size:9.5px; color:var(--text3); margin-top:3px; text-transform:uppercase; }
+.mg-puente { border:1px solid var(--line); border-radius:8px; padding:14px 16px; background:var(--card); }
+.mg-p-row { display:grid; grid-template-columns:130px 1fr 110px; gap:12px; align-items:center;
+  font-size:13.5px; padding:6px 0; }
+.mg-p-row.tot { border-top:1px solid var(--line); margin-top:5px; padding-top:9px; font-weight:600; }
+.mg-p-k { color:var(--text2); } .mg-p-v { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+.mg-bar { display:flex; height:13px; border-radius:3px; overflow:hidden; background:rgba(128,128,128,.12); min-width:60px; }
+.mg-bar i { display:block; height:100%; }
+.mg-bar i.neg { background:var(--red); } .mg-bar i.pos { background:var(--green); }
+.mg-bar i.b { opacity:.55; }
+.mg-esc { display:block; height:13px; background:rgba(128,128,128,.12); border-radius:3px; }
+.mg-esc i { display:block; height:100%; border-radius:3px; }
+.mg-esc i.neg { background:var(--red); } .mg-esc i.pos { background:var(--green); }
+.mg-p-row.falta .mg-p-k { color:var(--text3); }
+.mg-falta { font-size:12px; color:var(--text3); font-style:italic; }
+.mg-lect { font-size:13.5px; color:var(--text2); max-width:82ch; margin:10px 0 26px; line-height:1.6; }
+.mg-lect b { color:var(--text); }
+.mg-sub { font-size:11.5px; color:var(--text3); margin-top:2px; }
+.mg-nd { color:var(--text3); font-weight:400; }
+.mg-v { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em;
+  padding:2px 8px; border-radius:3px; background:rgba(128,128,128,.14); color:var(--text2); white-space:nowrap; }
+.mg-v.pr { background:rgba(200,60,30,.14); color:var(--red); }
+.mg-v.co { background:rgba(180,120,10,.16); color:var(--yellow); }
+.sl-note { font-size:12px; color:var(--text3); white-space:nowrap; margin-left:10px; }
+.mg-raiz { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
+  padding:16px 18px; background:var(--card); margin-bottom:24px; }
+.mg-raiz-k { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); }
+.mg-raiz-v { font-size:38px; font-weight:700; letter-spacing:-.03em; line-height:1.05; margin-top:4px;
+  font-variant-numeric:tabular-nums; }
+.mg-raiz-d { font-size:14px; color:var(--text2); margin-top:5px; }
+.mg-tabla { overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--card); margin-bottom:8px; }
+.mg-tabla table { border-collapse:collapse; width:100%; font-size:13.5px; min-width:460px; }
+.mg-tabla th, .mg-tabla td { padding:9px 13px; text-align:left; border-bottom:1px solid var(--line); }
+.mg-tabla th { font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--text3); white-space:nowrap; }
+.mg-tabla tbody tr:last-child td { border-bottom:0; }
+.mg-tabla tfoot td { border-top:2px solid var(--line); border-bottom:0; padding:9px 13px; font-size:13.5px; }
+.mg-tabla td.r, .mg-tabla th.r { text-align:right; font-variant-numeric:tabular-nums; }
+.mg-tabla tr.mg-click { cursor:pointer; }
+.mg-tabla tr.mg-click:hover { background:rgba(128,128,128,.07); }
+.mg-red { color:var(--red); } .mg-green { color:var(--green); } .mg-warn { color:var(--yellow); }
+.mg-resto { font-size:12.5px; color:var(--text3); margin:6px 0 24px; max-width:72ch; }
+.pr-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-bottom:22px; }
+.pr-card { border:1px solid var(--line); border-radius:8px; padding:14px 16px; background:var(--card); }
+.pr-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.pr-prod { font-size:14.5px; font-weight:600; letter-spacing:-.01em; line-height:1.3; }
+.pr-canal { font-size:12px; color:var(--text3); margin-top:2px; }
+.pr-disp { text-align:right; white-space:nowrap; }
+.pr-disp b { display:block; font-size:19px; font-weight:700; color:var(--red); font-variant-numeric:tabular-nums; }
+.pr-disp small { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; }
+.pr-band { margin:14px 0 10px; }
+.pr-med { font-size:12px; color:var(--text2); margin-bottom:6px; }
+.pr-dots { position:relative; height:18px; background:rgba(128,128,128,.13); border-radius:9px; }
+.pr-dot { position:absolute; top:4px; width:10px; height:10px; border-radius:50%; margin-left:-5px;
+  background:var(--text2); border:2px solid var(--card); }
+.pr-dot.lo { background:var(--red); }
+.pr-ejes { display:flex; justify-content:space-between; font-size:11px; color:var(--text3); margin-top:4px;
+  font-variant-numeric:tabular-nums; }
+.pr-v { display:inline-block; font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:4px;
+  background:rgba(128,128,128,.14); color:var(--text2); }
+.pr-v.pr-mezcla { background:rgba(60,120,80,.16); color:var(--green); }
+.pr-v.pr-rebaja { background:rgba(200,60,30,.14); color:var(--red); }
+.pr-bajo { font-size:12.5px; color:var(--text2); margin-top:9px; line-height:1.5; }
+.pr-bajo i { font-style:normal; font-variant-numeric:tabular-nums; color:var(--red); font-weight:600; }
+.vf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; }
+.vf-c { border:1px solid var(--line); border-radius:8px; padding:13px 15px; background:var(--card); }
+.vf-k { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); }
+.vf-v { font-size:26px; font-weight:700; letter-spacing:-.02em; margin-top:3px; font-variant-numeric:tabular-nums; }
+.vf-d { font-size:12px; color:var(--text2); margin-top:2px; }
+.vf-list { display:flex; flex-direction:column; gap:8px; margin-bottom:24px; }
+.vf-row { display:flex; justify-content:space-between; gap:14px; align-items:flex-start;
+  border:1px solid var(--line); border-radius:8px; padding:12px 15px; background:var(--card); }
+.vf-row.vf-bad { border-left:4px solid var(--red); }
+.vf-row.vf-ok { border-left:4px solid var(--green); }
+.vf-why { font-size:12.5px; color:var(--text3); margin-top:3px; line-height:1.5; max-width:74ch; }
+.vf-tag { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;
+  padding:3px 9px; border-radius:4px; background:rgba(128,128,128,.14); color:var(--text2); white-space:nowrap; }
+.vf-tag.bad { background:rgba(200,60,30,.14); color:var(--red); }
+.vf-tag.ok { background:rgba(60,120,80,.16); color:var(--green); }
+/* ── Vista HOY ── */
+.hoy-top h2 { font-size:26px; font-weight:700; letter-spacing:-.02em; margin:0 0 4px; }
+.hoy-top p { font-size:14px; color:var(--text2); margin:0 0 18px; max-width:70ch; }
+.hoy-list { display:flex; flex-direction:column; gap:10px; margin-bottom:26px; }
+.hoy-row { display:grid; grid-template-columns:30px 1fr auto; gap:14px; align-items:start;
+  padding:14px 16px; border:1px solid var(--line); border-left:4px solid var(--yellow);
+  border-radius:8px; background:var(--card); cursor:pointer; }
+.hoy-row:hover { border-color:var(--text3); }
+.hoy-crit { border-left-color:var(--red); }
+.hoy-n { font-size:17px; font-weight:700; color:var(--text3); font-variant-numeric:tabular-nums; }
+.hoy-t { font-size:16px; font-weight:600; letter-spacing:-.01em; }
+.hoy-seg { font-weight:400; color:var(--text2); font-size:14px; }
+.hoy-des { font-size:13.5px; color:var(--text2); margin-top:3px; }
+.hoy-dem { font-size:13px; margin-top:7px; padding:5px 9px; border-radius:4px;
+  background:rgba(200,60,30,.10); color:var(--red); display:inline-block; }
+.hoy-falta { font-size:12.5px; margin-top:7px; padding:5px 9px; border-radius:4px;
+  background:rgba(128,128,128,.12); color:var(--text2); line-height:1.45; }
+.hoy-tags { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.hoy-tag { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;
+  padding:2px 8px; border-radius:3px; background:rgba(128,128,128,.14); color:var(--text2); }
+.hoy-tag.urg { background:rgba(200,60,30,.14); color:var(--red); }
+.hoy-sol { text-align:right; white-space:nowrap; }
+.hoy-sol b { display:block; font-size:19px; font-weight:700; color:var(--red);
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+.hoy-sol b.hoy-nd { color:var(--text3); font-size:14px; font-weight:600; }
+.hoy-sol small { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; }
+.hoy-compact .hoy-row { padding:11px 14px; }
+.hoy-compact .hoy-t { font-size:14.5px; }
+.hoy-compact .hoy-sol b { font-size:16px; }
+.hoy-raices { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-bottom:22px; }
+.hoy-raiz { border:1px solid var(--line); border-radius:8px; padding:14px 16px; background:var(--card); }
+.hoy-raiz-k { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); }
+.hoy-raiz-v { font-size:30px; font-weight:700; letter-spacing:-.03em; margin-top:4px;
+  font-variant-numeric:tabular-nums; line-height:1.1; }
+.hoy-raiz-d { font-size:13px; color:var(--text2); margin-top:3px; }
+@media (max-width:640px){
+  .hoy-row { grid-template-columns:24px 1fr; }
+  .hoy-sol { grid-column:2; text-align:left; display:flex; gap:8px; align-items:baseline; margin-top:8px; }
+  .hoy-sol b { display:inline; }
+}
+.eje-h-demora { font-size:13px; margin-top:6px; padding:5px 9px; border-radius:4px;
+  background:rgba(200,60,30,.10); color:var(--red); }
+.eje-h-falta { font-size:12.5px; margin-top:6px; padding:5px 9px; border-radius:4px;
+  background:rgba(128,128,128,.12); color:var(--text2); line-height:1.45; }
 .eje-h-acc { font-size:13px; color:var(--text2); margin:7px 0 0; line-height:1.45; }
 .eje-legal { font-size:13px; color:var(--text3); margin:22px 0 0; max-width:86ch;
   border-top:1px solid var(--border); padding-top:12px; }
@@ -2068,10 +2216,6 @@ small { font-size:13px; line-height:1.4; }
       <div class="nav-item" data-tab="juanito" onclick="showTab('juanito')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
         <span>Chat IA</span>
-      </div>
-      <div class="nav-item" onclick="window.open('https://sites.neoreportes.com//private_includes/dashboard_directorio.php','_blank')">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        <span>Directorio</span>
       </div>
     </div>
 
@@ -3231,8 +3375,19 @@ function dxpStats() {
     if (ckv.length>=2) { s.ckDelta = (ckv[ckv.length-1].v/ckv[0].v-1)*100; s.ckIni=ckv[0].v; s.ckFin=ckv[ckv.length-1].v; s.ckIniP=ps[ckv[0].i]; s.ckFinP=ps[ckv[ckv.length-1].i]; s.ckN=ckv.length; }
     if (pkv.length>=2) { s.pkDelta = (pkv[pkv.length-1].v/pkv[0].v-1)*100; }
   }
-  const fr = ds.fill_rate && ds.fill_rate['% Fill Rate'];
-  if (fr) { const v = fr.filter(x=>x!=null); s.frN = v.length; s.frBajoMeta = v.filter(x=>x<0.98).length; }
+  // OJO: la serie se llama '% Fill Rate mensual' en series.json, no '% Fill Rate'.
+  // Con el nombre corto `fr` quedaba undefined y el mapa causal imprimía
+  // "undefined/undefined meses bajo meta" en pantalla. Se acepta cualquiera de
+  // los dos por si el nombre de la medida cambia en el reporte.
+  const fr = ds.fill_rate && (ds.fill_rate['% Fill Rate mensual'] || ds.fill_rate['% Fill Rate']);
+  if (fr) {
+    const v = fr.filter(x=>x!=null); s.frN = v.length; s.frBajoMeta = v.filter(x=>x<0.98).length;
+    // El valor de tarjeta (s.fillRate) viene del reporte sin periodo declarado,
+    // así que no se puede afirmar a qué mes pertenece. La serie sí lo sabe: se
+    // guarda el último mes con dato para poder sellarlo donde se muestre.
+    const ult = fr.map((x,i)=>({x,i})).filter(o=>o.x!=null).pop();
+    if (ult) { s.frUlt = ult.x; s.frUltP = (SERIES.periodos||[])[ult.i]; }
+  }
   const mm = ds.mermas && ds.mermas['% Merma Total'];
   if (mm) { const v = mm.filter(x=>x!=null); s.mmN = v.length; s.mmSobreMeta = v.filter(x=>x>0.02).length; }
 
@@ -3342,6 +3497,855 @@ function dxpNoteBanner(s) {
 }
 
 // ── Bloque: mapa de causalidad ─────────────────────────────────────────────
+// ── Vista HOY ──────────────────────────────────────────────────────────────
+// La entrada del tablero: las decisiones del día ordenadas por soles, no los
+// 13 indicadores. No calcula nada propio — reusa ejeHallazgos(), que ya trae
+// el monto, y le agrega el plazo y dónde se concentra el problema.
+//
+// El plazo NO se inventa: sale de si el hallazgo es un flujo que sigue
+// perdiendo plata cada semana (entonces es "esta semana") o un saldo que ya
+// está parado y no empeora solo (entonces es "este mes").
+function dxpPlazo(h) {
+  if (h.porSemana != null) return { txt: 'esta semana', urgente: true };
+  if (h.clave === 'facturacion') return { txt: 'esta semana', urgente: true };
+  if (h.soles != null) return { txt: 'este mes', urgente: false };
+  return { txt: 'pendiente de dato', urgente: false };
+}
+
+function dxpHoyView() {
+  const h = (typeof ejeHallazgos === 'function') ? ejeHallazgos() : [];
+  if (!h.length) return '<div class="eje-vacio">Cargando datos…</div>';
+  const conMonto = h.filter(x => x.soles != null);
+  const sinMonto = h.filter(x => x.soles == null);
+  const d = (typeof avanceDelMes === 'function' ? avanceDelMes() : null) || {};
+
+  const fila = (x, i) => {
+    const p = dxpPlazo(x);
+    return `
+    <article class="hoy-row hoy-${x.prioridad}" onclick="ejeAbrir('${x.clave}')">
+      <div class="hoy-n">${i + 1}</div>
+      <div class="hoy-main">
+        <div class="hoy-t">${esc(x.kpi)}${x.segmento && x.segmento !== 'total de la empresa'
+          ? ` <span class="hoy-seg">· ${esc(x.segmento)}</span>` : ''}</div>
+        <div class="hoy-des">${esc(x.desvio)}${x.solesNota ? ` · ${esc(x.solesNota)}` : ''}</div>
+        ${x.porSemana != null ? `<div class="hoy-dem">Cada semana sin actuar:
+          <b>${avSoles0(x.porSemana).replace('−', '')}</b></div>` : ''}
+        ${x.falta ? `<div class="hoy-falta"><b>Para ponerle monto falta:</b> ${esc(x.falta)}</div>` : ''}
+        <div class="hoy-tags"><span class="hoy-tag ${p.urgente ? 'urg' : ''}">${p.txt}</span>
+          <span class="hoy-tag">${x.prioridad === 'crit' ? 'crítico' : 'atención'}</span></div>
+      </div>
+      <div class="hoy-sol">${x.soles != null
+        ? `<b>${avSoles0(x.soles)}</b><small>al mes</small>`
+        : `<b class="hoy-nd">sin monto</b><small>ver qué falta</small>`}</div>
+    </article>`;
+  };
+
+  // Las dos raíces: margen (lo que defiendes ante el directorio) y caja.
+  const raiz = (clave, etiqueta) => {
+    const ind = (METAS?.indicadores || []).find(x => x.clave === clave);
+    if (!ind) return '';
+    const m = ejeMetrica(ind);
+    const val = m.curso != null ? m.curso : m.cerrado;
+    if (val == null) return '';
+    return `<div class="hoy-raiz">
+      <div class="hoy-raiz-k">${esc(etiqueta)}</div>
+      <div class="hoy-raiz-v">${esc(ejeFmt(ind, val))}</div>
+      <div class="hoy-raiz-d">${m.dist ? esc(m.dist.txt) + ' vs meta' : 'sin meta fijada'}</div>
+    </div>`;
+  };
+
+  return `
+  <section class="hoy-top">
+    <h2>Las ${Math.min(3, conMonto.length)} de hoy</h2>
+    <p>Ordenadas por lo que cuesta no actuar. ${conMonto.length} de ${h.length} hallazgos
+       tienen monto en soles; el resto dice qué falta para calcularlo.
+       ${d.dia ? `Corte al día ${d.dia} de ${d.dias}.` : ''}</p>
+  </section>
+
+  <div class="hoy-list">${conMonto.slice(0, 3).map(fila).join('')}</div>
+
+  ${conMonto.length > 3 ? `
+  <div class="section-label"><span class="num">◆</span><h2>Las otras ${conMonto.length - 3} con monto</h2><span class="rule"></span></div>
+  <div class="hoy-list hoy-compact">${conMonto.slice(3).map((x, i) => fila(x, i + 3)).join('')}</div>` : ''}
+
+  ${sinMonto.length ? `
+  <div class="section-label"><span class="num">◆</span><h2>Sin monto todavía — ${sinMonto.length}</h2><span class="rule"></span></div>
+  <div class="hoy-list hoy-compact">${sinMonto.map((x, i) => fila(x, i + conMonto.length)).join('')}</div>` : ''}
+
+  <div class="section-label"><span class="num">◆</span><h2>Las dos raíces</h2><span class="rule"></span></div>
+  <div class="hoy-raices">${raiz('margen', 'Margen variable')}${raiz('dias_cxp', 'Caja · días de pago')}</div>
+
+  <p class="eje-legal">Esta vista no calcula nada propio: toma los mismos hallazgos de la
+    pestaña Ejecutivo y los ordena por su monto en soles. El plazo sale de si el hallazgo
+    sigue perdiendo plata cada semana o es un saldo ya parado. Clic en cualquiera para
+    abrir su análisis completo.</p>`;
+}
+
+// ── Vista MARGEN ───────────────────────────────────────────────────────────
+// El árbol causal: se entra por el efecto y se baja por la causa. No repite el
+// análisis de Avance — lo enlaza. La regla de concentración (mostrar solo los
+// nodos que suman ~70% del desvío) evita las listas de 142 SKU que no se leen.
+function dxpConcentra(filas, valor, corte) {
+  // Devuelve los primeros nodos que acumulan `corte` (0-1) del total, y cuántos
+  // quedaron fuera. Ordena por peso descendente.
+  const con = filas.filter(f => valor(f) != null && valor(f) !== 0);
+  const tot = con.reduce((a, f) => a + Math.abs(valor(f)), 0);
+  if (!tot) return { top: [], resto: con.length, tot: 0, pct: 0 };
+  const ord = con.slice().sort((a, b) => Math.abs(valor(b)) - Math.abs(valor(a)));
+  const top = []; let acum = 0;
+  for (const f of ord) { top.push(f); acum += Math.abs(valor(f)); if (acum / tot >= (corte || 0.7)) break; }
+  return { top, resto: ord.length - top.length, tot, pct: acum / tot };
+}
+
+// ── Análisis profundo de margen ────────────────────────────────────────────
+// Esta pestaña es la única del reporte que descompone el margen. La identidad
+// que la sostiene: margen = 1 − costo/precio. De ahí, el movimiento entre dos
+// meses se parte EXACTAMENTE en dos efectos que suman el total:
+//   efecto precio = (c0/p0 − c0/p1) · 100      (el precio se movió, el costo no)
+//   efecto costo  = ((c0 − c1)/p1) · 100       (el costo se movió, al precio nuevo)
+// Se calcula SKU por SKU y se agrega hacia familia y unidad, porque solo a
+// nivel de SKU existe el precio por kilo de los dos meses.
+function mgNum(x) {
+  if (x == null) return null;
+  const s = String(x).replace(/S\/|\s|,/g, '').replace('%', '').replace('−', '-');
+  const v = parseFloat(s);
+  return isFinite(v) ? v : null;
+}
+
+function mgDescompone() {
+  const mv = avReporte('margen_variable');
+  const filas = [];
+  Object.entries(mv.sku_por_uen || {}).forEach(([uen, fs]) => (fs || []).forEach(f => {
+    const p1 = mgNum(f.precio_kg), p0 = mgNum(f.precio_kg_previo);
+    const m1 = mgNum(f.margen), m0 = mgNum(f.margen_previo), mE = mgNum(f.margen_enero);
+    const v  = mgNum(f.venta);
+    if ([p1, p0, m1, m0, v].some(x => x == null) || p0 <= 0 || p1 <= 0) {
+      filas.push({ uen, fam: f.subcategoria || '—', prod: f.producto, venta: v, sinDato: true,
+                   m1, m0, mE, soles: f.soles_mes, sospechoso: !!f.sospechoso });
+      return;
+    }
+    const c0 = p0 * (1 - m0 / 100), c1 = p1 * (1 - m1 / 100);
+    // Regla de exclusión escrita, no discrecional: un costo que supera el doble
+    // del precio no es un margen de negocio, es un asiento mal imputado. Entra
+    // al detalle marcado, pero no contamina los agregados.
+    const outlier = (c0 / p0 > 2) || (c1 / p1 > 2) || Math.abs(m0) > 100 || Math.abs(m1) > 100;
+    const ppP = (c0 / p0 - c0 / p1) * 100;     // efecto precio, en puntos
+    const ppC = ((c0 - c1) / p1) * 100;        // efecto costo,  en puntos
+    filas.push({ uen, fam: f.subcategoria || '—', prod: f.producto, venta: v,
+      p0, p1, c0, c1, m0, m1, mE, ppP, ppC, dpp: m1 - m0,
+      sP: ppP / 100 * v, sC: ppC / 100 * v,
+      soles: f.soles_mes, solesEnero: f.soles_enero, sospechoso: !!f.sospechoso, outlier,
+      manda: Math.abs(ppP) > Math.abs(ppC) * 2 ? 'precio'
+           : Math.abs(ppC) > Math.abs(ppP) * 2 ? 'costo' : 'ambos' });
+  }));
+  return filas;
+}
+
+function mgAgrupa(filas, clave) {
+  const g = {};
+  filas.forEach(f => {
+    const k = clave(f);
+    const o = g[k] = g[k] || { k, venta: 0, sP: 0, sC: 0, soles: 0, n: 0, sinDato: 0,
+                               mv0: 0, mv1: 0, mvE: 0, vE: 0 };
+    o.n++; o.venta += f.venta || 0;
+    if (f.sinDato) { o.sinDato++; } else { o.sP += f.sP; o.sC += f.sC; }
+    o.soles += f.soles || 0;
+    if (f.m0 != null && f.venta) o.mv0 += f.m0 * f.venta;
+    if (f.m1 != null && f.venta) o.mv1 += f.m1 * f.venta;
+    if (f.mE != null && f.venta) { o.mvE += f.mE * f.venta; o.vE += f.venta; }
+  });
+  return Object.values(g).map(o => ({ ...o,
+    m0: o.venta ? o.mv0 / o.venta : null,
+    m1: o.venta ? o.mv1 / o.venta : null,
+    mE: o.vE ? o.mvE / o.vE : null })).sort((a, b) => (a.sP + a.sC) - (b.sP + b.sC));
+}
+
+// Puente de margen COMPLETO entre dos periodos, con mezcla medida y no
+// despejada por residuo. Requiere venta, costo y peso por familia y por mes
+// (dimensión `margen_mensual`). La identidad que cierra:
+//
+//   M = Σ vᵢ·mᵢ / Σ vᵢ        con mᵢ = 1 − cᵢ/pᵢ
+//
+//   ΔM = Σ wᵢ¹(mᵢ¹ − mᵢ⁰)          ← efecto margen, a mezcla nueva
+//      + Σ (wᵢ¹ − wᵢ⁰)·mᵢ⁰         ← efecto mezcla, a margen viejo
+//
+// y el primer término se abre a su vez en precio y costo con la identidad
+// margen = 1 − costo/precio. Los tres suman ΔM sin residuo.
+function mgPuenteCompleto(perA, perB) {
+  const mm = (avReporte('margen_variable') || {}).margen_mensual;
+  if (!mm || !mm.length) return null;
+  const tomar = per => {
+    const o = {};
+    mm.filter(r => r.periodo === per).forEach(r => {
+      const k = r.uen + ' · ' + r.familia;
+      const a = o[k] = o[k] || { venta: 0, costo: 0, peso: 0 };
+      a.venta += r.venta || 0; a.costo += r.costo || 0; a.peso += r.peso || 0;
+    });
+    return o;
+  };
+  const A = tomar(perA), B = tomar(perB);
+  const claves = [...new Set([...Object.keys(A), ...Object.keys(B)])];
+  if (!claves.length) return null;
+
+  const vA = Object.values(A).reduce((s, x) => s + x.venta, 0);
+  const vB = Object.values(B).reduce((s, x) => s + x.venta, 0);
+  if (!vA || !vB) return null;
+  const m = x => (x && x.venta) ? (1 - x.costo / x.venta) : null;
+  const M0 = 1 - Object.values(A).reduce((s,x)=>s+x.costo,0) / vA;
+  const M1 = 1 - Object.values(B).reduce((s,x)=>s+x.costo,0) / vB;
+
+  let efMargen = 0, efMezcla = 0, efPrecio = 0, efCosto = 0, entran = 0, salen = 0;
+  const detalle = [];
+  claves.forEach(k => {
+    const a = A[k], b = B[k];
+    const w0 = a ? a.venta / vA : 0, w1 = b ? b.venta / vB : 0;
+    const m0 = m(a), m1 = m(b);
+    if (a && b && m0 != null && m1 != null) {
+      const dm = w1 * (m1 - m0);
+      efMargen += dm;
+      efMezcla += (w1 - w0) * m0;
+      // precio y costo, con precio por kilo derivado de venta y peso
+      const p0 = a.peso ? a.venta / a.peso : null, p1 = b.peso ? b.venta / b.peso : null;
+      const c0 = a.peso ? a.costo / a.peso : null, c1 = b.peso ? b.costo / b.peso : null;
+      if (p0 && p1 && c0 != null && c1 != null) {
+        efPrecio += w1 * (c0 / p0 - c0 / p1);
+        efCosto  += w1 * ((c0 - c1) / p1);
+      } else { efCosto += dm; }
+      detalle.push({ k, w0, w1, m0, m1, dm, mez: (w1 - w0) * m0,
+                     vA: a.venta, vB: b.venta });
+    } else if (b && m1 != null) {
+      // Familia que ENTRA. Para que la identidad cierre hay que darle un
+      // margen "anterior": se usa el margen de la empresa del periodo A. Así,
+      //   w1·m1 = w1·(m1 − M0) + w1·M0
+      // el primer término mide cuánto mejor o peor es la familia nueva que el
+      // promedio, y el segundo es puro peso. Verificado: suma exacta.
+      entran += w1 * (m1 - M0);
+      efMezcla += w1 * M0;
+      detalle.push({ k, w0: 0, w1, m0: null, m1, nueva: true, vB: b.venta,
+                     dm: w1 * (m1 - M0), mez: w1 * M0 });
+    } else if (a && m0 != null) {
+      // Familia que SALE: solo pierde peso, su margen ya no participa.
+      //   0 − w0·m0 = (0 − w0)·m0
+      salen += -w0 * m0;
+      efMezcla += -w0 * m0;
+      detalle.push({ k, w0, w1: 0, m0, m1: null, sale: true, vA: a.venta,
+                     mez: -w0 * m0 });
+    }
+  });
+  const total = M1 - M0;
+  // efMargen cubre las familias comparables; `entran` cubre las nuevas.
+  const residuo = total - (efMargen + entran + efMezcla);
+  return { perA, perB, M0, M1, total, vA, vB,
+           efMargen, efMezcla, efPrecio, efCosto, residuo, entran, salen,
+           detalle: detalle.sort((x, y) => (x.dm + (x.mez||0)) - (y.dm + (y.mez||0))),
+           nFam: claves.length };
+}
+
+function mgSoles(x) { return x == null ? '—' : avSoles0(Math.round(x)); }
+function mgPct(x, d) { return x == null ? '—' : x.toFixed(d == null ? 1 : d) + '%'; }
+function mgPp(x)  { return x == null ? '—' : (x > 0 ? '+' : '') + x.toFixed(1); }
+function mgCls(x) { return x == null ? '' : x > 0 ? 'mg-green' : x < 0 ? 'mg-red' : ''; }
+
+// Barra que parte el efecto en precio y costo dentro de un mismo ancho.
+function mgBarra(sP, sC) {
+  const tot = Math.abs(sP) + Math.abs(sC);
+  if (!tot) return '';
+  const wP = Math.abs(sP) / tot * 100, wC = 100 - wP;
+  return `<span class="mg-bar" title="precio ${mgSoles(sP)} · costo ${mgSoles(sC)}">
+    <i class="${sP < 0 ? 'neg' : 'pos'}" style="width:${wP.toFixed(1)}%"></i>
+    <i class="${sC < 0 ? 'neg' : 'pos'} b" style="width:${wC.toFixed(1)}%"></i></span>`;
+}
+
+function dxpMargenView() {
+  const mv = avReporte('margen_variable');
+  const filas = mgDescompone();
+  if (!filas.length) return '<div class="eje-vacio">Sin detalle de SKU en esta corrida.</div>';
+  const buenas = filas.filter(f => !f.sinDato && !f.outlier);
+  const outliers = filas.filter(f => f.outlier);
+
+  // Trayectoria del año y el mejor mes, desde la serie mensual.
+  const ps = SERIES?.periodos || [];
+  const sm = ((SERIES?.datasets || {}).margen || {})['% Margen Variable'] || [];
+  const anio = ps.map((p, i) => ({ p, v: sm[i] })).filter(x => x.v != null && x.p >= '2026-01');
+  const mejor = anio.slice().sort((a, b) => b.v - a.v)[0];
+  const parcial = SERIES?.parcial;
+  const cierre = anio.filter(x => x.p !== parcial).slice(-1)[0];
+  const actual = anio.slice(-1)[0];
+  const nm = p => (nombreMes(p) || p);
+
+  const tot = buenas.reduce((a, f) => ({ sP: a.sP + f.sP, sC: a.sC + f.sC, v: a.v + (f.venta||0) }),
+                            { sP: 0, sC: 0, v: 0 });
+  const manda = Math.abs(tot.sP) > Math.abs(tot.sC) ? 'precio' : 'costo';
+  // El efecto precio+costo es "a igualdad de mezcla": compara cada SKU consigo
+  // mismo. El margen de la empresa además se mueve porque cambia CUÁNTO pesa
+  // cada SKU. Esa diferencia es la mezcla, y se obtiene por residuo contra el
+  // cambio real del margen publicado — no se estima, se despeja.
+  // NO se calcula un efecto "mezcla" por residuo. Restar estos efectos del
+  // cambio de margen de la empresa mezcla universos distintos (127 SKU contra
+  // toda la venta), bases distintas (mes parcial contra mes cerrado) y mete
+  // dentro de "mezcla" la cobertura y los SKU que entran y salen. El residuo
+  // salía 6 veces más grande que el fenómeno que pretendía explicar. Para
+  // medir mezcla de verdad hace falta la venta por SKU del mes anterior, que
+  // el reporte no publica: se dice, no se estima.
+  const publicado = buenas.reduce((a, f) => a + (f.soles || 0), 0);
+
+  // ── Cabecera: los tres momentos ────────────────────────────────────────
+  const cab = `
+  <div class="mg-tres">
+    ${[[mejor, 'Mejor mes del año', 'best'], [cierre, 'Último cierre', ''], [actual, 'Mes en curso', 'now']]
+      .filter(x => x[0]).map(([m, lbl, cls]) => `
+      <div class="mg-t ${cls}">
+        <div class="mg-t-k">${lbl}</div>
+        <div class="mg-t-v">${mgPct(m.v * 100)}</div>
+        <div class="mg-t-d">${esc(nm(m.p))}${m === actual && parcial ? ' · parcial' : ''}</div>
+      </div>`).join('')}
+    ${mejor && actual ? `<div class="mg-t caida">
+      <div class="mg-t-k">Deterioro desde el mejor mes</div>
+      <div class="mg-t-v mg-red">${mgPp((actual.v - mejor.v) * 100)} pp</div>
+      <div class="mg-t-d">sobre ventas de ${mgSoles(tot.v)} equivale a
+        <b>${mgSoles((actual.v - mejor.v) * tot.v)}</b> de margen</div></div>` : ''}
+  </div>
+  <div class="mg-anio">${anio.map(x => {
+      const alto = mejor ? x.v / mejor.v : 0;
+      return `<span class="mg-a ${x.p === parcial ? 'par' : ''} ${x === mejor ? 'top' : ''}"
+        title="${esc(nm(x.p))} · ${mgPct(x.v*100)}">
+        <i style="height:${Math.max(6, (alto - 0.8) / 0.2 * 100).toFixed(0)}%"></i>
+        <small>${esc(nm(x.p)).slice(0,3)}</small></span>`; }).join('')}</div>`;
+
+  // Si la dimensión mensual está publicada, el puente se mide completo y la
+  // mezcla deja de ser un residuo. Si no, se cae al puente a mezcla constante
+  // y se dice qué falta — nunca se estima la mezcla por diferencia.
+  const pc = (cierre && actual) ? mgPuenteCompleto(cierre.p, actual.p) : null;
+  const puenteCompleto = pc ? (() => {
+    const S = x => mgSoles(x * pc.vB);
+    const esc0 = Math.max(...[pc.efPrecio, pc.efCosto, pc.efMezcla, pc.total].map(Math.abs), 1e-9);
+    const b = (v, k, nota) => `<div class="mg-p-row"><span class="mg-p-k">${k}
+        ${nota ? `<small class="mg-nd">${nota}</small>` : ''}</span>
+      <span class="mg-p-b"><span class="mg-esc"><i class="${v<0?'neg':'pos'}"
+        style="width:${(Math.abs(v)/esc0*100).toFixed(1)}%"></i></span></span>
+      <span class="mg-p-v ${mgCls(v)}">${S(v)}<small class="mg-nd"> ${mgPp(v*100)} pp</small></span></div>`;
+    return `
+    <div class="section-label"><span class="num">◆</span><h2>Puente de margen completo</h2>
+      <span class="rule"></span><span class="sl-note">${pc.nFam} familias · mezcla medida, no despejada</span></div>
+    <div class="mg-puente">
+      <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perA))}</span><span class="mg-p-b"></span>
+        <span class="mg-p-v">${mgPct(pc.M0*100)}</span></div>
+      ${b(pc.efPrecio, 'Precio', 'lo que se cobra por kilo')}
+      ${b(pc.efCosto, 'Costo', 'lo que cuesta el kilo')}
+      ${b(pc.efMezcla, 'Mezcla', 'cuánto pesa cada familia en la venta')}
+      ${Math.abs(pc.entran) > 1e-9 ? b(pc.entran, 'Altas y bajas', 'familias que entran o salen del mes') : ''}
+      ${Math.abs(pc.residuo) > 1e-6 ? b(pc.residuo, 'Sin asignar', 'debería ser cero') : ''}
+      <div class="mg-p-row anc"><span class="mg-p-k">${esc(nm(pc.perB))}</span><span class="mg-p-b"></span>
+        <span class="mg-p-v">${mgPct(pc.M1*100)}</span></div>
+      <div class="mg-p-row tot"><span class="mg-p-k">Cambio total</span><span class="mg-p-b"></span>
+        <span class="mg-p-v ${mgCls(pc.total)}">${S(pc.total)}<small class="mg-nd"> ${mgPp(pc.total*100)} pp</small></span></div>
+    </div>
+    <p class="mg-lect">${(() => {
+      const palancas = [['precio', pc.efPrecio], ['costo', pc.efCosto], ['mezcla', pc.efMezcla]]
+        .sort((a,b) => a[1] - b[1]);
+      const peor = palancas[0], mejor = palancas[palancas.length-1];
+      return `<b>La palanca que más resta es ${peor[0]}</b>, con ${S(peor[1])}
+        (${mgPp(peor[1]*100)} pp)${mejor[1] > 0 ? `, y la que compensa es ${mejor[0]} con ${S(mejor[1])}` : ''}.
+        ${Math.abs(pc.efMezcla) > Math.abs(pc.efPrecio) + Math.abs(pc.efCosto)
+          ? `<b>La mezcla pesa más que el precio y el costo juntos</b>: el problema no está en cómo
+             vendes cada producto sino en <b>qué producto se está vendiendo</b>. Eso no se arregla
+             negociando, se arregla decidiendo qué se empuja.`
+          : `Los tres efectos suman el cambio total sin residuo, así que no queda nada sin explicar.`}`;
+    })()}</p>
+    <div class="mg-tabla"><table>
+      <thead><tr><th>Unidad · Familia</th>
+        <th class="r">Venta ${esc(nm(pc.perA)).slice(0,3)}</th><th class="r">Venta ${esc(nm(pc.perB)).slice(0,3)}</th>
+        <th class="r">Peso</th><th class="r">Margen ${esc(nm(pc.perA)).slice(0,3)}</th>
+        <th class="r">Margen ${esc(nm(pc.perB)).slice(0,3)}</th>
+        <th class="r">Ef. margen</th><th class="r">Ef. mezcla</th></tr></thead>
+      <tbody>${pc.detalle.slice(0, 14).map(d => `<tr>
+        <td>${esc(d.k)}${d.nueva ? ' <b class="mg-green">nueva</b>' : d.sale ? ' <b class="mg-red">sale</b>' : ''}</td>
+        <td class="r">${d.vA != null ? mgSoles(d.vA).replace('+','') : '—'}</td>
+        <td class="r">${d.vB != null ? mgSoles(d.vB).replace('+','') : '—'}</td>
+        <td class="r">${(d.w1*100).toFixed(1)}%<small class="mg-nd"> de ${(d.w0*100).toFixed(1)}%</small></td>
+        <td class="r">${d.m0 != null ? mgPct(d.m0*100) : '—'}</td>
+        <td class="r">${d.m1 != null ? mgPct(d.m1*100) : '—'}</td>
+        <td class="r ${mgCls(d.dm)}">${d.dm != null ? mgSoles(d.dm*pc.vB) : '—'}</td>
+        <td class="r ${mgCls(d.mez)}">${d.mez != null ? mgSoles(d.mez*pc.vB) : '—'}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+  })() : '';
+
+  // ── El puente: precio contra costo ─────────────────────────────────────
+  const puente = `
+  <div class="section-label"><span class="num">◆</span><h2>¿Precio o costo?</h2><span class="rule"></span>
+    <span class="sl-note">${buenas.length} SKU con precio de los dos meses${
+      filas.length - buenas.length ? ` · ${filas.length - buenas.length} sin comparar` : ''}</span></div>
+  <div class="mg-puente">
+    ${(() => {
+      // Las tres barras comparten escala: si no, un efecto de S/881 se dibuja
+      // igual de ancho que uno de S/79,701 y la imagen miente.
+      const esc0 = Math.max(Math.abs(tot.sP), Math.abs(tot.sC), 1);
+      const b = (v, k) => `<div class="mg-p-row"><span class="mg-p-k">${k}</span>
+        <span class="mg-p-b"><span class="mg-esc"><i class="${v<0?'neg':'pos'}"
+          style="width:${(Math.abs(v)/esc0*100).toFixed(1)}%"></i></span></span>
+        <span class="mg-p-v ${mgCls(v)}">${mgSoles(v)}</span></div>`;
+      return b(tot.sP, 'Efecto precio') + b(tot.sC, 'Efecto costo')
+           + `<div class="mg-p-row tot"><span class="mg-p-k">Suma, a mezcla constante</span><span class="mg-p-b"></span>
+              <span class="mg-p-v ${mgCls(tot.sP + tot.sC)}">${mgSoles(tot.sP + tot.sC)}</span></div>`
+           + `<div class="mg-p-row falta"><span class="mg-p-k">Efecto mezcla</span>
+              <span class="mg-p-b"><span class="mg-falta">falta la venta por SKU del mes anterior para medirlo</span></span>
+              <span class="mg-p-v mg-nd">—</span></div>`;
+    })()}
+  </div>
+  <p class="mg-lect"><b>Esto compara cada SKU consigo mismo</b>, sobre la venta de
+    ${esc(nm(actual ? actual.p : ''))}: mide cuánto cambió el margen <b>a igualdad de mezcla</b>.
+    El costo explica <b>${mgSoles(tot.sC)}</b> y el precio apenas <b>${mgSoles(tot.sP)}</b>.
+    ${outliers.length ? `Se excluyeron <b>${outliers.length} SKU</b> con costo sobre el doble del
+      precio (asiento contable mal imputado, no margen de negocio).` : ''}
+    <b>Lo que este puente NO mide es la mezcla</b> — cuánto pesa cada producto y cada cliente en la
+    venta. Para calcularla hace falta la venta por SKU del mes anterior, que el reporte no publica.
+    Y la mezcla importa: el margen de la empresa cayó de ${mgPct(cierre ? cierre.v*100 : null)} a
+    ${mgPct(actual ? actual.v*100 : null)} mientras los productos, uno a uno, mejoraban.
+    Esa contradicción es justamente la mezcla, y hoy solo se puede nombrar, no cuantificar.</p>
+  <p class="mg-lect">Contraste: sobre estos mismos ${buenas.length} SKU, Power BI publica
+    <b>${mgSoles(publicado)}</b> y este cálculo da <b>${mgSoles(tot.sP + tot.sC)}</b>.
+    ${Math.abs(publicado) > 0 && Math.abs((tot.sP+tot.sC-publicado)/publicado) > 0.05
+      ? `<b class="mg-red">Hay ${(Math.abs((tot.sP+tot.sC-publicado)/publicado)*100).toFixed(0)}% de brecha
+         entre los dos, y hay que cerrarla antes de usar estas cifras para decidir.</b>`
+      : 'Cuadran dentro del 5%.'}</p>`;
+
+  // ── Tabla genérica por nivel ───────────────────────────────────────────
+  const tabla = (titulo, nota, grupos, etqCol) => `
+    <div class="section-label"><span class="num">◆</span><h2>${titulo}</h2><span class="rule"></span>
+      <span class="sl-note">${nota}</span></div>
+    <div class="mg-tabla"><table>
+      <thead><tr><th>${etqCol}</th><th class="r">Venta</th>
+        <th class="r">Enero</th><th class="r">${esc(nm(cierre?cierre.p:''))}</th>
+        <th class="r">${esc(nm(actual?actual.p:''))}</th><th class="r">Δ pp</th>
+        <th class="r">Precio</th><th class="r">Costo</th><th>Reparto</th></tr></thead>
+      <tbody>${grupos.map(g => `<tr>
+        <td><b>${esc(g.k)}</b>${g.sinDato ? `<small class="mg-nd"> ${g.sinDato} sin comparar</small>` : ''}</td>
+        <td class="r">${mgSoles(g.venta).replace('+','')}</td>
+        <td class="r mg-nd">${mgPct(g.mE)}</td>
+        <td class="r">${mgPct(g.m0)}</td>
+        <td class="r"><b>${mgPct(g.m1)}</b></td>
+        <td class="r ${mgCls(g.m1 - g.m0)}">${mgPp(g.m1 - g.m0)}</td>
+        <td class="r ${mgCls(g.sP)}">${mgSoles(g.sP)}</td>
+        <td class="r ${mgCls(g.sC)}">${mgSoles(g.sC)}</td>
+        <td>${mgBarra(g.sP, g.sC)}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+
+  const porUen = mgAgrupa(buenas.concat(filas.filter(f=>f.sinDato)), f => f.uen);
+  const porFam = mgAgrupa(buenas.concat(filas.filter(f=>f.sinDato)), f => f.uen + ' · ' + f.fam);
+
+  // ── SKU: los que mueven la aguja, con veredicto ────────────────────────
+  const orden = buenas.slice().sort((a, b) => (a.sP + a.sC) - (b.sP + b.sC));
+  const peores = orden.slice(0, 12), mejores = orden.slice(-5).reverse();
+  const filaSku = f => {
+    const ver = f.manda === 'precio'
+      ? '<span class="mg-v pr">manda el precio</span>'
+      : f.manda === 'costo' ? '<span class="mg-v co">manda el costo</span>'
+      : '<span class="mg-v">precio y costo</span>';
+    return `<tr class="mg-click" onclick="ejeAbrir('margen')">
+      <td>${esc(f.prod)}<div class="mg-sub">${esc(f.uen)} · ${esc(f.fam)}${
+        f.sospechoso ? ' · <b class="mg-red">dato en revisión</b>' : ''}</div></td>
+      <td class="r">${mgSoles(f.venta).replace('+','')}</td>
+      <td class="r mg-nd">${mgPct(f.mE)}</td>
+      <td class="r">${mgPct(f.m0)}</td>
+      <td class="r"><b>${mgPct(f.m1)}</b></td>
+      <td class="r mg-nd">S/${f.p0.toFixed(2)} → <b>S/${f.p1.toFixed(2)}</b></td>
+      <td class="r mg-nd">S/${f.c0.toFixed(2)} → <b>S/${f.c1.toFixed(2)}</b></td>
+      <td class="r ${mgCls(f.sP)}">${mgSoles(f.sP)}</td>
+      <td class="r ${mgCls(f.sC)}">${mgSoles(f.sC)}</td>
+      <td>${ver}</td></tr>`;
+  };
+  const cabSku = `<thead><tr><th>SKU</th><th class="r">Venta</th><th class="r">Ene</th>
+    <th class="r">${esc(nm(cierre?cierre.p:'')).slice(0,3)}</th>
+    <th class="r">${esc(nm(actual?actual.p:'')).slice(0,3)}</th>
+    <th class="r">Precio/kg</th><th class="r">Costo/kg</th>
+    <th class="r">Ef. precio</th><th class="r">Ef. costo</th><th>Veredicto</th></tr></thead>`;
+
+  const nPrecio = peores.filter(f => f.manda === 'precio').length;
+  const nCosto  = peores.filter(f => f.manda === 'costo').length;
+
+  return cab + (puenteCompleto || puente)
+  + tabla('Por unidad de negocio', `${porUen.length} unidades`, porUen, 'UEN')
+  + tabla('Por familia de producto', `${porFam.length} familias · ordenadas por lo que pesan`, porFam, 'UEN · Familia')
+  + `<div class="section-label"><span class="num">◆</span><h2>Los 12 SKU que más margen destruyen</h2>
+      <span class="rule"></span><span class="sl-note">de ${buenas.length} comparables</span></div>
+     <div class="mg-tabla"><table>${cabSku}<tbody>${peores.map(filaSku).join('')}</tbody></table></div>
+     <p class="mg-lect">De estos 12, <b>${nPrecio} pierden por precio</b> y <b>${nCosto} por costo</b>
+       ${nPrecio && nCosto ? '— son dos conversaciones distintas: la de precio va a comercial y a la pestaña de precio por cliente, la de costo va a compras y a la fórmula.' : '.'}
+       Cuando manda el precio, antes de negociar hay que mirar si el promedio bajó porque alguien
+       rebajó o porque cambió quién compra.</p>
+     <div class="section-label"><span class="num">◆</span><h2>Los 5 que más aportan</h2>
+       <span class="rule"></span><span class="sl-note">para saber qué se está haciendo bien</span></div>
+     <div class="mg-tabla"><table>${cabSku}<tbody>${mejores.map(filaSku).join('')}</tbody></table></div>`
+  + `<p class="eje-legal">Todo sale del reporte Margen Variable de Power BI. La única operación que
+      hace la app es la descomposición: con margen = 1 − costo/precio, el costo por kilo de cada mes
+      se deriva del precio y el margen publicados, y el movimiento se parte en efecto precio y efecto
+      costo, que suman el total sin residuo. Los SKU sin precio de alguno de los dos meses no se
+      descomponen y se cuentan aparte. La columna de enero es el mejor mes del año y sirve de
+      referencia de a dónde se puede volver, no de meta.</p>`;
+}
+
+// ── Vista PRECIO POR CLIENTE ───────────────────────────────────────────────
+// Un promedio ponderado no distingue una rebaja negociada de un cambio de
+// mezcla de clientes: son conversaciones opuestas. Esta vista usa el precio
+// por cliente para separarlas con nombre propio.
+function dxpPrecioView() {
+  const dim = (DATA?.empresas?.PAUNO?.dimensiones) || {};
+  const pc = dim.precio_cliente;
+  if (!pc || !pc.filas || !pc.filas.length) return `
+    <div class="eje-vacio">Todavía no hay precio por cliente en esta corrida.<br>
+    <small>Se publica en <code>dimensiones.precio_cliente</code>.</small></div>`;
+
+  const filas = pc.filas;
+  const meses = pc.meses || [];
+
+  // Agrupar por producto + canal: la comparación solo vale entre pares reales.
+  const grupos = {};
+  filas.forEach(f => {
+    const k = f.producto + ' ‖ ' + f.canal;
+    (grupos[k] = grupos[k] || { producto: f.producto, canal: f.canal, cli: [] }).cli.push(f);
+  });
+
+  // Solo grupos con al menos 3 clientes: con menos no hay dispersión que medir.
+  const conDisp = Object.values(grupos).filter(g => g.cli.length >= 3).map(g => {
+    const ps = g.cli.map(c => avNum(c.precio)).filter(x => x != null && x > 0).sort((a,b)=>a-b);
+    if (ps.length < 3) return null;
+    const med = ps.length % 2 ? ps[(ps.length-1)/2] : (ps[ps.length/2-1] + ps[ps.length/2]) / 2;
+    const bajo = g.cli.filter(c => { const p = avNum(c.precio); return p != null && p > 0 && p < med * 0.9; });
+    // Cuántos de los que ya compraban cambiaron su precio: eso separa rebaja de mezcla.
+    const previos = g.cli.filter(c => avNum(c.precio_previo) != null && avNum(c.precio_previo) > 0);
+    const cambiaron = previos.filter(c => Math.abs(avNum(c.precio) - avNum(c.precio_previo)) > 0.01);
+    const nuevos = g.cli.filter(c => !avNum(c.precio_previo) || avNum(c.precio_previo) === 0);
+    return { ...g, med, ps, bajo, previos, cambiaron, nuevos,
+             disp: ps.length > 1 ? (ps[ps.length-1] - ps[0]) / med : 0 };
+  }).filter(Boolean).sort((a, b) => b.disp - a.disp);
+
+  const fila = g => {
+    const veredicto = g.cambiaron.length === 0 && g.nuevos.length
+      ? `<span class="pr-v pr-mezcla">Es mezcla, no rebaja</span>`
+      : g.cambiaron.length
+        ? `<span class="pr-v pr-rebaja">${g.cambiaron.length} cliente${g.cambiaron.length>1?'s':''} cambió de precio</span>`
+        : `<span class="pr-v">Sin cambios de precio</span>`;
+    return `
+    <article class="pr-card">
+      <div class="pr-head">
+        <div><div class="pr-prod">${esc(g.producto)}</div>
+          <div class="pr-canal">${esc(g.canal)} · ${g.cli.length} clientes</div></div>
+        <div class="pr-disp"><b>${(g.disp*100).toFixed(0)}%</b><small>dispersión</small></div>
+      </div>
+      <div class="pr-band">
+        <div class="pr-med">mediana <b>S/${g.med.toFixed(2)}</b></div>
+        <div class="pr-dots">${g.cli.map(c => {
+          const p = avNum(c.precio); if (p == null || p <= 0) return '';
+          const lo = g.ps[0], hi = g.ps[g.ps.length-1];
+          const x = hi > lo ? ((p - lo) / (hi - lo)) * 100 : 50;
+          const bajo = p < g.med * 0.9;
+          return `<span class="pr-dot ${bajo?'lo':''}" style="left:${x.toFixed(1)}%"
+            title="${esc(avNombreLlano?avNombreLlano(c.cliente):c.cliente)} — S/${p.toFixed(2)}"></span>`;
+        }).join('')}</div>
+        <div class="pr-ejes"><span>S/${g.ps[0].toFixed(2)}</span><span>S/${g.ps[g.ps.length-1].toFixed(2)}</span></div>
+      </div>
+      ${veredicto}
+      ${g.bajo.length ? `<div class="pr-bajo"><b>${g.bajo.length} bajo la mediana:</b>
+        ${g.bajo.slice(0,4).map(c => `${esc(avNombreLlano?avNombreLlano(c.cliente):c.cliente)}
+          <i>S/${avNum(c.precio).toFixed(2)}</i>`).join(' · ')}${g.bajo.length>4?` y ${g.bajo.length-4} más`:''}</div>` : ''}
+    </article>`;
+  };
+
+  return `
+  <section class="hoy-top">
+    <h2>Precio por cliente</h2>
+    <p>${filas.length} combinaciones de producto, canal y cliente · ${meses.join(' vs ')}.
+       Se muestran los ${Math.min(12, conDisp.length)} casos con mayor dispersión entre clientes
+       que compran <b>el mismo producto en el mismo canal</b>. Un precio bajo la mediana de sus
+       pares es margen que se deja en la mesa; un precio que nadie movió y un promedio que igual
+       cayó es mezcla, no rebaja.</p>
+  </section>
+  <div class="pr-grid">${conDisp.slice(0, 12).map(fila).join('')}</div>
+  <p class="eje-legal">Fuente: matriz Precio Unitario del reporte R. Orden de Venta, Power BI ·
+    ${conDisp.length} grupos producto×canal con 3 o más clientes, de ${Object.keys(grupos).length} totales.
+    El reporte publica precio pero no volumen por cliente, así que la dispersión no se puede
+    convertir a soles todavía: haría falta el kilaje por cliente.</p>`;
+}
+
+// ── Vista VERIFICAR ────────────────────────────────────────────────────────
+// Las comprobaciones actuales son de coherencia interna, y un cero vacío es
+// coherente consigo mismo. La banda histórica compara cada cifra contra su
+// propia serie: es lo que atrapa una rotura que "cuadra" pero es imposible.
+function dxpBanda(vals) {
+  const v = vals.filter(x => x != null && isFinite(x));
+  if (v.length < 6) return null;
+  const hist = v.slice(0, -1), ult = v[v.length - 1];
+  const mu = hist.reduce((a, b) => a + b, 0) / hist.length;
+  const sd = Math.sqrt(hist.reduce((a, b) => a + (b - mu) ** 2, 0) / hist.length);
+  if (!sd) return null;
+  return { mu, sd, ult, z: (ult - mu) / sd, n: hist.length };
+}
+
+function dxpVerificarView() {
+  const val = DATA?.validacion || {};
+  const cob = DATA?.cobertura || {};
+  const vt = DATA?.validacion_tarjetas || {};
+  const ds = (SERIES?.datasets) || {};
+  const ps = SERIES?.periodos || [];
+
+  // Banda histórica sobre todas las series publicadas.
+  // OJO: el último periodo es el mes EN CURSO, que va a mitad. Una serie que
+  // acumula (ventas, costos) sale siempre muy por debajo de su historia de
+  // meses completos, y eso no es una rotura: es el calendario. Para esas se
+  // compara el mes cerrado, no el parcial, y se dice cuál se comparó.
+  const parcial = !!(SERIES && SERIES.parcial);
+  const fuera = [];
+  Object.entries(ds).forEach(([rep, medidas]) => {
+    Object.entries(medidas || {}).forEach(([med, vals]) => {
+      if (!Array.isArray(vals)) return;
+      // Una tasa (%) no acumula: su valor a mitad de mes ya es comparable.
+      const esTasa = /^%|ratio|precio|costo x|días|dias/i.test(med);
+      const usar = (parcial && !esTasa) ? vals.slice(0, -1) : vals;
+      const b = dxpBanda(usar);
+      if (!b || Math.abs(b.z) < 2) return;
+      const idx = usar.length - 1;
+      fuera.push({ rep, med, ...b, periodo: ps[idx], cerrado: usar !== vals });
+    });
+  });
+  fuera.sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+  const totSeries = Object.values(ds).reduce((a, m) => a + Object.keys(m || {}).length, 0);
+
+  const nc = (val.no_cuadran || []);
+  const nuevos = nc.filter(x => !x.conocido), conocidos = nc.filter(x => x.conocido);
+  const sinMeta = (METAS?.indicadores || []).filter(i => i.meta == null);
+
+  const fmtN = x => Math.abs(x) >= 1000 ? Math.round(x).toLocaleString('es-PE')
+                  : Math.abs(x) >= 1 ? x.toFixed(2) : x.toFixed(4);
+
+  return `
+  <section class="hoy-top">
+    <h2>Verificar</h2>
+    <p>No se abre a diario: se abre cuando dudas de un número. ${val.cuadran ?? '—'} comprobaciones
+       de coherencia pasaron, y además cada serie se contrasta contra su propia historia
+       (${ps.length} periodos) — un cero vacío es perfectamente coherente consigo mismo,
+       pero no con sus 15 meses.</p>
+  </section>
+
+  <div class="section-label"><span class="num">◆</span><h2>Contraste contra Power BI</h2><span class="rule"></span></div>
+  <div class="vf-grid">
+    <div class="vf-c"><div class="vf-k">Tarjetas idénticas al reporte</div>
+      <div class="vf-v">${vt.iguales ?? '—'}</div>
+      <div class="vf-d">${(vt.distintas||[]).length} distintas</div></div>
+    <div class="vf-c"><div class="vf-k">Cobertura</div>
+      <div class="vf-v">${cob.pct != null ? cob.pct + '%' : '—'}</div>
+      <div class="vf-d">${cob.kpis_del_reporte ?? '—'} de ${cob.kpis_totales ?? '—'} KPIs del reporte</div></div>
+    <div class="vf-c"><div class="vf-k">Series con historia</div>
+      <div class="vf-v">${totSeries}</div>
+      <div class="vf-d">${ps.length} periodos · ${ps[0] || ''} a ${ps[ps.length-1] || ''}</div></div>
+    <div class="vf-c"><div class="vf-k">Cifras calculadas</div>
+      <div class="vf-v">${(DATA?.derivados || []).length}</div>
+      <div class="vf-d">marcadas como tales donde aparecen</div></div>
+  </div>
+
+  <div class="section-label"><span class="num">◆</span><h2>Banda histórica</h2><span class="rule"></span>
+    <span class="sl-note">${fuera.length} de ${totSeries} series fuera de ±2σ</span></div>
+  ${fuera.length ? `<div class="mg-tabla"><table>
+    <thead><tr><th>Serie</th><th>Reporte</th><th class="r">Último</th><th class="r">Promedio</th>
+      <th class="r">Desvío</th></tr></thead>
+    <tbody>${fuera.slice(0, 10).map(f => `<tr>
+      <td>${esc(f.med)}<div class="vf-why">${esc(f.periodo || '')}${f.cerrado
+        ? ' · mes cerrado (el mes en curso va a medias y no es comparable)' : ''}</div></td>
+      <td>${esc(f.rep)}</td>
+      <td class="r"><b>${fmtN(f.ult)}</b></td>
+      <td class="r">${fmtN(f.mu)} <small>± ${fmtN(f.sd)}</small></td>
+      <td class="r ${Math.abs(f.z)>=3?'mg-red':'mg-warn'}">${f.z>0?'+':''}${f.z.toFixed(1)}σ</td>
+    </tr>`).join('')}</tbody></table></div>
+    <p class="mg-resto">Una cifra fuera de ±2σ no está necesariamente mal: está <b>fuera de lo que
+      esa serie ha hecho en ${ps.length} periodos</b>, y merece una mirada antes de usarse para decidir.</p>`
+    : `<p class="mg-resto">Ninguna serie se sale de su banda histórica en esta corrida.</p>`}
+
+  <div class="section-label"><span class="num">◆</span><h2>Descuadres</h2><span class="rule"></span></div>
+  <div class="vf-list">
+    ${nuevos.length ? nuevos.map(x => `<div class="vf-row vf-bad">
+      <div><b>${esc(x.prueba)}</b><div class="vf-why">${esc(x.detalle || '')}</div></div>
+      <span class="vf-tag bad">nuevo</span></div>`).join('')
+      : `<div class="vf-row vf-ok"><div><b>Sin descuadres nuevos</b>
+         <div class="vf-why">Las ${val.cuadran ?? '—'} comprobaciones de coherencia pasaron.</div></div>
+         <span class="vf-tag ok">ok</span></div>`}
+    ${conocidos.map(x => `<div class="vf-row">
+      <div><b>${esc(x.prueba)}</b><div class="vf-why">${esc(x.detalle || '')}</div></div>
+      <span class="vf-tag">ya investigado</span></div>`).join('')}
+  </div>
+
+  ${sinMeta.length ? `
+  <div class="section-label"><span class="num">◆</span><h2>Metas sin fijar — ${sinMeta.length}</h2><span class="rule"></span></div>
+  <div class="vf-list">${sinMeta.map(i => `<div class="vf-row">
+    <div><b>${esc(i.label)}</b><div class="vf-why">Sin meta, la app no puede decir si está bien o mal:
+      solo muestra el valor. Las metas son lo único que se escribe a mano.</div></div>
+    <span class="vf-tag">tu decisión</span></div>`).join('')}</div>` : ''}
+
+  <p class="eje-legal">La banda histórica compara el último valor de cada serie contra el promedio
+    y la desviación de sus periodos anteriores. Es la comprobación que faltaba: las otras verifican
+    que las cifras cuadren entre sí, y dos cifras vacías cuadran perfectamente.</p>`;
+}
+
+// ── Cierre del mes anterior y avance del actual ────────────────────────────
+// Lee las series mensuales y arma la lectura general: cómo cerró el mes
+// completo contra el anterior, y cómo va el mes en curso. Las cifras del mes
+// en curso son de medio mes y se dicen como tales — compararlas de frente
+// contra un mes entero es el error más común de un tablero.
+function dxpCYA_serie(rep, med) {
+  const v = ((SERIES?.datasets || {})[rep] || {})[med];
+  return Array.isArray(v) ? v : null;
+}
+
+function dxpCierreYAvance(empresa) {
+  const ps = SERIES?.periodos || [];
+  if (ps.length < 3) return '';
+  const parcial = SERIES?.parcial || null;
+  const iCur  = parcial ? ps.indexOf(parcial) : ps.length - 1;
+  const iCie  = iCur - 1;                 // último mes cerrado
+  const iPrev = iCur - 2;                 // el anterior a ese
+  if (iPrev < 0) return '';
+  const nm = p => nombreMes(p) || p;
+
+  const pct1 = x => x == null ? null : x * 100;
+  const F = {
+    pct:  x => x == null ? '—' : (x * 100).toFixed(1) + '%',
+    soles:x => x == null ? '—' : avSoles0(x).replace('+', ''),
+    dias: x => x == null ? '—' : x.toFixed(0) + ' d',
+    kg:   x => x == null ? '—' : Math.round(x).toLocaleString('es-PE') + ' kg',
+    sol2: x => x == null ? '—' : 'S/' + x.toFixed(2),
+    num:  x => x == null ? '—' : x.toFixed(1),
+  };
+
+  // rep, medida, etiqueta, formato, dirección buena (1 = subir es bueno)
+  const FILAS = [
+    ['margen','Ventas (S/.)',              'Ventas',                      'soles', 1],
+    ['margen','% Margen Variable',         'Margen variable',             'pct',   1],
+    ['margen','Precio x Kilo',             'Precio por kilo',             'sol2',  1],
+    ['margen','Costo x Kilo',              'Costo por kilo',              'sol2', -1],
+    ['fill_rate','% Fill Rate mensual',    'Fill rate',                   'pct',   1],
+    ['fill_rate','Venta perdida (S/)',     'Venta perdida',               'soles',-1],
+    ['mermas','% Merma Total',             'Merma total',                 'pct',  -1],
+    ['productividad','Producción (kg)',    'Producción',                  'kg',    1],
+    ['cxc','% Morosidad',                  'Morosidad',                   'pct',  -1],
+    ['cxp','Días CxP',                     'Días de pago a proveedores',  'dias', -1],
+    ['inventario','Días de rotación',      'Rotación de inventario',      'dias', -1],
+    ['compras','% Ratio Consumo/Compra',   'Ratio consumo / compra',      'pct',   1],
+    ['consumo','MIP / TN Vendida',         'Costo de materiales por TN',  'num',  -1],
+  ];
+
+  const datos = FILAS.map(([rep, med, etq, fmt, dir]) => {
+    const s = dxpCYA_serie(rep, med); if (!s) return null;
+    const prev = s[iPrev], cie = s[iCie], cur = s[iCur];
+    const vpct = (a, b) => (a == null || b == null || !a) ? null : (b / a - 1) * 100;
+    return { etq, fmt, dir, prev, cie, cur, dCierre: vpct(prev, cie),
+             esTasa: fmt === 'pct' || fmt === 'dias' || fmt === 'num' || fmt === 'sol2',
+             dPp: (fmt === 'pct' && prev != null && cie != null) ? (cie - prev) * 100 : null };
+  }).filter(Boolean);
+
+  const flecha = d => {
+    if (d.dCierre == null) return '<span class="cya-m">—</span>';
+    const bueno = (d.dCierre > 0 ? 1 : -1) === d.dir;
+    const txt = d.dPp != null ? (d.dPp > 0 ? '+' : '') + d.dPp.toFixed(1) + ' pp'
+                              : (d.dCierre > 0 ? '+' : '') + d.dCierre.toFixed(1) + '%';
+    return `<span class="${bueno ? 'cya-ok' : 'cya-mal'}">${txt}</span>`;
+  };
+
+  const tabla = `
+  <div class="mg-tabla"><table>
+    <thead><tr>
+      <th>Indicador</th>
+      <th class="r">${esc(nm(ps[iPrev]))}</th>
+      <th class="r">${esc(nm(ps[iCie]))} <small>cerrado</small></th>
+      <th class="r">variación</th>
+      <th class="r">${esc(nm(ps[iCur]))} <small>parcial</small></th>
+    </tr></thead>
+    <tbody>${datos.map(d => `<tr>
+      <td>${esc(d.etq)}</td>
+      <td class="r cya-m">${F[d.fmt](d.prev)}</td>
+      <td class="r"><b>${F[d.fmt](d.cie)}</b></td>
+      <td class="r">${flecha(d)}</td>
+      <td class="r">${d.cur == null ? '<span class="cya-m">sin dato</span>' : F[d.fmt](d.cur)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+
+  // ── Lecturas: se construyen solo si los datos que necesitan existen ──────
+  const g = (rep, med) => { const s = dxpCYA_serie(rep, med); return s ? { p: s[iPrev], c: s[iCie], a: s[iCur] } : null; };
+  const L = [];
+
+  const pk = g('margen','Precio x Kilo'), ck = g('margen','Costo x Kilo');
+  if (pk && ck && pk.p && ck.p) {
+    const dp = (pk.a != null ? pk.a / pk.p - 1 : pk.c / pk.p - 1) * 100;
+    const dc = (ck.a != null ? ck.a / ck.p - 1 : ck.c / ck.p - 1) * 100;
+    if (dc > dp) L.push({ t: 'La tijera entre precio y costo', c: 'mal', h:
+      `En estos ${pk.a != null ? 'tres' : 'dos'} meses el precio por kilo subió <b>${dp.toFixed(1)}%</b>
+       (${F.sol2(pk.p)} → ${F.sol2(pk.a ?? pk.c)}) y el costo por kilo subió <b>${dc.toFixed(1)}%</b>
+       (${F.sol2(ck.p)} → ${F.sol2(ck.a ?? ck.c)}). Estás trasladando precio, pero
+       <b>el costo corre ${(dc/dp).toFixed(1)} veces más rápido</b>: por eso el margen cae
+       aunque vendas más caro.` });
+  }
+
+  const vp = g('fill_rate','Venta perdida (S/)'), av = (typeof avanceDelMes === 'function' ? avanceDelMes() : null) || {};
+  if (vp && vp.a != null && vp.c != null) {
+    const ritmo = av.dia && av.dias ? vp.a / av.dia * av.dias : null;
+    L.push({ t: 'La venta perdida se está acelerando', c: 'mal', h:
+      `${nm(ps[iCie])} cerró con <b>${F.soles(vp.c)}</b> de venta perdida. En ${nm(ps[iCur])},
+       al día ${av.dia || '—'} de ${av.dias || '—'}, ya van <b>${F.soles(vp.a)}</b>
+       — ${vp.a >= vp.c ? '<b>más que todo el mes anterior completo</b>' : 'el ' + (vp.a/vp.c*100).toFixed(0) + '% de todo el mes anterior'}.
+       ${ritmo ? `A este ritmo el mes cierra cerca de <b>${F.soles(ritmo)}</b>.` : ''}` });
+  }
+
+  const ven = g('margen','Ventas (S/.)');
+  if (ven && ven.a != null && ven.c && av.dia && av.dias) {
+    const share = ven.a / ven.c * 100, esperado = av.dia / av.dias * 100;
+    L.push({ t: 'Dónde va la venta del mes', c: share >= esperado ? 'ok' : 'mal', h:
+      `Al día ${av.dia} de ${av.dias} llevas <b>${F.soles(ven.a)}</b>, que es el
+       <b>${share.toFixed(0)}%</b> de lo que vendiste en ${nm(ps[iCie])}. Por calendario
+       correspondería ${esperado.toFixed(0)}%.
+       ${share < esperado
+         ? `Van <b>${(esperado-share).toFixed(0)} puntos de atraso</b>, aunque la venta se
+            concentra en la segunda quincena, así que el cierre suele recuperar parte.`
+         : 'Vas por delante del calendario.'}` });
+  }
+
+  // Qué unidad de negocio explica el movimiento del margen
+  const uens = ['B&D','MAQUILA','TIGO'].map(u => {
+    const s = dxpCYA_serie('margen', '% Margen ' + u);
+    return s ? { u, c: s[iCie], a: s[iCur] } : null;
+  }).filter(x => x && x.c != null && x.a != null);
+  if (uens.length) {
+    const peor = uens.slice().sort((a,b) => (a.a-a.c) - (b.a-b.c))[0];
+    const suben = uens.filter(x => x.a > x.c);
+    if (peor.a < peor.c) L.push({ t: 'El margen no cae parejo', c: 'mal', h:
+      `<b>${peor.u}</b> pasó de ${F.pct(peor.c)} a ${F.pct(peor.a)}
+       (<b>${((peor.a-peor.c)*100).toFixed(1)} pp</b>).
+       ${suben.length ? `Mientras tanto ${suben.map(x=>`<b>${x.u}</b> sube a ${F.pct(x.a)}`).join(' y ')}.
+       La caída del total es de ${peor.u}, no del negocio entero — y ahí es donde hay que mirar.`
+       : ''}` });
+  }
+
+  const mo = g('cxc','% Morosidad'), ro = g('inventario','Días de rotación');
+  const buenas = [];
+  if (mo && mo.p != null && mo.a != null && mo.a < mo.p) buenas.push(`la morosidad bajó de ${F.pct(mo.p)} a <b>${F.pct(mo.a)}</b>`);
+  if (ro && ro.p != null && ro.a != null && ro.a < ro.p) buenas.push(`la rotación de inventario bajó de ${F.dias(ro.p)} a <b>${F.dias(ro.a)}</b>`);
+  if (buenas.length) L.push({ t: 'Lo que sí está mejorando', c: 'ok', h:
+    `${buenas.join(' y ')}. Es cobranza y capital de trabajo: la caja se está ordenando
+     aunque el margen no. Conviene saber qué se hizo distinto ahí y si se puede repetir.` });
+
+  return `
+  <div class="cya">
+    <div class="section-label"><span class="num">◆</span>
+      <h2>Cierre de ${esc(nm(ps[iCie]))} y avance de ${esc(nm(ps[iCur]))}</h2>
+      <span class="rule"></span>
+      <span class="sl-note">${av.dia ? `día ${av.dia} de ${av.dias}` : ''}</span></div>
+    <p class="cya-intro">La columna de <b>${esc(nm(ps[iCie]))}</b> es el mes completo y se compara
+      contra ${esc(nm(ps[iPrev]))}. La de <b>${esc(nm(ps[iCur]))}</b> va a medio mes: sirve para ver
+      la dirección, no para compararla de frente contra un mes entero.</p>
+    ${tabla}
+    <div class="cya-lect">${L.map(x => `
+      <article class="cya-l cya-${x.c}">
+        <h3>${esc(x.t)}</h3><p>${x.h}</p>
+      </article>`).join('')}</div>
+  </div>`;
+}
+
 function dxpCausal(s) {
   const ch = [];
   if (s.uenPeor && s.ckDelta != null && s.mgAct != null) ch.push([
@@ -3351,7 +4355,12 @@ function dxpCausal(s) {
     {c:'crit', l:'Margen implícito', v:dxpPct(s.mgAct,2), s:`${s.mgEsMin?'Mínimo histórico':'Actual'} · meta ${metaTxt('margen')}`},
   ]);
   if (s.fillRate && s.ventaPerdida && s.facturacion) ch.push([
-    {c:'crit', l:'Fill Rate', v:s.fillRate, s:`${s.frBajoMeta}/${s.frN} meses bajo meta ${metaTxt('fill_rate')}`},
+    // dxpPct recibe el número YA en unidades de porcentaje (46.0 = 46%), y la
+    // serie viene en fracción (0.843). Sin el ×100 la tarjeta decía "0.8%".
+    {c:'crit', l:'Fill Rate', v:(s.frUlt != null ? dxpPct(s.frUlt*100,1) : s.fillRate),
+     s:(s.frUltP ? `${fmtPeriodo(s.frUltP)} · ` : '')
+       + (s.frBajoMeta != null ? `${s.frBajoMeta}/${s.frN} meses bajo meta ${metaTxt('fill_rate')}`
+                               : `bajo meta ${metaTxt('fill_rate')} — sin serie mensual para contar`)},
     {c:'crit', l:'Venta Perdida', v:s.ventaPerdida, s:`${dxpPct(s.vpPct)} de la Orden de Venta (${s.ordenVenta})`},
     {c:'warn', l:'Facturación real', v:s.facturacion, s:`${dxpPct(s.faPct)} de lo pedido — techo de ventas autoimpuesto`},
   ]);
@@ -3420,7 +4429,7 @@ function dxpHolding(s) {
 function dxpCards(s) {
   const resumen = {
     control_interno: () => `<b>${s.ciCritico||'—'} pts críticos</b> (${s.ciCritPct||'—'} del total) · <b>${s.ciAtrasados||'—'} planes atrasados</b> de ${s.ciPlanes||'—'} (${dxpPct(s.ciAtrasPct)})`,
-    fill_rate: () => `<b>${s.frBajoMeta}/${s.frN} meses</b> bajo meta · Venta Perdida <b>${s.ventaPerdida||'—'}</b> (${dxpPct(s.vpPct)} del pedido)`,
+    fill_rate: () => `${s.frBajoMeta != null ? `<b>${s.frBajoMeta}/${s.frN} meses</b> bajo meta` : 'bajo meta'} · Venta Perdida <b>${s.ventaPerdida||'—'}</b> (${dxpPct(s.vpPct)} del pedido)`,
     mermas: () => `${s.uenPeor?`${s.uenPeor.uen} <b>${s.ratioUen?s.ratioUen.toFixed(1)+'x':''}</b> peor que ${s.uenMejor.uen}`:''}${s.plaPeor?` · ${s.plaPeor.planta} <b>${s.ratioPla?s.ratioPla.toFixed(1)+'x':''}</b> peor que ${s.plaMejor.planta}`:''}`,
     margen_variable: () => `Margen implícito <b>${dxpPct(s.mgAct,2)}</b> — ${s.mgEsMin?'mínimo histórico':'dentro'} de ${s.mgN} meses`,
     cuentas_por_cobrar: () => `CxC por vencer <b>${s.cxcVencer||'—'}</b> · aging en 4 tramos + serie mensual`,
@@ -5924,6 +6933,57 @@ function ejeAccion(ind, m) {
          `ese visual en Power BI.`;
 }
 
+// Traduce la distancia a meta de un indicador a soles, que es la única unidad
+// en la que se pueden comparar hallazgos de reportes distintos. Devuelve
+// además `falta`: cuando no se puede calcular, la app dice qué haría falta en
+// vez de publicar un hallazgo sin monto — un hallazgo sin precio no se puede
+// priorizar, y uno con un monto inventado es peor que ninguno.
+function ejeValorEnSoles(ind, m) {
+  const nada = { soles: null, nota: null, porSemana: null, falta: null };
+  if (!m || !m.dist || m.dist.d == null) return nada;
+
+  // a) El indicador YA está en soles: la distancia a meta es el monto.
+  if (ind.unidad === 'soles') {
+    return {
+      soles: m.dist.d,
+      nota: ind.tipo === 'acumula' ? 'brecha contra la meta del mes'
+                                   : 'exceso sobre la meta',
+      porSemana: null, falta: null,
+    };
+  }
+
+  // b) Fill rate: la venta perdida está publicada, y al margen variable del
+  //    mes se convierte en la contribución que se dejó de ganar. Es un flujo
+  //    que se repite todos los meses, así que también se dice por semana.
+  if (ind.clave === 'fill_rate') {
+    const fr = avReporte('fill_rate');
+    const vp = avNum(((fr.kpis || []).find(k => /venta perdida/i.test(k.label)) || {}).valor);
+    const mg = ejeMetrica((METAS.indicadores || []).find(x => x.clave === 'margen') || {});
+    const pct = mg && mg.curso != null ? mg.curso : (mg && mg.cerrado);
+    if (vp != null && pct != null) {
+      const contrib = -Math.abs(vp * pct);
+      return {
+        soles: contrib,
+        nota: `venta perdida ${avSoles0(vp).replace('+','')} × ${(pct*100).toFixed(1)}% de margen`,
+        porSemana: contrib / 4.345,   // semanas promedio de un mes
+        falta: null,
+      };
+    }
+    return { ...nada, falta: 'la venta perdida del mes y el margen variable para convertirla a soles' };
+  }
+
+  // c) Todo lo demás está en puntos, días o ratio, y no hay en el reporte el
+  //    factor que lo lleva a soles. Se dice cuál es ese factor por su nombre.
+  const queFalta = {
+    merma:            'la base de merma en kilos y el costo unitario aplicable',
+    margen:           'el desglose de la brecha por palanca (precio, mezcla, costo, volumen)',
+    dias_cxp:         'el costo unitario por proveedor y su plazo pactado, para medir la prima por pagar a 107 días',
+    morosidad:        'el costo financiero del capital inmovilizado en cartera vencida',
+    control_interno:  'nada: es el semáforo de confiabilidad del dato, no una pérdida en soles',
+  };
+  return { ...nada, falta: queFalta[ind.clave] || null };
+}
+
 function ejeHallazgos() {
   const out = [];
   const mv = avReporte('margen_variable');
@@ -5933,11 +6993,15 @@ function ejeHallazgos() {
     const m = ejeMetrica(ind);
     if (m.sem.k !== 'crit' && m.sem.k !== 'warn') return;
     if (m.dist == null) return;
+    const v = ejeValorEnSoles(ind, m);
     out.push({
       kpi: ind.label, clave: ind.clave,
       segmento: 'total de la empresa',
       desvio: m.dist.txt + ' vs meta de setiembre',
-      soles: null,
+      soles: v.soles,
+      solesNota: v.nota,
+      porSemana: v.porSemana,
+      falta: v.falta,
       tendencia: m.tri ? (m.tri.cls === 't-peor' ? 'empeora' :
                           m.tri.cls === 't-mejor' ? 'mejora' : 'estable') : null,
       prioridad: m.sem.k,
@@ -5945,7 +7009,14 @@ function ejeHallazgos() {
       // cuando el indicador tiene segmentos se nombra el que lo arrastra, y
       // cuando tiene desglose publicado se nombra la categoría que más pesa.
       accion: ejeAccion(ind, m),
-      orden: Math.abs(m.dist.d) * (m.sem.k === 'crit' ? 10 : 1),
+      // OJO: ordenar por `m.dist.d` mezclaba unidades — una brecha de ventas
+      // de 3,027,274 soles competía contra una de margen de 6.2 puntos, así
+      // que el de soles ganaba siempre por ser soles, no por valer más. Se
+      // ordena por el monto en soles cuando existe; los que no lo tienen van
+      // después, entre ellos por distancia a meta.
+      orden: v.soles != null
+        ? Math.abs(v.soles) * (m.sem.k === 'crit' ? 10 : 1)
+        : Math.abs(m.dist.d) * (m.sem.k === 'crit' ? 10 : 1) * 1e-6,
     });
   });
 
@@ -6151,6 +7222,10 @@ function ejeVista() {
             <span class="eje-h-des">${esc(h.desvio)}</span>
             ${h.soles != null ? `<span class="eje-h-sol">${avSoles0(h.soles)}</span>` : ''}
           </div>
+          ${h.solesNota ? `<div class="eje-h-nota">${esc(h.solesNota)}</div>` : ''}
+          ${h.porSemana != null ? `<div class="eje-h-demora">Cada semana sin actuar:
+            <b>${avSoles0(h.porSemana).replace('−','')}</b></div>` : ''}
+          ${h.falta ? `<div class="eje-h-falta"><b>Para ponerle monto falta:</b> ${esc(h.falta)}</div>` : ''}
           ${h.tendencia ? `<div class="eje-h-ten">${esc(h.tendencia)}</div>` : ''}
           <p class="eje-h-acc">${h.accionHtml ? h.accion : esc(h.accion)}</p>
         </article>`).join('')}
@@ -6509,6 +7584,10 @@ function dxpTab(tab) {
   root.querySelectorAll('.tt').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   if (tab === 'avance' && v) v.innerHTML = dxpAvanceView();
   if (tab === 'ejecutivo' && v) v.innerHTML = ejeVista();
+  if (tab === 'hoy' && v) v.innerHTML = dxpHoyView();
+  if (tab === 'margen' && v) v.innerHTML = dxpMargenView();
+  if (tab === 'precio' && v) v.innerHTML = dxpPrecioView();
+  if (tab === 'verificar' && v) v.innerHTML = dxpVerificarView();
   const ctx = root.querySelector('#dxp-context');
   // Cada pestaña habla de un período distinto y el encabezado lo dice: el
   // resumen es del mes cerrado y las otras dos del mes en curso. Tenerlo en el
@@ -6516,7 +7595,11 @@ function dxpTab(tab) {
   // decía "Agosto".
   const mesCur = nombreMes(mesParcial()) || 'mes en curso';
   if (ctx) ctx.textContent =
-      tab === 'roadmap'   ? 'Plan de Acción'
+      tab === 'margen'    ? `Árbol causal del margen · ${mesCur}`
+    : tab === 'precio'    ? 'Dispersión de precio por cliente'
+    : tab === 'verificar' ? 'Estado y confiabilidad del dato'
+    : tab === 'hoy'       ? `Decisiones de hoy · ${mesCur} al día ${(avanceDelMes()||{}).dia||''}`
+    : tab === 'roadmap'   ? 'Plan de Acción'
     : tab === 'avance'    ? `Avance de ${mesCur}`
     : tab === 'ejecutivo' ? `${(METAS?.indicadores || []).length} indicadores · ${mesCur} vs ${nombreMesCerrado()}`
     : `Cierre de ${nombreMesCerrado()} · ${DXP_ORDEN.length} reportes`;
@@ -6554,13 +7637,23 @@ function renderHome() {
     </div>
 
     <div class="top-tabs">
-      <button class="tt active" data-tab="ejecutivo" onclick="dxpTab('ejecutivo')">Ejecutivo</button>
+      <button class="tt active" data-tab="hoy" onclick="dxpTab('hoy')">Hoy</button>
+      <button class="tt" data-tab="margen" onclick="dxpTab('margen')">Margen</button>
+      <button class="tt" data-tab="precio" onclick="dxpTab('precio')">Precio por cliente</button>
+      <button class="tt" data-tab="verificar" onclick="dxpTab('verificar')">Verificar</button>
+      <button class="tt" data-tab="ejecutivo" onclick="dxpTab('ejecutivo')">Ejecutivo</button>
       <button class="tt" data-tab="resumen" onclick="dxpTab('resumen')">Resumen</button>
       <button class="tt" data-tab="avance" onclick="dxpTab('avance')">Avance del mes</button>
       <button class="tt" data-tab="roadmap" onclick="dxpTab('roadmap')">Plan de Acción</button>
     </div>
 
-    <div class="view active" id="dxp-view-ejecutivo"></div>
+    <div class="view active" id="dxp-view-hoy"></div>
+
+    <div class="view" id="dxp-view-margen"></div>
+    <div class="view" id="dxp-view-precio"></div>
+    <div class="view" id="dxp-view-verificar"></div>
+
+    <div class="view" id="dxp-view-ejecutivo"></div>
 
     <div class="view" id="dxp-view-resumen">
       ${dxpExecSummary(s)}
@@ -6585,8 +7678,8 @@ function renderHome() {
   // La vista ejecutiva arranca activa pero se pinta acá y no dentro de la
   // plantilla: así se arma una sola vez con los datos ya cargados, y el mismo
   // camino sirve cuando se vuelve a ella desde otra pestaña.
-  const eje = document.getElementById('dxp-view-ejecutivo');
-  if (eje) eje.innerHTML = ejeVista();
+  const hoy = document.getElementById('dxp-view-hoy');
+  if (hoy) hoy.innerHTML = dxpHoyView();
 }
 
 function renderAgendaSection(id, title, color, items) {
@@ -6854,163 +7947,12 @@ function renderEmpresa(empresa, containerId) {
 
   const estPill = semaforo==='red'?'crit':semaforo==='yellow'?'warn':'ok';
   const estTxt  = semaforo==='red'?'Crítico — acción inmediata':semaforo==='yellow'?'Atención — revisar':'Operando normal';
+  // La pantalla de empresa se quedó con dos cosas: la lectura general del
+  // cierre y el avance, y el Plan de Board. Todo lo demás que se pintaba acá
+  // (matriz de decisión, secciones I a V, grilla de reportes) ya vive en las
+  // pestañas de Inicio, y repetirlo era la duplicación que sobraba.
   el.innerHTML = `
-  <!-- CABECERA EMPRESA -->
-  <div class="mck-head mck-head-bleed">
-    <div><div class="mck-title">${empresa}</div><div class="mck-sub">${estTxt}${razon ? ' · '+razon : ''} · Agosto 2026</div></div>
-    <span class="mck-pill ${estPill}">${stateLabel(semaforo)}</span>
-  </div>
-
-  <!-- ZONA DE DECISIÓN: qué priorizar HOY -->
-  ${matrix.length ? `
-  <div style="margin-bottom:20px">
-    <div style="font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--mk-sub);text-transform:uppercase;margin-bottom:8px">¿Qué gestionar primero?</div>
-    ${matrix.map((item, i) => {
-      const cfg = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===item.tipo);
-      const clickFn = cfg ? `onclick="showDetail('${empresa}','${item.tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')"` : '';
-      return `<div ${clickFn} style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;border-radius:0;background:${stateBg(item.estado)};border:1px solid ${stateColor(item.estado)}22;cursor:pointer;transition:opacity .15s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
-        <div style="width:24px;height:24px;border-radius:50%;background:${stateColor(item.estado)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">${i+1}</div>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span style="font-weight:700;font-size:14px">${item.indicador}</span>
-            <span style="font-size:13px;color:${stateColor(item.estado)};font-weight:600">${item.valor}</span>
-            <span style="font-size:13px;color:var(--mk-sub)">meta ${item.meta}</span>
-            <span style="font-size:13px;background:${stateColor(item.estado)}22;color:${stateColor(item.estado)};padding:1px 6px;border-radius:0;font-weight:700">${item.brecha} brecha</span>
-          </div>
-          <div style="font-size:13px;color:var(--mk-sub);margin-top:3px">📊 ${item.impacto}</div>
-          <div style="font-size:13px;color:var(--mk-ink);margin-top:4px;padding-top:4px;border-top:1px solid var(--mk-border)">→ ${item.accion}</div>
-        </div>
-        <div style="font-size:13px;color:${stateColor(item.estado)};font-weight:700;flex-shrink:0">${item.area}</div>
-      </div>`;
-    }).join('')}
-  </div>` : ''}
-
-  <!-- MATRIX KPIs: valor / meta / brecha / tendencia -->
-  <div style="font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--mk-sub);text-transform:uppercase;margin-bottom:8px">Panel de Control — Agosto 2026</div>
-  <div class="av-scroll-x" style="margin-bottom:20px">
-  <table style="width:100%;border-collapse:collapse;font-size:12px">
-    <thead>
-      <tr style="border-bottom:2px solid var(--mk-border)">
-        <th style="text-align:left;padding:6px 8px;font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--mk-sub)">ÁREA / KPI</th>
-        <th style="text-align:right;padding:6px 8px;font-size:12px;font-weight:700;color:var(--mk-sub)">VALOR</th>
-        <th style="text-align:right;padding:6px 8px;font-size:13px;font-weight:700;color:var(--mk-sub)">META</th>
-        <th style="text-align:center;padding:6px 8px;font-size:13px;font-weight:700;color:var(--mk-sub)">ESTADO</th>
-        <th style="padding:6px 8px;font-size:13px;font-weight:700;color:var(--mk-sub)">PROGRESO</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${[
-        { grupo:'Ventas', kpi:'Ventas mes',         val: kv('margen_variable','Ventas mes'),     meta:null, tipo:'margen_variable', inv:false },
-        { grupo:'Ventas', kpi:'Avance vs Ppto',      val: kv('margen_variable_pag2','Avance vs Ppto'), meta:100, tipo:'margen_variable_pag2', inv:false },
-        { grupo:'Ventas', kpi:'Margen variable',     val: kv('margen_variable','Margen variable'),meta:null, tipo:'margen_variable', inv:false },
-        { grupo:'Supply', kpi:'Fill Rate',           val: kv('fill_rate','Fill Rate'),            meta:98,  tipo:'fill_rate', inv:false },
-        { grupo:'Supply', kpi:'Venta Perdida',       val: kv('fill_rate','Venta Perdida'),        meta:null, tipo:'fill_rate', inv:true },
-        { grupo:'Supply', kpi:'Stock',               val: kv('sop_inventario','Inventario Total'),meta:null, tipo:'sop_inventario', inv:false },
-        { grupo:'Cobranzas', kpi:'Morosidad CxC',   val: kv('cuentas_por_cobrar','Morosidad'),   meta:15,  tipo:'cuentas_por_cobrar', inv:true },
-        { grupo:'Cobranzas', kpi:'CxC por vencer',  val: kv('cuentas_por_cobrar','CxC por vencer'), meta:null, tipo:'cuentas_por_cobrar', inv:true },
-        { grupo:'Finanzas', kpi:'CxP Total',         val: kv('cuentas_por_pagar','CxP Total'),   meta:null, tipo:'cuentas_por_pagar', inv:true },
-        { grupo:'Finanzas', kpi:'Refinanciado',      val: kv('cuentas_por_pagar','Refinanciado'),meta:null, tipo:'cuentas_por_pagar', inv:true },
-        { grupo:'Operaciones', kpi:'Mermas',         val: kv('mermas','Merma Total'),             meta:2,   tipo:'mermas', inv:true },
-      ].filter(r => r.val && r.val !== '—').map((row, i) => {
-        const valN = fmtNum(row.val);
-        const est  = rp[row.tipo]?.estado || 'neutral';
-        const bg   = i%2 ? 'var(--mk-surface2)' : 'transparent';
-        const cfg  = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===row.tipo);
-        const clickFn = cfg ? `onclick="showDetail('${empresa}','${row.tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')"` : '';
-        // brecha bar
-        let barHtml = '';
-        if (valN !== null && row.meta) {
-          const pctFill = row.inv
-            ? Math.min(100, Math.round((row.meta / valN) * 100))
-            : Math.min(100, Math.round((valN / row.meta) * 100));
-          const barColor = stateColor(est);
-          barHtml = `<div style="display:flex;align-items:center;gap:6px">
-            <div style="flex:1;height:5px;background:var(--mk-border);border-radius:0">
-              <div style="height:5px;border-radius:0;background:${barColor};width:${pctFill}%"></div>
-            </div>
-            <span style="font-size:13px;color:var(--mk-sub);width:28px;text-align:right">${pctFill}%</span>
-          </div>`;
-        }
-        return `<tr style="border-bottom:1px solid var(--mk-border);background:${bg};cursor:${cfg?'pointer':'default'}" ${clickFn}>
-          <td style="padding:8px">
-            <div style="font-size:12px;color:var(--mk-sub);font-weight:600;text-transform:uppercase;letter-spacing:.04em">${row.grupo}</div>
-            <div style="font-weight:600;font-size:12px">${row.kpi}</div>
-          </td>
-          <td style="padding:8px;text-align:right;font-weight:800;font-family:monospace;font-size:14px;color:${stateColor(est)}">${row.val}</td>
-          <td style="padding:8px;text-align:right;color:var(--mk-sub);font-size:13px">${row.meta ? (row.inv?'<':'>=')+row.meta+'%' : '—'}</td>
-          <td style="padding:8px;text-align:center">
-            <span style="font-size:13px;font-weight:700;padding:2px 7px;border-radius:0;background:${stateColor(est)}22;color:${stateColor(est)}">${stateLabel(est)}</span>
-          </td>
-          <td style="padding:8px;min-width:90px">${barHtml}</td>
-        </tr>`;
-      }).join('')}
-    </tbody>
-  </table>
-  </div>
-
-  <!-- GRÁFICAS INLINE -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-    <!-- Fill Rate -->
-    ${rp.fill_rate ? `<div style="padding:12px;background:var(--mk-surface2);border-radius:0;border:1px solid var(--mk-border)" onclick="showDetail('${empresa}','fill_rate','Fill Rate','','')">
-      <div style="font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--mk-sub);text-transform:uppercase;margin-bottom:8px">Fill Rate — Desglose</div>
-      ${frWaterfall()}
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-        ${miniGauge(parseVal(kv('fill_rate','Fill Rate'))||0, (parseVal(kv('fill_rate','Fill Rate'))||0)>=98?'var(--mk-green)':'var(--mk-red)')}
-        <div>
-          <div style="font-size:18px;font-weight:800;color:${(parseVal(kv('fill_rate','Fill Rate'))||0)>=98?'var(--mk-green)':'var(--mk-red)'}">${kv('fill_rate','Fill Rate')}</div>
-          <div style="font-size:13px;color:var(--mk-sub)">meta ${metaTxt('fill_rate')}</div>
-        </div>
-      </div>
-    </div>` : '<div></div>'}
-    <!-- CxP -->
-    ${rp.cuentas_por_pagar ? `<div style="padding:12px;background:var(--mk-surface2);border-radius:0;border:1px solid var(--mk-border)" onclick="showDetail('${empresa}','cuentas_por_pagar','CxP','','')">
-      <div style="font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--mk-sub);text-transform:uppercase;margin-bottom:4px">Cuentas por Pagar</div>
-      ${cxpBars()}
-      <div style="font-size:12px;color:var(--mk-sub);margin-top:6px">Proveedores: ${kv('cuentas_por_pagar','# Proveedores')}</div>
-    </div>` : '<div></div>'}
-  </div>
-
-  <!-- GAUGE ROW: indicadores % -->
-  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;justify-content:space-around">
-    ${[
-      // red/yellow = umbrales exactos del backend (sem_thresh en fetch_powerbi.py) — no formula generica
-      {tipo:'cuentas_por_cobrar', lbl:'Morosidad', kpiLbl:'Morosidad', meta:15, red:20, yellow:15, inv:true},
-      {tipo:'mermas',             lbl:'Mermas',    kpiLbl:'Merma Total', meta:2, red:3, yellow:2, inv:true},
-      {tipo:'margen_variable_pag2', lbl:'Avance Ppto', kpiLbl:'Avance vs Ppto', meta:100, red:60, yellow:80, inv:false},
-    ].filter(g => rp[g.tipo]).map(g => {
-      const val = parseVal(kv(g.tipo, g.kpiLbl)) || 0;
-      const color = g.inv
-        ? (val > g.red ? 'var(--mk-red)' : val > g.yellow ? 'var(--mk-yellow)' : 'var(--mk-green)')
-        : (val <= g.red ? 'var(--mk-red)' : val <= g.yellow ? 'var(--mk-yellow)' : 'var(--mk-green)');
-      const cfg  = REPORTES_CONFIG[empresa]?.find(r=>r.tipo===g.tipo);
-      const click = cfg ? `onclick="showDetail('${empresa}','${g.tipo}','${cfg.label}','${cfg.archivo}','${(cfg.desc||'').replace(/'/g,"\\'")}')"` : '';
-      return `<div ${click} style="text-align:center;cursor:pointer;padding:10px;background:var(--mk-surface2);border-radius:0;border:1px solid var(--mk-border);min-width:90px;flex:1">
-        ${svgGauge(val, g.lbl, color, g.meta+'%')}
-      </div>`;
-    }).join('')}
-  </div>
-
-  <!-- REPORTES: acceso detalle -->
-  <div style="font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--mk-sub);text-transform:uppercase;margin-bottom:8px">Reportes Detallados</div>
-  <div class="reportes-list">
-    ${reportes.map(r => {
-      const rd2 = reportesData[r.tipo] || {};
-      const estado = rd2.estado || 'neutral';
-      const subtext = rd2.alerta || (estado==='green' ? 'Sin alertas' : rd2.kpis?.[0] ? rd2.kpis[0].label+': '+rd2.kpis[0].valor : 'Ver análisis');
-      const chipLabel = estado==='red'?'Crítico':estado==='yellow'?'Alerta':estado==='green'?'OK':'Ver';
-      const safeDesc = (r.desc||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return `<div class="reporte-item ${estado}" onclick="showDetail('${empresa}','${r.tipo}','${r.label}','${r.archivo}','${safeDesc}')">
-        <div class="reporte-icon icon-${estado==='neutral'?'neutral':estado}">
-          <svg viewBox="0 0 24 24">${ICON_SVG[r.icon]||ICON_SVG.check}</svg>
-        </div>
-        <div class="reporte-info">
-          <div class="reporte-name">${r.label}</div>
-          <div class="reporte-sub">${subtext}</div>
-        </div>
-        <span class="estado-chip ${estado}">${chipLabel}</span>
-      </div>`;
-    }).join('')}
-  </div>
+  ${dxpCierreYAvance(empresa)}
 
   ${generarPlanBoard(empresa, reportes, reportesData, semaforo, razon, [])}
   `;

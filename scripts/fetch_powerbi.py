@@ -3631,6 +3631,43 @@ def build_margen(found):
                             "ningún visual: se arma con los filtros del reporte "
                             "y el precio por kilo se deriva de venta y peso")
             res["sku_por_uen"] = salida
+
+            # Serie mensual por unidad y familia. La consulta ya traía TODOS los
+            # meses del año con venta, costo y peso por SKU; hasta acá se
+            # quedaban solo dos y el resto se botaba. Sin el peso (los kilos)
+            # del mes anterior no se puede separar el efecto MEZCLA del efecto
+            # precio/costo, y ese era el agujero del puente de margen: la mezcla
+            # salía por residuo, que es una cifra de cuadre, no una medición.
+            #
+            # Se publica agregado a familia, no a SKU: son ~30 familias por 9
+            # meses en vez de 142 SKU por 9 meses, y la mezcla se mide igual de
+            # bien. El detalle por SKU del último salto sigue en sku_por_uen.
+            mensual = {}
+            for uen, meses in por_uen_mes.items():
+                for (anio, mes), prods in meses.items():
+                    per = f"{anio}-{mes:02d}"
+                    for nombre, (v, c, pe, sub) in prods.items():
+                        k = (per, uen, (sub or "—"))
+                        o = mensual.setdefault(k, {"venta": 0.0, "costo": 0.0,
+                                                   "peso": 0.0, "skus": 0})
+                        o["venta"] += v or 0.0
+                        o["costo"] += c or 0.0
+                        o["peso"] += pe or 0.0
+                        o["skus"] += 1
+            if mensual:
+                res["margen_mensual"] = [
+                    {"periodo": k[0], "uen": k[1], "familia": k[2],
+                     "venta": round(o["venta"], 2), "costo": round(o["costo"], 2),
+                     "peso": round(o["peso"], 3), "skus": o["skus"]}
+                    for k, o in sorted(mensual.items())]
+                res["margen_mensual_periodos"] = sorted({k[0] for k in mensual})
+                anotar_derivado(
+                    "margen_variable", "margen_mensual", "venta",
+                    "suma de venta, costo y peso de los SKU de cada familia, por mes",
+                    "la consulta de SKU ya traía el año entero con kilos; sin los "
+                    "kilos del mes anterior la mezcla solo se puede despejar por "
+                    "residuo, que es una cifra de cuadre y no una medición")
+
             res["sku_por_uen_meses"] = None
             for uen, meses in por_uen_mes.items():
                 orden = sorted(meses)
