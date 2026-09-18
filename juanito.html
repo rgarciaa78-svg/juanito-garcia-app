@@ -2006,6 +2006,8 @@ small { font-size:13px; line-height:1.4; }
 .mg-sku-tabla td.r, .mg-sku-tabla th.r { text-align:right; font-variant-numeric:tabular-nums; }
 .mg-sku-vacio { font-size:12.5px; color:var(--text3); }
 .mg-v.co { background:rgba(180,120,10,.16); color:var(--yellow); }
+.chat-motor { font-size:12px; color:var(--yellow); background:rgba(180,120,10,.10);
+  border-radius:5px; padding:7px 10px; margin-bottom:9px; line-height:1.45; }
 .mast-build { opacity:.55; font-size:11px; letter-spacing:.02em; }
 .sl-note { font-size:12px; color:var(--text3); white-space:nowrap; margin-left:10px; }
 .mg-raiz { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px;
@@ -2205,10 +2207,10 @@ small { font-size:13px; line-height:1.4; }
 <script>
 // Versión del service worker. Se declara una vez y se usa en los dos lados
 // —la comprobación de arranque y el registro— para que no puedan discrepar.
-const SW_VERSION = 'v=18';
+const SW_VERSION = 'v=19';
 // Sello de compilación: sirve para confirmar de un vistazo qué versión está
 // cargada. Sin esto, "no me cambió" y "sí cambió" son indistinguibles.
-const APP_BUILD = '2026-09-17-e';
+const APP_BUILD = '2026-09-17-g';
 // Limpiar todo el caché viejo al abrir la app
 (async function() {
   try {
@@ -12040,20 +12042,32 @@ async function sendJuanito() {
   const loadEl = addJuanitoMsg('assistant', '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>');
   loadEl.classList.add('loading');
 
-  // El analizador local va PRIMERO. Responde al instante con los mismos
-  // datos que vería la IA, así que cuando sabe contestar no tiene sentido
-  // hacer esperar al usuario por un servicio externo que además puede fallar.
-  let cuerpo = analizarLocal(text);
+  // La IA va PRIMERO. Estaba de suplente —solo se la llamaba cuando el
+  // buscador local no reconocía la pregunta— y el buscador es de palabras
+  // clave: contesta lo más parecido antes que admitir que no entendió. El
+  // resultado era que una IA conectada y funcionando casi nunca se usaba, y
+  // el usuario recibía plantillas. Peor: cada ruta nueva que se le agregaba
+  // al buscador le quitaba preguntas a la IA.
+  //
+  // El local queda de respaldo, que es su papel real: responde igual de bien
+  // cuando la pregunta es un ranking, y sobre todo responde cuando no hay
+  // internet o el servicio está caído.
+  let cuerpo = await preguntarJuanitoIA(text);
+  let motor = 'ia';
 
   if (!cuerpo) {
-    // Solo si el analizador no reconoce la pregunta se recurre a la IA, que
-    // es la que puede razonar sobre lo que no está tabulado.
-    const iaResp = await preguntarJuanitoIA(text);
-    if (iaResp) {
-      cuerpo = iaResp;
-    } else {
+    motor = 'local';
+    cuerpo = analizarLocal(text);
+    if (!cuerpo) {
       const local = buscarRespuestaLocal(text);
       cuerpo = (local ? local.replace(/\n/g, '<br>') : analizarConJuanito(text));
+    }
+    // Se dice qué respondió y por qué. Una respuesta de plantilla presentada
+    // como si fuera la IA es la forma más rápida de perder la confianza.
+    if (cuerpo && ultimoFalloIA) {
+      cuerpo = `<div class="chat-motor">⚠️ ${localEsc(ultimoFalloIA)} ` +
+        `Respuesta del analizador local, que solo sabe rankear y comparar lo ` +
+        `tabulado.</div>` + cuerpo;
     }
   }
 
