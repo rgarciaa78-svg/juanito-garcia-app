@@ -3571,10 +3571,19 @@ def build_margen(found):
             o["venta"] += v_
             o["costo"] += c_
         if acum:
+            # Un margen sobre venta negativa se lee al revés: si el mes de
+            # ese cliente en esa unidad cerró en devolución neta, 1-costo/venta
+            # devuelve un porcentaje que parece sano y no lo es. La devolución
+            # se publica —es un hecho del mes— pero sin margen, que es lo único
+            # honesto. Lo cazó la comprobación de "margen sobre base negativa".
             res["margen_cliente_uen"] = [
                 {"periodo": k[0], "uen": k[1], "cliente": o["nombre"],
                  "venta": round(o["venta"], 2), "costo": round(o["costo"], 2),
-                 "margen": f"{(1 - o['costo'] / o['venta']) * 100:.1f}%"}
+                 "margen": (f"{(1 - o['costo'] / o['venta']) * 100:.1f}%"
+                            if o["venta"] > 0 else None),
+                 "nota": (None if o["venta"] > 0 else
+                          "devolución neta del mes: sin margen, un porcentaje "
+                          "sobre venta negativa se lee al revés")}
                 for k, o in sorted(acum.items()) if o["venta"]]
             res["margen_cliente_uen_periodos"] = sorted({k[0] for k in acum})
             anotar_derivado(
