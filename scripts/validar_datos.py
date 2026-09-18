@@ -605,22 +605,28 @@ def main():
         return None
 
     malos = []
-    def _mirar(o, ruta=""):
+    # OJO con el nombre de estas variables: `ruta` es, veinte líneas más
+    # arriba, la RUTA DEL ARCHIVO que se escribe al final en modo --anotar. Un
+    # `for ruta, ... in malos` la pisaba con un texto, y write_text explotaba
+    # con "'str' object has no attribute 'write_text'" — pero solo cuando
+    # `malos` traía algo, así que en local pasaba y en la corrida reventaba.
+    # Se llaman `camino` para que no puedan volver a chocar.
+    def _mirar(o, camino=""):
         if isinstance(o, dict):
             v = _plata(o.get("venta")) if "venta" in o else None
             if v is not None and v <= 0:
                 for campo in ("margen", "margen_previo", "margen_enero"):
                     if o.get(campo):
-                        malos.append((ruta, o.get("producto") or o.get("cliente")
+                        malos.append((camino, o.get("producto") or o.get("cliente")
                                       or "?", campo, o.get("venta"), o[campo]))
             for k, val in o.items():
-                _mirar(val, f"{ruta}/{k}")
+                _mirar(val, f"{camino}/{k}")
         elif isinstance(o, list):
             for i, val in enumerate(o):
-                _mirar(val, f"{ruta}[{i}]")
+                _mirar(val, f"{camino}[{i}]")
     _mirar(rp)
     if malos:
-        for ruta, quien, campo, venta, val in malos[:6]:
+        for camino, quien, campo, venta, val in malos[:6]:
             inf.afirmar(False, f"{quien}: {campo} sobre una venta negativa",
                         f"venta {venta} y {campo} {val} — un porcentaje sobre "
                         f"una base negativa se lee al revés; publicar la "
