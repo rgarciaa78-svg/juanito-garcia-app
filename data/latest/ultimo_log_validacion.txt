@@ -1,17 +1,18 @@
-Validación cruzada · datos al 18/09/2026
+Validación cruzada · datos al 23/09/2026
 
 Un total tiene que ser la suma de sus partes
   OK     CxC: total vs suma de tramos  (4 tramos del aging)
   OK     CxP: total vs tramos + refinanciado  (8 tramos del aging más la deuda refinanciada)
-  OK     Inventario: total vs dead + working + excesos  (las cuatro clasificaciones)
 
 Un ratio tiene que dar lo que dan sus operandos
-  OK     CxC: morosidad vs vencido / total  (694,668 / 5,110,000)
+  OK     CxC: morosidad vs vencido / total  (1,020,000 / 4,900,000)
   OK     Inventario: % dead stock vs dead / total  (declarado contra calculado)
   OK     Margen: % vs (precio − costo) / precio  ((S/5.93 − S/3.16) / S/5.93)
   OK     Fill rate: % vs facturación / orden de venta  (6,090,000 / 6,790,000)
   OK     Fill rate: venta perdida vs orden − facturación  (la diferencia entre lo pedido y lo facturado)
-  OK     Productividad: planilla por kg producido  (5,110,000 / 9,621,234 kg)
+  FALLA  Productividad: planilla por kg producido
+         4,020,000 / 9,621,234 kg
+         difieren en 21.2%
   (planilla por kg vendido: medida propia del reporte, no se reconstruye dividiendo dos tarjetas)
   (costo por tonelada: medida propia del reporte, igual que arriba)
 
@@ -31,7 +32,7 @@ La tarjeta del mes contra el gráfico mensual (dos consultas)
   OK     Orden de Venta: tarjeta vs serie de 2026-08  (fill_rate · fill_rate/Orden de Venta)
   FALLA  Costo x TN Vendida: tarjeta vs serie de 2026-08
          consumo_materiales · consumo/MIP / TN Vendida
-         difieren en 9.0%
+         difieren en 9.6%
   OK     Planilla S/. / KG Producido: tarjeta vs serie de 2026-08  (productividad · productividad/Planilla / kg producido)
 
 Un promedio no puede salirse del rango de sus partes
@@ -39,19 +40,7 @@ Un promedio no puede salirse del rango de sus partes
   ·      Merma Total no se compara con por_planta: la tarjeta es de período sin declarar y los segmentos son acumulado 2026
 
 Ningún porcentaje calculado sobre una base negativa
-  FALLA  BRADIS SAC: margen sobre una venta negativa
-         venta -99.09 y margen 81.5% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  FALLA  CORPORACION DJMA CHOQUE S.A.C.: margen sobre una venta negativa
-         venta -1518.53 y margen 64.5% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  FALLA  LA FIAMBRERIA PERU S.A.C.: margen sobre una venta negativa
-         venta -9456.8 y margen 100.0% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  FALLA  CORPORACION P & P GLOBAL S.A.C.: margen sobre una venta negativa
-         venta -196.69 y margen 63.1% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  FALLA  DESPENSA PERUANA S.A.: margen sobre una venta negativa
-         venta -3040.67 y margen 65.7% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  FALLA  DISTRIBUIDORA DIPROSEL S.A.C.: margen sobre una venta negativa
-         venta -20877.58 y margen 65.6% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-         …y 25 más
+  OK     ninguna fila publica margen sobre venta menor o igual a cero
 
 Ningún precio por kilo con un salto imposible
   FALLA  B&D MOSTAZA BALDE 4K   ND: precio por kilo fuera de rango
@@ -61,14 +50,14 @@ El resumen trae sus metadatos
   OK     cobertura, derivados y cifras de tarjeta presentes
 
 Cada desglose suma lo que dice su tarjeta
-  OK     cuentas_por_cobrar/tramos vs CxC Total  (suma 5,114,668 contra 5,110,000 (1.00): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
-  OK     cuentas_por_cobrar/responsables vs CxC Total  (suma 5,119,447 contra 5,110,000 (1.00): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
-  OK     sop_inventario/dead_por_categoria vs Dead Stock  (suma 1,057,052 contra 1,070,000 (0.99): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
-  OK     sop_inventario/working_por_categoria vs Working Stock  (suma 4,332,974 contra 4,420,000 (0.98): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
-  OK     margen_variable_pag2/por_canal vs Facturado  (suma 3,018,626 contra 3,020,000 (1.00): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
-  OK     cuentas_por_pagar/tramos no cuadra con CxP Total (0.62) y está explicado
-  OK     margen_variable/por_cliente no cuadra con Ventas mes (0.65) y está explicado
-  OK     margen_variable/por_documento no cuadra con Ventas mes (0.39) y está explicado
+  OK     cuentas_por_cobrar/tramos vs CxC Total  (suma 4,905,171 contra 4,900,000 (1.00): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
+  OK     cuentas_por_cobrar/responsables vs CxC Total  (suma 4,907,674 contra 4,900,000 (1.00): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
+  OK     sop_inventario/dead_por_categoria vs Dead Stock  (suma 5,405,154 contra 5,460,000 (0.99): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
+  OK     sop_inventario/working_por_categoria vs Working Stock  (suma 1,135,131 contra 1,150,000 (0.99): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
+  OK     margen_variable_pag2/por_canal vs Facturado  (suma 4,111,521 contra 4,110,000 (1.00): un desglose que no suma lo que dice su tarjeta se lee como si le faltaran filas)
+  OK     cuentas_por_pagar/tramos no cuadra con CxP Total (0.67) y está explicado
+  OK     margen_variable/por_cliente no cuadra con Ventas mes (0.76) y está explicado
+  OK     margen_variable/por_documento no cuadra con Ventas mes (0.53) y está explicado
 
 Porcentajes de la misma familia en la misma escala
   OK     todas las familias de porcentajes en una sola escala
@@ -77,33 +66,23 @@ Series escritas en el tramo equivocado del eje
   OK     ninguna serie desalineada
 
 De qué período es realmente cada cifra
-  CORRIGE  Producción Total (KG) → Producción Total (KG) · acumulado 2026  (coincide con el acumulado del año)
+  ?      Producción Total (KG): no coincide con mes, año ni total
   CORRIGE  Planilla Total → Planilla Total · acumulado 2026  (coincide con el acumulado del año)
   OK     Ventas mes: es del mes, como dice
   OK     Facturación: es del mes, como dice
   OK     Orden de Venta: es del mes, como dice
-  MARCA  Morosidad → Morosidad · hoy  (hoy 13.6 · cierre de 2026-08 21.9)
+  MARCA  Morosidad → Morosidad · hoy  (hoy 20.7 · cierre de 2026-08 21.9)
 
-Período de cada tarjeta: 12 selladas con su mes, 51 sin confirmar
+Período de cada tarjeta: 10 selladas con su mes, 51 sin confirmar
+
+  2 descuadre(s) quedaron explicados al corregir el período
 
 ──────────────────────────────────────────────────────────────────
-33 comprobaciones cuadran · 8 no cuadran
+32 comprobaciones cuadran · 2 no cuadran
 
 Lo que no cuadra:
-  · Costo x TN Vendida: tarjeta vs serie de 2026-08
-      publicado 143.00  ·  se esperaba 157.11  (9% de diferencia)
-  · BRADIS SAC: margen sobre una venta negativa
-      venta -99.09 y margen 81.5% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  · CORPORACION DJMA CHOQUE S.A.C.: margen sobre una venta negativa
-      venta -1518.53 y margen 64.5% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  · LA FIAMBRERIA PERU S.A.C.: margen sobre una venta negativa
-      venta -9456.8 y margen 100.0% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  · CORPORACION P & P GLOBAL S.A.C.: margen sobre una venta negativa
-      venta -196.69 y margen 63.1% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  · DESPENSA PERUANA S.A.: margen sobre una venta negativa
-      venta -3040.67 y margen 65.7% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
-  · DISTRIBUIDORA DIPROSEL S.A.C.: margen sobre una venta negativa
-      venta -20877.58 y margen 65.6% — un porcentaje sobre una base negativa se lee al revés; publicar la devolución sin margen es lo correcto
+  · Productividad: planilla por kg producido
+      publicado 0.53  ·  se esperaba 0.42  (21% de diferencia)
   · B&D MOSTAZA BALDE 4K   ND: precio por kilo fuera de rango
       de S/4.01 a S/31.54 — un precio no se mueve así; lo más probable es que el peso esté mal registrado, y el margen derivado de ese precio tampoco vale
 
