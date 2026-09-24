@@ -1,9 +1,8 @@
 name: Juanito Garcia — Scraper Diario
 
 on:
-  schedule:
-    # 12:00 UTC = 07:00 Lima (America/Lima UTC-5)
-    - cron: '0 12 * * 1-5'
+  # Cron desactivado a pedido del usuario (24/09/2026): ya no corre solo.
+  # Se mantiene workflow_dispatch para poder lanzarlo a mano cuando se necesite.
   workflow_dispatch:  # permite ejecutar manualmente desde GitHub
 
 jobs:
