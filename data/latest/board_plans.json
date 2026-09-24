@@ -1,44 +1,44 @@
 {
-  "fecha": "23/09/2026",
+  "fecha": "24/09/2026",
   "generado_por": "Asesor IA del Directorio — Holding Juanito Garcia",
   "empresas": {
     "PAUNO": {
-      "objetivo": "Reducir la morosidad de CxC (21.4%, S/1.01M vencido) sin frenar el avance comercial —facturación al 49.5% del presupuesto mensual con producción al 70% de cumplimiento diario—, sacar Control Interno de zona crítica (69.3% vs meta 85%, 30 Planes de Acción atrasados) y contener el CxP vencido, que escaló a 37.6% de la deuda viva (S/4.09M), antes de comprometer la relación con proveedores.",
-      "alerta_principal": "La morosidad de CxC sigue en zona crítica (21.4% vs meta 15%, S/1.01M vencido de una cartera de S/4.73M) y el CxP vencido subió a 37.6% de la deuda viva (S/4.09M sobre S/16.22M total), con S/5.33M ya refinanciados. En paralelo, Control Interno permanece en rojo (69.3% vs meta 85%, 108 puntos críticos, 30 Planes de Acción atrasados), Dead Stock sube a 16.3% (S/1.05M, meta <5%) y la producción cerró ayer en 70% de cumplimiento, frenando el avance de facturación (49.5% del presupuesto del mes, S/7.83M).",
+      "objetivo": "Frenar el deterioro simultáneo de liquidez y control operativo: la morosidad de CxC subió a 20.7% (S/1.02M vencido), el Dead Stock saltó a 82.6% del inventario (S/5.46M, desde 16.3% en el corte anterior) y el CxP vencido escaló a 37.7% de la deuda viva (S/4.16M), mientras Control Interno sigue en rojo (69.3% vs meta 85%) y la producción (70% de cumplimiento diario) frena el avance de facturación (52.6% del presupuesto del mes).",
+      "alerta_principal": "Morosidad de CxC en 20.7% (meta 15%, S/1.02M vencido de una cartera de S/4.90M). Dead Stock se disparó a 82.6% del inventario (S/5.46M, meta <5%) — un salto muy fuerte frente al corte anterior (16.3%, S/1.05M) que debe validarse con SOP antes de decidir liquidación, pero se trata como crítico mientras se confirma; concentrado en Envases y Embalajes (S/2.80M, 51.2%) y Materia Prima (S/1.47M, 26.9%). El CxP vencido subió a 37.7% de la deuda viva (S/4.16M sobre S/16.37M), con el proveedor E&M S.R.L. (leche descremada) concentrando 37.9% de la deuda total (S/4.44M) — riesgo de desabastecimiento si se tensa la relación. Control Interno permanece en rojo (69.32% vs meta 85%, 108 puntos críticos, 30 Planes de Acción atrasados) y hay 8 materiales en quiebre de stock (LECHE FRESCA en cero, faltante 41,389 kg) frenando la producción (70% de cumplimiento ayer) y el avance de facturación (52.6% del presupuesto de S/7.83M).",
       "ingresos": [
-        "Activar cobranza urgente sobre los 216 clientes con CxC vencida (S/1.01M, 21.4% de cartera), priorizando los tramos que aún no cruzan los 30 días antes de que migren.",
-        "Cerrar los 27 materiales en quiebre de stock que frenan la producción (cumplimiento diario 70%) para destrabar los S/404,877 pendientes de facturar y acelerar el avance hacia el presupuesto del mes (S/7.83M).",
+        "Activar cobranza urgente sobre el CxC vencido >30 días (S/457,464, 9.3% de cartera), priorizando al responsable con mayor exposición, Carlos Miranda (S/412,648 vencido de S/780,624 en Canal Tradicional).",
+        "Resolver los 8 materiales en quiebre de stock —empezando por Leche Fresca (faltante 41,389 kg, stock 0)— para destrabar la producción (70% de cumplimiento) y acelerar el avance de facturación (52.6% del presupuesto de S/7.83M, S/507,771 pendiente de facturar).",
         "Recuperar la venta perdida por Fill Rate 88.4% (S/700,000, 199 pedidos no atendidos): atender primero los pedidos más antiguos y confirmar fecha de entrega a clientes clave."
       ],
       "costos": [
-        "Bajar la merma de 2.9% a <2% con auditoría de causa raíz esta semana en la línea de mayor pérdida.",
+        "Bajar la merma de la UEN TIGO (4.21%, en rojo) con auditoría de causa raíz esta semana; B&D (1.51%) puede servir de referencia de buenas prácticas.",
         "Elevar el margen variable de 46.4% a ≥52%: revisar el spread precio/costo por kg (venta S/5.93 vs costo S/3.16) y priorizar el mix de mayor margen.",
-        "Contener la Planilla S/./KG producido (S/0.53) mejorando la eficiencia de planta mientras el cumplimiento de producción esté en 70%."
+        "Contener la Planilla S/0.53/kg producido mejorando la eficiencia de planta mientras el cumplimiento de producción esté en 70%."
       ],
       "capital_trabajo": [
-        "Plan de liquidación en 30 días para el Dead Stock de S/1.05M (16.3% del inventario, meta <5%), evitando que Exceso 1 (S/489,815) y Exceso 2 (S/309,590) se sumen antes de liquidarse.",
-        "Negociar con el top 15 de proveedores (S/11.62M de deuda) para bajar el CxP vencido de S/4.09M (37.6% de la deuda viva) y gestionar activamente el tramo ya refinanciado (S/5.33M).",
+        "Abrir un plan de liquidación urgente para el Dead Stock de S/5.46M (82.6% del inventario), priorizando Envases y Embalajes (S/2.80M, 51.2%) y Materia Prima (S/1.47M, 26.9%), y validar en paralelo con SOP la causa del salto desde S/1.05M en el corte previo.",
+        "Negociar con E&M S.R.L. (S/4.44M, 37.9% de la deuda total) un plan de pago que evite tensar el suministro de leche descremada, y bajar el CxP vencido de S/4.16M (37.7% de la deuda viva) priorizando los tramos de 31 a 90 días (S/1.73M).",
         "Cerrar los 30 Planes de Acción atrasados de Control Interno (34.7% de puntos en estado crítico) para llevar el cumplimiento de 69.3% a 85% y evitar riesgo regulatorio."
       ],
       "kpis_seguimiento": [
-        { "label": "Morosidad CxC", "actual": "21.4%", "meta": "15%", "estado": "red" },
-        { "label": "CxP Vencido", "actual": "S/4.09M (37.6% deuda viva)", "meta": "bajar concentración", "estado": "red" },
-        { "label": "Control Interno % Cumplimiento", "actual": "69.3%", "meta": "85%", "estado": "red" },
-        { "label": "Dead Stock", "actual": "16.3% (S/1.05M)", "meta": "<5%", "estado": "red" },
-        { "label": "Merma Total", "actual": "2.9%", "meta": "<2%", "estado": "red" },
-        { "label": "Materiales en quiebre", "actual": "27", "meta": "0", "estado": "red" },
-        { "label": "Avance facturación vs presupuesto", "actual": "49.5%", "meta": "100%", "estado": "red" },
+        { "label": "Morosidad CxC", "actual": "20.7%", "meta": "15%", "estado": "red" },
+        { "label": "CxP Vencido", "actual": "S/4.16M (37.7% deuda viva)", "meta": "bajar concentración", "estado": "red" },
+        { "label": "Dead Stock", "actual": "82.6% (S/5.46M)", "meta": "<5%", "estado": "red" },
+        { "label": "Control Interno % Cumplimiento", "actual": "69.32%", "meta": "85%", "estado": "red" },
+        { "label": "Merma UEN TIGO", "actual": "4.21%", "meta": "<2%", "estado": "red" },
+        { "label": "Materiales en quiebre", "actual": "8", "meta": "0", "estado": "red" },
+        { "label": "Avance facturación vs presupuesto", "actual": "52.6%", "meta": "100%", "estado": "red" },
         { "label": "Fill Rate", "actual": "88.4%", "meta": "98%", "estado": "yellow" },
         { "label": "Margen Variable", "actual": "46.4%", "meta": "≥52%", "estado": "yellow" },
         { "label": "Días CxP", "actual": "107d", "meta": "<90d", "estado": "yellow" }
       ]
     },
     "AMAUTA": {
-      "objetivo": "Frenar el alza de Días CxP (139d, subiendo desde 128d en agosto, meta <120d) sin descuidar el abastecimiento de materia prima crítica, mientras se consolida la mejora de morosidad de CxC (15%, en línea con la meta tras bajar de 22% en agosto) cobrando el vencido mayor a 30 días.",
-      "alerta_principal": "Días CxP volvió a subir, ahora en 139 días (meta <120d), impulsado por el tramo de 30-90 días (S/3.34M, 21.5% de una deuda total de S/15.52M) concentrado en KOBAX LLC (S/1.29M) y RITRAMA PERÚ (S/1.02M). En CxC la morosidad llegó a 15% (meta cumplida, bajando desde 22% en agosto), pero el vencido mayor a 30 días sigue en S/479,717 (6.4% de una cartera de S/7.47M), concentrado en FLEXOGRAFIA (S/190,704, 12.9% de su línea) y PACKAGING (S/183,698, 6.4%).",
+      "objetivo": "⚠ Sin datos nuevos en el corte de hoy (el pipeline solo generó reportes de PAUNO) — se mantiene el objetivo del último corte disponible: frenar el alza de Días CxP (139d, meta <120d) sin descuidar el abastecimiento de materia prima crítica, mientras se consolida la mejora de morosidad de CxC (15%, en línea con la meta).",
+      "alerta_principal": "⚠ AMAUTA no tiene datos actualizados hoy (24/09) — el corte de KPIs solo trajo información de PAUNO; pedir a IT/datos que revise por qué falló la extracción de AMAUTA. Mientras se resuelve, la última alerta válida sigue vigente: Días CxP en 139 días (meta <120d), impulsado por el tramo de 30-90 días (S/3.34M, 21.5% de una deuda total de S/15.52M) concentrado en KOBAX LLC (S/1.29M) y RITRAMA PERÚ (S/1.02M). En CxC la morosidad estaba en 15% (meta cumplida), pero el vencido mayor a 30 días seguía en S/479,717 (6.4% de una cartera de S/7.47M), concentrado en FLEXOGRAFIA (S/190,704) y PACKAGING (S/183,698).",
       "ingresos": [
-        "Sostener la mejora de morosidad (15%, bajando desde 22% en agosto) cobrando el vencido mayor a 30 días (S/479,717): priorizar FLEXOGRAFIA (S/190,704, 12.9% de su cartera) y PACKAGING (S/183,698).",
-        "Acelerar el cobro del tramo 16-30 días (S/128,257) antes de que migre a vencido, aprovechando que la rotación de CxC bajó a 47 días.",
+        "Sostener la mejora de morosidad (15% en el último corte) cobrando el vencido mayor a 30 días (S/479,717): priorizar FLEXOGRAFIA (S/190,704, 12.9% de su cartera) y PACKAGING (S/183,698).",
+        "Acelerar el cobro del tramo 16-30 días (S/128,257) antes de que migre a vencido, aprovechando que la rotación de CxC había bajado a 47 días.",
         "Revisar condiciones de crédito de las líneas con mayor mora relativa (FLEXOGRAFIA) antes de seguir facturando sin garantías adicionales."
       ],
       "costos": [
@@ -47,26 +47,26 @@
         "Revisar el CxP con Intercorp (S/349,780) y confirmar que no genere penalidades mientras se reprograman pagos."
       ],
       "capital_trabajo": [
-        "Vigilar que el inventario en exceso (250 + 58 ítems entre Exceso 1 y 2) no migre a Dead Stock, hoy en 5% (S/543K) con cobertura de 3.1 meses (meta <3 meses).",
-        "Cerrar el cobro del vencido mayor a 30 días (S/479,717, 6.4% de la cartera) antes de fin de mes para aliviar la presión de caja mientras Días CxP se mantiene elevado.",
-        "Evitar que el alza de Días CxP (139d) se use para compensar caja mientras se resuelve la cobranza de CxC — negociar plazos con proveedores, no acumular mora."
+        "Vigilar que el inventario en exceso (250 + 58 ítems entre Exceso 1 y 2) no migre a Dead Stock, en 5% (S/543K) con cobertura de 3.1 meses (meta <3 meses) en el último corte.",
+        "Cerrar el cobro del vencido mayor a 30 días (S/479,717, 6.4% de la cartera) para aliviar la presión de caja mientras Días CxP se mantiene elevado.",
+        "Pedir a IT/datos la corrección del pipeline de AMAUTA para tener el corte de hoy antes del próximo comité — sin datos frescos el directorio no puede confirmar si estas cifras siguen vigentes."
       ],
       "kpis_seguimiento": [
-        { "label": "Días CxP", "actual": "139d", "meta": "<120d", "estado": "red" },
-        { "label": "CxP tramo 30-90 días", "actual": "S/3.34M (21.5%)", "meta": "bajar concentración", "estado": "red" },
-        { "label": "CxC vencida >30 días", "actual": "S/479,717 (6.4%)", "meta": "<5% de cartera", "estado": "yellow" },
-        { "label": "Dead Stock", "actual": "5% (S/543K)", "meta": "<5%", "estado": "yellow" },
-        { "label": "Cobertura de Inventario", "actual": "3.1 meses", "meta": "<3 meses", "estado": "yellow" },
-        { "label": "Morosidad CxC", "actual": "15%", "meta": "<15%", "estado": "green" }
+        { "label": "Días CxP", "actual": "139d (dato no actualizado hoy)", "meta": "<120d", "estado": "red" },
+        { "label": "CxP tramo 30-90 días", "actual": "S/3.34M (21.5%) (dato no actualizado hoy)", "meta": "bajar concentración", "estado": "red" },
+        { "label": "CxC vencida >30 días", "actual": "S/479,717 (6.4%) (dato no actualizado hoy)", "meta": "<5% de cartera", "estado": "yellow" },
+        { "label": "Dead Stock", "actual": "5% (S/543K) (dato no actualizado hoy)", "meta": "<5%", "estado": "yellow" },
+        { "label": "Cobertura de Inventario", "actual": "3.1 meses (dato no actualizado hoy)", "meta": "<3 meses", "estado": "yellow" },
+        { "label": "Morosidad CxC", "actual": "15% (dato no actualizado hoy)", "meta": "<15%", "estado": "green" }
       ]
     },
     "NEOPACK": {
-      "objetivo": "Cerrar la brecha de facturación vs presupuesto (59% acumulado en el año, 40% de avance del mes al 22 de setiembre) sin perder el control en Días CxP (29d, ya cerca del límite de 30d) y consolidando la fuerte mejora de morosidad de CxC (5.2%, muy por debajo de la meta de 15%).",
-      "alerta_principal": "Cumplimiento de ventas acumulado del año de solo 59% (S/6.30M vs S/10.74M de presupuesto acumulado), con avance del mes de 40% al 22 de setiembre (S/375,720 facturado vs S/947,990 esperado al día). STRETCH FILM, la línea de mayor presupuesto (S/9.16M al año), va al 60% de cumplimiento y explica el mayor déficit en soles (S/2.20M); POLIESTER (32%, S/1.24M de brecha) y POLIPROPILENO (30%, S/566K de brecha) son las más rezagadas. Días CxP subió a 29 días, ya al borde de la meta de <30d.",
+      "objetivo": "⚠ Sin datos nuevos en el corte de hoy (el pipeline solo generó reportes de PAUNO) — se mantiene el objetivo del último corte disponible: cerrar la brecha de facturación vs presupuesto (59% acumulado en el año) sin perder el control en Días CxP (29d, cerca del límite de 30d) y consolidando la fuerte mejora de morosidad de CxC (5.2%).",
+      "alerta_principal": "⚠ NEOPACK no tiene datos actualizados hoy (24/09) — el corte de KPIs solo trajo información de PAUNO; pedir a IT/datos que revise por qué falló la extracción de NEOPACK. Mientras se resuelve, la última alerta válida sigue vigente: cumplimiento de ventas acumulado del año de solo 59% (S/6.30M vs S/10.74M de presupuesto acumulado). STRETCH FILM, la línea de mayor presupuesto (S/9.16M al año), iba al 60% de cumplimiento y explicaba el mayor déficit en soles (S/2.20M); POLIESTER (32%) y POLIPROPILENO (30%) eran las más rezagadas. Días CxP había subido a 29 días, al borde de la meta de <30d.",
       "ingresos": [
         "Atacar las categorías más rezagadas vs presupuesto anual: POLIPROPILENO (30% de cumplimiento, S/566K de brecha acumulada) y POLIESTER (32%, S/1.24M de brecha acumulada).",
-        "Reforzar STRETCH FILM (60% de cumplimiento, S/9.16M de presupuesto anual), que concentra el mayor déficit en soles del año (S/2.20M).",
-        "Rebalancear la cartera comercial: Juan Sotacora concentra S/5.19M facturados en el año vs S/1.11M de Jankarlo Arevalo — evaluar redistribución de cuentas o refuerzo del equipo comercial."
+        "Reforzar STRETCH FILM (60% de cumplimiento, S/9.16M de presupuesto anual), que concentraba el mayor déficit en soles del año (S/2.20M).",
+        "Rebalancear la cartera comercial: Juan Sotacora concentraba S/5.19M facturados en el año vs S/1.11M de Jankarlo Arevalo — evaluar redistribución de cuentas o refuerzo del equipo comercial."
       ],
       "costos": [
         "Ajustar el plan de compras al ritmo real de ventas (59% de cumplimiento) para no seguir presionando los tramos largos de CxP.",
@@ -75,16 +75,16 @@
       ],
       "capital_trabajo": [
         "Cerrar la brecha de presupuesto de ventas (41% de déficit acumulado en el año) para aliviar la presión sobre caja y capital de trabajo.",
-        "Mantener la fuerte mejora de morosidad de CxC (5.2%, muy bajo meta) cobrando el tramo vencido mayor a 30 días (S/110,534, 7.9% de la cartera) antes de que vuelva a subir.",
-        "Frenar el alza de Días CxP (29d, subiendo hacia la meta de <30d) resolviendo primero el tramo de 90 días o más (S/221,538) en vez de usar el plazo a proveedores para compensar el bajo ritmo de ventas."
+        "Mantener la fuerte mejora de morosidad de CxC (5.2% en el último corte) cobrando el tramo vencido mayor a 30 días (S/110,534, 7.9% de la cartera) antes de que vuelva a subir.",
+        "Pedir a IT/datos la corrección del pipeline de NEOPACK para tener el corte de hoy antes del próximo comité — sin datos frescos el directorio no puede confirmar si estas cifras siguen vigentes."
       ],
       "kpis_seguimiento": [
-        { "label": "Cumplimiento de ventas acumulado", "actual": "59%", "meta": "100%", "estado": "red" },
-        { "label": "Avance de ventas del mes", "actual": "40%", "meta": "100% al día", "estado": "red" },
-        { "label": "Días CxP", "actual": "29d", "meta": "<30d", "estado": "yellow" },
-        { "label": "CxP tramo 90 días o más", "actual": "S/221,538 (14.2%)", "meta": "reducir concentración", "estado": "yellow" },
-        { "label": "CxC vencida >30 días", "actual": "S/110,534 (7.9%)", "meta": "<5% de cartera", "estado": "yellow" },
-        { "label": "Morosidad CxC", "actual": "5.2%", "meta": "<15%", "estado": "green" }
+        { "label": "Cumplimiento de ventas acumulado", "actual": "59% (dato no actualizado hoy)", "meta": "100%", "estado": "red" },
+        { "label": "Avance de ventas del mes", "actual": "40% (dato no actualizado hoy)", "meta": "100% al día", "estado": "red" },
+        { "label": "Días CxP", "actual": "29d (dato no actualizado hoy)", "meta": "<30d", "estado": "yellow" },
+        { "label": "CxP tramo 90 días o más", "actual": "S/221,538 (14.2%) (dato no actualizado hoy)", "meta": "reducir concentración", "estado": "yellow" },
+        { "label": "CxC vencida >30 días", "actual": "S/110,534 (7.9%) (dato no actualizado hoy)", "meta": "<5% de cartera", "estado": "yellow" },
+        { "label": "Morosidad CxC", "actual": "5.2% (dato no actualizado hoy)", "meta": "<15%", "estado": "green" }
       ]
     }
   }
